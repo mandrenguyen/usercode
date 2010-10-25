@@ -68,9 +68,11 @@ PFCandAnalyzer::PFCandAnalyzer(const edm::ParameterSet& iConfig)
   // Event Info
   pfCandidateLabel_ = iConfig.getParameter<edm::InputTag>("pfCandidateLabel");
   genLabel_ = iConfig.getParameter<edm::InputTag>("genLabel");
+  jetLabel_ = iConfig.getParameter<edm::InputTag>("jetLabel");
 
   pfPtMin_ = iConfig.getParameter<double>("pfPtMin");
   genPtMin_ = iConfig.getParameter<double>("genPtMin");
+  jetPtMin_ = iConfig.getParameter<double>("jetPtMin");
 
   // debug
   verbosity_ = iConfig.getUntrackedParameter<int>("verbosity", 0);
@@ -116,6 +118,7 @@ PFCandAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	pfEvt_.pfId_[pfEvt_.nPFpart_] = pfCandidate.particleId();      
 	pfEvt_.pfPt_[pfEvt_.nPFpart_] = pt;      
 	pfEvt_.pfEta_[pfEvt_.nPFpart_] = pfCandidate.eta();      
+	pfEvt_.pfPhi_[pfEvt_.nPFpart_] = pfCandidate.phi();      
 	pfEvt_.nPFpart_++;
       }
   }
@@ -132,15 +135,36 @@ PFCandAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     double eta = gen.eta();      
     double pt = gen.pt();      
 
-    if(gen.status()==1 && fabs(eta)<3.0 && pt< genPtMin_){      
+    if(gen.status()==1 && fabs(eta)<3.0 && pt> genPtMin_){      
       pfEvt_.genPDGId_[pfEvt_.nGENpart_] = gen.pdgId();      
       pfEvt_.genPt_[pfEvt_.nGENpart_] = pt;      
       pfEvt_.genEta_[pfEvt_.nGENpart_] = eta;      
+      pfEvt_.genPhi_[pfEvt_.nGENpart_] = gen.phi();      
       pfEvt_.nGENpart_++;
     }
   }
 
+    // Fill Jet info
   
+  edm::Handle<pat::JetCollection> jets;
+  iEvent.getByLabel(jetLabel_,jets);  
+  const pat::JetCollection *jetColl = &(*jets);
+
+
+  for(unsigned ijet=0;ijet<jetColl->size(); ijet++) {
+      const pat::Jet jet = jetColl->at(ijet);
+      
+      double pt =  jet.pt();
+      
+      if(pt>jetPtMin_){
+	pfEvt_.pfPt_[pfEvt_.njets_] = pt;      
+	pfEvt_.pfEta_[pfEvt_.njets_] = jet.eta();      
+	pfEvt_.pfPhi_[pfEvt_.njets_] = jet.phi();      
+	pfEvt_.njets_++;
+      }
+  }
+	
+
   // All done
   pfTree_->Fill();
 }

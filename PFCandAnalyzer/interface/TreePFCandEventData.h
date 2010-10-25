@@ -28,10 +28,11 @@ class TreePFCandEventData
 
 
     // -- particle info --
-    Int_t		    nPFpart_, nGENpart_;
+    Int_t		    nPFpart_, nGENpart_, njets_;
     Int_t	  	    pfId_[MAXPARTICLE], genPDGId_[MAXPARTICLE];
-    Float_t	  	    pfPt_[MAXPARTICLE], genPt_[MAXPARTICLE];
-    Float_t	  	    pfEta_[MAXPARTICLE], genEta_[MAXPARTICLE];
+    Float_t	  	    pfPt_[MAXPARTICLE], genPt_[MAXPARTICLE],  jetPt_[MAXPARTICLE];
+    Float_t	  	    pfEta_[MAXPARTICLE], genEta_[MAXPARTICLE],  jetEta_[MAXPARTICLE];
+    Float_t	  	    pfPhi_[MAXPARTICLE], genPhi_[MAXPARTICLE],  jetPhi_[MAXPARTICLE];
 
 
   private:

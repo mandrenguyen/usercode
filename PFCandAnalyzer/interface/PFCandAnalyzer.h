@@ -42,12 +42,14 @@ class PFCandAnalyzer : public edm::EDAnalyzer {
     // Event Info
     edm::InputTag pfCandidateLabel_;
     edm::InputTag genLabel_;
+    edm::InputTag jetLabel_;
 
     TTree	  *pfTree_;
     TreePFCandEventData pfEvt_;
 
     // cuts
     Double_t        pfPtMin_;
+    Double_t        jetPtMin_;
     Double_t        genPtMin_;
 
    // debug
