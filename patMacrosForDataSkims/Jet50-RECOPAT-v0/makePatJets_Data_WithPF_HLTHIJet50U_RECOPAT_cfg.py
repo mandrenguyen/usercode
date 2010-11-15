@@ -500,9 +500,14 @@ process.runAllJets = cms.Sequence(
 process.load("HeavyIonsAnalysis.Configuration.HI_DiJetSkim_cff")
 process.hltJetHI.HLTPaths = ["HLT_HIJet50U"]
 
+process.load("edwenger.Skims.hfCoincFilter_cff")
+process.hfPosFilter.minNumber = cms.uint32(3)
+process.hfNegFilter.minNumber = cms.uint32(3)
+
 process.jetSkimPath = cms.Path(
     process.hltJetHI
     * process.primaryVertexFilterForJets
+    * process.hfCoincFilter
     )
 
 
@@ -512,6 +517,7 @@ process.path = cms.Path(
 #    process.hiEcalSpikeFilter*
     process.hltJetHI*
     process.primaryVertexFilterForJets*
+    process.hfCoincFilter*
     process.hiTrackReco*
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
