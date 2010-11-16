@@ -3,11 +3,11 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process('HIJETS')
 
 
-process.load("HeavyIonsAnalysis.Configuration.Sources.Data2010_Run150476_Express_HLT_MinBias_cff")
+#process.load("HeavyIonsAnalysis.Configuration.Sources.Data2010_Run150476_Express_HLT_MinBias_cff")
 
-#process.source = cms.Source("PoolSource",
-#                            fileNames = cms.untracked.vstring("rfio:/castor/cern.ch/user/e/edwenger/skims/mergeCleanDiJetall.root")
-#                            )
+process.source = cms.Source("PoolSource",
+                            fileNames = cms.untracked.vstring("rfio:/castor/cern.ch/user/e/edwenger/skims/mergeCleanDiJetall.root")
+                            )
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -19,6 +19,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = 'GR10_P_V12::All'  #Data
 
 process.load('Configuration.StandardSequences.GeometryExtended_cff')
+#process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 
@@ -500,14 +501,11 @@ process.runAllJets = cms.Sequence(
 process.load("HeavyIonsAnalysis.Configuration.HI_DiJetSkim_cff")
 process.hltJetHI.HLTPaths = ["HLT_HIJet50U"]
 
-process.load("edwenger.Skims.hfCoincFilter_cff")
-process.hfPosFilter.minNumber = cms.uint32(3)
-process.hfNegFilter.minNumber = cms.uint32(3)
+process.load("HeavyIonsAnalysis.Configuration.collisionEventSelection_cff")
 
 process.jetSkimPath = cms.Path(
-    process.hltJetHI
-    * process.primaryVertexFilterForJets
-    * process.hfCoincFilter
+    process.hltJetHI*
+    process.collisionEventSelection
     )
 
 
@@ -516,8 +514,7 @@ process.jetSkimPath = cms.Path(
 process.path = cms.Path(
 #    process.hiEcalSpikeFilter*
     process.hltJetHI*
-    process.primaryVertexFilterForJets*
-    process.hfCoincFilter*
+    process.collisionEventSelection*
     process.hiTrackReco*
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
