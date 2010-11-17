@@ -49,6 +49,7 @@ process.ic5sub = process.heavyIonL1SubtractedJets.clone()
 process.ic5sub.src = 'ic5CaloJets'
 process.ic5sub.rhoTag = 'kt4CaloJets'
 
+process.patJets.embedCaloTowers = cms.bool(False)
 
 process.ic5corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("ic5sub"),
                                                   corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_IC5Calo"),
@@ -287,7 +288,7 @@ process.runAllJets = cms.Sequence(
 
 
 process.load("HeavyIonsAnalysis.Configuration.HI_DiJetSkim_cff")
-process.hltJetHI.HLTPaths = ["HLT_HIMinBiasHfOrBSC"]
+process.hltJetHI.HLTPaths = ["HLT_HIMinBiasHfOrBSC_Core"]
 
 process.load("HeavyIonsAnalysis.Configuration.collisionEventSelection_cff")
 
