@@ -499,23 +499,11 @@ process.runAllJets = cms.Sequence(
 
 
 
-process.load("HeavyIonsAnalysis.Configuration.HI_DiJetSkim_cff")
+process.load("MNguyen.Configuration.HI_JetSkim_cff")
 process.hltJetHI.HLTPaths = ["HLT_HIJet50U"]
 
-process.load("HeavyIonsAnalysis.Configuration.collisionEventSelection_cff")
-
 process.jetSkimPath = cms.Path(
-    process.hltJetHI*
-    process.collisionEventSelection
-    )
-
-
-#process.load("RecoHI.HiEgammaAlgos.hiEcalSpikeFilter_cfi")
-
-process.path = cms.Path(
-#    process.hiEcalSpikeFilter*
-    process.hltJetHI*
-    process.collisionEventSelection*
+    process.jetSkimSequence*
     process.hiTrackReco*
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
@@ -538,6 +526,9 @@ process.output = cms.OutputModule("PoolOutputModule",
                                   dataTier = cms.untracked.string('PAT')
                                   )
                                 )
+
+
+
 
 
 # Save some extra stuff
@@ -574,6 +565,13 @@ process.output.outputCommands.extend(["keep *_ecalRecHit_*_*"])
 
 process.out_step = cms.EndPath(process.output)
 
+
+
+
+# Schedule definition
+process.schedule = cms.Schedule(process.jetSkimPath,process.out_step)
+
+
 # And the logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.options = cms.untracked.PSet(
@@ -600,3 +598,12 @@ process.options = cms.untracked.PSet(
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
+
+
+
+
+
+
+
+
+
