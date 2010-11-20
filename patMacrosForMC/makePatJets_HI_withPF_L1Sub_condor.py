@@ -39,7 +39,7 @@ process.maxEvents = cms.untracked.PSet(
 #load some general stuff
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 #process.GlobalTag.globaltag = 'MC_39Y_V4::All'  #39X
-process.GlobalTag.globaltag = 'START39_V4HI::All'  #39X
+process.GlobalTag.globaltag = 'START39_V6HI::All'  #39X
 
 process.load('Configuration.StandardSequences.GeometryExtended_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
@@ -153,6 +153,8 @@ process.patJets.addGenPartonMatch   = True
 process.patJets.addGenJetMatch      = True
 
 process.load("RecoHI.HiJetAlgos.HiL1Corrector_cff")
+
+process.patJets.embedCaloTowers = cms.bool(False)
 
 ### IC5, Calo  ###
 
