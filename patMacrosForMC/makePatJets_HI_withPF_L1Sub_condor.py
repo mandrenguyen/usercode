@@ -7,10 +7,12 @@ ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testin
 #ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECODEBUG/Pyquen_DiJet_Pt80_MC_38Y_V12-v2/0006/4EE677A1-DBE0-DF11-BE92-001D0967D314.root"
 #ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RAW/MC_38Y_V12-v1/0000/B6025776-B8D5-DF11-AD8E-001EC9AA9720.root"
 #ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/AMPT_Default_MinBias_2760GeV/GEN-SIM-RECO/Pyquen_UnquenchedDiJet_Pt80_MC_38Y_V12-v1/0000/5A608832-8ADD-DF11-A8A8-00151796D4E8.root"
-ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECODEBUG/Pyquen_DiJet_Pt80_START39_V4HI-v1/0001/DC70D208-4DEA-DF11-83A5-0015178C6978.root"
+#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECODEBUG/Pyquen_DiJet_Pt80_START39_V4HI-v1/0001/DC70D208-4DEA-DF11-83A5-0015178C6978.root"
+#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECODEBUG/Pyquen_DiJet_Pt80_MC_38Y_V12-v2/0009/061C5BE1-1FE1-DF11-BC94-0024E87699A6.root"
+ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/bb84e5a80bcc166dca2e76096130a4ba/Pyquen_UnquenchedDiJet_Pt80_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_1_1_I9V.root"
 
-ivars.output = 'patJets_Hydjet_Pyquen_DiJet_Pt80.root'
-ivars.maxEvents = 1
+#ivars.output = 'patJets_AMPT_Pyquen_DiJet_Pt80.root'
+ivars.maxEvents = -1
 ivars.initialEvent = 1
 
 ivars.parseArguments()
@@ -725,8 +727,8 @@ process.output = cms.OutputModule("PoolOutputModule",
                                   fileName = cms.untracked.string(ivars.output)
                                   )
 
-process.output.outputCommands.extend(["drop *_towerMaker_*_*"])
-process.output.outputCommands.extend(["keep *_hiSelectedTracks_*_*"])
+#process.output.outputCommands.extend(["drop *_towerMaker_*_*"])
+process.output.outputCommands.extend(["keep *_hiSelectedTracks_*_HIJETS"])
 process.output.outputCommands.extend(["keep *_particleFlow_*_*"])
 process.output.outputCommands.extend(["keep *_mergedtruth_*_*"])
 process.output.outputCommands.extend(["keep double*_*PF*_*_*"])
@@ -736,7 +738,23 @@ process.output.outputCommands.extend(["keep *_hiSignal_*_*"])
 process.output.outputCommands.extend(["keep *_genParticles_*_*"])
 process.output.outputCommands.extend(["keep *_hiGenParticles_*_*"])
 process.output.outputCommands.extend(["keep *_TriggerResults_*_*"])
-
+process.output.outputCommands.extend(["keep *_heavyIon_*_*"])
+# reco jets
+process.output.outputCommands.extend(["keep recoCaloJets_*_*_*"])
+process.output.outputCommands.extend(["keep recoPFJets_*_*_*"])
+#particle flow
+process.output.outputCommands.extend(["keep recoPFClusters_*_*_*"])
+process.output.outputCommands.extend(["keep recoPFRecHits_*_*_*"])
+#fast jet pf stuff
+process.output.outputCommands.extend(["keep doubles_*PF*_*_*"])
+#calorimeter stuff
+process.output.outputCommands.extend(["keep *_towerMaker_*_*"])
+process.output.outputCommands.extend(["keep *_caloTowers_*_*"])
+process.output.outputCommands.extend(["keep *_hcalnoise_*_*"])
+process.output.outputCommands.extend(["keep *_hbhereco_*_*"])
+process.output.outputCommands.extend(["keep *_horeco_*_*"])
+process.output.outputCommands.extend(["keep *_hfreco_*_*"])
+process.output.outputCommands.extend(["keep *_ecalRecHit_*_*"])
 
 
 
