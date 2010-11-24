@@ -133,7 +133,7 @@ process.load('RecoHI.HiJetAlgos.HiGenJets_cff')
 #This runs GenHIEventProducer
 process.heavyIon
 
-process.hiGenParticles.srcVector = cms.vstring('hiSignal')
+#process.hiGenParticles.srcVector = cms.vstring('hiSignal')
 
 process.hiGen = cms.Sequence(
 #Careful when using embedded samples
