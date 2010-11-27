@@ -42,15 +42,27 @@ jetEtFilter = cms.EDFilter("EtMinCaloJetCountFilter",
 from CmsHi.PhotonAnalysis.hiEcalRecHitSpikeFilter_cfi import *
 hiEcalRecHitSpikeFilter.minEt = 50.0
 
+#HCAL cleaning
+from JetMETAnalysis.HcalReflagging.hbherechitreflaggerJETMET_cfi import *
+
+hbheReflagNewTimeEnv = hbherechitreflaggerJETMET.clone()
+hbheReflagNewTimeEnv.timingshapedcutsParameters.hbheTimingFlagBit=cms.untracked.int32(8)
+
+# HCAL Timing
+hcalTimingFilter = cms.EDFilter("HcalTimingFilter",
+                                        hbheHits = cms.untracked.InputTag("hbheReflagNewTimeEnv")
+                                        )
+
 
 # jet skim sequence
 jetSkimSequence = cms.Sequence(hltJetHI
-                                 * collisionEventSelection
-                                 #* icPu5CaloJetsL2L3
-                                 #* jetEtFilter
-                                 #* dijetEtFilter
-                                 * hiEcalRecHitSpikeFilter
-                                 )
+                               * collisionEventSelection
+                               #* icPu5CaloJetsL2L3
+                               #* jetEtFilter
+                               #* dijetEtFilter
+                               * hiEcalRecHitSpikeFilter
+                               * hcalTimingFilter
+                               )
 #jetSkimPath = cms.Path(hltJetHI
 #                                 * collisionEventSelection
 #                                 #* icPu5CaloJetsL2L3
