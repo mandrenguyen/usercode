@@ -17,7 +17,7 @@
 #include "CondFormats/JetMETObjects/src/JetCorrectionUncertainty.cc"
 
 //void analyzeJetTrees(char *infile="merged_jetTree_v5.root",char *outfile="histos_Data_v5_010_v2.root",int isMC=0, int useWeight=0, int central = 1)
-int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="histos_Pyquen.root",int isMC=1, int useWeight=0, int central = 0, int useRawPt = 0)
+int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="histos_Pyquen.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
 {
   // central =0, all centralities or p+p
   //central =1, 0-10
@@ -99,7 +99,7 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
    // create output file 
    TFile *fout=new TFile(outfile,"RECREATE");
    // add a small ntuple for light analysis
-   TNtuple *nt = new TNtuple("nt","","et1:unc1:et2:unc2:bin:dphi:weight:fRes");
+   TNtuple *nt = new TNtuple("nt","","et1:eta1:phi1:unc1:et2:eta2:phi2:unc2:bin:dphi:weight:fRes");
 
 
    float pi= acos(-1.);
@@ -122,7 +122,7 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
    TH2F *hLeadingResolutionVsPt = new TH2F("hLeadingResolutionVsPt","hLeadingResolutionVsPt",100,-5.,5.,100,0,500);
    TH2F *hSubLeadingResolutionVsPt = new TH2F("hSubLeadingResolutionVsPt","hSubLeadingResolutionVsPt",100,-5.,5.,100,0,500);
 
-   TFile *fcent_Data = new TFile("CentDist_Data_v5.root");
+   TFile *fcent_Data = new TFile("CentDist_Data.root");
    TH1F *hCent_Data = (TH1F*)fcent_Data->Get("h");
    float cent_integral_Data = 1.;
    if(central==1)cent_integral_Data=hCent_Data->Integral(1,4);
@@ -213,7 +213,7 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
       double sub_unc = jecUnc->getUncertainty(true);
 
       // Fill mini-ntuple
-      nt->Fill(max_jet_pt,max_unc,sub_jet_pt,sub_unc,bin,dphi,weight,fRes->GetRandom());
+      nt->Fill(max_jet_pt,max_jet_eta,max_jet_phi,max_unc,sub_jet_pt,sub_jet_eta,sub_jet_phi,sub_unc,bin,dphi,weight,fRes->GetRandom());
 
       if(isMC){
 
