@@ -4,16 +4,33 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TROOT.h"
-#include <iostream.h>
+#include "TNtuple.h"
+#include "TF1.h"
+
+// Hacks to get the jet energy scale uncertainty
+#include "CondFormats/JetMETObjects/src/Utilities.cc"
+#include "CondFormats/JetMETObjects/src/JetCorrectorParameters.cc"
+#include "CondFormats/JetMETObjects/src/SimpleJetCorrector.cc"
+#include "CondFormats/JetMETObjects/src/FactorizedJetCorrector.cc"
+
+#include "CondFormats/JetMETObjects/src/SimpleJetCorrectionUncertainty.cc"
+#include "CondFormats/JetMETObjects/src/JetCorrectionUncertainty.cc"
 
 //void analyzeJetTrees(char *infile="merged_jetTree_v5.root",char *outfile="histos_Data_v5_010_v2.root",int isMC=0, int useWeight=0, int central = 1)
-void analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="histos_Pyquen.root",int isMC=1, int useWeight=0, int central = 0)
+int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="histos_Pyquen.root",int isMC=1, int useWeight=0, int central = 0, int useRawPt = 0)
 {
   // central =0, all centralities or p+p
   //central =1, 0-10
   //central =2, 10-30
   // central =3, 30-90
 
+  // Jet energy correction
+  JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("CondFormats/JetMETObjects/data/Spring10_Uncertainty_AK5Calo.txt");
+  
+  // Scale factor for fRes
+  TF1 *fRes = new TF1("fRes","TMath::Gaus(x,[0],[1])");
+  fRes->SetParameters(1,0.1);
+  fRes->SetRange(0,2);
 
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile);
    if (!f) {
@@ -21,8 +38,15 @@ void analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="hi
       f->cd("inclusiveJetAnalyzer");
    }
    TTree *t;
-   if(isMC && useWeight==1) t= (TTree*)gDirectory->Get("t");  // Old hydjet file
+   if(isMC) t= (TTree*)gDirectory->Get("t");  // Old hydjet file
    else t = (TTree*)gDirectory->Get("icPu5patJets_tree");
+
+   if (t==0) {
+      cout <<"Tree 't' is not found! Use icPu5patJets_tree instead..."<<endl;
+      t = (TTree*)gDirectory->Get("icPu5patJets_tree");
+      if (t==0) return 0;
+   }
+   
 
 //Declaration of leaves types
    Int_t           run;
@@ -48,7 +72,13 @@ void analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="hi
    t->SetBranchAddress("hf",&hf);
    t->SetBranchAddress("nref",&nref);
    t->SetBranchAddress("bin",&bin);
-   t->SetBranchAddress("jtpt",jtpt);
+
+   if (useRawPt) {
+      t->SetBranchAddress("rawpt",jtpt);
+   } else {
+      t->SetBranchAddress("jtpt",jtpt);
+   }
+
    t->SetBranchAddress("jteta",jteta);
    t->SetBranchAddress("jty",jty);
    t->SetBranchAddress("jtphi",jtphi);
@@ -65,6 +95,12 @@ void analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="hi
 //       To read only selected branches, Insert statements like:
 // t->SetBranchStatus("*",0);  // disable all branches
 // TTreePlayer->SetBranchStatus("branchname",1);  // activate branchname
+
+   // create output file 
+   TFile *fout=new TFile(outfile,"RECREATE");
+   // add a small ntuple for light analysis
+   TNtuple *nt = new TNtuple("nt","","et1:unc1:et2:unc2:bin:dphi:weight:fRes");
+
 
    float pi= acos(-1.);
 
@@ -167,6 +203,17 @@ void analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="hi
       hLeading_Pt_Eta_Phi->Fill(max_jet_pt,max_jet_eta,max_jet_phi,weight);
       hSubLeading_Pt_Eta_Phi->Fill(sub_jet_pt,sub_jet_eta,sub_jet_phi,weight);
 
+      // Calculate jet energy scale uncertainty 
+      jecUnc->setJetEta(max_jet_eta);
+      jecUnc->setJetPt(max_jet_pt);
+      double max_unc = jecUnc->getUncertainty(true);
+
+      jecUnc->setJetEta(sub_jet_eta);
+      jecUnc->setJetPt(sub_jet_pt);
+      double sub_unc = jecUnc->getUncertainty(true);
+
+      // Fill mini-ntuple
+      nt->Fill(max_jet_pt,max_unc,sub_jet_pt,sub_unc,bin,dphi,weight,fRes->GetRandom());
 
       if(isMC){
 
@@ -199,7 +246,10 @@ void analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="hi
 
    }
 
-   TFile *fout=new TFile(outfile,"RECREATE");
+   // Write to output file.
+   fout->cd();
+   nt->Write();
+
    hLeadingJetPt->Write();
    hPt1_Pt2_Dphi->Write();
    hPt1_Pt2_Phi2->Write();
@@ -218,10 +268,8 @@ void analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="hi
    hSubLeadingResolutionVsPt->Write();
 
 
-
    fout->Close();
-
-
+   return 1;
 }
 
 
