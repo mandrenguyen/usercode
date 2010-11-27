@@ -53,9 +53,9 @@ void plotLeadingJetAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotLeadingJet(0,"data.root","hydjet.root","mix.root",true,false,false);
+  plotLeadingJet(2,"data.root","hydjet.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("0~10%",0.25,0.24);
+  drawText("30~100%",0.25,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
@@ -66,9 +66,9 @@ void plotLeadingJetAllCent(){
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotLeadingJet(2,"data.root","hydjet.root","mix.root",true,false,true);
+  plotLeadingJet(0,"data.root","hydjet.root","mix.root",true,false,true);
   gPad->SetLogy();
-  drawText("30~100%",0.10,0.24);
+  drawText("0~10%",0.10,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(150,1.8,"CMS Preliminary");

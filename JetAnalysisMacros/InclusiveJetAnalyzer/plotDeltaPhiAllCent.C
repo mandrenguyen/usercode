@@ -53,9 +53,9 @@ void plotDeltaPhiAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotDeltaPhi(0,"data.root","hydjet.root","mix.root",true,false,false);
+  plotDeltaPhi(2,"data.root","hydjet.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("0~10%",0.8,0.24);
+  drawText("30~100%",0.77,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
@@ -66,9 +66,9 @@ void plotDeltaPhiAllCent(){
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotDeltaPhi(2,"data.root","hydjet.root","mix.root",true,false,true);
+  plotDeltaPhi(0,"data.root","hydjet.root","mix.root",true,false,true);
   gPad->SetLogy();
-  drawText("30~100%",0.69,0.24);
+  drawText("0~10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(0.30,0.49,"CMS Preliminary");
