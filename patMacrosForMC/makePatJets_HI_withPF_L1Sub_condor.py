@@ -12,7 +12,7 @@ ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testin
 ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/bb84e5a80bcc166dca2e76096130a4ba/Pyquen_UnquenchedDiJet_Pt80_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_1_1_I9V.root"
 
 #ivars.output = 'patJets_AMPT_Pyquen_DiJet_Pt80.root'
-ivars.maxEvents = -1
+ivars.maxEvents = 10
 ivars.initialEvent = 1
 
 ivars.parseArguments()
@@ -104,6 +104,9 @@ muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJe
 #Track Reco
 process.rechits = cms.Sequence(process.siPixelRecHits * process.siStripMatchedRecHits)
 process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking * muonRecoPbPb)
+
+# good track selection
+process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
 
 # for PF
 process.load("RecoHI.Configuration.Reconstruction_hiPF_cff")
@@ -710,9 +713,12 @@ process.runAllJets = cms.Sequence(
 
 # put it all together
 
+
+
 process.path = cms.Path(
     process.makeCentralityTableTFile*
     process.hiTrackReco*
+    process.hiGoodTracksSelection*
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
     process.hiGen*
@@ -729,6 +735,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 
 #process.output.outputCommands.extend(["drop *_towerMaker_*_*"])
 process.output.outputCommands.extend(["keep *_hiSelectedTracks_*_HIJETS"])
+process.output.outputCommands.extend(["keep *_hiGoodTracks_*_*"])
 process.output.outputCommands.extend(["keep *_particleFlow_*_*"])
 process.output.outputCommands.extend(["keep *_mergedtruth_*_*"])
 process.output.outputCommands.extend(["keep double*_*PF*_*_*"])
