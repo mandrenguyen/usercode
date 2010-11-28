@@ -48,12 +48,23 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
 
   virtual void beginJob();
 
+  void fillL1Bits(const edm::Event &iEvent);
+
+  void fillHLTBits(const edm::Event &iEvent);
+
+  template <typename TYPE>
+    void                          getProduct(const std::string name, edm::Handle<TYPE> &prod,
+					     const edm::Event &event) const;    
+  template <typename TYPE>
+    bool                          getProductSafe(const std::string name, edm::Handle<TYPE> &prod,
+						 const edm::Event &event) const;
+  
+
  private:
   
 
 
-  edm::InputTag   jetTag_;
-
+  edm::InputTag   jetTag_, L1gtReadout_; 
 
 
   /// verbose ?
@@ -68,8 +79,22 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
 
   CentralityProvider * centrality_;
 
-  static const int MAXJETS = 5000;
-  
+
+
+  std::string                   hltResName_;         //HLT trigger results name
+  std::vector<std::string>      hltProcNames_;       //HLT process name(s)
+  std::vector<std::string>      hltTrgNames_;        //HLT trigger name(s)
+
+  std::vector<int>              hltTrgBits_;         //HLT trigger bit(s)
+  std::vector<bool>             hltTrgDeci_;         //HLT trigger descision(s)
+  std::vector<std::string>      hltTrgUsedNames_;    //HLT used trigger name(s)
+  std::string                   hltUsedResName_;     //used HLT trigger results name
+
+
+
+  static const int MAXJETS = 50000;
+  static const int MAXHLTBITS = 500000;
+
 
   struct JRA{
     
@@ -89,7 +114,17 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
     float jty[MAXJETS];
     float refy[MAXJETS];
     float refdrjt[MAXJETS];
-    
+
+    // hlt
+    int nHLTBit;
+    bool hltBit[MAXHLTBITS];
+
+    // l1
+    int nL1TBit;
+    bool l1TBit[MAXHLTBITS];
+    int nL1ABit;
+    bool l1ABit[MAXHLTBITS];
+
   };
 
   JRA jets_;

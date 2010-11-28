@@ -73,8 +73,15 @@ process.HeavyIonGlobalParameters = cms.PSet(
 process.inclusiveJetAnalyzer = cms.EDAnalyzer("InclusiveJetAnalyzer",
                                               jetTag = cms.InputTag("icPu5patJets"),
                                               isMC = cms.untracked.bool(False), 
-                                              useCentrality = cms.untracked.bool(True)
+                                              useCentrality = cms.untracked.bool(True),
+                                              L1gtReadout = cms.InputTag("gtDigis"),
+                                              hltTrgResults = cms.untracked.string("TriggerResults::HLT"),
+                                              hltTrgNames  = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core',
+                                                                                   'HLT_HIJet35U',
+                                                                                   'HLT_HIJet35U_Core',
+                                                                                   'HLT_HIJet50U_Core')
                                               )
+
 
 process.ic3JetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.ic3JetAnalyzer.jetTag = 'ic3patJets'
@@ -98,6 +105,8 @@ process.ak5JetAnalyzer.jetTag = 'ak5patJets'
 process.ak7JetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.ak7JetAnalyzer.jetTag = 'ak7patJets'
 
+process.kt4JetAnalyzer = process.inclusiveJetAnalyzer.clone()
+process.kt4JetAnalyzer.jetTag = 'kt4patJets'
 
 process.ic3PFJetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.ic3PFJetAnalyzer.jetTag = 'ic3PFpatJets'
@@ -132,20 +141,21 @@ process.jetSkimPath = cms.Path(process.jetSkimSequence)
 
 process.p = cms.Path(    process.jetSkimSequence
                          *process.inclusiveJetAnalyzer
-                         *process.ic3JetAnalyzer
-                         *process.ic4JetAnalyzer
+                         #*process.ic3JetAnalyzer
+                         #*process.ic4JetAnalyzer
                          *process.ic5JetAnalyzer
-                         *process.ak3JetAnalyzer
-                         *process.ak4JetAnalyzer
+                         #*process.ak3JetAnalyzer
+                         #*process.ak4JetAnalyzer
                          *process.ak5JetAnalyzer
-                         *process.ak7JetAnalyzer
-                         *process.ic3PFJetAnalyzer
-                         *process.ic4PFJetAnalyzer
-                         *process.ic5PFJetAnalyzer
-                         *process.ak3PFJetAnalyzer
-                         *process.ak4PFJetAnalyzer
-                         *process.ak5PFJetAnalyzer
-                         *process.ak7PFJetAnalyzer
+                         *process.kt4JetAnalyzer
+                         #*process.ak7JetAnalyzer
+                         #*process.ic3PFJetAnalyzer
+                         #*process.ic4PFJetAnalyzer
+                         #*process.ic5PFJetAnalyzer
+                         #*process.ak3PFJetAnalyzer
+                         #*process.ak4PFJetAnalyzer
+                         #*process.ak5PFJetAnalyzer
+                         #*process.ak7PFJetAnalyzer
                          )
 
 ## Schedule
