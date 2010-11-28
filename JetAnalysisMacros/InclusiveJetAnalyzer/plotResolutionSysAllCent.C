@@ -90,7 +90,7 @@ void plotEnergyScaleSys(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120 && et2>35 && dphi>2.5";
+  TString cut="et1>120 && et2>50 && dphi>2.5";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -185,7 +185,7 @@ void plotEnergyScaleSys(int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.26,0.63,0.80,0.88); 
-    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    t3->AddEntry(h,"PYTHIA Embedded in MB","pl");
     t3->AddEntry(hSys1,"PYTHIA, smeared by 10%","lf");
     t3->AddEntry(hSys2,"PYTHIA, smeared by 50%","lf");
     t3->SetFillColor(0);

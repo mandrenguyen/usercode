@@ -98,7 +98,7 @@ void plotDeltaPhi(int cbin,
 		  bool drawLeg)
 {
 
-  TString cut="et1>120 && et2>35";
+  TString cut="et1>120 && et2>50";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
