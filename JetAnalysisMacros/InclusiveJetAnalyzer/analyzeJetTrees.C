@@ -32,6 +32,7 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
   fRes->SetParameters(1,0.1);
   fRes->SetRange(0,2);
 
+  // Take the tree from the file
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile);
    if (!f) {
       f = new TFile(infile);
@@ -41,12 +42,14 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
    if(isMC) t= (TTree*)gDirectory->Get("t");  // Old hydjet file
    else t = (TTree*)gDirectory->Get("icPu5patJets_tree");
 
+
    if (t==0) {
       cout <<"Tree 't' is not found! Use icPu5patJets_tree instead..."<<endl;
       t = (TTree*)gDirectory->Get("icPu5patJets_tree");
       if (t==0) return 0;
    }
    
+//   t = (TTree*)f->FindObjectAny("ic5PFpatJets_tree");
 
 //Declaration of leaves types
    Int_t           run;
@@ -111,7 +114,6 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
    TH3F* hLeading_Pt_Eta_Phi = new TH3F("hLeading_Pt_Eta_Phi","Leading Jet p_{T} vs #eta vs #phi",100,0,500,20,-2.,2.,20,-pi,pi);
    TH3F* hSubLeading_Pt_Eta_Phi = new TH3F("hSubLeading_Pt_Eta_Phi","SubLeading Jet p_{T} vs #eta vs #phi",100,0,500,20,-2.,2.,20,-pi,pi);
 
-
    TH1F* hGenLeadingJetPt = new TH1F("hGenLeadingJetPt","Leading Jet p_{T}",500,0,500);
    TH3F* hGen_Pt1_Pt2_Dphi = new TH3F("hGen_Pt1_Pt2_Dphi","Leading Jet p_{T} vs Sub-Leading Jet p_{T} vs #Delta#phi",100,0,500,100,0,500,20,0.,pi);
    TH3F* hGenLeading_Pt_Eta_Phi = new TH3F("hGenLeading_Pt_Eta_Phi","Leading Jet p_{T} vs #eta vs #phi",100,0,500,20,-2.,2.,20,-pi,pi);
@@ -157,7 +159,6 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
 	if(bin<12||bin>35) continue;
       }
 
-
       float weight = 1.;
       
       if(useWeight)
@@ -166,7 +167,7 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
 	  
 	}
   
-
+      // if the leading jet has eta > 2 --> throw it away
       if(fabs(jteta[0])>2) continue;
       
       max_jet_index = 0;
@@ -186,9 +187,6 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
           }
 	
       }
-
- 
-      
 
       float dphi = max_jet_phi - sub_jet_phi;
       if(dphi<0) dphi+=2*pi;
