@@ -34,7 +34,8 @@ void plotBal_vs_Imbal(int cbin = 0,
 	          bool useWeight = true,
 		  bool drawXLabel = false,
 		      bool drawLeg = false,
-		      int kind = 0    // kind = 0 for data, 1 for mix 2 for hydjet
+		      int kind = 0,    // kind = 0 for data, 1 for mix 2 for hydjet
+		      int usePyquen = 1
 		      );
 
 void drawText(const char *text, float xp, float yp);
@@ -48,27 +49,27 @@ void drawDum(float min, float max, double drawXLabel);
 void drawPatch(float x1, float y1, float x2, float y2); 
 //---------------------------------------------------------------------
 
-void plot_lead_vs_subletd_AllCent() {
+void plot_lead_vs_subletd_AllCent(int usePyquen=1) {
    
    TCanvas *c1 = new TCanvas("c1","",1250,1100);
    
    makeMultiPanelCanvas(c1,3,3,0.0,0.0,0.2,0.15,0.02);
    
    c1->cd(1);
-   plotBal_vs_Imbal(2,"data.root",true,false,false,0);
+   plotBal_vs_Imbal(2,"data.root",true,false,false,0,0);
    float px(0.25),py(0.75);
    drawText("30~100%",px,py);
    //  drawPatch(0.976,0.0972,1.1,0.141);
    
   c1->cd(2);
-  plotBal_vs_Imbal(1,"data.root",true,true,false,0);
+  plotBal_vs_Imbal(1,"data.root",true,true,false,0,0);
 
   drawText("10~30%",px,py);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotBal_vs_Imbal(0,"data.root",true,false,true,0);
+  plotBal_vs_Imbal(0,"data.root",true,false,true,0,0);
 
   drawText("0~10%",px,py);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
@@ -85,18 +86,18 @@ void plot_lead_vs_subletd_AllCent() {
 
  
   c1->cd(4);
-  plotBal_vs_Imbal(2,"mix.root",true,false,false,1);
+  plotBal_vs_Imbal(2,"mix.root",true,false,false,1,0);
   drawText("30~100%",65,170);
   drawPatch(0.06,0.912,0.19,0.999);
   c1->cd(5);
-  plotBal_vs_Imbal(1,"mix.root",true,true,false,1);
+  plotBal_vs_Imbal(1,"mix.root",true,true,false,1,0);
   //  gPad->SetLogy();
   drawText("10~30%",65,170);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.966,0.0972,1.1,0.141);
   
   c1->cd(6);
-  plotBal_vs_Imbal(0,"mix.root",true,false,true,1);
+  plotBal_vs_Imbal(0,"mix.root",true,false,true,1,0);
   drawText("0~10%",65,170);
   //  drawPatch(-0.00007,0.0972,0.0318,0.141);
   TLatex *mix = new TLatex(60,200,"unquenched PYQUEN + Data");
@@ -108,25 +109,36 @@ void plot_lead_vs_subletd_AllCent() {
    
 
   c1->cd(7);
-  plotBal_vs_Imbal(2,"hydjet.root",true,false,false,2);
+  if(usePyquen)plotBal_vs_Imbal(2,"pyquen.root",true,false,false,2,1);
+  else plotBal_vs_Imbal(2,"hydjet.root",true,false,false,2,0);
   drawText("30~100%",65,170);
   drawPatch(0.966,0.0972,1.1,0.141);
   drawPatch(0.06,0.922,0.19,0.999);
 
   c1->cd(8);
-  plotBal_vs_Imbal(1,"hydjet.root",true,true,false,2);
+  if(usePyquen)plotBal_vs_Imbal(1,"pyquen.root",true,true,false,2,1);
+  else plotBal_vs_Imbal(1,"hydjet.root",true,true,false,2,0);
   drawText("10~30%",65,170);
   drawPatch(-0.00007,0.0972,0.1318,0.141);
   drawPatch(0.956,0.0992,1.1,0.141);
   c1->cd(9);
-  plotBal_vs_Imbal(0,"hydjet.root",true,false,true,2);
+  if(usePyquen)plotBal_vs_Imbal(0,"pyquen.root",true,false,true,2,1);
+  else plotBal_vs_Imbal(0,"hydjet.root",true,false,true,2,0);
   drawText("0~10%",65,170);
   drawPatch(-0.00007,0.0972,0.1318,0.141);
   
   TLatex *hydjet = new TLatex(60,200,"unquenched PYQUEN + HYDJET");
   hydjet->SetTextFont(63);
   hydjet->SetTextSize(18);
-  hydjet->Draw();
+
+
+  TLatex *pyquen = new TLatex(60,200,"unquenched PYQUEN");
+  pyquen->SetTextFont(63);
+  pyquen->SetTextSize(18);
+
+  if(usePyquen)pyquen->Draw();
+  else hydjet->Draw();
+
 
   gPad->SetRightMargin(0.1);
 
@@ -145,10 +157,14 @@ void plotBal_vs_Imbal(int cbin,
 		      bool useWeight,
 		      bool drawXLabel,
 		      bool drawLeg,
-		      int kind)
+		      int kind,
+		      int usePyquen
+		      )
 {
-
+  
    TString cut="";//  "et1>120 && et2>35";
+   TString cutpp= cut;
+
    TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -173,7 +189,8 @@ void plotBal_vs_Imbal(int cbin,
 
   char* var="et2:et1";
   
-  nt->Draw(Form("%s>>h",var),Form("(%s)",cut.Data())); 
+  if(usePyquen)nt->Draw(Form("%s>>h",var),Form("(%s)",cutpp.Data())); 
+  else nt->Draw(Form("%s>>h",var),Form("(%s)",cut.Data())); 
     
   // calculate the statistical error and normalize
   //  hBal->Sumw2();

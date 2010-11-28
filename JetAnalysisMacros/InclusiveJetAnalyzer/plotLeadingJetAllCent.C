@@ -29,7 +29,7 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 
 void plotLeadingJet(int cbin = 0,
 		    TString infname = "data.root",
-		    TString hydjet = "hydjet.root",
+		    TString hydjet = "pyquen.root",
 		    TString mix = "mix.root",
 		    bool useWeight = true,
 		    bool drawXLabel = false,
@@ -53,20 +53,20 @@ void plotLeadingJetAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotLeadingJet(2,"data.root","hydjet.root","mix.root",true,false,false);
+  plotLeadingJet(2,"data.root","pyquen.root","mix.root",true,false,false);
   gPad->SetLogy();
   drawText("30~100%",0.25,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotLeadingJet(1,"data.root","hydjet.root","mix.root",true,true,false);
+  plotLeadingJet(1,"data.root","pyquen.root","mix.root",true,true,false);
   gPad->SetLogy();
   drawText("10~30%",0.10,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotLeadingJet(0,"data.root","hydjet.root","mix.root",true,false,true);
+  plotLeadingJet(0,"data.root","pyquen.root","mix.root",true,false,true);
   gPad->SetLogy();
   drawText("0~10%",0.10,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
@@ -99,6 +99,7 @@ void plotLeadingJet(int cbin,
 {
 
   TString cut="et1>120 && et2>35 && dphi>2.5";
+  TString cutpp="et1>120 && et2>35 && dphi>2.5";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -132,12 +133,12 @@ void plotLeadingJet(int cbin,
    
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntHydjet->Draw("et1>>hEmbedded",Form("(%s)*weight",cut.Data())); 
+    ntHydjet->Draw("et1>>hEmbedded",Form("(%s)",cutpp.Data())); 
     ntMix->Draw("et1>>hDataMix",Form("(%s)*weight",cut.Data())); 
   } else {
     // ignore centrality reweighting
-    ntHydjet->Draw("et1>>hEmbedded",Form("(%s)",cut.Data()));
-    ntMix->Draw("et1>>hDataMix",Form("(%s)*weight",cut.Data()));  
+    ntHydjet->Draw("et1>>hEmbedded",Form("(%s)",cutpp.Data()));
+    ntMix->Draw("et1>>hDataMix",Form("(%s)",cut.Data()));  
   }
 
   // calculate the statistical error and normalize
@@ -188,7 +189,7 @@ void plotLeadingJet(int cbin,
   if(drawLeg){
     TLegend *t3=new TLegend(0.25,0.64,0.79,0.90);
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hEmbedded,"unquenched PYQUEN + HYDJET","lf");
+    t3->AddEntry(hEmbedded,"unquenched PYQUEN","lf");
     t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);

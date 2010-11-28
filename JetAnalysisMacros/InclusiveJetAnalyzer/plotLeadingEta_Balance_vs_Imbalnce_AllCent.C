@@ -32,7 +32,7 @@ void plotBal_vs_Imbal(int cbin = 0,
 	          bool useWeight = true,
 		  bool drawXLabel = false,
 		      bool drawLeg = false,
-		      int kind = 0    // kind = 0 for data, 1 for mix 2 for hydjet
+		      int kind = 0    // kind = 0 for data, 1 for mix 2 for pyquen
 		      );
 
 void drawText(const char *text, float xp, float yp);
@@ -107,26 +107,26 @@ void plotLeadingEta_Balance_vs_Imbalnce_AllCent() {
    
 
   c1->cd(7);
-  plotBal_vs_Imbal(2,"hydjet.root",true,false,false,2);
+  plotBal_vs_Imbal(2,"pyquen.root",true,false,false,2);
   gPad->SetLogy();
   drawText("30~100%",0.67,0.24);
   drawPatch(0.966,0.0972,1.1,0.141);
 
   c1->cd(8);
-  plotBal_vs_Imbal(1,"hydjet.root",true,true,false,2);
+  plotBal_vs_Imbal(1,"pyquen.root",true,true,false,2);
   gPad->SetLogy();
   drawText("10~30%",0.65,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.966,0.0972,1.1,0.141);
   c1->cd(9);
-  plotBal_vs_Imbal(0,"hydjet.root",true,false,true,2);
+  plotBal_vs_Imbal(0,"pyquen.root",true,false,true,2);
   gPad->SetLogy();
   drawText("0~10%",0.65,0.24);
   drawPatch(-0.00007,0.0972,0.0318,0.141);
-  TLatex *hydjet = new TLatex(-1.9,1.29,"unquenched PYQUEN + HYDJET");
-  hydjet->SetTextFont(63);
-  hydjet->SetTextSize(18);
-  hydjet->Draw();
+  TLatex *pyquen = new TLatex(-1.9,1.29,"unquenched PYQUEN");
+  pyquen->SetTextFont(63);
+  pyquen->SetTextSize(18);
+  pyquen->Draw();
 
 
 
@@ -147,7 +147,8 @@ void plotBal_vs_Imbal(int cbin,
 		      int kind)
 {
 
-  TString cut="et1>120 && et2>35";
+  TString cut="et1>120 && et2>50";
+  TString cutpp="et1>120 && et2>50";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -163,6 +164,8 @@ void plotBal_vs_Imbal(int cbin,
   
   TString cutBal   = cut+"&& ((et1-et2)/(et1+et2) < 0.3)";
   TString cutImBal = cut+"&& ((et1-et2)/(et1+et2) > 0.3)";
+  TString cutBalpp   = cutpp+"&& ((et1-et2)/(et1+et2) < 0.3)";
+  TString cutImBalpp = cutpp+"&& ((et1-et2)/(et1+et2) > 0.3)";
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
@@ -177,7 +180,7 @@ void plotBal_vs_Imbal(int cbin,
      nt->Draw(Form("%s>>hBal",var),Form("(%s)",cutBal.Data())); 
      nt->Draw(Form("%s>>hImBal",var),Form("(%s)",cutImBal.Data()));
   }
-  if ( kind == 1 || kind ==2) {
+  if ( kind == 1) {
      
      if (useWeight) {
 	// use the weight value caluculated by Matt's analysis macro
@@ -185,9 +188,13 @@ void plotBal_vs_Imbal(int cbin,
 	nt->Draw(Form("%s>>hImBal",var),Form("(%s)*weight",cutImBal.Data()));
      } else {
 	// ignore centrality reweighting
-	nt->Draw(Form("%s>>hImBal",var),Form("(%s)",cutBal.Data()));
+	nt->Draw(Form("%s>>hBal",var),Form("(%s)",cutBal.Data()));
         nt->Draw(Form("%s>>hImBal",var),Form("(%s)",cutImBal.Data()));
      }
+  } 
+  if ( kind == 2) {    
+    nt->Draw(Form("%s>>hBal",var),Form("(%s)",cutBalpp.Data()));
+    nt->Draw(Form("%s>>hImBal",var),Form("(%s)",cutImBalpp.Data()));
   }
   
   // calculate the statistical error and normalize
@@ -250,7 +257,7 @@ void plotBal_vs_Imbal(int cbin,
     char* legOps;
     if ( kind ==0)  legOps = "pl";
     else  legOps = "lf";
-    t3[kind]->AddEntry(hBal,"Balanced jet ( AJ<0.3)",legOps); //unquenched PYQUEN + HYDJET","lf");
+    t3[kind]->AddEntry(hBal,"Balanced jet ( AJ<0.3)",legOps); //unquenched PYQUEN","lf");
     t3[kind]->AddEntry(hImBal,"Imbalanced jet (AJ>0.3)",legOps);//DataMix,"unquenched PYQUEN + Data","lf");
     t3[kind]->SetFillColor(0);
     t3[kind]->SetBorderSize(0);

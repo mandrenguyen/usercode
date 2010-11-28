@@ -29,7 +29,7 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 
 void plotDeltaPhi(int cbin = 0,
 		 TString infname = "data.root",
-		 TString hydjet = "hydjet.root",
+		 TString pyquen = "pyquen.root",
 		 TString mix = "mix.root",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
@@ -53,20 +53,20 @@ void plotDeltaPhiAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotDeltaPhi(2,"data.root","hydjet.root","mix.root",true,false,false);
+  plotDeltaPhi(2,"data.root","pyquen.root","mix.root",true,false,false);
   gPad->SetLogy();
   drawText("30~100%",0.77,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotDeltaPhi(1,"data.root","hydjet.root","mix.root",true,true,false);
+  plotDeltaPhi(1,"data.root","pyquen.root","mix.root",true,true,false);
   gPad->SetLogy();
   drawText("10~30%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotDeltaPhi(0,"data.root","hydjet.root","mix.root",true,false,true);
+  plotDeltaPhi(0,"data.root","pyquen.root","mix.root",true,false,true);
   gPad->SetLogy();
   drawText("0~10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
@@ -91,7 +91,7 @@ void plotDeltaPhiAllCent(){
 
 void plotDeltaPhi(int cbin,
 		  TString infname,
-		  TString hydjet,
+		  TString pyquen,
 		  TString mix,
 		  bool useWeight,
 		  bool drawXLabel,
@@ -99,6 +99,7 @@ void plotDeltaPhi(int cbin,
 {
 
   TString cut="et1>120 && et2>50";
+  TString cutpp="et1>120 && et2>50";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -115,9 +116,9 @@ void plotDeltaPhi(int cbin,
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
 
-  // open the hydjet (MC) file
-  TFile *infHydjet = new TFile(hydjet.Data());
-  TTree *ntHydjet = (TTree*) infHydjet->FindObjectAny("nt");
+  // open the pyquen (MC) file
+  TFile *infPyquen = new TFile(pyquen.Data());
+  TTree *ntPyquen = (TTree*) infPyquen->FindObjectAny("nt");
 
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
@@ -133,12 +134,12 @@ void plotDeltaPhi(int cbin,
    
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntHydjet->Draw("dphi>>hEmbedded",Form("(%s)*weight",cut.Data())); 
+    ntPyquen->Draw("dphi>>hEmbedded",Form("(%s)",cutpp.Data())); 
     ntMix->Draw("dphi>>hDataMix",Form("(%s)*weight",cut.Data())); 
   } else {
     // ignore centrality reweighting
-    ntHydjet->Draw("dphi>>hEmbedded",Form("(%s)",cut.Data()));
-    ntMix->Draw("dphi>>hDataMix",Form("(%s)*weight",cut.Data()));  
+    ntPyquen->Draw("dphi>>hEmbedded",Form("(%s)",cutpp.Data()));
+    ntMix->Draw("dphi>>hDataMix",Form("(%s)",cut.Data()));  
   }
 
   // calculate the statistical error and normalize
@@ -189,7 +190,7 @@ void plotDeltaPhi(int cbin,
   if(drawLeg){
     TLegend *t3=new TLegend(0.05,0.63,0.59,0.88);
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hEmbedded,"unquenched PYQUEN + HYDJET","lf");
+    t3->AddEntry(hEmbedded,"unquenched PYQUEN","lf");
     t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
