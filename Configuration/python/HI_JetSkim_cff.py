@@ -61,6 +61,7 @@ jetSkimSequence = cms.Sequence(hltJetHI
                                #* jetEtFilter
                                #* dijetEtFilter
                                * hiEcalRecHitSpikeFilter
+                               * hbheReflagNewTimeEnv
                                * hcalTimingFilter
                                )
 #jetSkimPath = cms.Path(hltJetHI
