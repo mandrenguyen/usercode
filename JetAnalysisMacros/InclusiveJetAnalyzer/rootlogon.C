@@ -54,7 +54,7 @@
    gStyle->SetErrorX(0);  
    gStyle->SetMarkerStyle(20);
    //gStyle->SetMarkerSize(1.25);
-   gStyle->SetMarkerSize(1.5);
+   gStyle->SetMarkerSize(1.25);
 
    gStyle->SetOptFit(1111);
    gStyle->SetStatColor(0);
