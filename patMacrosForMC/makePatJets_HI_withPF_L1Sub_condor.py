@@ -152,6 +152,7 @@ process.hiGen = cms.Sequence(
 
 process.load('RecoHI.HiJetAlgos.HiRecoJets_cff')
 process.load('RecoHI.HiJetAlgos.HiRecoPFJets_cff')
+process.load("RecoJets.Configuration.RecoJPTJetsHIC_cff")
 
 process.patJets.addGenPartonMatch   = True
 process.patJets.addGenJetMatch      = True
@@ -676,6 +677,23 @@ process.kt3PFpatJets = process.patJets.clone(jetSource  = cms.InputTag("kt3PFsub
                                            jetCorrFactorsSource = cms.VInputTag(cms.InputTag("kt3PFcorr")))
 process.kt3PFpatSequence = cms.Sequence(process.kt3PFJets*process.kt3PFsub*process.kt3PFcorr*process.kt3PFclean*process.kt3PFmatch*process.kt3PFparton*process.kt3PFpatJets)
 
+# JPT
+
+process.jpticPu5corr = process.patJetCorrFactors.clone(jetSource =
+                                                       cms.InputTag("JetPlusTrackZSPCorJetIconePu5"),
+                                                       corrLevels =
+                                                       cms.PSet(L2Relative = cms.string("L2Relative_AK5JPT"),
+                                                                L3Absolute = cms.string("L3Absolute_AK5JPT"),
+                                                                L5Flavor = cms.string("none")))
+process.jpticPu5patJets = process.patJets.clone(jetSource  =
+                                                cms.InputTag("JetPlusTrackZSPCorJetIconePu5"),
+                                                jetCorrFactorsSource =
+                                                cms.VInputTag(cms.InputTag("jpticPu5corr")))
+
+process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticPu5corr*process.jpticPu5patJets)
+
+
+
 
 
 process.runAllJets = cms.Sequence(
@@ -690,6 +708,7 @@ process.runAllJets = cms.Sequence(
     process.ak7PFpatSequence +
     process.ic5PFpatSequence +
     process.icPu5patSequence +
+    process.icPu5JPTpatSequence +
     process.ak3patSequence +
     process.ak4patSequence +
     process.kt3patSequence +
@@ -761,6 +780,10 @@ process.output.outputCommands.extend(["keep *_hbhereco_*_*"])
 process.output.outputCommands.extend(["keep *_horeco_*_*"])
 process.output.outputCommands.extend(["keep *_hfreco_*_*"])
 process.output.outputCommands.extend(["keep *_ecalRecHit_*_*"])
+#JPT
+process.output.outputCommands.extend(["keep *_jptic*_*_*"])
+process.output.outputCommands.extend(["keep *_recoJPT*_*_*"])
+process.output.outputCommands.extend(["keep *_JetPlusTrack*_*_*"])
 
 
 
