@@ -53,7 +53,8 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
       if (t==0) return 0;
    }
    
-//   t = (TTree*)f->FindObjectAny("ic5PFpatJets_tree");
+//   t = (TTree*)f->FindObjectAny("ak7PFpatJets_tree");
+//   t = (TTree*)f->FindObjectAny("ic3patJets_tree");
 
 //Declaration of leaves types
    Int_t           run;
@@ -79,7 +80,7 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
    t->SetBranchAddress("hf",&hf);
    t->SetBranchAddress("nref",&nref);
    t->SetBranchAddress("bin",&bin);
-
+   
    if (useRawPt) {
       t->SetBranchAddress("rawpt",jtpt);
    } else {
@@ -139,10 +140,11 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
    Long64_t nentries = t->GetEntries();
 
    Long64_t nbytes = 0;
+   int count =0;
    for (Long64_t i=0; i<nentries;i++) {
       nbytes += t->GetEntry(i);
-
-
+      if (nref==0) continue;
+      
       int max_jet_index = -1;
       int sub_jet_index = -1;
       float max_jet_pt = 0.;
@@ -216,6 +218,7 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
 
       // Fill mini-ntuple
       nt->Fill(max_jet_pt,max_jet_eta,max_jet_phi,max_unc,sub_jet_pt,sub_jet_eta,sub_jet_phi,sub_unc,bin,dphi,weight,fRes->GetRandom());
+      count++;
 
       if(isMC){
 
@@ -269,7 +272,8 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
    hLeadingResolutionVsPt->Write();
    hSubLeadingResolutionVsPt->Write();
 
-
+   cout <<"Di-jet: "<<count<<" "<<nentries<<endl;
+   cout <<t->GetEntries("abs(jteta[0])<2");
    fout->Close();
    return 1;
 }
