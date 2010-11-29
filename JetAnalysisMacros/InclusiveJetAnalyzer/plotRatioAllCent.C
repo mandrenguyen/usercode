@@ -84,9 +84,9 @@ void plotRatioAllCent(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/dijet_imbalance_all_cent_20101126_v0.gif");
-  c1->Print("./fig/dijet_imbalance_all_cent_20101126_v0.eps");
-  c1->Print("./fig/dijet_imbalance_all_cent_20101126_v0.pdf");
+  c1->Print("./fig/ratio_all_cent_20101126_v0.gif");
+  c1->Print("./fig/ratio_all_cent_20101126_v0.eps");
+  c1->Print("./fig/ratio_all_cent_20101126_v0.pdf");
 
 }
 
@@ -98,7 +98,7 @@ void plotRatio(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5 ";
+  TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<0.5 ";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -108,7 +108,7 @@ void plotRatio(int cbin,
     cut+=" && bin>=4 && bin<12";
   } else {
     cstring = "30-100%";
-    cut+=" && bin>=16 && bin<40";
+    cut+=" && bin>=12 && bin<40";
   }
 
   // open the data file
@@ -161,27 +161,28 @@ void plotRatio(int cbin,
      hEmbedded->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
      h->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
   }
-  hEmbedded->GetXaxis()->SetLabelSize(20);
-  hEmbedded->GetXaxis()->SetLabelFont(43);
-  hEmbedded->GetXaxis()->SetTitleSize(22);
-  hEmbedded->GetXaxis()->SetTitleFont(43);
-  hEmbedded->GetXaxis()->SetTitleOffset(1.5);
-  hEmbedded->GetXaxis()->CenterTitle();
+  h->GetXaxis()->SetLabelSize(20);
+  h->GetXaxis()->SetLabelFont(43);
+  h->GetXaxis()->SetTitleSize(22);
+  h->GetXaxis()->SetTitleFont(43);
+  h->GetXaxis()->SetTitleOffset(1.5);
+  h->GetXaxis()->CenterTitle();
+  h->GetXaxis()->SetNdivisions(905,true);
 
-  hEmbedded->GetXaxis()->SetNdivisions(905,true);
-  
-  h->SetYTitle("Event Fraction");
-  hEmbedded->SetYTitle("Event Fraction");
-
-  hEmbedded->GetYaxis()->SetLabelSize(20);
-  hEmbedded->GetYaxis()->SetLabelFont(43);
-  hEmbedded->GetYaxis()->SetTitleSize(20);
-  hEmbedded->GetYaxis()->SetTitleFont(43);
-  hEmbedded->GetYaxis()->SetTitleOffset(2.5);
-  hEmbedded->GetYaxis()->CenterTitle();
+  h->GetYaxis()->SetLabelSize(20);
+  h->GetYaxis()->SetLabelFont(43);
+  h->GetYaxis()->SetTitleSize(20);
+  h->GetYaxis()->SetTitleFont(43);
+  h->GetYaxis()->SetTitleOffset(2.5);
+  h->GetYaxis()->CenterTitle();
   
 
-  hEmbedded->SetAxisRange(0,0.3,"Y");
+  h->SetAxisRange(0,0.3,"Y");
+
+  
+  h->SetYTitle("Ratio");
+  hEmbedded->SetYTitle("Ratio");
+
 
 
   hDataMix->Sumw2();
@@ -201,7 +202,7 @@ void plotRatio(int cbin,
 
   TH1D *hErr = getErrorBand(h);
   double systematicError10TeV[12] =
-                  {0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.3,0.2,0.2,0.2};
+                  {0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.25,0.2,0.2,0.2};
 
 
   TGraph *gErrorBand;
