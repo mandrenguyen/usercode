@@ -679,20 +679,19 @@ process.kt3PFpatSequence = cms.Sequence(process.kt3PFJets*process.kt3PFsub*proce
 
 # JPT
 
-process.jpticPu5corr = process.patJetCorrFactors.clone(jetSource =
-                                                       cms.InputTag("JetPlusTrackZSPCorJetIconePu5"),
-                                                       corrLevels =
-                                                       cms.PSet(L2Relative = cms.string("L2Relative_AK5JPT"),
-                                                                L3Absolute = cms.string("L3Absolute_AK5JPT"),
-                                                                L5Flavor = cms.string("none")))
-process.jpticPu5patJets = process.patJets.clone(jetSource  =
-                                                cms.InputTag("JetPlusTrackZSPCorJetIconePu5"),
-                                                jetCorrFactorsSource =
-                                                cms.VInputTag(cms.InputTag("jpticPu5corr")))
-
-process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticPu5corr*process.jpticPu5patJets)
-
-
+process.jpticPu5corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("JetPlusTrackZSPCorJetIconePu5"),
+                                                       corrLevels =  cms.PSet(L2Relative = cms.string("L2Relative_AK5JPT"),
+                                                                              L3Absolute = cms.string("L3Absolute_AK5JPT"),
+                                                                              L5Flavor = cms.string("none")))
+process.jpticPu5clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('iterativeCone5HiGenJets'))
+process.jpticPu5match = process.patJetGenJetMatch.clone(src = cms.InputTag("JetPlusTrackZSPCorJetIconePu5"),
+                                                        matched = cms.InputTag("jpticPu5clean"))
+process.jpticPu5parton = process.patJetPartonMatch.clone(src = cms.InputTag("JetPlusTrackZSPCorJetIconePu5"))
+process.jpticPu5patJets = process.patJets.clone(jetSource  =cms.InputTag("JetPlusTrackZSPCorJetIconePu5"),
+                                                genJetMatch = cms.InputTag("jpticPu5match"),
+                                                genPartonMatch= cms.InputTag("jpticPu5parton"),                                       
+                                                jetCorrFactorsSource = cms.VInputTag(cms.InputTag("jpticPu5corr")))
+process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticPu5corr*process.jpticPu5clean*process.jpticPu5match*process.jpticPu5parton*process.jpticPu5patJets)
 
 
 
