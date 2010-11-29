@@ -94,7 +94,8 @@ void plotBalanceNew(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120";
+  TString cut="et1>120&&et2>50&&dphi>3.14159/3*2";
+  TString cut2="et1>120&&(!(et2>50&&dphi>3.14159/3*2))";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -121,25 +122,21 @@ void plotBalanceNew(int cbin,
 
   gStyle->SetErrorX(0.5);
   // projection histogram
-  const int nBin=11;
-  double bins[nBin+1] = {0.,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,1};
+//  const int nBin=11;
+//  double bins[nBin+1] = {0.,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,1};
+  const int nBin=20;
+  double bins[nBin+1] = {0.,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1};
   TH1D *h = new TH1D("h","",nBin,bins);
-  TH1D *hEmbedded = new TH1D("hEmbedded","",nBin,bins);
+  TH1D *hMissingJet = new TH1D("hMissingJet","",nBin,bins);
   TH1D *hDataMix = new TH1D("hDataMix","",nBin,bins);
  
-  char *var = "((et1-et2)/(et1+et2)*(((et1-et2)/(et1+et2))<0.5&&dphi>2.5)+0.97*(!(((et1-et2)/(et1+et2))<0.5&&dphi>2.5)))";
+  char *var = "((et1-et2)/(et1+et2))";
+  char *var2 = "((et1-50)/(et1+50))";
 
   nt->Draw(Form("%s>>h",var),Form("(%s)",cut.Data())); 
    
-  if (useWeight) {
-    // use the weight value caluculated by Matt's analysis macro
-    ntHydjet->Draw(Form("%s>>hEmbedded",var),Form("(%s)*weight",cut.Data())); 
-    ntMix->Draw(Form("%s>>hDataMix",var),Form("(%s)*weight",cut.Data())); 
-  } else {
-    // ignore centrality reweighting
-    ntHydjet->Draw(Form("%s>>hEmbedded",var),Form("(%s)",cut.Data()));
-    ntMix->Draw(Form("%s>>hDataMix",var),Form("(%s)*weight",cut.Data()));  
-  }
+  nt->Draw(Form("%s>>hMissingJet",var2),Form("(%s)",cut2.Data()));
+  ntMix->Draw(Form("%s>>hDataMix",var),Form("(%s)",cut.Data()));  
 
 
 
@@ -147,36 +144,36 @@ void plotBalanceNew(int cbin,
   h->Sumw2();
   h->SetMarkerStyle(20);
   normalize(h);
-  hEmbedded->SetLineColor(kBlue);
-  hEmbedded->SetFillColor(kAzure-8);
-  hEmbedded->SetFillStyle(3005);
+  hMissingJet->SetLineColor(kBlue);
+  hMissingJet->SetFillColor(kAzure-8);
+  hMissingJet->SetFillStyle(3005);
   
-  hEmbedded->SetStats(0);
-  normalize(hEmbedded);
-  hEmbedded->Draw("hist");
+  hMissingJet->SetStats(0);
+  normalize(hMissingJet);
+  hMissingJet->Draw("hist");
 
-  if(drawXLabel) hEmbedded->SetXTitle("A_{J}");//(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hMissingJet->SetXTitle("A_{J}");//(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
 
-  hEmbedded->GetXaxis()->SetLabelSize(20);
-  hEmbedded->GetXaxis()->SetLabelFont(43);
-  hEmbedded->GetXaxis()->SetTitleSize(22);
-  hEmbedded->GetXaxis()->SetTitleFont(43);
-  hEmbedded->GetXaxis()->SetTitleOffset(1.5);
-  hEmbedded->GetXaxis()->CenterTitle();
+  hMissingJet->GetXaxis()->SetLabelSize(20);
+  hMissingJet->GetXaxis()->SetLabelFont(43);
+  hMissingJet->GetXaxis()->SetTitleSize(22);
+  hMissingJet->GetXaxis()->SetTitleFont(43);
+  hMissingJet->GetXaxis()->SetTitleOffset(1.5);
+  hMissingJet->GetXaxis()->CenterTitle();
 
-  hEmbedded->GetXaxis()->SetNdivisions(905,true);
+  hMissingJet->GetXaxis()->SetNdivisions(905,true);
   
-  hEmbedded->SetYTitle("dN/dA_{J}");
+  hMissingJet->SetYTitle("dN/dA_{J}");
 
-  hEmbedded->GetYaxis()->SetLabelSize(20);
-  hEmbedded->GetYaxis()->SetLabelFont(43);
-  hEmbedded->GetYaxis()->SetTitleSize(20);
-  hEmbedded->GetYaxis()->SetTitleFont(43);
-  hEmbedded->GetYaxis()->SetTitleOffset(2.5);
-  hEmbedded->GetYaxis()->CenterTitle();
+  hMissingJet->GetYaxis()->SetLabelSize(20);
+  hMissingJet->GetYaxis()->SetLabelFont(43);
+  hMissingJet->GetYaxis()->SetTitleSize(20);
+  hMissingJet->GetYaxis()->SetTitleFont(43);
+  hMissingJet->GetYaxis()->SetTitleOffset(2.5);
+  hMissingJet->GetYaxis()->CenterTitle();
   
 
-  hEmbedded->SetAxisRange(0,4,"Y");
+  hMissingJet->SetAxisRange(0,4,"Y");
 
 
   hDataMix->SetLineColor(kRed);
@@ -190,7 +187,7 @@ void plotBalanceNew(int cbin,
   if(drawLeg){
     TLegend *t3=new TLegend(0.26,0.63,0.80,0.88); 
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hEmbedded,"unquenched PYQUEN + HYDJET","lf");  
+    t3->AddEntry(hMissingJet,"Missing Jet","lf");  
     t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
