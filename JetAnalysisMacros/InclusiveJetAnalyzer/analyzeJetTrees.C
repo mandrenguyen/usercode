@@ -16,8 +16,12 @@
 #include "CondFormats/JetMETObjects/src/SimpleJetCorrectionUncertainty.cc"
 #include "CondFormats/JetMETObjects/src/JetCorrectionUncertainty.cc"
 
-//void analyzeJetTrees(char *infile="merged_jetTree_v5.root",char *outfile="histos_Data_v5_010_v2.root",int isMC=0, int useWeight=0, int central = 1)
-int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="histos_Pyquen.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
+// Data
+int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_DefaultReco_v7.root",char *outfile="data.root",int isMC=0, int useWeight=0, int central = 0, int useRawPt = 0)
+// Pyquen
+//int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen/HIDATA/JetTrees/merged_jetTree_Pyquen_v2.root",char *outfile="pyquen.root",int isMC=1, int useWeight=0, int central = 0, int useRawPt = 0)
+// Pyquen, Data-Embedded
+//int analyzeJetTrees(char *infile="/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root",char *outfile="mix.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
 {
   // central =0, all centralities or p+p
   //central =1, 0-10
@@ -35,7 +39,7 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
   // Take the tree from the file
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile);
    if (!f) {
-      f = new TFile(infile);
+     f =  TFile::Open(infile);
       f->cd("inclusiveJetAnalyzer");
    }
    TTree *t;
@@ -124,7 +128,7 @@ int analyzeJetTrees(char *infile="merged_jetTree_Pyquen.root",char *outfile="his
    TH2F *hLeadingResolutionVsPt = new TH2F("hLeadingResolutionVsPt","hLeadingResolutionVsPt",100,-5.,5.,100,0,500);
    TH2F *hSubLeadingResolutionVsPt = new TH2F("hSubLeadingResolutionVsPt","hSubLeadingResolutionVsPt",100,-5.,5.,100,0,500);
 
-   TFile *fcent_Data = new TFile("CentDist_Data.root");
+   TFile *fcent_Data = new TFile("CentDist_Data_v6.root");
    TH1F *hCent_Data = (TH1F*)fcent_Data->Get("h");
    float cent_integral_Data = 1.;
    if(central==1)cent_integral_Data=hCent_Data->Integral(1,4);

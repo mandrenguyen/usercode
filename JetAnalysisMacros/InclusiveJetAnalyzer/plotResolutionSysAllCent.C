@@ -139,9 +139,12 @@ void plotEnergyScaleSys(int cbin,
   nt->Draw("abs(et1*(1+fResB1)-et2*(1+fResB2))/(et1*(1+fResB1)+et2*(1+fResB2))>>hSys2",Form("(%s)",cut.Data())); 
 
   // calculate the statistical error and normalize
-  h->Sumw2();
+  //  h->Sumw2();
   h->Scale(1./h->GetEntries());
-  h->SetMarkerStyle(20);
+  h->SetLineColor(kGreen+2);
+  h->SetFillColor(kGreen-9);
+  h->SetFillStyle(3006);
+  h->Draw("hist");
 
   hSys1->Scale(1./hSys1->Integral(0,20));
   hSys1->SetLineColor(kBlue);
@@ -185,7 +188,7 @@ void plotEnergyScaleSys(int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.26,0.63,0.80,0.88); 
-    t3->AddEntry(h,"PYTHIA Embedded in MB","pl");
+    t3->AddEntry(h,"PYTHIA Embedded in MB","lf");
     t3->AddEntry(hSys1,"PYTHIA, smeared by 10%","lf");
     t3->AddEntry(hSys2,"PYTHIA, smeared by 50%","lf");
     t3->SetFillColor(0);

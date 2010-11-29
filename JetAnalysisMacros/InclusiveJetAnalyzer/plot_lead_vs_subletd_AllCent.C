@@ -1,5 +1,6 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
+#include <iostream.h>
 #include "TCanvas.h"
 #include "TError.h"
 #include "TPad.h"
@@ -15,6 +16,7 @@
 #include "TLegend.h"
 #include "TLatex.h"
 #include "TString.h"
+#include "TStyle.h"
 
 #endif
 
@@ -34,8 +36,7 @@ void plotBal_vs_Imbal(int cbin = 0,
 	          bool useWeight = true,
 		  bool drawXLabel = false,
 		      bool drawLeg = false,
-		      int kind = 0,    // kind = 0 for data, 1 for mix 2 for hydjet
-		      int usePyquen = 1
+		      int kind = 0    // kind = 0 for data, 1 for mix 2 for pyquen
 		      );
 
 void drawText(const char *text, float xp, float yp);
@@ -49,30 +50,32 @@ void drawDum(float min, float max, double drawXLabel);
 void drawPatch(float x1, float y1, float x2, float y2); 
 //---------------------------------------------------------------------
 
-void plot_lead_vs_subletd_AllCent(int usePyquen=1) {
+void plot_lead_vs_subletd_AllCent() {
    
+  gStyle->SetNdivisions(505,"xyz");
+
    TCanvas *c1 = new TCanvas("c1","",1250,1100);
    
    makeMultiPanelCanvas(c1,3,3,0.0,0.0,0.2,0.15,0.02);
    
    c1->cd(1);
-   plotBal_vs_Imbal(2,"data.root",true,false,false,0,0);
+   plotBal_vs_Imbal(2,"data.root",true,false,false,0);
    float px(0.25),py(0.75);
    drawText("30~100%",px,py);
    //  drawPatch(0.976,0.0972,1.1,0.141);
    
   c1->cd(2);
-  plotBal_vs_Imbal(1,"data.root",true,true,false,0,0);
+  plotBal_vs_Imbal(1,"data.root",true,true,false,0);
 
   drawText("10~30%",px,py);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotBal_vs_Imbal(0,"data.root",true,false,true,0,0);
+  plotBal_vs_Imbal(0,"data.root",true,false,true,0);
 
   drawText("0~10%",px,py);
-  //  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(60,200,"CMS Preliminary");
   cms->SetTextFont(63);
@@ -86,20 +89,20 @@ void plot_lead_vs_subletd_AllCent(int usePyquen=1) {
 
  
   c1->cd(4);
-  plotBal_vs_Imbal(2,"mix.root",true,false,false,1,0);
+  plotBal_vs_Imbal(2,"mix.root",true,false,false,1);
   drawText("30~100%",65,170);
-  drawPatch(0.06,0.912,0.19,0.999);
+  //drawPatch(0.06,0.912,0.19,0.999);
   c1->cd(5);
-  plotBal_vs_Imbal(1,"mix.root",true,true,false,1,0);
+  plotBal_vs_Imbal(1,"mix.root",true,true,false,1);
   //  gPad->SetLogy();
   drawText("10~30%",65,170);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.966,0.0972,1.1,0.141);
   
   c1->cd(6);
-  plotBal_vs_Imbal(0,"mix.root",true,false,true,1,0);
+  plotBal_vs_Imbal(0,"mix.root",true,false,true,1);
   drawText("0~10%",65,170);
-  //  drawPatch(-0.00007,0.0972,0.0318,0.141);
+   drawPatch(-0.00007,0.0972,0.0318,0.141);
   TLatex *mix = new TLatex(60,200,"unquenched PYQUEN + Data");
   mix->SetTextFont(63);
   mix->SetTextSize(18);
@@ -109,35 +112,27 @@ void plot_lead_vs_subletd_AllCent(int usePyquen=1) {
    
 
   c1->cd(7);
-  if(usePyquen)plotBal_vs_Imbal(2,"pyquen.root",true,false,false,2,1);
-  else plotBal_vs_Imbal(2,"hydjet.root",true,false,false,2,0);
+  plotBal_vs_Imbal(2,"pyquen.root",true,false,false,2);
   drawText("30~100%",65,170);
-  drawPatch(0.966,0.0972,1.1,0.141);
-  drawPatch(0.06,0.922,0.19,0.999);
+  //drawPatch(0.966,0.0972,1.1,0.141);
+  //drawPatch(0.06,0.922,0.19,0.999);
 
   c1->cd(8);
-  if(usePyquen)plotBal_vs_Imbal(1,"pyquen.root",true,true,false,2,1);
-  else plotBal_vs_Imbal(1,"hydjet.root",true,true,false,2,0);
+  plotBal_vs_Imbal(1,"pyquen.root",true,true,false,2);
   drawText("10~30%",65,170);
-  drawPatch(-0.00007,0.0972,0.1318,0.141);
-  drawPatch(0.956,0.0992,1.1,0.141);
+  //drawPatch(-0.00007,0.0972,0.1318,0.141);
+  //drawPatch(0.956,0.0992,1.1,0.141);
   c1->cd(9);
-  if(usePyquen)plotBal_vs_Imbal(0,"pyquen.root",true,false,true,2,1);
-  else plotBal_vs_Imbal(0,"hydjet.root",true,false,true,2,0);
+  plotBal_vs_Imbal(0,"pyquen.root",true,false,true,2);
   drawText("0~10%",65,170);
   drawPatch(-0.00007,0.0972,0.1318,0.141);
   
-  TLatex *hydjet = new TLatex(60,200,"unquenched PYQUEN + HYDJET");
-  hydjet->SetTextFont(63);
-  hydjet->SetTextSize(18);
-
-
   TLatex *pyquen = new TLatex(60,200,"unquenched PYQUEN");
   pyquen->SetTextFont(63);
   pyquen->SetTextSize(18);
 
-  if(usePyquen)pyquen->Draw();
-  else hydjet->Draw();
+
+  pyquen->Draw();
 
 
   gPad->SetRightMargin(0.1);
@@ -157,13 +152,11 @@ void plotBal_vs_Imbal(int cbin,
 		      bool useWeight,
 		      bool drawXLabel,
 		      bool drawLeg,
-		      int kind,
-		      int usePyquen
+		      int kind
 		      )
 {
   
-   TString cut="";//  "et1>120 && et2>35";
-   TString cutpp= cut;
+   TString cut="";//  "et1>120 && et2>50";
 
    TString cstring = "";
   if(cbin==0) {
@@ -185,11 +178,15 @@ void plotBal_vs_Imbal(int cbin,
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
   // projection histogram
-  TH2D *h = new TH2D("h","",100,50,220,100,50,220);
-
+  TH2D *h = new TH2D("h","",100,50.001,219.999,100,50.001,219.999);
+  h->GetZaxis()->SetRangeUser(0.001,4.2);
   char* var="et2:et1";
   
-  if(usePyquen)nt->Draw(Form("%s>>h",var),Form("(%s)",cutpp.Data())); 
+  cout<<" infname.Data() "<<infname.Data()<<endl;
+  if(infname.BeginsWith("pyquen")){
+    nt->Draw(Form("%s>>h",var)); 
+    cout<<" hello "<<endl;
+  }
   else nt->Draw(Form("%s>>h",var),Form("(%s)",cut.Data())); 
     
   // calculate the statistical error and normalize
