@@ -69,12 +69,12 @@ void plotBalanceAllCent_PTY(){
   drawText("0~10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
-  TLatex *cms = new TLatex(0.35,0.1825,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.35,3.625,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.73,3.625,"#intL dt = 3 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
