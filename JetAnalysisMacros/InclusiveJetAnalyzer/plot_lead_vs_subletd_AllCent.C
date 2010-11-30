@@ -1,6 +1,6 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
-#include <iostream.h>
+#include <iostream>
 #include "TCanvas.h"
 #include "TError.h"
 #include "TPad.h"
@@ -36,7 +36,7 @@ void plotBal_vs_Imbal(int cbin = 0,
 	          bool useWeight = true,
 		  bool drawXLabel = false,
 		      bool drawLeg = false,
-		      int kind = 0    // kind = 0 for data, 1 for mix 2 for pyquen
+		      int kind = 0    // kind = 0 for data, 1 for mix 2 for pythia
 		      );
 
 void drawText(const char *text, float xp, float yp);
@@ -103,7 +103,7 @@ void plot_lead_vs_subletd_AllCent() {
   plotBal_vs_Imbal(0,"mix.root",true,false,true,1);
   drawText("0~10%",65,170);
    drawPatch(-0.00007,0.0972,0.0318,0.141);
-  TLatex *mix = new TLatex(60,200,"unquenched PYQUEN + Data");
+  TLatex *mix = new TLatex(60,200,"embedded PYTHIA");
   mix->SetTextFont(63);
   mix->SetTextSize(18);
   mix->Draw();
@@ -112,27 +112,27 @@ void plot_lead_vs_subletd_AllCent() {
    
 
   c1->cd(7);
-  plotBal_vs_Imbal(2,"pyquen.root",true,false,false,2);
+  plotBal_vs_Imbal(2,"pythia.root",true,false,false,2);
   drawText("30~100%",65,170);
   //drawPatch(0.966,0.0972,1.1,0.141);
   //drawPatch(0.06,0.922,0.19,0.999);
 
   c1->cd(8);
-  plotBal_vs_Imbal(1,"pyquen.root",true,true,false,2);
+  plotBal_vs_Imbal(1,"pythia.root",true,true,false,2);
   drawText("10~30%",65,170);
   //drawPatch(-0.00007,0.0972,0.1318,0.141);
   //drawPatch(0.956,0.0992,1.1,0.141);
   c1->cd(9);
-  plotBal_vs_Imbal(0,"pyquen.root",true,false,true,2);
+  plotBal_vs_Imbal(0,"pythia.root",true,false,true,2);
   drawText("0~10%",65,170);
   drawPatch(-0.00007,0.0972,0.1318,0.141);
   
-  TLatex *pyquen = new TLatex(60,200,"unquenched PYQUEN");
-  pyquen->SetTextFont(63);
-  pyquen->SetTextSize(18);
+  TLatex *pythia = new TLatex(60,200,"embedded PYTHIA");
+  pythia->SetTextFont(63);
+  pythia->SetTextSize(18);
 
 
-  pyquen->Draw();
+  pythia->Draw();
 
 
   gPad->SetRightMargin(0.1);
@@ -183,7 +183,7 @@ void plotBal_vs_Imbal(int cbin,
   char* var="et2:et1";
   
   cout<<" infname.Data() "<<infname.Data()<<endl;
-  if(infname.BeginsWith("pyquen")){
+  if(infname.BeginsWith("pythia")){
     nt->Draw(Form("%s>>h",var)); 
     cout<<" hello "<<endl;
   }
@@ -224,8 +224,8 @@ void plotBal_vs_Imbal(int cbin,
     char* legOps;
     if ( kind ==0)  legOps = "pl";
     else  legOps = "lf";
-    //    t3[kind]->AddEntry(h,"Balanced jet ( AJ<0.3)",legOps); //unquenched PYQUEN + HYDJET","lf");
-    //  t3[kind]->AddEntry(hImBal,"Imbalanced jet (AJ>0.3)",legOps);//DataMix,"unquenched PYQUEN + Data","lf");
+    //    t3[kind]->AddEntry(h,"Balanced jet ( AJ<0.3)",legOps); //unquenched PYTHIA + HYDJET","lf");
+    //  t3[kind]->AddEntry(hImBal,"Imbalanced jet (AJ>0.3)",legOps);//DataMix,"unquenched PYTHIA + Data","lf");
     //  t3[kind]->SetFillColor(0);
     //    t3[kind]->SetBorderSize(0);
     //  t3[kind]->SetFillStyle(0);

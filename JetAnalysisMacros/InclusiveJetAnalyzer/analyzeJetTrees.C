@@ -16,12 +16,15 @@
 #include "CondFormats/JetMETObjects/src/SimpleJetCorrectionUncertainty.cc"
 #include "CondFormats/JetMETObjects/src/JetCorrectionUncertainty.cc"
 
+
+// Note that centrality flag is somewhat deprecated, just use central = 0 to make the tree and make cuts in the plotting macros
+
 // Data
-int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_DefaultReco_v7.root",char *outfile="data.root",int isMC=0, int useWeight=0, int central = 0, int useRawPt = 0)
+//int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_DefaultReco_v7.root",char *outfile="data.root",int isMC=0, int useWeight=0, int central = 0, int useRawPt = 0)
 // Pyquen
-//int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen/HIDATA/JetTrees/merged_jetTree_Pyquen_v2.root",char *outfile="pyquen.root",int isMC=1, int useWeight=0, int central = 0, int useRawPt = 0)
+//int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen/HIDATA/JetTrees/merged_jetTree_Pyquen_v2.root",char *outfile="pythia.root",int isMC=1, int useWeight=0, int central = 0, int useRawPt = 0)
 // Pyquen, Data-Embedded
-//int analyzeJetTrees(char *infile="/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root",char *outfile="mix.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
+int analyzeJetTrees(char *infile="/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root",char *outfile="mix.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
 {
   // central =0, all centralities or p+p
   //central =1, 0-10

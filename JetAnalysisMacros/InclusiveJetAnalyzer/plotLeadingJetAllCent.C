@@ -29,7 +29,7 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 
 void plotLeadingJet(int cbin = 0,
 		    TString infname = "data.root",
-		    TString hydjet = "pyquen.root",
+		    TString hydjet = "pythia.root",
 		    TString mix = "mix.root",
 		    bool useWeight = true,
 		    bool drawXLabel = false,
@@ -53,20 +53,20 @@ void plotLeadingJetAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotLeadingJet(2,"data.root","pyquen.root","mix.root",true,false,false);
+  plotLeadingJet(2,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
   drawText("30~100%",0.25,0.8);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotLeadingJet(1,"data.root","pyquen.root","mix.root",true,true,false);
+  plotLeadingJet(1,"data.root","pythia.root","mix.root",true,true,false);
   gPad->SetLogy();
   drawText("10~30%",0.08,0.8);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotLeadingJet(0,"data.root","pyquen.root","mix.root",true,false,true);
+  plotLeadingJet(0,"data.root","pythia.root","mix.root",true,false,true);
   gPad->SetLogy();
   drawText("0~10%",0.08,0.8);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
@@ -127,17 +127,17 @@ void plotLeadingJet(int cbin,
 
   // projection histogram
   TH1D *h = new TH1D("h","",10,120,220);
-  TH1D *hEmbedded = new TH1D("hEmbedded","",10,120,220);
+  TH1D *hPythia = new TH1D("hPythia","",10,120,220);
   TH1D *hDataMix = new TH1D("hDataMix","",10,120,220);
   nt->Draw("et1>>h",Form("(%s)",cut.Data())); 
    
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntHydjet->Draw("et1>>hEmbedded",Form("(%s)",cutpp.Data())); 
+    ntHydjet->Draw("et1>>hPythia",Form("(%s)",cutpp.Data())); 
     ntMix->Draw("et1>>hDataMix",Form("(%s)*weight",cut.Data())); 
   } else {
     // ignore centrality reweighting
-    ntHydjet->Draw("et1>>hEmbedded",Form("(%s)",cutpp.Data()));
+    ntHydjet->Draw("et1>>hPythia",Form("(%s)",cutpp.Data()));
     ntMix->Draw("et1>>hDataMix",Form("(%s)",cut.Data()));  
   }
 
@@ -146,34 +146,34 @@ void plotLeadingJet(int cbin,
   h->Scale(1./h->GetEntries());
   h->SetMarkerStyle(20);
 
-  hEmbedded->Scale(1./hEmbedded->Integral(0,20));
-  hEmbedded->SetLineColor(kBlue);
-  hEmbedded->SetFillColor(kAzure-8);
-  hEmbedded->SetFillStyle(3005);
+  hPythia->Scale(1./hPythia->Integral(0,20));
+  hPythia->SetLineColor(kBlue);
+  hPythia->SetFillColor(kAzure-8);
+  hPythia->SetFillStyle(3005);
    
-  hEmbedded->SetStats(0);
-  hEmbedded->Draw("hist");
-  if(drawXLabel) hEmbedded->SetXTitle("Leading Jet E_{T} (GeV)");
+  hPythia->SetStats(0);
+  hPythia->Draw("hist");
+  if(drawXLabel) hPythia->SetXTitle("Leading Jet E_{T} (GeV)");
 
-  hEmbedded->GetXaxis()->SetLabelSize(20);
-  hEmbedded->GetXaxis()->SetLabelFont(43);
-  hEmbedded->GetXaxis()->SetTitleSize(22);
-  hEmbedded->GetXaxis()->SetTitleFont(43);
-  hEmbedded->GetXaxis()->SetTitleOffset(1.5);
-  hEmbedded->GetXaxis()->CenterTitle();
+  hPythia->GetXaxis()->SetLabelSize(20);
+  hPythia->GetXaxis()->SetLabelFont(43);
+  hPythia->GetXaxis()->SetTitleSize(22);
+  hPythia->GetXaxis()->SetTitleFont(43);
+  hPythia->GetXaxis()->SetTitleOffset(1.5);
+  hPythia->GetXaxis()->CenterTitle();
 
-  hEmbedded->GetXaxis()->SetNdivisions(904,true);
+  hPythia->GetXaxis()->SetNdivisions(904,true);
 
-  hEmbedded->SetYTitle("Event Fraction");
+  hPythia->SetYTitle("Event Fraction");
 
-  hEmbedded->GetYaxis()->SetLabelSize(20);
-  hEmbedded->GetYaxis()->SetLabelFont(43);
-  hEmbedded->GetYaxis()->SetTitleSize(20);
-  hEmbedded->GetYaxis()->SetTitleFont(43);
-  hEmbedded->GetYaxis()->SetTitleOffset(2.5);
-  hEmbedded->GetYaxis()->CenterTitle();
+  hPythia->GetYaxis()->SetLabelSize(20);
+  hPythia->GetYaxis()->SetLabelFont(43);
+  hPythia->GetYaxis()->SetTitleSize(20);
+  hPythia->GetYaxis()->SetTitleFont(43);
+  hPythia->GetYaxis()->SetTitleOffset(2.5);
+  hPythia->GetYaxis()->CenterTitle();
 
-  hEmbedded->SetAxisRange(2E-3,3,"Y");
+  hPythia->SetAxisRange(2E-3,3,"Y");
   hDataMix->SetAxisRange(2E-3,3,"Y");
   h->SetAxisRange(2E-3,3,"Y");
 
@@ -189,8 +189,8 @@ void plotLeadingJet(int cbin,
   if(drawLeg){
     TLegend *t3=new TLegend(0.25,0.64,0.79,0.90);
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hEmbedded,"unquenched PYQUEN","lf");
-    t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
+    t3->AddEntry(hPythia,"PYTHIA","lf");
+    t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);

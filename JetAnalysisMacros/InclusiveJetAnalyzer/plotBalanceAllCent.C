@@ -29,7 +29,7 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 
 void plotBalance(int cbin = 0,
 		 TString infname = "data.root",
-		 TString pyquen = "pyquen.root",
+		 TString pythia = "pythia.root",
 		 TString mix = "mix.root",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
@@ -53,18 +53,18 @@ void plotBalanceAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotBalance(2,"data.root","pyquen.root","mix.root",true,false,false);
+  plotBalance(2,"data.root","pythia.root","mix.root",true,false,false);
   drawText("30~100%",0.76,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotBalance(1,"data.root","pyquen.root","mix.root",true,true,false);
+  plotBalance(1,"data.root","pythia.root","mix.root",true,true,false);
   drawText("10~30%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotBalance(0,"data.root","pyquen.root","mix.root",true,false,true);
+  plotBalance(0,"data.root","pythia.root","mix.root",true,false,true);
   drawText("0~10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
@@ -86,7 +86,7 @@ void plotBalanceAllCent(){
 
 void plotBalance(int cbin,
 		 TString infname,
-		 TString pyquen,
+		 TString pythia,
 		 TString mix,
 		 bool useWeight,
 		 bool drawXLabel,
@@ -110,9 +110,9 @@ void plotBalance(int cbin,
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
 
-  // open the pyquen (MC) file
-  TFile *infPyquen = new TFile(pyquen.Data());
-  TTree *ntPyquen = (TTree*) infPyquen->FindObjectAny("nt");
+  // open the pythia (MC) file
+  TFile *infPythia = new TFile(pythia.Data());
+  TTree *ntPythia = (TTree*) infPythia->FindObjectAny("nt");
 
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
@@ -121,7 +121,7 @@ void plotBalance(int cbin,
 
   // projection histogram
   TH1D *h = new TH1D("h","",20,0,1);
-  TH1D *hEmbedded = new TH1D("hEmbedded","",20,0,1);
+  TH1D *hPythia = new TH1D("hPythia","",20,0,1);
   TH1D *hDataMix = new TH1D("hDataMix","",20,0,1);
   nt->Draw("(et1-et2)/(et1+et2)>>h",Form("(%s)",cut.Data())); 
    
@@ -132,43 +132,43 @@ void plotBalance(int cbin,
     // ignore centrality reweighting
     ntMix->Draw("(et1-et2)/(et1+et2)>>hDataMix",Form("(%s)",cut.Data()));  
   }
-  ntPyquen->Draw("(et1-et2)/(et1+et2)>>hEmbedded",Form("(%s)",cutpp.Data()));
+  ntPythia->Draw("(et1-et2)/(et1+et2)>>hPythia",Form("(%s)",cutpp.Data()));
 
   // calculate the statistical error and normalize
   h->Sumw2();
   h->Scale(1./h->GetEntries());
   h->SetMarkerStyle(20);
 
-  hEmbedded->Scale(1./hEmbedded->Integral(0,20));
-  hEmbedded->SetLineColor(kBlue);
-  hEmbedded->SetFillColor(kAzure-8);
-  hEmbedded->SetFillStyle(3005);
+  hPythia->Scale(1./hPythia->Integral(0,20));
+  hPythia->SetLineColor(kBlue);
+  hPythia->SetFillColor(kAzure-8);
+  hPythia->SetFillStyle(3005);
 
-  hEmbedded->SetStats(0);
-  hEmbedded->Draw("hist");
+  hPythia->SetStats(0);
+  hPythia->Draw("hist");
 
-  if(drawXLabel) hEmbedded->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hPythia->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
 
-  hEmbedded->GetXaxis()->SetLabelSize(20);
-  hEmbedded->GetXaxis()->SetLabelFont(43);
-  hEmbedded->GetXaxis()->SetTitleSize(22);
-  hEmbedded->GetXaxis()->SetTitleFont(43);
-  hEmbedded->GetXaxis()->SetTitleOffset(1.5);
-  hEmbedded->GetXaxis()->CenterTitle();
+  hPythia->GetXaxis()->SetLabelSize(20);
+  hPythia->GetXaxis()->SetLabelFont(43);
+  hPythia->GetXaxis()->SetTitleSize(22);
+  hPythia->GetXaxis()->SetTitleFont(43);
+  hPythia->GetXaxis()->SetTitleOffset(1.5);
+  hPythia->GetXaxis()->CenterTitle();
 
-  hEmbedded->GetXaxis()->SetNdivisions(905,true);
+  hPythia->GetXaxis()->SetNdivisions(905,true);
   
-  hEmbedded->SetYTitle("Event Fraction");
+  hPythia->SetYTitle("Event Fraction");
 
-  hEmbedded->GetYaxis()->SetLabelSize(20);
-  hEmbedded->GetYaxis()->SetLabelFont(43);
-  hEmbedded->GetYaxis()->SetTitleSize(20);
-  hEmbedded->GetYaxis()->SetTitleFont(43);
-  hEmbedded->GetYaxis()->SetTitleOffset(2.5);
-  hEmbedded->GetYaxis()->CenterTitle();
+  hPythia->GetYaxis()->SetLabelSize(20);
+  hPythia->GetYaxis()->SetLabelFont(43);
+  hPythia->GetYaxis()->SetTitleSize(20);
+  hPythia->GetYaxis()->SetTitleFont(43);
+  hPythia->GetYaxis()->SetTitleOffset(2.5);
+  hPythia->GetYaxis()->CenterTitle();
   
 
-  hEmbedded->SetAxisRange(0,0.2,"Y");
+  hPythia->SetAxisRange(0,0.2,"Y");
 
 
   hDataMix->Scale(1./hDataMix->Integral(0,20));
@@ -182,8 +182,8 @@ void plotBalance(int cbin,
   if(drawLeg){
     TLegend *t3=new TLegend(0.31,0.675,0.85,0.88); 
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hEmbedded,"unquenched PYQUEN","lf");  
-    t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
+    t3->AddEntry(hPythia,"PYTHIA","lf");  
+    t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);

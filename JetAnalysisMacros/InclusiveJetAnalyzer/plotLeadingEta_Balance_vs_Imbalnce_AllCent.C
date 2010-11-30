@@ -32,7 +32,7 @@ void plotBal_vs_Imbal(int cbin = 0,
 	          bool useWeight = true,
 		  bool drawXLabel = false,
 		      bool drawLeg = false,
-		      int kind = 0    // kind = 0 for data, 1 for mix 2 for pyquen
+		      int kind = 0    // kind = 0 for data, 1 for mix 2 for pythia
 		      );
 
 void drawText(const char *text, float xp, float yp);
@@ -99,7 +99,7 @@ void plotLeadingEta_Balance_vs_Imbalnce_AllCent() {
   gPad->SetLogy();
   drawText("0~10%",0.65,0.24);
   //  drawPatch(-0.00007,0.0972,0.0318,0.141);
-  TLatex *mix = new TLatex(-1.9,1.29,"unquenched PYQUEN + Data");
+  TLatex *mix = new TLatex(-1.9,1.29,"embedded PYTHIA");
   mix->SetTextFont(63);
   mix->SetTextSize(18);
   mix->Draw();
@@ -107,26 +107,26 @@ void plotLeadingEta_Balance_vs_Imbalnce_AllCent() {
    
 
   c1->cd(7);
-  plotBal_vs_Imbal(2,"pyquen.root",true,false,false,2);
+  plotBal_vs_Imbal(2,"pythia.root",true,false,false,2);
   gPad->SetLogy();
   drawText("30~100%",0.67,0.24);
   drawPatch(0.966,0.0972,1.1,0.141);
 
   c1->cd(8);
-  plotBal_vs_Imbal(1,"pyquen.root",true,true,false,2);
+  plotBal_vs_Imbal(1,"pythia.root",true,true,false,2);
   gPad->SetLogy();
   drawText("10~30%",0.65,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.966,0.0972,1.1,0.141);
   c1->cd(9);
-  plotBal_vs_Imbal(0,"pyquen.root",true,false,true,2);
+  plotBal_vs_Imbal(0,"pythia.root",true,false,true,2);
   gPad->SetLogy();
   drawText("0~10%",0.65,0.24);
   drawPatch(-0.00007,0.0972,0.0318,0.141);
-  TLatex *pyquen = new TLatex(-1.9,1.29,"unquenched PYQUEN");
-  pyquen->SetTextFont(63);
-  pyquen->SetTextSize(18);
-  pyquen->Draw();
+  TLatex *pythia = new TLatex(-1.9,1.29,"PYTHIA");
+  pythia->SetTextFont(63);
+  pythia->SetTextSize(18);
+  pythia->Draw();
 
 
 
@@ -257,8 +257,8 @@ void plotBal_vs_Imbal(int cbin,
     char* legOps;
     if ( kind ==0)  legOps = "pl";
     else  legOps = "lf";
-    t3[kind]->AddEntry(hBal,"Balanced jet ( AJ<0.3)",legOps); //unquenched PYQUEN","lf");
-    t3[kind]->AddEntry(hImBal,"Imbalanced jet (AJ>0.3)",legOps);//DataMix,"unquenched PYQUEN + Data","lf");
+    t3[kind]->AddEntry(hBal,"Balanced jet ( A_{J} < 0.3)",legOps); //unquenched PYTHIA","lf");
+    t3[kind]->AddEntry(hImBal,"Imbalanced jet (A_{J} > 0.3)",legOps);//DataMix,"unquenched PYTHIA + Data","lf");
     t3[kind]->SetFillColor(0);
     t3[kind]->SetBorderSize(0);
     t3[kind]->SetFillStyle(0);
