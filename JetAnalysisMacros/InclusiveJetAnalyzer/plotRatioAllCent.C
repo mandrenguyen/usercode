@@ -32,7 +32,7 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 
 void plotRatio(int cbin = 0,
 		 TString infname = "data.root",
-		 TString hydjet = "hydjet.root",
+		 TString DataPF = "dataPF.root",
 		 TString mix = "mix.root",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
@@ -59,18 +59,18 @@ void plotRatioAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotRatio(2,"data.root","hydjet.root","mix.root",true,false,false);
+  plotRatio(2,"data.root","dataPF.root","mix.root",true,false,false);
   drawText("30~100%",0.76,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotRatio(1,"data.root","hydjet.root","mix.root",true,true,false);
+  plotRatio(1,"data.root","dataPF.root","mix.root",true,true,false);
   drawText("10~30%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotRatio(0,"data.root","hydjet.root","mix.root",true,false,true);
+  plotRatio(0,"data.root","dataPF.root","mix.root",true,false,true);
   drawText("0~10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
@@ -92,7 +92,7 @@ void plotRatioAllCent(){
 
 void plotRatio(int cbin,
 		 TString infname,
-		 TString hydjet,
+		 TString DataPF,
 		 TString mix,
 		 bool useWeight,
 		 bool drawXLabel,
@@ -115,9 +115,9 @@ void plotRatio(int cbin,
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
 
-  // open the hydjet (MC) file
-  TFile *infHydjet = new TFile(hydjet.Data());
-  TTree *ntHydjet = (TTree*) infHydjet->FindObjectAny("nt");
+  // open the DataPF (MC) file
+  TFile *infDataPF = new TFile(DataPF.Data());
+  TTree *ntDataPF = (TTree*) infDataPF->FindObjectAny("nt");
 
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
@@ -126,21 +126,22 @@ void plotRatio(int cbin,
   // Variable Aj
   char *aj = "(et1-et2)/(et1+et2)";
 
-  const int nBin = 11;
-  double bins[nBin+1]={0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.8,1};
+  const int nBin = 12;
+  double bins[nBin+1]={0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.8,1};
   // projection histogram
   TH1D *h = new TH1D("h","",nBin,bins);
+  TH1D *hTmp = new TH1D("hTmp","",nBin,bins);
   TH1D *hEmbedded = new TH1D("hEmbedded","",nBin,bins);
   TH1D *hDataMix = new TH1D("hDataMix","",nBin,bins);
   nt->Draw(Form("%s>>h",aj),Form("(%s)",cut.Data())); 
    
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntHydjet->Draw(Form("%s>>hEmbedded",aj),Form("(%s)*weight",cut.Data())); 
+    ntDataPF->Draw(Form("%s>>hEmbedded",aj),Form("(%s)",cut.Data())); 
     ntMix->Draw(Form("%s>>hDataMix",aj),Form("(%s)*weight",cut.Data())); 
   } else {
     // ignore centrality reweighting
-    ntHydjet->Draw(Form("%s>>hEmbedded",aj),Form("(%s)",cut.Data()));
+    ntDataPF->Draw(Form("%s>>hEmbedded",aj),Form("(%s)",cut.Data()));
     ntMix->Draw(Form("%s>>hDataMix",aj),Form("(%s)*weight",cut.Data()));  
   }
 
@@ -197,29 +198,58 @@ void plotRatio(int cbin,
   hEmbedded->Divide(hDataMix);
 
   TLine *l = new TLine(0,1,1,1);
-  //hEmbedded->Draw("hist");
   h->Draw("");
 
   TH1D *hErr = getErrorBand(h);
-  double systematicError10TeV[12] =
-                  {0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.25,0.2,0.2,0.2};
+
+
+  double systematicErrorResolution[nBin] =
+                  {0.06,0.05,0.04,0.04,0.04,0.06,0.1,0.18,0.3,0.5,0.5};
+
+  double systematicErrorScale[nBin] =
+                  {0.06,0.05,0.04,0.03,0.02,0.02,0.03,0.04,0.05,0.08,0.1};
+
+  double systematicErrorEfficiency[nBin] =
+                  {0.00,0.00,0.00,0.00,0.00,0.00,0.07,0.07,0.07,0.07,0.07};
+
+  double systematicErrorFake[nBin] =
+                  {0.00,0.00,0.00,0.00,0.00,0.00,0.01,0.02,0.03,0.04,0.04};
+
+  double systematicError[nBin];
+
+  for (int b=0;b<nBin;b++)
+  {
+     double sum=0;
+     sum+= systematicErrorResolution[b]*systematicErrorResolution[b];
+     sum+= systematicErrorScale[b]*systematicErrorScale[b];
+     sum+= systematicErrorEfficiency[b]*systematicErrorEfficiency[b];
+     sum+= systematicErrorFake[b]*systematicErrorFake[b];
+     systematicError[b]=sqrt(sum);
+     hTmp->SetBinContent(b,1);
+  }
 
 
   TGraph *gErrorBand;
 
   if (cbin!=0) {
-     gErrorBand = GetErrorBand(h,systematicError10TeV,systematicError10TeV,0.025,9);
+     gErrorBand = GetErrorBand(hTmp,systematicError,systematicError,0.025,10);
   } else {
-     gErrorBand = GetErrorBand(h,systematicError10TeV,systematicError10TeV,0.025,8);
+     gErrorBand = GetErrorBand(hTmp,systematicError,systematicError,0.025,9);
   }
   gErrorBand->Draw("f");
+  hEmbedded->SetMarkerStyle(4);
+  hEmbedded->SetMarkerColor(4);
+  hEmbedded->SetLineColor(4);
+  hEmbedded->SetLineStyle(2);
+  
+  hEmbedded->Draw("same");
   h->Draw("same");
   l->Draw();
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.26,0.73,0.80,0.88); 
+    TLegend *t3=new TLegend(0.43,0.73,0.85,0.88); 
     t3->AddEntry(h,"Data / PYQUEN +Data","pl");
-    //t3->AddEntry(hEmbedded,"PYQUEN + HYDJET / PYQUEN + Data","lf");  
+    t3->AddEntry(hEmbedded,"Data PF / PYQUEN + Data","l");  
     //t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
