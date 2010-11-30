@@ -54,26 +54,26 @@ void plotResolutionSysAllCent(){
 
   c1->cd(1);
   plotEnergyScaleSys(2,"mix.root",true,false,false);
-  drawText("30~100%",0.75,0.34);
+  drawText("30-100%",0.75,0.34);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
   plotEnergyScaleSys(1,"mix.root",true,true,false);
-  drawText("10~30%",0.75,0.34);
+  drawText("10-30%",0.75,0.34);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
   plotEnergyScaleSys(0,"mix.root",true,false,true);
-  drawText("0~10%",0.75,0.34);
+  drawText("0-10%",0.75,0.34);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
-  TLatex *cms = new TLatex(0.30,0.18,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.30,3.675,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.68,0.18,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.68,3.675,"#intL dt = 3 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -92,15 +92,19 @@ void plotEnergyScaleSys(int cbin,
 {
   TString cut="et1>120 && et2>50 && dphi>2.5";
   TString cstring = "";
+  TString trigcut = "";
   if(cbin==0) {
     cstring = "0-10%";
     cut+=" && bin>=0 && bin<4";
+    trigcut =" bin>=0 && bin<4";
   } else if (cbin==1) {
     cstring = "10-30%";
     cut+=" && bin>=4 && bin<12";
+    trigcut =" bin>=4 && bin<12";
   } else {
     cstring = "30-100%";
     cut+=" && bin>=12 && bin<40";
+    trigcut =" bin>=12 && bin<40";
   }
 
   // open the data file
@@ -130,7 +134,7 @@ void plotEnergyScaleSys(int cbin,
   nt->AddFriend("t");
     
   // projection histogram
-  TH1D *h = new TH1D("h","",20,0,1);
+  TH1D *h = new TH1D("h","h",20,0,1);
   TH1D *hSys1 = new TH1D("hSys1","",20,0,1);
   TH1D *hSys2 = new TH1D("hSys2","",20,0,1);
   
@@ -138,23 +142,39 @@ void plotEnergyScaleSys(int cbin,
   nt->Draw("abs(et1*(1+fResA1)-et2*(1+fResA2))/(et1*(1+fResA1)+et2*(1+fResA2))>>hSys1",Form("(%s)",cut.Data())); 
   nt->Draw("abs(et1*(1+fResB1)-et2*(1+fResB2))/(et1*(1+fResB1)+et2*(1+fResB2))>>hSys2",Form("(%s)",cut.Data())); 
 
+  TH1D *h_trig = new TH1D("h_trig","h_trig",380,120,500);
+  TH1D *hSys1_trig = new TH1D("hSys1_trig","hSys1_trig",380,120,500);
+  TH1D *hSys2_trig = new TH1D("hSys2_trig","hSys2_trig",380,120,500);
+   
+  nt->Draw("et1>>h_trig",Form("(%s)",trigcut.Data()));
+  //nt->Draw("abs(et1*(1+fResA1))>>hSys1_trig",Form("(%s)",trigcut.Data()));
+  //nt->Draw("abs(et1*(1+fResB1))>>hSys2_trig",Form("(%s)",trigcut.Data()));
+  nt->Draw("et1>>hSys1_trig",Form("(%s)",trigcut.Data()));
+  nt->Draw("et1>>hSys2_trig",Form("(%s)",trigcut.Data()));
+
+  cout<<" h_trig->Integral() "<<h_trig->Integral()<<endl;
+  cout<<" hSys1_trig->Integral() "<<hSys1_trig->Integral()<<endl;
+  cout<<" hSys2_trig->Integral() "<<hSys2_trig->Integral()<<endl;
+
   // calculate the statistical error and normalize
   //  h->Sumw2();
-  h->Scale(1./h->GetEntries());
+  //h->Scale(1./h->GetEntries());
+  h->Scale(1./h_trig->Integral(1,380)/h->GetBinWidth(1));
   h->SetLineColor(kGreen+2);
   h->SetFillColor(kGreen-9);
-  h->SetFillStyle(3006);
+  h->SetFillStyle(0);
   h->Draw("hist");
 
-  hSys1->Scale(1./hSys1->Integral(0,20));
+  //hSys1->Scale(1./hSys1->Integral(0,20));
+  hSys1->Scale(1./hSys1_trig->Integral(1,380)/hSys1->GetBinWidth(1));
   hSys1->SetLineColor(kBlue);
   hSys1->SetFillColor(kAzure-8);
-  hSys1->SetFillStyle(3005);
+  hSys1->SetFillStyle(0);
 
   hSys1->SetStats(0);
   hSys1->Draw("hist");
 
-  if(drawXLabel) hSys1->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hSys1->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
 
   hSys1->GetXaxis()->SetLabelSize(20);
   hSys1->GetXaxis()->SetLabelFont(43);
@@ -165,7 +185,7 @@ void plotEnergyScaleSys(int cbin,
 
   hSys1->GetXaxis()->SetNdivisions(905,true);
   
-  hSys1->SetYTitle("Event Fraction");
+  hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
 
   hSys1->GetYaxis()->SetLabelSize(20);
   hSys1->GetYaxis()->SetLabelFont(43);
@@ -175,22 +195,23 @@ void plotEnergyScaleSys(int cbin,
   hSys1->GetYaxis()->CenterTitle();
   
 
-  hSys1->SetAxisRange(0,0.2,"Y");
+  hSys1->SetAxisRange(0,4.0,"Y");
 
 
-  hSys2->Scale(1./hSys2->Integral(0,20));
+  //hSys2->Scale(1./hSys2->Integral(0,20));
+  hSys2->Scale(1./hSys2_trig->Integral(1,380)/hSys2->GetBinWidth(1));
   hSys2->SetLineColor(kRed);
   hSys2->SetFillColor(kRed-9);
-  hSys2->SetFillStyle(3004);
+  hSys2->SetFillStyle(0);
   hSys2->Draw("same");
   
   h->Draw("same");
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.26,0.63,0.80,0.88); 
-    t3->AddEntry(h,"PYTHIA Embedded in MB","lf");
-    t3->AddEntry(hSys1,"PYTHIA, smeared by 10%","lf");
-    t3->AddEntry(hSys2,"PYTHIA, smeared by 50%","lf");
+    t3->AddEntry(h,"PYTHIA Embedded in MB","l");
+    t3->AddEntry(hSys1,"PYTHIA, smeared by 10%","l");
+    t3->AddEntry(hSys2,"PYTHIA, smeared by 50%","l");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -228,7 +249,7 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);
@@ -247,7 +268,7 @@ void drawDum(float min, float max, double drawXLabel){
   hdum->GetYaxis()->SetTitleOffset(2.5);
   hdum->GetYaxis()->CenterTitle();
 
-  hdum->SetAxisRange(0,0.2,"Y");
+  hdum->SetAxisRange(0,4.0,"Y");
 
   hdum->Draw("");
 

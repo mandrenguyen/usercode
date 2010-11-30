@@ -123,12 +123,13 @@ void plotEnergyScaleSys(int cbin,
   hSys1->Scale(1./hSys1->Integral(0,20));
   hSys1->SetLineColor(kBlue);
   hSys1->SetFillColor(kAzure-8);
-  hSys1->SetFillStyle(3005);
+  hSys1->SetFillStyle(0);
 
   hSys1->SetStats(0);
+
+  hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
   hSys1->Draw("hist");
 
-  if(drawXLabel) hSys1->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
 
   hSys1->GetXaxis()->SetLabelSize(20);
   hSys1->GetXaxis()->SetLabelFont(43);
@@ -139,7 +140,7 @@ void plotEnergyScaleSys(int cbin,
 
   hSys1->GetXaxis()->SetNdivisions(905,true);
   
-  hSys1->SetYTitle("Event Fraction");
+  if(drawXLabel)hSys1->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
 
   hSys1->GetYaxis()->SetLabelSize(20);
   hSys1->GetYaxis()->SetLabelFont(43);
@@ -155,7 +156,7 @@ void plotEnergyScaleSys(int cbin,
   hSys2->Scale(1./hSys2->Integral(0,20));
   hSys2->SetLineColor(kRed);
   hSys2->SetFillColor(kRed-9);
-  hSys2->SetFillStyle(3004);
+  hSys2->SetFillStyle(0);
   hSys2->Draw("same");
   
   h->Draw("same");
@@ -163,8 +164,8 @@ void plotEnergyScaleSys(int cbin,
   if(drawLeg){
     TLegend *t3=new TLegend(0.26,0.63,0.80,0.88); 
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hSys1,"Data 30-100%, 2^{nd} Jet E_{T} scaled","lf");
-    t3->AddEntry(hSys2,"Data 30-100%, tile JEC","lf");
+    t3->AddEntry(hSys1,"Data 30-100%, 2^{nd} Jet E_{T} scaled","l");
+    t3->AddEntry(hSys2,"Data 30-100%, tile JEC","l");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -201,7 +202,7 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel)   hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);

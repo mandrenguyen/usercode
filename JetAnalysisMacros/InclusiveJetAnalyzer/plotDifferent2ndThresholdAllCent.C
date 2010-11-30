@@ -54,26 +54,26 @@ void plotDifferent2ndThresholdAllCent(){
 
   c1->cd(1);
   plotDifferent2ndThreshold(2,"data.root",true,false,false);
-  drawText("30~100%",0.75,0.34);
+  drawText("30-100%",0.75,0.34);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
   plotDifferent2ndThreshold(1,"data.root",true,true,false);
-  drawText("10~30%",0.75,0.34);
+  drawText("10-30%",0.75,0.34);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
   plotDifferent2ndThreshold(0,"data.root",true,false,true);
-  drawText("0~10%",0.75,0.34);
+  drawText("0-10%",0.75,0.34);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
-  TLatex *cms = new TLatex(0.30,0.18,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.30,3.225,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.68,0.18,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.68,3.225,"#intL dt = 3 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -93,6 +93,9 @@ void plotDifferent2ndThreshold(int cbin,
   TString cut="et1>120 && et2>50 && dphi>2.5";
   TString cut2="et1>120 && et2>35 && dphi>2.5";
   TString cut3="et1>120 && et2>55 && dphi>2.5";
+  TString trigcut1 = "et1>120";
+  TString trigcut2 = "et1>120";
+  TString trigcut3 = "et1>120";
 
 
   TString cstring = "";
@@ -101,16 +104,25 @@ void plotDifferent2ndThreshold(int cbin,
     cut+=" && bin>=0 && bin<4";
     cut2+=" && bin>=0 && bin<4";
     cut3+=" && bin>=0 && bin<4";
+    trigcut1+=" && bin>=0 && bin<4";
+    trigcut2+=" && bin>=0 && bin<4";
+    trigcut3+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
     cstring = "10-30%";
     cut+=" && bin>=4 && bin<12";
     cut2+=" && bin>=4 && bin<12";
     cut3+=" && bin>=4 && bin<12";
+    trigcut1+=" && bin>=4 && bin<12";
+    trigcut2+=" && bin>=4 && bin<12";
+    trigcut3+=" && bin>=4 && bin<12";
   } else {
     cstring = "30-100%";
     cut+=" && bin>=12 && bin<40";
     cut2+=" && bin>=12 && bin<40";
     cut3+=" && bin>=12 && bin<40";
+    trigcut1+=" && bin>=12 && bin<40";
+    trigcut2+=" && bin>=12 && bin<40";
+    trigcut3+=" && bin>=12 && bin<40";
   }
 
   // open the data file
@@ -127,20 +139,34 @@ void plotDifferent2ndThreshold(int cbin,
   nt->Draw("(et1-et2)/(et1+et2)>>hSys1",Form("(%s)",cut2.Data())); 
   nt->Draw("(et1-et2)/(et1+et2)>>hSys2",Form("(%s)",cut3.Data())); 
 
+ TH1D *h_trig = new TH1D("h_trig","h_trig",380,120,500);
+  TH1D *hSys1_trig = new TH1D("hSys1_trig","hSys1_trig",380,120,500);
+  TH1D *hSys2_trig = new TH1D("hSys2_trig","hSys2_trig",380,120,500);
+
+  nt->Draw("et1>>h_trig",Form("(%s)",trigcut1.Data()));
+  nt->Draw("et1>>hSys1_trig",Form("(%s)",trigcut2.Data()));
+  nt->Draw("et1>>hSys2_trig",Form("(%s)",trigcut3.Data()));
+
+  cout<<" h_trig->Integral() "<<h_trig->Integral()<<endl;
+  cout<<" hSys1_trig->Integral() "<<hSys1_trig->Integral()<<endl;
+  cout<<" hSys2_trig->Integral() "<<hSys2_trig->Integral()<<endl;
+
   // calculate the statistical error and normalize
   h->Sumw2();
-  h->Scale(1./h->GetEntries());
+   h->Scale(1./h_trig->Integral(1,380)/h->GetBinWidth(1));
+   // h->Scale(1./h->GetEntries());
   h->SetMarkerStyle(20);
 
-  hSys1->Scale(1./hSys1->Integral(0,20));
+  //  hSys1->Scale(1./hSys1->Integral(0,20));
+  hSys1->Scale(1./hSys1_trig->Integral(1,380)/hSys1->GetBinWidth(1));
   hSys1->SetLineColor(kBlue);
   hSys1->SetFillColor(kAzure-8);
-  hSys1->SetFillStyle(3005);
+  hSys1->SetFillStyle(0);
 
   hSys1->SetStats(0);
   hSys1->Draw("hist");
 
-  if(drawXLabel) hSys1->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hSys1->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
 
   hSys1->GetXaxis()->SetLabelSize(20);
   hSys1->GetXaxis()->SetLabelFont(43);
@@ -151,7 +177,7 @@ void plotDifferent2ndThreshold(int cbin,
 
   hSys1->GetXaxis()->SetNdivisions(905,true);
   
-  hSys1->SetYTitle("Event Fraction");
+  hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
 
   hSys1->GetYaxis()->SetLabelSize(20);
   hSys1->GetYaxis()->SetLabelFont(43);
@@ -161,13 +187,14 @@ void plotDifferent2ndThreshold(int cbin,
   hSys1->GetYaxis()->CenterTitle();
   
 
-  hSys1->SetAxisRange(0,0.2,"Y");
+  hSys1->SetAxisRange(0,3.625,"Y");
 
 
-  hSys2->Scale(1./hSys2->Integral(0,20));
+  //hSys2->Scale(1./hSys2->Integral(0,20));
+  hSys2->Scale(1./hSys2_trig->Integral(1,380)/hSys2->GetBinWidth(1));
   hSys2->SetLineColor(kRed);
   hSys2->SetFillColor(kRed-9);
-  hSys2->SetFillStyle(3004);
+  hSys2->SetFillStyle(0);
   hSys2->Draw("same");
   
   h->Draw("same");
@@ -175,8 +202,8 @@ void plotDifferent2ndThreshold(int cbin,
   if(drawLeg){
     TLegend *t3=new TLegend(0.36,0.63,0.90,0.88); 
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hSys1,"2^{nd} Jet E_{T} > 35 GeV","lf");
-    t3->AddEntry(hSys2,"2^{nd} Jet E_{T} > 55 GeV","lf");
+    t3->AddEntry(hSys1,"2^{nd} Jet E_{T} > 35 GeV","l");
+    t3->AddEntry(hSys2,"2^{nd} Jet E_{T} > 55 GeV","l");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -212,7 +239,7 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hdum->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);
@@ -222,7 +249,8 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->GetXaxis()->SetNdivisions(905,true);
 
-  hdum->SetYTitle("Event Fraction");
+  hdum->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+
 
   hdum->GetYaxis()->SetLabelSize(20);
   hdum->GetYaxis()->SetLabelFont(43);
@@ -231,7 +259,7 @@ void drawDum(float min, float max, double drawXLabel){
   hdum->GetYaxis()->SetTitleOffset(2.5);
   hdum->GetYaxis()->CenterTitle();
 
-  hdum->SetAxisRange(0,0.2,"Y");
+  hdum->SetAxisRange(0,3.625,"Y");
 
   hdum->Draw("");
 
