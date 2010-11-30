@@ -61,20 +61,20 @@ void plot_lead_vs_subletd_AllCent() {
    c1->cd(1);
    plotBal_vs_Imbal(2,"data.root",true,false,false,0);
    float px(0.25),py(0.75);
-   drawText("30~100%",px,py);
+   drawText("30-100%",px,py);
    //  drawPatch(0.976,0.0972,1.1,0.141);
    
   c1->cd(2);
   plotBal_vs_Imbal(1,"data.root",true,true,false,0);
 
-  drawText("10~30%",px,py);
+  drawText("10-30%",px,py);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
   plotBal_vs_Imbal(0,"data.root",true,false,true,0);
 
-  drawText("0~10%",px,py);
+  drawText("0-10%",px,py);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(60,200,"CMS Preliminary");
@@ -90,18 +90,18 @@ void plot_lead_vs_subletd_AllCent() {
  
   c1->cd(4);
   plotBal_vs_Imbal(2,"mix.root",true,false,false,1);
-  drawText("30~100%",65,170);
+  drawText("30-100%",65,170);
   //drawPatch(0.06,0.912,0.19,0.999);
   c1->cd(5);
   plotBal_vs_Imbal(1,"mix.root",true,true,false,1);
   //  gPad->SetLogy();
-  drawText("10~30%",65,170);
+  drawText("10-30%",65,170);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.966,0.0972,1.1,0.141);
   
   c1->cd(6);
   plotBal_vs_Imbal(0,"mix.root",true,false,true,1);
-  drawText("0~10%",65,170);
+  drawText("0-10%",65,170);
    drawPatch(-0.00007,0.0972,0.0318,0.141);
   TLatex *mix = new TLatex(60,200,"embedded PYTHIA");
   mix->SetTextFont(63);
@@ -113,18 +113,18 @@ void plot_lead_vs_subletd_AllCent() {
 
   c1->cd(7);
   plotBal_vs_Imbal(2,"pythia.root",true,false,false,2);
-  drawText("30~100%",65,170);
+  drawText("30-100%",65,170);
   //drawPatch(0.966,0.0972,1.1,0.141);
   //drawPatch(0.06,0.922,0.19,0.999);
 
   c1->cd(8);
   plotBal_vs_Imbal(1,"pythia.root",true,true,false,2);
-  drawText("10~30%",65,170);
+  drawText("10-30%",65,170);
   //drawPatch(-0.00007,0.0972,0.1318,0.141);
   //drawPatch(0.956,0.0992,1.1,0.141);
   c1->cd(9);
   plotBal_vs_Imbal(0,"pythia.root",true,false,true,2);
-  drawText("0~10%",65,170);
+  drawText("0-10%",65,170);
   drawPatch(-0.00007,0.0972,0.1318,0.141);
   
   TLatex *pythia = new TLatex(60,200,"embedded PYTHIA");

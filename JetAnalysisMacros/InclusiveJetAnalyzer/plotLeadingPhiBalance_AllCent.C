@@ -55,20 +55,20 @@ void plotLeadingPhiBalance_AllCent(){
   c1->cd(1);
   plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("30~100%",0.77,0.66);
+  drawText("30-100%",0.77,0.66);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
   plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,true,false);
   gPad->SetLogy();
-  drawText("10~30%",0.75,0.66);
+  drawText("10-30%",0.75,0.66);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
   plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,true);
   gPad->SetLogy();
-  drawText("0~10%",0.75,0.66);
+  drawText("0-10%",0.75,0.66);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(-2.5,2.49,"CMS Preliminary");

@@ -55,21 +55,21 @@ void plotSubLeadingJetAllCent_onlyBalancedJets() {
   c1->cd(1);
   plotLeadingJet(2,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("30~100%",0.25,0.24);
+  drawText("30-100%",0.25,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
 
   c1->cd(2);
   plotLeadingJet(1,"data.root","pythia.root","mix.root",true,true,false);
   gPad->SetLogy();
-  drawText("10~30%",0.10,0.24);
+  drawText("10-30%",0.10,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
   plotLeadingJet(0,"data.root","pythia.root","mix.root",true,false,true);
   gPad->SetLogy();
-  drawText("0~10%",0.10,0.24);
+  drawText("0-10%",0.10,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(105,1.8,"CMS Preliminary");

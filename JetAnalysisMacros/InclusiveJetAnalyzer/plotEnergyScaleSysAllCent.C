@@ -52,18 +52,18 @@ void plotEnergyScaleSysAllCent(){
 
   c1->cd(1);
   plotEnergyScaleSys(2,"data.root",true,false,false);
-  drawText("30~100%",0.75,0.34);
+  drawText("30-100%",0.75,0.34);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
   plotEnergyScaleSys(1,"data.root",true,true,false);
-  drawText("10~30%",0.75,0.34);
+  drawText("10-30%",0.75,0.34);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
   plotEnergyScaleSys(0,"data.root",true,false,true);
-  drawText("0~10%",0.75,0.34);
+  drawText("0-10%",0.75,0.34);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(0.30,0.18,"CMS Preliminary");
