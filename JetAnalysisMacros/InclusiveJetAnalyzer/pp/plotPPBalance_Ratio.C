@@ -46,8 +46,8 @@ void plotPPBalance_Ratio(){
   hDum->SetFillStyle(3005);
 
   hDum->SetStats(0);
-  hDum->SetXTitle("J_{A} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
-  hDum->SetYTitle("Ratio");
+  hDum->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  hDum->SetYTitle("Data/PYTHIA");
 
   hDum->GetXaxis()->SetLabelSize(20);
   hDum->GetXaxis()->SetLabelFont(43);
@@ -84,7 +84,7 @@ void plotPPBalance_Ratio(){
   TLegend *t3=new TLegend(0.20,0.54,0.58,0.79);
   //t3->SetHeader("ant-k_{T} (R=0.5) CaloJets");
   t3->AddEntry(hDijetBal_data,"p + p  #sqrt{s}=7.0 TeV","pl");
-  t3->AddEntry(hDijetBal_mc,"PYTHIA","lf");
+  //t3->AddEntry(hDijetBal_mc,"PYTHIA","lf");
   t3->SetFillColor(0);
   t3->SetBorderSize(0);
   t3->SetFillStyle(0);
