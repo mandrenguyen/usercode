@@ -17,6 +17,7 @@
 #include "TGraphAsymmErrors.h"
 #include "TStyle.h"
 #include "TLine.h"
+#include "DrawTick.C"
 
 using namespace std;
 
@@ -149,6 +150,12 @@ void plotRJ(  double ajCut=0.24,
   hTmp->GetYaxis()->SetTitleOffset(1.5);
   hTmp->Draw();
 
+  double errorbar = 0.02;
+  for(int i = 0; i < g->GetN(); ++i){
+    double *x = g->GetX();
+    double *y = g->GetY();
+    DrawTick(y[i],errorbar,errorbar,x[i],0.012,8.1,16);
+  }
   g->Draw("p same");
   gPythia->SetMarkerColor(4);
   gPythia->SetLineColor(4);
@@ -174,7 +181,7 @@ void plotRJ(  double ajCut=0.24,
     t3->SetTextSize(15);
     t3->Draw();
   }
-  
+
 
   TLatex *cms = new TLatex(0.20,0.88,"CMS Preliminary");
   cms->SetNDC();
