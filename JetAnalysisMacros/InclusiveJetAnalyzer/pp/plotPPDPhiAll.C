@@ -43,11 +43,11 @@ void plotPPDPhiAll(){
   // dum styling ----
   TH1F *hDum = new TH1F("hDum","",10,0,3.142);
   hDum->SetLineColor(kBlue);
-  hDum->SetFillColor(kAzure-8);
-  hDum->SetFillStyle(3005);
+  //hDum->SetFillColor(kAzure-8);
+  //hDum->SetFillStyle(3005);
 
   hDum->SetStats(0);
-  hDum->SetXTitle("#Delta #Phi");
+  hDum->SetXTitle("#Delta#phi (rad)");
   hDum->SetYTitle("Event Fraction");
 
   hDum->GetXaxis()->SetLabelSize(20);
@@ -81,7 +81,7 @@ void plotPPDPhiAll(){
 
 
   // Legend
-  TLegend *t3=new TLegend(0.21,0.57,0.8,0.82);
+  TLegend *t3=new TLegend(0.21,0.56,0.8,0.81);
   //t3->SetHeader("ant-k_{T} (R=0.5) CaloJets");
   t3->AddEntry(hDijetBal_data,"p + p  #sqrt{s}=7.0 TeV","pl");
   t3->AddEntry(hDijetBal_mc,"PYTHIA","lf");
@@ -99,15 +99,15 @@ void plotPPDPhiAll(){
   cms->SetTextSize(17);
   cms->Draw();
 
-  TLatex *lumi = new TLatex(1.3,0.33,"#intL dt = 35.1 pb^{-1}");
+  TLatex *lumi = new TLatex(1.37,0.33,"#intL dt = 35.1 pb^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
 
   
   TLatex *jetf;
-  if(!isPF) jetf = new TLatex(0.24,0.21,"anti-k_{T} (R=0.5) CaloJets");
-  else jetf = new TLatex(0.24,0.21,"anti-k_{T} (R=0.5) PFJets");
+  if(!isPF) jetf = new TLatex(0.24,0.23,"anti-k_{T} (R=0.5) CaloJets");
+  else jetf = new TLatex(0.24,0.23,"anti-k_{T} (R=0.5) PFJets");
   jetf->SetTextFont(63);
   jetf->SetTextSize(15);
   jetf->Draw();
