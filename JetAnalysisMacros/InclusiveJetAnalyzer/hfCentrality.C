@@ -65,7 +65,8 @@ void hfCentrality(char* fname = "r151878.root",  char* trg="anaPixelHitJet50U")
    handsomeTH1(hhfMB);
    hhfMB->DrawCopy();
    
-   TLine* t1 = new TLine(.511,1e-5,.511,hhfMB->GetBinContent(hhfMB->FindBin(0.511)));
+   //   TLine* t1 = new TLine(.511,1e-5,.511,hhfMB->GetBinContent(hhfMB->FindBin(0.511)));
+   TLine* t1 = new TLine(0,1e-5,.511,hhfMB->GetBinContent(hhfMB->FindBin(0.511)));
    TLine* t2 = new TLine(35.397,1e-5,35.397,hhfMB->GetBinContent(hhfMB->FindBin(35.397)));
    TLine* t3 = new TLine(79.370,1e-5,79.370,hhfMB->GetBinContent(hhfMB->FindBin(79.370)));
    t1->SetLineWidth(1);
@@ -85,15 +86,15 @@ void hfCentrality(char* fname = "r151878.root",  char* trg="anaPixelHitJet50U")
 
    TLegend* leg0 = new TLegend(0.2813131,0.7115054,0.9,0.8439785,NULL,"brNDC");
    TLegend* leg0b =new TLegend(0.3813131,0.7115054,1,0.8439785,NULL,"brNDC");
-   TLegend* leg1 = new TLegend(0.1767677,0.3876344,0.4267677,0.5865591,NULL,"brNDC");
+   TLegend* leg1 = new TLegend(0.1767677,0.3826344,0.4467677,0.5875591,NULL,"brNDC");
    TLegend* leg2 = new TLegend(0.3611111,0.3876344,0.6111111,0.5865591,NULL,"brNDC");
    TLegend* leg3 = new TLegend(0.5606061,0.3876344,0.8106061,0.5865591,NULL,"brNDC");
 
    easyLeg(leg0b,"Centrality, HLT_HIJet50U");
 
-   easyLeg(leg1,"30%-90%");
-   easyLeg(leg2,"10%-30%");
-   easyLeg(leg3," 0%-10%");
+   easyLeg(leg1,"30%-100%");
+   easyLeg(leg2,"10%-30% ");
+   easyLeg(leg3," 0%-10% ");
 
    //   TCanvas* c2 = new TCanvas(Form("c2_%s",trg),"",400,400);
    
@@ -110,10 +111,29 @@ void hfCentrality(char* fname = "r151878.root",  char* trg="anaPixelHitJet50U")
    leg0->AddEntry(hhfMB,"HLT_MinBiasHForBSC_Core","l");
    leg0->AddEntry(hhfJET,"HLT_HiJet50U","l");
    leg0->Draw();
-   leg1->Draw();
-   leg2->Draw();
-   leg3->Draw();
-      
+   //   leg1->Draw();
+   //   leg2->Draw();
+   //   leg3->Draw();
+     
+   TLatex *bint = new TLatex(0.1867677,0.4876344,"30%-100%");
+   bint->SetTextFont(63);
+   bint->SetTextSize(13);
+   bint->SetNDC();
+   bint->Draw();
+
+   bint = new TLatex(0.4011111,0.4876344,"10%-30% ");
+   bint->SetTextFont(63);
+   bint->SetTextSize(13);
+   bint->SetNDC();
+   bint->Draw();
+
+   bint = new TLatex(0.6006061,0.4876344," 0%-10% ");
+   bint->SetTextFont(63);
+   bint->SetTextSize(13);
+   bint->SetNDC();
+   bint->Draw();
+
+ 
    TLatex *cms = new TLatex(0.6013,0.89,"CMS Preliminary");
    cms->SetTextFont(63);
    cms->SetTextSize(16);
