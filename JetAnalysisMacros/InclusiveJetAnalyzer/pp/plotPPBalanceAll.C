@@ -46,7 +46,7 @@ void plotPPBalanceAll(){
   hDum->SetFillStyle(3005);
 
   hDum->SetStats(0);
-  hDum->SetXTitle("J_{A} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  hDum->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
   hDum->SetYTitle("Event Fraction");
 
   hDum->GetXaxis()->SetLabelSize(20);
