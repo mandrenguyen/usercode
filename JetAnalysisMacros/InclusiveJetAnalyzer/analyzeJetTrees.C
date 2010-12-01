@@ -21,10 +21,11 @@
 
 // Data
 //int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_DefaultReco_v7.root",char *outfile="data.root",int isMC=0, int useWeight=0, int central = 0, int useRawPt = 0)
+int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_PFXcheck.root",char *outfile="PFdata.root",int isMC=0, int useWeight=0, int central = 0, int useRawPt = 0)
 // Pyquen
 //int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen/HIDATA/JetTrees/merged_jetTree_Pyquen_v2.root",char *outfile="pythia.root",int isMC=1, int useWeight=0, int central = 0, int useRawPt = 0)
 // Pyquen, Data-Embedded
-int analyzeJetTrees(char *infile="/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root",char *outfile="mix.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
+//int analyzeJetTrees(char *infile="/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root",char *outfile="mix.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
 {
   // central =0, all centralities or p+p
   //central =1, 0-10
@@ -43,16 +44,19 @@ int analyzeJetTrees(char *infile="/afs/cern.ch/user/e/edwenger/public/dijets/dij
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile);
    if (!f) {
      f =  TFile::Open(infile);
-      f->cd("inclusiveJetAnalyzer");
+     //f->cd("inclusiveJetAnalyzer");
+     f->cd("ak5PFJetAnalyzer");
    }
    TTree *t;
    if(isMC) t= (TTree*)gDirectory->Get("t");  // Old hydjet file
-   else t = (TTree*)gDirectory->Get("icPu5patJets_tree");
+   else t = (TTree*)gDirectory->Get("ak5PFpatJets_tree");
+   //else t = (TTree*)gDirectory->Get("icPu5patJets_tree");
 
 
    if (t==0) {
       cout <<"Tree 't' is not found! Use icPu5patJets_tree instead..."<<endl;
-      t = (TTree*)gDirectory->Get("icPu5patJets_tree");
+      //t = (TTree*)gDirectory->Get("icPu5patJets_tree");
+      t = (TTree*)gDirectory->Get("ak5PFpatJets_tree");
       if (t==0) return 0;
    }
    

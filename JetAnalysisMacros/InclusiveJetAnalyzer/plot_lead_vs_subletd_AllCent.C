@@ -81,7 +81,7 @@ void plot_lead_vs_subletd_AllCent() {
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();
-  TLatex *lumi = new TLatex(130,200,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(130,200,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
@@ -127,7 +127,7 @@ void plot_lead_vs_subletd_AllCent() {
   drawText("0-10%",65,170);
   drawPatch(-0.00007,0.0972,0.1318,0.141);
   
-  TLatex *pythia = new TLatex(60,200,"embedded PYTHIA");
+  TLatex *pythia = new TLatex(60,200,"PYTHIA");
   pythia->SetTextFont(63);
   pythia->SetTextSize(18);
 

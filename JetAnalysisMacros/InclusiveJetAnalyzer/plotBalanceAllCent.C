@@ -73,7 +73,7 @@ void plotBalanceAllCent(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -147,24 +147,24 @@ void plotBalance(int cbin,
   hPythia->SetStats(0);
   hPythia->Draw("hist");
 
-  if(drawXLabel) hPythia->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
-
-  hPythia->GetXaxis()->SetLabelSize(20);
+  if(drawXLabel) hPythia->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  
+  hPythia->GetXaxis()->SetLabelSize(22);
   hPythia->GetXaxis()->SetLabelFont(43);
-  hPythia->GetXaxis()->SetTitleSize(22);
+  hPythia->GetXaxis()->SetTitleSize(24);
   hPythia->GetXaxis()->SetTitleFont(43);
-  hPythia->GetXaxis()->SetTitleOffset(1.5);
+  hPythia->GetXaxis()->SetTitleOffset(1.4);
   hPythia->GetXaxis()->CenterTitle();
-
+  
   hPythia->GetXaxis()->SetNdivisions(905,true);
   
   hPythia->SetYTitle("Event Fraction");
-
-  hPythia->GetYaxis()->SetLabelSize(20);
+  
+  hPythia->GetYaxis()->SetLabelSize(22);
   hPythia->GetYaxis()->SetLabelFont(43);
-  hPythia->GetYaxis()->SetTitleSize(20);
+  hPythia->GetYaxis()->SetTitleSize(22);
   hPythia->GetYaxis()->SetTitleFont(43);
-  hPythia->GetYaxis()->SetTitleOffset(2.5);
+  hPythia->GetYaxis()->SetTitleOffset(2.4);
   hPythia->GetYaxis()->CenterTitle();
   
 
@@ -180,7 +180,7 @@ void plotBalance(int cbin,
   h->Draw("same");
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.31,0.675,0.85,0.88); 
+    TLegend *t3=new TLegend(0.35,0.675,0.89,0.88); 
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     t3->AddEntry(hPythia,"PYTHIA","lf");  
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
@@ -220,25 +220,26 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  /*
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);
   hdum->GetXaxis()->SetTitleFont(43);
   hdum->GetXaxis()->SetTitleOffset(1.5);
   hdum->GetXaxis()->CenterTitle();
-
+  */
   hdum->GetXaxis()->SetNdivisions(905,true);
 
   hdum->SetYTitle("Event Fraction");
-
+  /*
   hdum->GetYaxis()->SetLabelSize(20);
   hdum->GetYaxis()->SetLabelFont(43);
   hdum->GetYaxis()->SetTitleSize(20);
   hdum->GetYaxis()->SetTitleFont(43);
   hdum->GetYaxis()->SetTitleOffset(2.5);
   hdum->GetYaxis()->CenterTitle();
-
+  */
   hdum->SetAxisRange(0,0.2,"Y");
 
   hdum->Draw("");

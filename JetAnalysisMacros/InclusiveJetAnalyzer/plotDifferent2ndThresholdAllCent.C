@@ -73,7 +73,7 @@ void plotDifferent2ndThresholdAllCent(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.68,3.225,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.68,3.225,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -153,12 +153,12 @@ void plotDifferent2ndThreshold(int cbin,
 
   // calculate the statistical error and normalize
   h->Sumw2();
-   h->Scale(1./h_trig->Integral(1,380)/h->GetBinWidth(1));
-   // h->Scale(1./h->GetEntries());
+  //h->Scale(1./h_trig->Integral(1,380)/h->GetBinWidth(1));
+    h->Scale(1./h->GetEntries());
   h->SetMarkerStyle(20);
 
-  //  hSys1->Scale(1./hSys1->Integral(0,20));
-  hSys1->Scale(1./hSys1_trig->Integral(1,380)/hSys1->GetBinWidth(1));
+    hSys1->Scale(1./hSys1->Integral(0,20));
+  //hSys1->Scale(1./hSys1_trig->Integral(1,380)/hSys1->GetBinWidth(1));
   hSys1->SetLineColor(kBlue);
   hSys1->SetFillColor(kAzure-8);
   hSys1->SetFillStyle(0);
@@ -177,21 +177,23 @@ void plotDifferent2ndThreshold(int cbin,
 
   hSys1->GetXaxis()->SetNdivisions(905,true);
   
-  hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  //hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  hSys1->SetYTitle("Event Fraction");
 
-  hSys1->GetYaxis()->SetLabelSize(20);
+  hSys1->GetYaxis()->SetLabelSize(22);
   hSys1->GetYaxis()->SetLabelFont(43);
-  hSys1->GetYaxis()->SetTitleSize(20);
+  hSys1->GetYaxis()->SetTitleSize(22);
   hSys1->GetYaxis()->SetTitleFont(43);
-  hSys1->GetYaxis()->SetTitleOffset(2.5);
+  hSys1->GetYaxis()->SetTitleOffset(2.4);
   hSys1->GetYaxis()->CenterTitle();
   
 
-  hSys1->SetAxisRange(0,3.625,"Y");
+  //hSys1->SetAxisRange(0,3.625,"Y");
+  hSys1->SetAxisRange(0,0.18,"Y");
 
 
-  //hSys2->Scale(1./hSys2->Integral(0,20));
-  hSys2->Scale(1./hSys2_trig->Integral(1,380)/hSys2->GetBinWidth(1));
+  hSys2->Scale(1./hSys2->Integral(0,20));
+  //hSys2->Scale(1./hSys2_trig->Integral(1,380)/hSys2->GetBinWidth(1));
   hSys2->SetLineColor(kRed);
   hSys2->SetFillColor(kRed-9);
   hSys2->SetFillStyle(0);
@@ -249,7 +251,8 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->GetXaxis()->SetNdivisions(905,true);
 
-  hdum->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  //hdum->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  hdum->SetYTitle("Event Fraction");
 
 
   hdum->GetYaxis()->SetLabelSize(20);
@@ -259,7 +262,7 @@ void drawDum(float min, float max, double drawXLabel){
   hdum->GetYaxis()->SetTitleOffset(2.5);
   hdum->GetYaxis()->CenterTitle();
 
-  hdum->SetAxisRange(0,3.625,"Y");
+  //hdum->SetAxisRange(0,3.625,"Y");
 
   hdum->Draw("");
 

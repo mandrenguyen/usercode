@@ -76,7 +76,7 @@ void plotDeltaPhiAllCent(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(1.45,0.49,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(1.45,0.49,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -155,24 +155,24 @@ void plotDeltaPhi(int cbin,
   hPythia->SetStats(0);
   hPythia->Draw("hist");
 
-  if(drawXLabel) hPythia->SetXTitle("#Delta#phi");
+  if(drawXLabel) hPythia->SetXTitle("#Delta#phi (rad)");
 
-  hPythia->GetXaxis()->SetLabelSize(20);
+  hPythia->GetXaxis()->SetLabelSize(22);
   hPythia->GetXaxis()->SetLabelFont(43);
-  hPythia->GetXaxis()->SetTitleSize(22);
+  hPythia->GetXaxis()->SetTitleSize(24);
   hPythia->GetXaxis()->SetTitleFont(43);
-  hPythia->GetXaxis()->SetTitleOffset(1.5);
+  hPythia->GetXaxis()->SetTitleOffset(1.4);
   hPythia->GetXaxis()->CenterTitle();
 
   //hPythia->GetXaxis()->SetNdivisions(905,true);
 
   hPythia->SetYTitle("Event Fraction");
 
-  hPythia->GetYaxis()->SetLabelSize(20);
+  hPythia->GetYaxis()->SetLabelSize(22);
   hPythia->GetYaxis()->SetLabelFont(43);
-  hPythia->GetYaxis()->SetTitleSize(20);
+  hPythia->GetYaxis()->SetTitleSize(22);
   hPythia->GetYaxis()->SetTitleFont(43);
-  hPythia->GetYaxis()->SetTitleOffset(2.5);
+  hPythia->GetYaxis()->SetTitleOffset(2.4);
   hPythia->GetYaxis()->CenterTitle();
 
   hPythia->SetAxisRange(9E-4,0.9,"Y");

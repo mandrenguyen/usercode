@@ -27,15 +27,13 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 			  const Float_t bottomMargin=0.2,
                           const Float_t edge=0.05);
 
-void plotDeltaPhi(int cbin = 0,
-		  TString infname = "data.root",
-		  TString pythia = "pythia.root",
-		  TString mix = "mix.root",
-		  bool useWeight = true,
-		  bool drawXLabel = false,
-		  bool drawLeg = false,
-		  bool balance=true
-		  );
+void plotBalance(int cbin = 0,
+		 TString infname = "data.root",
+		 TString PFdata = "PFdata.root",
+		 TString mix = "mix.root",
+		 bool useWeight = true,
+		 bool drawXLabel = false,
+		 bool drawLeg = false);
 
 void drawText(const char *text, float xp, float yp);
 void drawDum(float min, float max, double drawXLabel);
@@ -48,188 +46,147 @@ void drawDum(float min, float max, double drawXLabel);
 void drawPatch(float x1, float y1, float x2, float y2); 
 //---------------------------------------------------------------------
 
-void plotSubLeadingPhi_BalanceBin_AllCent(){
+void plotBalanceAllCent_withPF(){
 
-  TCanvas *c1 = new TCanvas("c1","",1250,800);
+  TCanvas *c1 = new TCanvas("c1","",1250,530);
 
-  makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.15,0.02);
+  makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false);
-  gPad->SetLogy();
-  drawText("30-100%",0.77,0.6);
-  //  drawPatch(0.976,0.0972,1.1,0.141);
+  plotBalance(2,"data.root","PFdata.root","mix.root",true,false,false);
+  drawText("30-100%",0.76,0.24);
+  drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,true,false);
-  gPad->SetLogy();
-  drawText("10-30%",0.75,0.6);
-  //  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  //  drawPatch(0.976,0.0972,1.1,0.141);
+  plotBalance(1,"data.root","PFdata.root","mix.root",true,true,false);
+  drawText("10-30%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,true);
-  gPad->SetLogy();
-  drawText("0-10%",0.75,0.6);
-  //  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  plotBalance(0,"data.root","PFdata.root","mix.root",true,false,true);
+  drawText("0-10%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.141);
 
-  TLatex *cms = new TLatex(-2.5,2.49,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.35,0.1825,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
-  cms->Draw();
-  TLatex *lumi = new TLatex(0.4,2.49,"#intL dt = 3.4 #mub^{-1}");
+  cms->Draw();                                                                                                                                        
+
+  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
-  lumi->Draw();
+  lumi->Draw(); 
 
-  TLatex *aja= new TLatex(-2.5,0.2,"A_{J} < 0.3");
-  aja->SetTextFont(63);
-  aja->SetTextSize(18);
-  aja->Draw();
-
-  c1->cd(4);
-  plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false,false);
-  gPad->SetLogy();
-  drawText("30-100%",0.77,0.675);
-  drawPatch(0.946,0.0972,1.1,0.141);
-  
-  c1->cd(5);
-  plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,true,false,false);
-  gPad->SetLogy();
-  drawText("10-30%",0.75,0.675);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.946,0.0972,1.1,0.141);
-  
-  c1->cd(6);
-  plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,false,false);
-  gPad->SetLogy();
-  drawText("0-10%",0.75,0.675);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-   
-
-  TLatex *aj= new TLatex(-2.5,0.2,"A_{J} > 0.3");
-  aj->SetTextFont(63);
-  aj->SetTextSize(18);
-  aj->Draw();
-
-  c1->Print("./fig/dijet_SubleadingPhi_balanceBin_all_cent_20101126_v0.gif");
-  c1->Print("./fig/dijet_SubleadingPhi_balanceBin_all_cent_20101126_v0.eps");
-  c1->Print("./fig/dijet_SubleadingPhi_balanceBin_all_cent_20101126_v0.pdf");
+  c1->Print("./fig/dijet_imbalance_all_cent_withPF_v0.gif");
+  c1->Print("./fig/dijet_imbalance_all_cent_withPF_v0.eps");
+  c1->Print("./fig/dijet_imbalance_all_cent_withPF_v0.pdf");
 
 }
 
-
-
-void plotDeltaPhi(int cbin,
-		  TString infname,
-		  TString pythia,
-		  TString mix,
-		  bool useWeight,
-		  bool drawXLabel,
-		  bool drawLeg,
-		  bool balance)
+void plotBalance(int cbin,
+		 TString infname,
+		 TString PFdata,
+		 TString mix,
+		 bool useWeight,
+		 bool drawXLabel,
+		 bool drawLeg)
 {
-
-  TString cut="et1>120 && et2>50";
-  TString cutpp="et1>120 && et2>50";
+  TString cut="et1>120 && et2>50 && dphi>2.5";
+  TString cutpp="et1>120 && et2>50 && dphi>2.5";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
     cut+=" && bin>=0 && bin<4";
-    if (balance==true)  cut+=" && ((et1-et2)/(et1+et2) < 0.3)";
-    else cut+=" && ((et1-et2)/(et1+et2) > 0.3)";
-
   } else if (cbin==1) {
     cstring = "10-30%";
     cut+=" && bin>=4 && bin<12";
-    if (balance==true)  cut+=" && ((et1-et2)/(et1+et2) < 0.3)";
-    else cut+=" && ((et1-et2)/(et1+et2) > 0.3)";
-
   } else {
     cstring = "30-100%";
     cut+=" && bin>=12 && bin<40";
-    if (balance==true)  cut+=" && ((et1-et2)/(et1+et2) < 0.3)";
-    else cut+=" && ((et1-et2)/(et1+et2) > 0.3)";
   }
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
 
-  // open the pythia (MC) file
-  TFile *infPythia = new TFile(pythia.Data());
-  TTree *ntPythia = (TTree*) infPythia->FindObjectAny("nt");
+  // open the PFdata (MC) file
+  TFile *infPFdata = new TFile(PFdata.Data());
+  TTree *ntPFdata = (TTree*) infPFdata->FindObjectAny("nt");
 
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
 
+
   // projection histogram
-  TH1D *h = new TH1D("h","",20,-3.14159,3.14159);
-  TH1D *hPythia = new TH1D("hPythia","",20,-3.14159,3.14159);
-  TH1D *hDataMix = new TH1D("hDataMix","",20,-3.14159,3.14159);
-  
-  nt->Draw("phi2>>h",Form("(%s)",cut.Data())); 
+  TH1D *h = new TH1D("h","",20,0,1);
+  TH1D *hPFdata = new TH1D("hPFdata","",20,0,1);
+  TH1D *hDataMix = new TH1D("hDataMix","",20,0,1);
+  nt->Draw("(et1-et2)/(et1+et2)>>h",Form("(%s)",cut.Data())); 
+  ntPFdata->Draw("(et1-et2)/(et1+et2)>>hPFdata",Form("(%s)",cut.Data())); 
    
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntPythia->Draw("phi2>>hPythia",Form("(%s)",cutpp.Data())); 
-    ntMix->Draw("phi2>>hDataMix",Form("(%s)*weight",cut.Data())); 
+    ntMix->Draw("(et1-et2)/(et1+et2)>>hDataMix",Form("(%s)*weight",cut.Data())); 
   } else {
     // ignore centrality reweighting
-     ntPythia->Draw("phi2>>hPythia",Form("(%s)",cutpp.Data()));
-     ntMix->Draw("phi2>>hDataMix",Form("(%s)",cut.Data()));  
+    ntMix->Draw("(et1-et2)/(et1+et2)>>hDataMix",Form("(%s)",cut.Data()));  
   }
-  
+
   // calculate the statistical error and normalize
   h->Sumw2();
   h->Scale(1./h->GetEntries());
   h->SetMarkerStyle(20);
 
-  hPythia->Scale(1./hPythia->Integral(0,20));
-  hPythia->SetLineColor(kBlue);
-  hPythia->SetFillColor(kAzure-8);
-  hPythia->SetFillStyle(3005);
-   
-  hPythia->SetStats(0);
-  hPythia->Draw("hist");
+  hPFdata->Sumw2();
+  hPFdata->SetMarkerStyle(4);
+  hPFdata->Scale(1./hPFdata->Integral(0,20));
+  hPFdata->SetLineColor(kBlue);
+  hPFdata->SetMarkerColor(kBlue);
+  hPFdata->SetFillColor(kAzure-8);
+  hPFdata->SetFillStyle(3005);
 
-  if(drawXLabel) hPythia->SetXTitle("Subleading jet #phi");
+  hPFdata->SetStats(0);
+  hPFdata->Draw();
 
-  hPythia->GetXaxis()->SetLabelSize(20);
-  hPythia->GetXaxis()->SetLabelFont(43);
-  hPythia->GetXaxis()->SetTitleSize(22);
-  hPythia->GetXaxis()->SetTitleFont(43);
-  hPythia->GetXaxis()->SetTitleOffset(1.5);
-  hPythia->GetXaxis()->CenterTitle();
+  if(drawXLabel) hPFdata->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  
+  hPFdata->GetXaxis()->SetLabelSize(22);
+  hPFdata->GetXaxis()->SetLabelFont(43);
+  hPFdata->GetXaxis()->SetTitleSize(24);
+  hPFdata->GetXaxis()->SetTitleFont(43);
+  hPFdata->GetXaxis()->SetTitleOffset(1.4);
+  hPFdata->GetXaxis()->CenterTitle();
+  
+  hPFdata->GetXaxis()->SetNdivisions(905,true);
+  
+  hPFdata->SetYTitle("Event Fraction");
+  
+  hPFdata->GetYaxis()->SetLabelSize(22);
+  hPFdata->GetYaxis()->SetLabelFont(43);
+  hPFdata->GetYaxis()->SetTitleSize(22);
+  hPFdata->GetYaxis()->SetTitleFont(43);
+  hPFdata->GetYaxis()->SetTitleOffset(2.4);
+  hPFdata->GetYaxis()->CenterTitle();
+  
 
-  //hPythia->GetXaxis()->SetNdivisions(905,true);
+  hPFdata->SetAxisRange(0,0.2,"Y");
 
-  hPythia->SetYTitle("Event Fraction");
-
-  hPythia->GetYaxis()->SetLabelSize(20);
-  hPythia->GetYaxis()->SetLabelFont(43);
-  hPythia->GetYaxis()->SetTitleSize(20);
-  hPythia->GetYaxis()->SetTitleFont(43);
-  hPythia->GetYaxis()->SetTitleOffset(2.5);
-  hPythia->GetYaxis()->CenterTitle();
-
-  hPythia->SetAxisRange(1.001e-3,5.9,"Y");
-  hDataMix->SetAxisRange(1.001e-3,5.9,"Y");
-  h->SetAxisRange(1.001e-3,1.9,"Y");
-
-  h->Draw("same");
 
   hDataMix->Scale(1./hDataMix->Integral(0,20));
   hDataMix->SetLineColor(kRed);
   hDataMix->SetFillColor(kRed-9);
   hDataMix->SetFillStyle(3004);
   hDataMix->Draw("same");
+  
+  h->Draw("same");
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.05,0.69,0.59,0.85);
-    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hPythia,"PYTHIA","lf");
+    TLegend *t3=new TLegend(0.35,0.675,0.89,0.88); 
+    //t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    t3->AddEntry(h,"Data, ICPU5","pl");
+    t3->AddEntry(hPFdata,"Data, AK5PF","pl");  
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
@@ -267,25 +224,26 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  /*
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);
   hdum->GetXaxis()->SetTitleFont(43);
   hdum->GetXaxis()->SetTitleOffset(1.5);
   hdum->GetXaxis()->CenterTitle();
-
+  */
   hdum->GetXaxis()->SetNdivisions(905,true);
 
   hdum->SetYTitle("Event Fraction");
-
+  /*
   hdum->GetYaxis()->SetLabelSize(20);
   hdum->GetYaxis()->SetLabelFont(43);
   hdum->GetYaxis()->SetTitleSize(20);
   hdum->GetYaxis()->SetTitleFont(43);
   hdum->GetYaxis()->SetTitleOffset(2.5);
   hdum->GetYaxis()->CenterTitle();
-
+  */
   hdum->SetAxisRange(0,0.2,"Y");
 
   hdum->Draw("");

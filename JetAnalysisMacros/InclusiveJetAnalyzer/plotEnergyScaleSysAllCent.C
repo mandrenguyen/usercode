@@ -71,7 +71,7 @@ void plotEnergyScaleSysAllCent(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.68,0.18,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.68,0.18,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -127,30 +127,32 @@ void plotEnergyScaleSys(int cbin,
 
   hSys1->SetStats(0);
 
-  hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  //hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  hSys1->SetYTitle("Event Fraction");
   hSys1->Draw("hist");
 
 
-  hSys1->GetXaxis()->SetLabelSize(20);
+  hSys1->GetXaxis()->SetLabelSize(22);
   hSys1->GetXaxis()->SetLabelFont(43);
-  hSys1->GetXaxis()->SetTitleSize(22);
+  hSys1->GetXaxis()->SetTitleSize(24);
   hSys1->GetXaxis()->SetTitleFont(43);
-  hSys1->GetXaxis()->SetTitleOffset(1.5);
+  hSys1->GetXaxis()->SetTitleOffset(1.4);
   hSys1->GetXaxis()->CenterTitle();
 
   hSys1->GetXaxis()->SetNdivisions(905,true);
   
   if(drawXLabel)hSys1->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
 
-  hSys1->GetYaxis()->SetLabelSize(20);
+  hSys1->GetYaxis()->SetLabelSize(22);
   hSys1->GetYaxis()->SetLabelFont(43);
-  hSys1->GetYaxis()->SetTitleSize(20);
+  hSys1->GetYaxis()->SetTitleSize(22);
   hSys1->GetYaxis()->SetTitleFont(43);
-  hSys1->GetYaxis()->SetTitleOffset(2.5);
+  hSys1->GetYaxis()->SetTitleOffset(2.4);
   hSys1->GetYaxis()->CenterTitle();
   
 
   hSys1->SetAxisRange(0,0.2,"Y");
+  //hSys1->SetAxisRange(0,3.75,"Y");
 
 
   hSys2->Scale(1./hSys2->Integral(0,20));

@@ -74,7 +74,7 @@ void plotBalanceAllCent_PTY(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.73,3.625,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.73,3.625,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 

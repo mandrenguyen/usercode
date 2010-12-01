@@ -73,7 +73,7 @@ void plotResolutionSysAllCent(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.68,3.675,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.68,3.675,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -157,16 +157,16 @@ void plotEnergyScaleSys(int cbin,
   cout<<" hSys2_trig->Integral() "<<hSys2_trig->Integral()<<endl;
 
   // calculate the statistical error and normalize
-  //  h->Sumw2();
-  //h->Scale(1./h->GetEntries());
-  h->Scale(1./h_trig->Integral(1,380)/h->GetBinWidth(1));
+  //h->Sumw2();
+  h->Scale(1./h->GetEntries());
+  //h->Scale(1./h_trig->Integral(1,380)/h->GetBinWidth(1));
   h->SetLineColor(kGreen+2);
   h->SetFillColor(kGreen-9);
   h->SetFillStyle(0);
   h->Draw("hist");
 
-  //hSys1->Scale(1./hSys1->Integral(0,20));
-  hSys1->Scale(1./hSys1_trig->Integral(1,380)/hSys1->GetBinWidth(1));
+  hSys1->Scale(1./hSys1->Integral(0,20));
+  //hSys1->Scale(1./hSys1_trig->Integral(1,380)/hSys1->GetBinWidth(1));
   hSys1->SetLineColor(kBlue);
   hSys1->SetFillColor(kAzure-8);
   hSys1->SetFillStyle(0);
@@ -176,30 +176,32 @@ void plotEnergyScaleSys(int cbin,
 
   if(drawXLabel) hSys1->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
 
-  hSys1->GetXaxis()->SetLabelSize(20);
+  hSys1->GetXaxis()->SetLabelSize(22);
   hSys1->GetXaxis()->SetLabelFont(43);
-  hSys1->GetXaxis()->SetTitleSize(22);
+  hSys1->GetXaxis()->SetTitleSize(24);
   hSys1->GetXaxis()->SetTitleFont(43);
-  hSys1->GetXaxis()->SetTitleOffset(1.5);
+  hSys1->GetXaxis()->SetTitleOffset(1.4);
   hSys1->GetXaxis()->CenterTitle();
 
   hSys1->GetXaxis()->SetNdivisions(905,true);
   
-  hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  //hSys1->SetYTitle("1/N_{leading jet} dN/dA_{J}");
+  hSys1->SetYTitle("Event Fraction");
 
-  hSys1->GetYaxis()->SetLabelSize(20);
+  hSys1->GetYaxis()->SetLabelSize(22);
   hSys1->GetYaxis()->SetLabelFont(43);
-  hSys1->GetYaxis()->SetTitleSize(20);
+  hSys1->GetYaxis()->SetTitleSize(22);
   hSys1->GetYaxis()->SetTitleFont(43);
-  hSys1->GetYaxis()->SetTitleOffset(2.5);
+  hSys1->GetYaxis()->SetTitleOffset(2.4);
   hSys1->GetYaxis()->CenterTitle();
   
 
-  hSys1->SetAxisRange(0,4.0,"Y");
+  //hSys1->SetAxisRange(0,4.0,"Y");
+  hSys1->SetAxisRange(0,0.2,"Y");
 
 
-  //hSys2->Scale(1./hSys2->Integral(0,20));
-  hSys2->Scale(1./hSys2_trig->Integral(1,380)/hSys2->GetBinWidth(1));
+  hSys2->Scale(1./hSys2->Integral(0,20));
+  //hSys2->Scale(1./hSys2_trig->Integral(1,380)/hSys2->GetBinWidth(1));
   hSys2->SetLineColor(kRed);
   hSys2->SetFillColor(kRed-9);
   hSys2->SetFillStyle(0);
@@ -249,7 +251,7 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1} - E_{T}^{j2})/(E_{T}^{j1} + E_{T}^{j2})");
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);
@@ -268,7 +270,8 @@ void drawDum(float min, float max, double drawXLabel){
   hdum->GetYaxis()->SetTitleOffset(2.5);
   hdum->GetYaxis()->CenterTitle();
 
-  hdum->SetAxisRange(0,4.0,"Y");
+  //hdum->SetAxisRange(0,4.0,"Y");
+  hdum->SetAxisRange(0,0.2,"Y");
 
   hdum->Draw("");
 
