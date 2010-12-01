@@ -61,7 +61,7 @@
    gStyle->SetStatBorderSize(1);
    gStyle->SetOptTitle(0);
    //gStyle->SetOptStat(1111);
-   //gStyle->SetOptStat(0);   
+   gStyle->SetOptStat(0);   
 
 
    gStyle->SetPadLeftMargin(0.17);

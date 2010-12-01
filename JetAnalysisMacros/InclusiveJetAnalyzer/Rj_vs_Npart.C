@@ -1,10 +1,10 @@
 {
 //=========Macro generated from canvas: c/
-//=========  (Wed Dec  1 09:49:10 2010) by ROOT version5.22/00d
+//=========  (Wed Dec  1 11:19:17 2010) by ROOT version5.22/00d
    TCanvas *c = new TCanvas("c", "",20,42,500,500);
    gStyle->SetOptFit(1);
    gStyle->SetOptStat(0);
-   c->Range(-86.07595,0.046875,420.2532,0.734375);
+   c->Range(-86.07595,0.05493827,420.2532,0.7339506);
    c->SetFillColor(0);
    c->SetBorderMode(0);
    c->SetBorderSize(0);
@@ -13,7 +13,7 @@
    c->SetLeftMargin(0.17);
    c->SetRightMargin(0.04);
    c->SetTopMargin(0.05);
-   c->SetBottomMargin(0.15);
+   c->SetBottomMargin(0.14);
    c->SetFrameLineColor(0);
    c->SetFrameBorderMode(0);
    c->SetFrameLineColor(0);
@@ -22,28 +22,24 @@
    TH1 *hTmp = new TH1D("hTmp","",100,0,400);
    hTmp->SetMinimum(0.15);
    hTmp->SetMaximum(0.7);
-   hTmp->SetFillColor(1);
-   hTmp->SetFillStyle(1);
    hTmp->SetLineStyle(0);
    hTmp->SetMarkerStyle(20);
-   hTmp->SetMarkerSize(1.2);
+   hTmp->SetMarkerSize(1.25);
    hTmp->GetXaxis()->SetTitle("N_{part}");
    hTmp->GetXaxis()->CenterTitle(true);
    hTmp->GetXaxis()->SetLabelFont(42);
    hTmp->GetXaxis()->SetLabelOffset(0.01);
-   hTmp->GetXaxis()->SetLabelSize(0.045);
-   hTmp->GetXaxis()->SetTitleSize(0.055);
+   hTmp->GetXaxis()->SetTitleSize(0.045);
+   hTmp->GetXaxis()->SetTitleOffset(1.2);
    hTmp->GetXaxis()->SetTitleFont(42);
    hTmp->GetYaxis()->SetTitle("R_{A>0.24}");
    hTmp->GetYaxis()->CenterTitle(true);
    hTmp->GetYaxis()->SetLabelFont(42);
    hTmp->GetYaxis()->SetLabelOffset(0.01);
-   hTmp->GetYaxis()->SetLabelSize(0.045);
-   hTmp->GetYaxis()->SetTitleSize(0.055);
+   hTmp->GetYaxis()->SetTitleSize(0.045);
    hTmp->GetYaxis()->SetTitleOffset(1.5);
    hTmp->GetYaxis()->SetTitleFont(42);
    hTmp->GetZaxis()->SetLabelFont(42);
-   hTmp->GetZaxis()->SetLabelSize(0.045);
    hTmp->GetZaxis()->SetTitleFont(42);
    hTmp->Draw("");
    
@@ -52,7 +48,7 @@
    grae->SetTitle("");
    grae->SetFillColor(1);
    grae->SetMarkerStyle(20);
-   grae->SetMarkerSize(1.2);
+   grae->SetMarkerSize(1.25);
    grae->SetPoint(0,358.623,0.4787234);
    grae->SetPointError(0,0,0,0.02098591,0.02103612);
    grae->SetPoint(1,232.909,0.4380665);
@@ -65,24 +61,20 @@
    Graph1->SetMaximum(0.5168162);
    Graph1->SetDirectory(0);
    Graph1->SetStats(0);
-   Graph1->SetFillColor(1);
-   Graph1->SetFillStyle(1);
    Graph1->SetLineStyle(0);
    Graph1->SetMarkerStyle(20);
-   Graph1->SetMarkerSize(1.2);
+   Graph1->SetMarkerSize(1.25);
    Graph1->GetXaxis()->SetLabelFont(42);
    Graph1->GetXaxis()->SetLabelOffset(0.01);
-   Graph1->GetXaxis()->SetLabelSize(0.045);
-   Graph1->GetXaxis()->SetTitleSize(0.055);
+   Graph1->GetXaxis()->SetTitleSize(0.045);
+   Graph1->GetXaxis()->SetTitleOffset(1.2);
    Graph1->GetXaxis()->SetTitleFont(42);
    Graph1->GetYaxis()->SetLabelFont(42);
    Graph1->GetYaxis()->SetLabelOffset(0.01);
-   Graph1->GetYaxis()->SetLabelSize(0.045);
-   Graph1->GetYaxis()->SetTitleSize(0.055);
-   Graph1->GetYaxis()->SetTitleOffset(1.2);
+   Graph1->GetYaxis()->SetTitleSize(0.045);
+   Graph1->GetYaxis()->SetTitleOffset(1.8);
    Graph1->GetYaxis()->SetTitleFont(42);
    Graph1->GetZaxis()->SetLabelFont(42);
-   Graph1->GetZaxis()->SetLabelSize(0.045);
    Graph1->GetZaxis()->SetTitleFont(42);
    grae->SetHistogram(Graph1);
    
@@ -95,7 +87,7 @@
    grae->SetLineColor(2);
    grae->SetMarkerColor(2);
    grae->SetMarkerStyle(20);
-   grae->SetMarkerSize(1.2);
+   grae->SetMarkerSize(1.25);
    grae->SetPoint(0,358.623,0.2290155);
    grae->SetPointError(0,0,0,0.0133368,0.0137111);
    grae->SetPoint(1,232.909,0.2281941);
@@ -108,24 +100,20 @@
    Graph2->SetMaximum(0.2454314);
    Graph2->SetDirectory(0);
    Graph2->SetStats(0);
-   Graph2->SetFillColor(1);
-   Graph2->SetFillStyle(1);
    Graph2->SetLineStyle(0);
    Graph2->SetMarkerStyle(20);
-   Graph2->SetMarkerSize(1.2);
+   Graph2->SetMarkerSize(1.25);
    Graph2->GetXaxis()->SetLabelFont(42);
    Graph2->GetXaxis()->SetLabelOffset(0.01);
-   Graph2->GetXaxis()->SetLabelSize(0.045);
-   Graph2->GetXaxis()->SetTitleSize(0.055);
+   Graph2->GetXaxis()->SetTitleSize(0.045);
+   Graph2->GetXaxis()->SetTitleOffset(1.2);
    Graph2->GetXaxis()->SetTitleFont(42);
    Graph2->GetYaxis()->SetLabelFont(42);
    Graph2->GetYaxis()->SetLabelOffset(0.01);
-   Graph2->GetYaxis()->SetLabelSize(0.045);
-   Graph2->GetYaxis()->SetTitleSize(0.055);
-   Graph2->GetYaxis()->SetTitleOffset(1.2);
+   Graph2->GetYaxis()->SetTitleSize(0.045);
+   Graph2->GetYaxis()->SetTitleOffset(1.8);
    Graph2->GetYaxis()->SetTitleFont(42);
    Graph2->GetZaxis()->SetLabelFont(42);
-   Graph2->GetZaxis()->SetLabelSize(0.045);
    Graph2->GetZaxis()->SetTitleFont(42);
    grae->SetHistogram(Graph2);
    
@@ -138,7 +126,7 @@
    grae->SetLineColor(4);
    grae->SetMarkerColor(4);
    grae->SetMarkerStyle(20);
-   grae->SetMarkerSize(1.2);
+   grae->SetMarkerSize(1.25);
    grae->SetPoint(0,2,0.2175778);
    grae->SetPointError(0,0,0,0.004547491,0.004593695);
    
@@ -147,24 +135,20 @@
    Graph3->SetMaximum(0.2230857);
    Graph3->SetDirectory(0);
    Graph3->SetStats(0);
-   Graph3->SetFillColor(1);
-   Graph3->SetFillStyle(1);
    Graph3->SetLineStyle(0);
    Graph3->SetMarkerStyle(20);
-   Graph3->SetMarkerSize(1.2);
+   Graph3->SetMarkerSize(1.25);
    Graph3->GetXaxis()->SetLabelFont(42);
    Graph3->GetXaxis()->SetLabelOffset(0.01);
-   Graph3->GetXaxis()->SetLabelSize(0.045);
-   Graph3->GetXaxis()->SetTitleSize(0.055);
+   Graph3->GetXaxis()->SetTitleSize(0.045);
+   Graph3->GetXaxis()->SetTitleOffset(1.2);
    Graph3->GetXaxis()->SetTitleFont(42);
    Graph3->GetYaxis()->SetLabelFont(42);
    Graph3->GetYaxis()->SetLabelOffset(0.01);
-   Graph3->GetYaxis()->SetLabelSize(0.045);
-   Graph3->GetYaxis()->SetTitleSize(0.055);
-   Graph3->GetYaxis()->SetTitleOffset(1.2);
+   Graph3->GetYaxis()->SetTitleSize(0.045);
+   Graph3->GetYaxis()->SetTitleOffset(1.8);
    Graph3->GetYaxis()->SetTitleFont(42);
    Graph3->GetZaxis()->SetLabelFont(42);
-   Graph3->GetZaxis()->SetLabelSize(0.045);
    Graph3->GetZaxis()->SetTitleFont(42);
    grae->SetHistogram(Graph3);
    
@@ -189,21 +173,21 @@
    entry->SetLineWidth(1);
    entry->SetMarkerColor(1);
    entry->SetMarkerStyle(20);
-   entry->SetMarkerSize(1.2);
+   entry->SetMarkerSize(1.25);
    entry=leg->AddEntry("","PYTHIA","pl");
    entry->SetLineColor(4);
    entry->SetLineStyle(1);
    entry->SetLineWidth(1);
    entry->SetMarkerColor(4);
    entry->SetMarkerStyle(20);
-   entry->SetMarkerSize(1.2);
+   entry->SetMarkerSize(1.25);
    entry=leg->AddEntry("","embedded PYTHIA","pl");
    entry->SetLineColor(2);
    entry->SetLineStyle(1);
    entry->SetLineWidth(1);
    entry->SetMarkerColor(2);
    entry->SetMarkerStyle(20);
-   entry->SetMarkerSize(1.2);
+   entry->SetMarkerSize(1.25);
    leg->Draw();
    TLatex *   tex = new TLatex(0.2,0.88,"CMS Preliminary");
 tex->SetNDC();
