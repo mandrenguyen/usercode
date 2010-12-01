@@ -139,8 +139,10 @@ void hfCentrality(char* fname = "r151878.root",  char* trg="anaPixelHitJet50U")
    cms->SetTextSize(16);
    cms->SetNDC();
    cms->Draw();
-   c1->SaveAs("hf_centrality_distribution_mb_jet50_20101126_v0.eps");
-   
+   c1->SaveAs("hf_centrality_distribution_mb_jet50_20101126_v1.eps");
+   c1->SaveAs("hf_centrality_distribution_mb_jet50_20101126_v1.gif");
+   c1->SaveAs("hf_centrality_distribution_mb_jet50_20101126_v1.C");
+
    // TCanvas* c2 = new TCanvas(Form("c2_%s",trg),"",400,400);
    //  hhfJET->Divide(hhfMB);
    //  hhfJET->Draw();

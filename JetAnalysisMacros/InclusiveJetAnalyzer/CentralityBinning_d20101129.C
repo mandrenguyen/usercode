@@ -1,10 +1,10 @@
 {
 //=========Macro generated from canvas: c1/
-//=========  (Tue Nov 30 19:06:09 2010) by ROOT version5.22/00d
-   TCanvas *c1 = new TCanvas("c1", "",0,22,400,400);
+//=========  (Wed Dec  1 22:01:09 2010) by ROOT version5.22/00d
+   TCanvas *c1 = new TCanvas("c1", "",1920,44,400,400);
    gStyle->SetOptFit(1);
    gStyle->SetOptStat(0);
-   c1->Range(-8.607595,-5.9375,42.02532,0.3125);
+   c1->Range(-8.607595,-5.864198,42.02532,0.308642);
    c1->SetFillColor(0);
    c1->SetBorderMode(0);
    c1->SetBorderSize(0);
@@ -14,7 +14,7 @@
    c1->SetLeftMargin(0.17);
    c1->SetRightMargin(0.04);
    c1->SetTopMargin(0.05);
-   c1->SetBottomMargin(0.15);
+   c1->SetBottomMargin(0.14);
    c1->SetFrameLineColor(0);
    c1->SetFrameBorderMode(0);
    c1->SetFrameLineColor(0);
@@ -104,11 +104,9 @@
    hMB->SetMinimum(1e-05);
    hMB->SetMaximum(1);
    hMB->SetEntries(74246);
-   hMB->SetFillColor(1);
-   hMB->SetFillStyle(1);
    hMB->SetLineStyle(0);
    hMB->SetMarkerStyle(20);
-   hMB->SetMarkerSize(0.8);
+   hMB->SetMarkerSize(1.25);
    hMB->GetXaxis()->SetTitle("Centrality Bin");
    hMB->GetXaxis()->SetBinLabel(1,"100%");
    hMB->GetXaxis()->SetBinLabel(11,"75%");
@@ -119,19 +117,17 @@
    hMB->GetXaxis()->SetNdivisions(40);
    hMB->GetXaxis()->SetLabelFont(42);
    hMB->GetXaxis()->SetLabelOffset(0.01);
-   hMB->GetXaxis()->SetLabelSize(0.045);
-   hMB->GetXaxis()->SetTitleSize(0.055);
+   hMB->GetXaxis()->SetTitleSize(0.045);
+   hMB->GetXaxis()->SetTitleOffset(1.2);
    hMB->GetXaxis()->SetTitleFont(42);
    hMB->GetYaxis()->SetTitle("Fraction of minimum bias events");
    hMB->GetYaxis()->CenterTitle(true);
    hMB->GetYaxis()->SetLabelFont(42);
    hMB->GetYaxis()->SetLabelOffset(0.01);
-   hMB->GetYaxis()->SetLabelSize(0.045);
-   hMB->GetYaxis()->SetTitleSize(0.055);
-   hMB->GetYaxis()->SetTitleOffset(1.2);
+   hMB->GetYaxis()->SetTitleSize(0.045);
+   hMB->GetYaxis()->SetTitleOffset(1.8);
    hMB->GetYaxis()->SetTitleFont(42);
    hMB->GetZaxis()->SetLabelFont(42);
-   hMB->GetZaxis()->SetLabelSize(0.045);
    hMB->GetZaxis()->SetTitleFont(42);
    hMB->Draw("hist");
    
@@ -211,20 +207,18 @@
    hJ->SetLineColor(ci);
    hJ->SetLineStyle(0);
    hJ->SetMarkerStyle(20);
-   hJ->SetMarkerSize(0.8);
+   hJ->SetMarkerSize(1.25);
    hJ->GetXaxis()->SetLabelFont(42);
    hJ->GetXaxis()->SetLabelOffset(0.01);
-   hJ->GetXaxis()->SetLabelSize(0.045);
-   hJ->GetXaxis()->SetTitleSize(0.055);
+   hJ->GetXaxis()->SetTitleSize(0.045);
+   hJ->GetXaxis()->SetTitleOffset(1.2);
    hJ->GetXaxis()->SetTitleFont(42);
    hJ->GetYaxis()->SetLabelFont(42);
    hJ->GetYaxis()->SetLabelOffset(0.01);
-   hJ->GetYaxis()->SetLabelSize(0.045);
-   hJ->GetYaxis()->SetTitleSize(0.055);
-   hJ->GetYaxis()->SetTitleOffset(1.2);
+   hJ->GetYaxis()->SetTitleSize(0.045);
+   hJ->GetYaxis()->SetTitleOffset(1.8);
    hJ->GetYaxis()->SetTitleFont(42);
    hJ->GetZaxis()->SetLabelFont(42);
-   hJ->GetZaxis()->SetLabelSize(0.045);
    hJ->GetZaxis()->SetTitleFont(42);
    hJ->Draw("hist same");
    
