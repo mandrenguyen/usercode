@@ -1,5 +1,5 @@
-#ifndef MNguyen_PFJetAnalyzer_PFJetAnalyzer_
-#define MNguyen_PFJetAnalyzer_PFJetAnalyzer_
+#ifndef MNguyen_InclusiveJetAnalyzer_PFJetAnalyzer_
+#define MNguyen_InclusiveJetAnalyzer_PFJetAnalyzer_
 
 // system include files
 #include <memory>
@@ -55,9 +55,9 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   
 
 
-  edm::InputTag   jetTag_, pfCandidatesTag_, recoJetTag_;
-
-
+  edm::InputTag  pfCandidatesTag_;
+  edm::InputTag jetTag_, jetTag2_, jetTag3_;
+  edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_;
 
   /// verbose ?
   bool   verbose_;
@@ -71,43 +71,82 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
   CentralityProvider * centrality_;
 
-  static const int MAXJETS = 5000;
-  static const int MAXPFCANDS = 5000;
+  static const int MAXJETS = 25000;
+  static const int MAXPFCANDS = 25000;
   
 
   struct JRA{
     
-    unsigned char nref;
+    int nicPu5;
+    int nic5;
+    int nak5;
     int run;
     int evt;
     int bin;
     float b;
     float hf;
-    float rawpt[MAXJETS];
-    float jtpt[MAXJETS];
-    float refpt[MAXJETS];
-    float jteta[MAXJETS];
-    float refeta[MAXJETS];
-    float jtphi[MAXJETS];
-    float refphi[MAXJETS];
-    float jty[MAXJETS];
-    float refy[MAXJETS];
-    float refdrjt[MAXJETS];
-    float preL1et[MAXJETS];
-    float L2[MAXJETS];
-    float L3[MAXJETS];
-    
+
+    float rawpt_icPu5[MAXJETS];
+    float jtpt_icPu5[MAXJETS];
+    float refpt_icPu5[MAXJETS];
+    float jteta_icPu5[MAXJETS];
+    float refeta_icPu5[MAXJETS];
+    float jtphi_icPu5[MAXJETS];
+    float refphi_icPu5[MAXJETS];
+    float jty_icPu5[MAXJETS];
+    float refy_icPu5[MAXJETS];
+    float refdrjt_icPu5[MAXJETS];
+    float preL1et_icPu5[MAXJETS];
+    float L2_icPu5[MAXJETS];
+    float L3_icPu5[MAXJETS];
+    float area_icPu5[MAXJETS];
+
+
+    float rawpt_ic5[MAXJETS];
+    float jtpt_ic5[MAXJETS];
+    float refpt_ic5[MAXJETS];
+    float jteta_ic5[MAXJETS];
+    float refeta_ic5[MAXJETS];
+    float jtphi_ic5[MAXJETS];
+    float refphi_ic5[MAXJETS];
+    float jty_ic5[MAXJETS];
+    float refy_ic5[MAXJETS];
+    float refdrjt_ic5[MAXJETS];
+    float preL1et_ic5[MAXJETS];
+    float L2_ic5[MAXJETS];
+    float L3_ic5[MAXJETS];
+    float area_ic5[MAXJETS];
+
+
+
+    float rawpt_ak5[MAXJETS];
+    float jtpt_ak5[MAXJETS];
+    float refpt_ak5[MAXJETS];
+    float jteta_ak5[MAXJETS];
+    float refeta_ak5[MAXJETS];
+    float jtphi_ak5[MAXJETS];
+    float refphi_ak5[MAXJETS];
+    float jty_ak5[MAXJETS];
+    float refy_ak5[MAXJETS];
+    float refdrjt_ak5[MAXJETS];
+    float preL1et_ak5[MAXJETS];
+    float L2_ak5[MAXJETS];
+    float L3_ak5[MAXJETS];
+    float area_ak5[MAXJETS];
+
     int nPFcand;
     int candID[MAXPFCANDS];
     float candpt[MAXPFCANDS];
     float candeta[MAXPFCANDS];
     float candphi[MAXPFCANDS];
     float candy[MAXPFCANDS];
-    
+
+
+
+
   };
 
   JRA jets_;
-
 };
 
 #endif
