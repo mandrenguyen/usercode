@@ -34,6 +34,7 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/TrackReco/interface/Track.h"
 
 using namespace std;
 using namespace edm;
@@ -53,7 +54,7 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   recoJetTag3_ = iConfig.getParameter<InputTag>("recoJetTag3");
 
   pfCandidatesTag_ = iConfig.getParameter<InputTag>("pfCandidatesTag");
-
+  trackTag_ = iConfig.getParameter<edm::InputTag>("trackTag");
 
   verbose_ = iConfig.getUntrackedParameter<bool>("verbose",false);
 
@@ -177,6 +178,12 @@ PFJetAnalyzer::beginJob() {
   t->Branch("candy",jets_.candy,"candy[nPFcand]/F");
   t->Branch("candphi",jets_.candphi,"candphi[nPFcand]/F");
 
+  t->Branch("ntrack",&jets_.ntrack,"ntrack/I");
+  t->Branch("tracknhits",jets_.tracknhits,"tracknhits[ntrack]/I");
+  t->Branch("trackpt",jets_.trackpt,"trackpt[ntrack]/F");
+  t->Branch("tracketa",jets_.tracketa,"tracketa[ntrack]/F");
+  t->Branch("trackphi",jets_.trackphi,"trackphi[ntrack]/F");
+
 
   TH1D::SetDefaultSumw2();
   
@@ -276,9 +283,11 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    iEvent.getByLabel(pfCandidatesTag_, pfCandidates);
 
 
+   Handle<vector<Track> > tracks;
+   iEvent.getByLabel(trackTag_, tracks);
 
 
-   
+
    
    // FILL JRA TREE
 
@@ -306,19 +315,19 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      //cout<<" abs corr "<<jet.corrFactor("L3Absolute")<<endl;
 
 
-       float L2Corr = jet.correctedJet("rel").pt()/jet.correctedJet("raw").pt();
-       float L3Corr = jet.correctedJet("abs").pt()/jet.correctedJet("rel").pt();
-       
-
-       jets_.L2_icPu5[jets_.nicPu5] = L2Corr;
-       jets_.L3_icPu5[jets_.nicPu5] = L3Corr;
-
-
-       jets_.area_icPu5[jets_.nicPu5] = jet.jetArea();
-
-       // Match to reco jet to find unsubtracted jet energy
-       
-       if(1==0){
+     float L2Corr = jet.correctedJet("rel").pt()/jet.correctedJet("raw").pt();
+     float L3Corr = jet.correctedJet("abs").pt()/jet.correctedJet("rel").pt();
+     
+     
+     jets_.L2_icPu5[jets_.nicPu5] = L2Corr;
+     jets_.L3_icPu5[jets_.nicPu5] = L3Corr;
+     
+     
+     jets_.area_icPu5[jets_.nicPu5] = jet.jetArea();
+     
+     // Match to reco jet to find unsubtracted jet energy
+     
+     if(1==0){
 	 int recoJetSize = recoJetColl->size();
 	 
 	 jets_.preL1et_icPu5[jets_.nicPu5] = -1;
@@ -618,6 +627,16 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        //cout<<" jets_.nPFcand "<<jets_.nPFcand<<endl;
    }
    
+   for(unsigned int it=0; it<tracks->size(); ++it){
+     const reco::Track & track = (*tracks)[it];
+
+     // Could makes some track selection here
+     jets_.tracknhits[jets_.ntrack] = track.numberOfValidHits();
+     jets_.trackpt[jets_.ntrack] = track.pt();
+     jets_.tracketa[jets_.ntrack] = track.eta();
+     jets_.trackphi[jets_.ntrack] = track.phi();
+     jets_.ntrack++;
+   }
 
 
    t->Fill();
@@ -628,7 +647,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    jets_.nic5 = 0;
    jets_.nak5 = 0;
    jets_.nPFcand = 0;
-
+   jets_.ntrack = 0;
 
 }
 

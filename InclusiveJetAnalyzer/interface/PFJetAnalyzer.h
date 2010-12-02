@@ -55,7 +55,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   
 
 
-  edm::InputTag  pfCandidatesTag_;
+  edm::InputTag  pfCandidatesTag_, trackTag_;
   edm::InputTag jetTag_, jetTag2_, jetTag3_;
   edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_;
 
@@ -73,6 +73,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
   static const int MAXJETS = 25000;
   static const int MAXPFCANDS = 25000;
+  static const int MAXTRACKS = 25000;
   
 
   struct JRA{
@@ -141,7 +142,11 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float candphi[MAXPFCANDS];
     float candy[MAXPFCANDS];
 
-
+    int ntrack;
+    int tracknhits[MAXTRACKS];
+    float trackpt[MAXTRACKS];
+    float tracketa[MAXTRACKS];
+    float trackphi[MAXTRACKS];
 
 
   };
