@@ -144,45 +144,42 @@ void plotBalance(int cbin,
   hPythia->SetFillColor(kAzure-8);
   hPythia->SetFillStyle(3005);
 
-  hPythia->SetStats(0);
-  hPythia->Draw("hist");
-
-  if(drawXLabel) hPythia->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
-  
-  hPythia->GetXaxis()->SetLabelSize(22);
-  hPythia->GetXaxis()->SetLabelFont(43);
-  hPythia->GetXaxis()->SetTitleSize(24);
-  hPythia->GetXaxis()->SetTitleFont(43);
-  hPythia->GetXaxis()->SetTitleOffset(1.4);
-  hPythia->GetXaxis()->CenterTitle();
-  
-  hPythia->GetXaxis()->SetNdivisions(905,true);
-  
-  hPythia->SetYTitle("Event Fraction");
-  
-  hPythia->GetYaxis()->SetLabelSize(22);
-  hPythia->GetYaxis()->SetLabelFont(43);
-  hPythia->GetYaxis()->SetTitleSize(22);
-  hPythia->GetYaxis()->SetTitleFont(43);
-  hPythia->GetYaxis()->SetTitleOffset(2.4);
-  hPythia->GetYaxis()->CenterTitle();
-  
-
-  hPythia->SetAxisRange(0,0.2,"Y");
-
-
   hDataMix->Scale(1./hDataMix->Integral(0,20));
   hDataMix->SetLineColor(kRed);
   hDataMix->SetFillColor(kRed-9);
   hDataMix->SetFillStyle(3004);
-  hDataMix->Draw("same");
+
+
+  hDataMix->SetStats(0);
+
+  hDataMix->GetXaxis()->SetLabelSize(22);
+  hDataMix->GetXaxis()->SetLabelFont(43);
+  hDataMix->GetXaxis()->SetTitleSize(24);
+  hDataMix->GetXaxis()->SetTitleFont(43);
+  hDataMix->GetXaxis()->SetTitleOffset(1.4);
+  hDataMix->GetXaxis()->CenterTitle();
   
+  
+  hDataMix->GetYaxis()->SetLabelSize(22);
+  hDataMix->GetYaxis()->SetLabelFont(43);
+  hDataMix->GetYaxis()->SetTitleSize(22);
+  hDataMix->GetYaxis()->SetTitleFont(43);
+  hDataMix->GetYaxis()->SetTitleOffset(2.4);
+  hDataMix->GetYaxis()->CenterTitle();
+  
+  if(drawXLabel) hDataMix->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");  
+  hDataMix->SetYTitle("Event Fraction");
+  hDataMix->SetAxisRange(0,0.2,"Y");
+  hDataMix->GetXaxis()->SetNdivisions(905,true);
+
+  hDataMix->Draw("hist");
+  //hPythia->Draw("hist");  
   h->Draw("same");
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.35,0.675,0.89,0.88); 
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(hPythia,"PYTHIA","lf");  
+    //t3->AddEntry(hPythia,"PYTHIA","lf");  
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);

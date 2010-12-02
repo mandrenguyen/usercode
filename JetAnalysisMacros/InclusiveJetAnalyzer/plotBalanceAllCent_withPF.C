@@ -73,7 +73,7 @@ void plotBalanceAllCent_withPF(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 3 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -178,16 +178,17 @@ void plotBalance(int cbin,
   hDataMix->SetLineColor(kRed);
   hDataMix->SetFillColor(kRed-9);
   hDataMix->SetFillStyle(3004);
-  hDataMix->Draw("same");
+  //hDataMix->Draw("same");
   
   h->Draw("same");
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.35,0.675,0.89,0.88); 
     //t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(h,"Data, ICPU5","pl");
-    t3->AddEntry(hPFdata,"Data, AK5PF","pl");  
-    t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
+    t3->SetHeader("Pb+Pb #sqrt{s}_{_NN}=2.76 TeV");
+    t3->AddEntry(h,"Iterative Cone Calo Jets","pl");
+    t3->AddEntry(hPFdata,"Anti-k_{T} Particle-Flow Jets","pl");  
+    //t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
