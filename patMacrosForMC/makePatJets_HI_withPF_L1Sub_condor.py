@@ -1,21 +1,15 @@
-import FWCore.ParameterSet.VarParsing as VarParsing
+#import FWCore.ParameterSet.VarParsing as VarParsing
 
-ivars = VarParsing.VarParsing('standard')
-ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
+#ivars = VarParsing.VarParsing('standard')
+#ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
-#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECO/Pyquen_UnquenchedDiJet_Pt80_MC_38Y_V12-v2/0010/4E2EF93C-80E1-DF11-A17A-0026B94E2899.root"
-#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECODEBUG/Pyquen_DiJet_Pt80_MC_38Y_V12-v2/0006/4EE677A1-DBE0-DF11-BE92-001D0967D314.root"
-#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RAW/MC_38Y_V12-v1/0000/B6025776-B8D5-DF11-AD8E-001EC9AA9720.root"
-#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/AMPT_Default_MinBias_2760GeV/GEN-SIM-RECO/Pyquen_UnquenchedDiJet_Pt80_MC_38Y_V12-v1/0000/5A608832-8ADD-DF11-A8A8-00151796D4E8.root"
-#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECODEBUG/Pyquen_DiJet_Pt80_START39_V4HI-v1/0001/DC70D208-4DEA-DF11-83A5-0015178C6978.root"
-#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Quenched_MinBias_2760GeV/GEN-SIM-RECODEBUG/Pyquen_DiJet_Pt80_MC_38Y_V12-v2/0009/061C5BE1-1FE1-DF11-BC94-0024E87699A6.root"
-ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/bb84e5a80bcc166dca2e76096130a4ba/Pyquen_UnquenchedDiJet_Pt80_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_1_1_I9V.root"
+#ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/bb84e5a80bcc166dca2e76096130a4ba/Pyquen_UnquenchedDiJet_Pt80_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_1_1_I9V.root"
 
 #ivars.output = 'patJets_AMPT_Pyquen_DiJet_Pt80.root'
-ivars.maxEvents = -1
-ivars.initialEvent = 1
+#ivars.maxEvents = -1
+#ivars.initialEvent = 1
 
-ivars.parseArguments()
+#ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
@@ -31,11 +25,11 @@ process = cms.Process('HIJETS')
 
 # Input source
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring(ivars.files)
+                            fileNames = cms.untracked.vstring("file:test_in.root")
                             )
 
 process.maxEvents = cms.untracked.PSet(
-            input = cms.untracked.int32(ivars.maxEvents)
+            input = cms.untracked.int32(-1)
                     )
 
 #load some general stuff
@@ -107,6 +101,9 @@ process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking * 
 
 # good track selection
 process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
+# merge with pixel tracks
+process.load('Appeltel.PixelTracksRun2010.HiLowPtPixelTracksFromReco_cff')
+process.load('Appeltel.PixelTracksRun2010.HiMultipleMergedTracks_cff')
 
 # for PF
 process.load("RecoHI.Configuration.Reconstruction_hiPF_cff")
@@ -725,6 +722,16 @@ process.runAllJets = cms.Sequence(
 #    process.ktPu6patSequence +
 )
 
+process.load("MNguyen.InclusiveJetAnalyzer.inclusiveJetAnalyzer_cff")
+process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_cff")
+# track efficiency anlayzer
+#process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
+#for tree output
+process.TFileService = cms.Service("TFileService",
+                                                                     fileName=cms.string("JetAnalysisTTrees.root"))
+
+
+
 #actually only works on raw b/c of it needs random numbers which aren't stored
 #process.load("Configuration.StandardSequences.ValidationHeavyIons_cff")
 
@@ -736,10 +743,14 @@ process.path = cms.Path(
     process.makeCentralityTableTFile*
     process.hiTrackReco*
     process.hiGoodTracksSelection*
+    process.conformalPixelTrackReco *
+    process.hiGoodMergedTracks *
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
     process.hiGen*
-    process.runAllJets
+    process.runAllJets*
+    process.allJetAnalyzers*
+    process.PFJetAnalyzerSequence    
     #*process.hiTrackValidation
     )
 
@@ -747,12 +758,12 @@ process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
 
 process.output = cms.OutputModule("PoolOutputModule",
                                   process.jetTrkSkimContentMC,
-                                  fileName = cms.untracked.string(ivars.output)
+                                  fileName = cms.untracked.string("PAT.root")
                                   )
 
 #process.output.outputCommands.extend(["drop *_towerMaker_*_*"])
 #process.output.outputCommands.extend(["keep *_hiSelectedTracks_*_HIJETS"])
-process.output.outputCommands.extend(["keep *_hiGoodTracks_*_*"])
+process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
 process.output.outputCommands.extend(["keep *_particleFlow_*_*"])
 process.output.outputCommands.extend(["keep *_mergedtruth_*_*"])
 process.output.outputCommands.extend(["keep double*_*PF*_*_*"])
