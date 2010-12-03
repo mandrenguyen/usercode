@@ -11,6 +11,8 @@
 <use name=DataFormats/PatCandidates>
 <use name="DataFormats/ParticleFlowCandidate">
 <use name="DataFormats/ParticleFlowReco">
+<use name="DataFormats/TrackReco">
+<use name=HLTrigger/HLTcore>
 <flags EDM_PLUGIN=1>
 <export>
    <lib name=MNguyenInclusiveJetAnalyzer>
@@ -27,4 +29,6 @@
    <use name=DataFormats/PatCandidates>
    <use name="DataFormats/ParticleFlowCandidate">
    <use name="DataFormats/ParticleFlowReco">
+   <use name="DataFormats/TrackReco">
+   <use name=HLTrigger/HLTcore>
 </export>
