@@ -51,14 +51,16 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
   
 
   jetTag_ = iConfig.getParameter<InputTag>("jetTag");
+  genjetTag_ = iConfig.getParameter<InputTag>("genjetTag");
 
   verbose_ = iConfig.getUntrackedParameter<bool>("verbose",false);
 
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
 
-  L1gtReadout_ = iConfig.getParameter<edm::InputTag>("L1gtReadout");
+  if(!isMC_)L1gtReadout_ = iConfig.getParameter<edm::InputTag>("L1gtReadout");
   hltResName_ = iConfig.getUntrackedParameter<string>("hltTrgResults","TriggerResults::HLT");
+
    
   if (iConfig.exists("hltTrgNames"))
     hltTrgNames_ = iConfig.getUntrackedParameter<vector<string> >("hltTrgNames");
@@ -72,7 +74,7 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
 
 
   cout<<" jet collection : "<<jetTag_<<endl;
-
+  cout<<" genjet collection : "<<genjetTag_<<endl;
 
 
    
@@ -95,7 +97,7 @@ InclusiveJetAnalyzer::beginJob() {
 
   string jetTagName = jetTag_.label()+"_tree"; 
   string jetTagTitle = jetTag_.label()+" Jet Analysis Tree"; 
-  t = f->make<TTree>(jetTagName.c_str(),jetTagTitle.c_str());
+  t = fs1->make<TTree>(jetTagName.c_str(),jetTagTitle.c_str());
 
 
   //  TTree* t= new TTree("t","Jet Response Analyzer");
@@ -103,24 +105,25 @@ InclusiveJetAnalyzer::beginJob() {
   t->Branch("evt",&jets_.evt,"evt/I");
   t->Branch("b",&jets_.b,"b/F");
   t->Branch("hf",&jets_.hf,"hf/F");
-  t->Branch("nref",&jets_.nref,"nref/b");
+  t->Branch("nref",&jets_.nref,"nref/I");
   t->Branch("bin",&jets_.bin,"bin/I");
   t->Branch("rawpt",jets_.rawpt,"rawpt[nref]/F");
   t->Branch("jtpt",jets_.jtpt,"jtpt[nref]/F");
   t->Branch("jteta",jets_.jteta,"jteta[nref]/F");
   t->Branch("jty",jets_.jty,"jty[nref]/F");
   t->Branch("jtphi",jets_.jtphi,"jtphi[nref]/F");
+
   if(isMC_){
-    t->Branch("refpt",jets_.refpt,"refpt[nref]/F");
-    t->Branch("refeta",jets_.refeta,"refeta[nref]/F");
-    t->Branch("refy",jets_.refy,"refy[nref]/F");
-    t->Branch("refphi",jets_.refphi,"refphi[nref]/F");
-    t->Branch("refdrjt",jets_.refdrjt,"refdrjt[nref]/F");
+    t->Branch("ngen",&jets_.ngen,"ngen/I");
+    t->Branch("genmatchindex",jets_.genmatchindex,"genmatchindex[ngen]/I");
+    t->Branch("genpt",jets_.genpt,"genpt[ngen]/F");
+    t->Branch("geneta",jets_.geneta,"geneta[ngen]/F");
+    t->Branch("geny",jets_.geny,"geny[ngen]/F");
+    t->Branch("genphi",jets_.genphi,"genphi[ngen]/F");
+    t->Branch("gendrjt",jets_.gendrjt,"gendrjt[ngen]/F");
   }
   
-  int filltrigger = 1;
-  if(filltrigger){
-
+  if(!isMC_){
     t->Branch("nL1TBit",&jets_.nL1TBit,"nL1TBit/I");
     t->Branch("l1TBit",jets_.l1TBit,"l1TBit[nL1TBit]/O");
 
@@ -201,8 +204,10 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    //jets_.hf = hf;
    
    edm::Handle<pat::JetCollection> jets;
-   //ev.getByLabel(edm::InputTag(jetTag),jets);
    iEvent.getByLabel(jetTag_, jets);
+
+   edm::Handle<vector<reco::GenJet> >genjets;
+   iEvent.getByLabel(genjetTag_, genjets);
 
    
    
@@ -211,44 +216,67 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 
    jets_.b = b;
    jets_.nref = 0;
+   
+   if(!isMC_){
+     fillL1Bits(iEvent);
+     fillHLTBits(iEvent);
+   }
 
-   fillL1Bits(iEvent);
-   fillHLTBits(iEvent);
-    
-  for(unsigned int j = 0 ; j < jets->size(); ++j){
-    const pat::Jet& jet = (*jets)[j];
-    
-    //cout<<" jet pt "<<jet.pt()<<endl;
-    if(jet.pt() < jetPtMin) continue;
-    jets_.rawpt[jets_.nref]=jet.correctedJet("raw").pt();
+   for(unsigned int j = 0 ; j < jets->size(); ++j){
+     const pat::Jet& jet = (*jets)[j];
+     
+     //cout<<" jet pt "<<jet.pt()<<endl;
+     if(jet.pt() < jetPtMin) continue;
+     jets_.rawpt[jets_.nref]=jet.correctedJet("raw").pt();
      jets_.jtpt[jets_.nref] = jet.pt();                            
      jets_.jteta[jets_.nref] = jet.eta();
      jets_.jtphi[jets_.nref] = jet.phi();
      jets_.jty[jets_.nref] = jet.eta();
      
      
-     if(isMC_){
+     jets_.nref++;
        
        
-       if(jet.genJet()!=0 && jet.genJet()->pt()>1.0 && jet.genJet()->pt()<999999){
-	 jets_.refpt[jets_.nref] = jet.genJet()->pt();
-	 jets_.refeta[jets_.nref] = jet.genJet()->eta();
-	 jets_.refphi[jets_.nref] = jet.genJet()->phi();
-	 jets_.refy[jets_.nref] = jet.genJet()->eta();
+   }
+
+
+   if(isMC_){
+
+     for(unsigned int igen = 0 ; igen < genjets->size(); ++igen){
+       const reco::GenJet & genjet = (*genjets)[igen];
+       
+       
+       jets_.genpt[jets_.ngen] = genjet.pt();                            
+       jets_.geneta[jets_.ngen] = genjet.eta();
+       jets_.genphi[jets_.ngen] = genjet.phi();
+       jets_.geny[jets_.ngen] = genjet.eta();
+       
+
+       // find matching patJet if there is one
+
+       jets_.gendrjt[jets_.ngen] = -1.0;
+       jets_.genmatchindex[jets_.ngen] = -1;
+       
+       
+       for(unsigned int ijet = 0 ; ijet < jets->size(); ++ijet){
+	 const pat::Jet& jet = (*jets)[ijet];
 	 
-	 jets_.refdrjt[jets_.nref] = reco::deltaR(jet,*(jet.genJet()));
-       }        
-       else{
-	 jets_.refpt[jets_.nref] = 0;
-	 jets_.refeta[jets_.nref] = -999;
-	 jets_.refphi[jets_.nref] = -999;
-	 jets_.refy[jets_.nref] = -999;
+	 if(jet.genJet()){
+	   if(fabs(genjet.pt()-jet.genJet()->pt()<0.0001) &&
+	      fabs(genjet.eta()-jet.genJet()->eta()<0.0001) &&
+	      fabs(genjet.phi()-jet.genJet()->phi()<0.0001)){
+	     
+	     jets_.genmatchindex[jets_.ngen] = (int)ijet;
+	     jets_.gendrjt[jets_.ngen] = reco::deltaR(jet,genjet);	
+	     break;
+	   }            		
+	 }
        }
+       jets_.ngen++;
+       
        
      }
-       jets_.nref++;
-       
-       
+     
    }
    
    t->Fill();

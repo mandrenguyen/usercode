@@ -64,7 +64,7 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
   
 
 
-  edm::InputTag   jetTag_, L1gtReadout_; 
+  edm::InputTag   jetTag_, genjetTag_, L1gtReadout_; 
 
 
   /// verbose ?
@@ -75,7 +75,7 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
 
 
   TTree *t;
-  edm::Service<TFileService> f;
+  edm::Service<TFileService> fs1;
 
   CentralityProvider * centrality_;
 
@@ -113,7 +113,15 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
     float refphi[MAXJETS];
     float jty[MAXJETS];
     float refy[MAXJETS];
-    float refdrjt[MAXJETS];
+
+
+    unsigned char ngen;
+    int genmatchindex[MAXJETS];
+    float genpt[MAXJETS];
+    float geneta[MAXJETS];
+    float genphi[MAXJETS];
+    float geny[MAXJETS];
+    float gendrjt[MAXJETS];
 
     // hlt
     int nHLTBit;
