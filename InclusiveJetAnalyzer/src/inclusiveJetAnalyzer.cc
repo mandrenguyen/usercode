@@ -20,11 +20,10 @@
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 
-
 #include "DataFormats/HeavyIonEvent/interface/CentralityBins.h"
+#include "DataFormats/HeavyIonEvent/interface/Centrality.h"
 
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
-#include "DataFormats/HeavyIonEvent/interface/Centrality.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "SimDataFormats/HiGenData/interface/GenHIEvent.h"
@@ -145,7 +144,6 @@ void
 InclusiveJetAnalyzer::analyze(const Event& iEvent, 
 			     const EventSetup& iSetup) {
   
-
  int event = iEvent.id().event();
   int run = iEvent.id().run();
 
@@ -169,7 +167,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
       const reco::Centrality *cent = centrality_->raw();
       
       hf = cent->EtHFhitSum();
-      
+
       bin = centrality_->getBin();
       b = centrality_->bMean();
       //}
@@ -206,11 +204,8 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    edm::Handle<pat::JetCollection> jets;
    iEvent.getByLabel(jetTag_, jets);
 
-   edm::Handle<vector<reco::GenJet> >genjets;
-   iEvent.getByLabel(genjetTag_, genjets);
 
-   
-   
+  
    
    // FILL JRA TREE
 
@@ -241,6 +236,9 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 
 
    if(isMC_){
+
+   edm::Handle<vector<reco::GenJet> >genjets;
+   iEvent.getByLabel(genjetTag_, genjets);
 
      for(unsigned int igen = 0 ; igen < genjets->size(); ++igen){
        const reco::GenJet & genjet = (*genjets)[igen];
@@ -278,7 +276,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      }
      
    }
-   
+
    t->Fill();
 }
 
