@@ -18,7 +18,7 @@
 
 
 // Note that centrality flag is somewhat deprecated, just use central = 0 to make the tree and make cuts in the plotting macros
-int analyzeJetTrees(int data_pythia_mix=0, int central = 0, int useRawPt = 0, int useAK5PF=0){
+int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, int useAK5PF=0){
   
   string infile;
   string outfile;
@@ -37,7 +37,7 @@ int analyzeJetTrees(int data_pythia_mix=0, int central = 0, int useRawPt = 0, in
     isMC=1;
   }
   if(data_pythia_mix==2){
-    infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/dijetTreeDM_pt80.root";
+    infile = "/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root";
     if(useAK5PF) outfile = "mix_AK5PF.root";
     else outfile  = "mix.root";
     useWeight = 1;
