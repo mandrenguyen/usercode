@@ -18,20 +18,38 @@
 
 
 // Note that centrality flag is somewhat deprecated, just use central = 0 to make the tree and make cuts in the plotting macros
+int analyzeJetTrees(int data_pythia_mix=0, int central = 0, int useRawPt = 0, int useAK5PF=0){
+  
+  string infile;
+  string outfile;
+  int useWeight = 0;
+  int isMC = 0;
 
-// Data
-//int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_DefaultReco_v7.root",char *outfile="data.root",int isMC=0, int useWeight=0, int central = 0, int useRawPt = 0)
-int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_PFXcheck.root",char *outfile="PFdata.root",int isMC=0, int useWeight=0, int central = 0, int useRawPt = 0)
-// Pyquen
-//int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen/HIDATA/JetTrees/merged_jetTree_Pyquen_v2.root",char *outfile="pythia.root",int isMC=1, int useWeight=0, int central = 0, int useRawPt = 0)
-// Pyquen, Data-Embedded
-//int analyzeJetTrees(char *infile="/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root",char *outfile="mix.root",int isMC=1, int useWeight=1, int central = 0, int useRawPt = 0)
-{
+  if(data_pythia_mix==0){
+    infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_v10.root";
+    if(useAK5PF) outfile = "data_AK5PF.root";
+    else outfile  = "data.root";
+  }
+  if(data_pythia_mix==1){
+    infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Pyquen_v2.root";
+    if(useAK5PF) outfile = "pythia_AK5PF.root";
+    else outfile  = "pythia.root";
+    isMC=1;
+  }
+  if(data_pythia_mix==2){
+    infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/dijetTreeDM_pt80.root";
+    if(useAK5PF) outfile = "mix_AK5PF.root";
+    else outfile  = "mix.root";
+    useWeight = 1;
+    isMC=1;
+  }
+    
+  cout<<" set defaults "<<endl;
   // central =0, all centralities or p+p
   //central =1, 0-10
   //central =2, 10-30
   // central =3, 30-90
-
+  
   // Jet energy correction
   JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("CondFormats/JetMETObjects/data/Spring10_Uncertainty_AK5Calo.txt");
   
@@ -40,35 +58,44 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
   fRes->SetParameters(1,0.1);
   fRes->SetRange(0,2);
 
+  cout<< "opening file: "<<infile<<endl;
+  
   // Take the tree from the file
-  TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile);
-   if (!f) {
-     f =  TFile::Open(infile);
-     //f->cd("inclusiveJetAnalyzer");
-     f->cd("ak5PFJetAnalyzer");
-   }
-   TTree *t;
-   if(isMC) t= (TTree*)gDirectory->Get("t");  // Old hydjet file
-   else t = (TTree*)gDirectory->Get("ak5PFpatJets_tree");
-   //else t = (TTree*)gDirectory->Get("icPu5patJets_tree");
+  TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile.c_str());
 
+  char *dirname=NULL;
+  if(useAK5PF)dirname = "ak5PFJetAnalyzer";
+  else dirname = "inclusiveJetAnalyzer";
 
+  cout<<" looking in directory: "<<dirname<<endl;
+
+  if (!f) {
+    f =  TFile::Open(infile.c_str());
+    f->cd(dirname);
+  }
+
+  char *treename=NULL;
+  if(useAK5PF)treename = "ak5PFpatJets_tree";
+  else treename = "icPu5patJets_tree";
+
+  TTree *t = (TTree*)gDirectory->Get(treename);
+  
+    /*  // legacy
    if (t==0) {
-      cout <<"Tree 't' is not found! Use icPu5patJets_tree instead..."<<endl;
-      //t = (TTree*)gDirectory->Get("icPu5patJets_tree");
-      t = (TTree*)gDirectory->Get("ak5PFpatJets_tree");
-      if (t==0) return 0;
+   cout <<"Tree 't' is not found! Use icPu5patJets_tree instead..."<<endl;
+   //t = (TTree*)gDirectory->Get("icPu5patJets_tree");
+   t = (TTree*)gDirectory->Get("ak5PFpatJets_tree");
+   if (t==0) return 0;
    }
+    */
    
-//   t = (TTree*)f->FindObjectAny("ak7PFpatJets_tree");
-//   t = (TTree*)f->FindObjectAny("ic3patJets_tree");
 
 //Declaration of leaves types
    Int_t           run;
    Int_t           evt;
    Float_t         b;
    Float_t         hf;
-   UChar_t         nref;
+   Int_t         nref;
    Int_t           bin;
    Float_t         jtpt[99];
    Float_t         jteta[99];
@@ -112,7 +139,7 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
 // TTreePlayer->SetBranchStatus("branchname",1);  // activate branchname
 
    // create output file 
-   TFile *fout=new TFile(outfile,"RECREATE");
+   TFile *fout=new TFile(outfile.c_str(),"RECREATE");
    // add a small ntuple for light analysis
    TNtuple *nt = new TNtuple("nt","","et1:eta1:phi1:unc1:et2:eta2:phi2:unc2:bin:dphi:weight:fRes");
 
@@ -136,7 +163,7 @@ int analyzeJetTrees(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTree
    TH2F *hLeadingResolutionVsPt = new TH2F("hLeadingResolutionVsPt","hLeadingResolutionVsPt",100,-5.,5.,100,0,500);
    TH2F *hSubLeadingResolutionVsPt = new TH2F("hSubLeadingResolutionVsPt","hSubLeadingResolutionVsPt",100,-5.,5.,100,0,500);
 
-   TFile *fcent_Data = new TFile("CentDist_Data_v6.root");
+   TFile *fcent_Data = new TFile("CentDist_Data_v10.root");
    TH1F *hCent_Data = (TH1F*)fcent_Data->Get("h");
    float cent_integral_Data = 1.;
    if(central==1)cent_integral_Data=hCent_Data->Integral(1,4);

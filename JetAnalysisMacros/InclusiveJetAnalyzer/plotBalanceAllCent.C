@@ -1,5 +1,6 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
+#include <iostream>
 #include "TCanvas.h"
 #include "TError.h"
 #include "TPad.h"
@@ -175,6 +176,8 @@ void plotBalance(int cbin,
   hDataMix->Draw("hist");
   //hPythia->Draw("hist");  
   h->Draw("same");
+
+  cout<<" mean value of data "<<h->GetMean()<<endl;
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.35,0.675,0.89,0.88); 
