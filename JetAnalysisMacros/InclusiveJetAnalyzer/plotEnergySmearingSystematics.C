@@ -62,35 +62,35 @@ void plotEnergySmearingSystematics(){
   c1->cd(1);
   plotRatio(4,"data-smeared.root","data.root","data.root",false,false,false);
   drawText("50~100%",0.72,0.24);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetLeftMargin(0.25);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(2);
   plotRatio(3,"data-smeared.root","data.root","data.root",false,false,false);
   drawText("30~50%",0.7,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
   plotRatio(2,"data-smeared.root","data.root","data.root",false,true,false);
   drawText("20~30%",0.7,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(4);
   plotRatio(1,"data-smeared.root","data.root","data.root",false,false,false);
   drawText("10~20%",0.7,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(5);
   plotRatio(0,"data-smeared.root","data.root","data.root",false,false,true);
   drawText("0~10%",0.73,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
   gPad->SetBottomMargin(0.18);
 
   TLatex *cms = new TLatex(0.086,4.5,"CMS Preliminary");
