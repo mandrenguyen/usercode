@@ -84,6 +84,27 @@ process.ic5sub.rhoTag = 'kt4CaloJets'
 
 process.patJets.embedCaloTowers = cms.bool(False)
 
+
+# set up vertex matching
+process.iterativeConePu5CaloJets.doPVCorrection = cms.bool(True)
+process.iterativeConePu5CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.ic5CaloJets.doPVCorrection = cms.bool(True)
+process.ic5CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.ak5CaloJets.doPVCorrection = cms.bool(True)
+process.ak5CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.ak7CaloJets.doPVCorrection = cms.bool(True)
+process.ak7CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.kt4CaloJets.doPVCorrection = cms.bool(True)
+process.kt4CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.kt6CaloJets.doPVCorrection = cms.bool(True)
+process.kt6CaloJets.srcPVs = 'hiSelectedVertex'
+
+
 process.ic5corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("ic5sub"),
                                                   corrLevels = cms.PSet(L2Relative = cms.string("L2Relative_IC5Calo"),
                                                                         L3Absolute = cms.string("L3Absolute_IC5Calo"),
