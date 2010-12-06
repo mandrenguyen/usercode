@@ -56,43 +56,43 @@ void plotBalanceAllCent(){
   c1->cd(1);
   plotBalance(4,"data.root","pythia.root","mix.root",true,false,false);
   drawText("50-100%",0.76,0.24);
-  drawPatch(0.976,0.0972,1.1,0.191);
+  drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetLeftMargin(0.25);
-  gPad->SetBottomMargin(0.2);
+  gPad->SetBottomMargin(0.18);
   c1->cd(2);
   plotBalance(3,"data.root","pythia.root","mix.root",true,false,false);
   drawText("30-50%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.191);
-  drawPatch(0.976,0.0972,1.1,0.191);
-  gPad->SetBottomMargin(0.2);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
   plotBalance(2,"data.root","pythia.root","mix.root",true,true,false);
   drawText("20-30%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.191);
-  drawPatch(0.976,0.0972,1.1,0.191);
- gPad->SetBottomMargin(0.2);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+ gPad->SetBottomMargin(0.18);
 
   c1->cd(4);
   plotBalance(1,"data.root","pythia.root","mix.root",true,false,false);
   drawText("10-20%",0.75,0.24);
-  drawPatch(0.976,0.0972,1.1,0.191);
-  drawPatch(-0.00007,0.0972,0.0518,0.191);
-  gPad->SetBottomMargin(0.2);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  gPad->SetBottomMargin(0.18);
   
   c1->cd(5);
   plotBalance(0,"data.root","pythia.root","mix.root",true,false,true);
   drawText("0-10%",0.75,0.24);
   //  drawPatch(0.976,0.0972,1.1,0.191);
-  gPad->SetBottomMargin(0.2);
-  drawPatch(-0.00007,0.0972,0.0518,0.191);
+  gPad->SetBottomMargin(0.18);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
 
   TLatex *cms = new TLatex(0.15,0.1825,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.66,0.1825,"#intL dt = 8.6 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.66,0.1825,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -111,8 +111,8 @@ void plotBalance(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120 && et2>50 && dphi>2.5";
-  TString cutpp="et1>120 && et2>50 && dphi>2.5";
+  TString cut="et1>120 && et2>50 && dphi>2.0944";
+  TString cutpp="et1>120 && et2>50 && dphi>2.0944";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";

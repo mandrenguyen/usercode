@@ -96,7 +96,7 @@ void plotLeadingJetAllCent(){
   cms->SetTextSize(18);
   cms->Draw();
 
-  TLatex *lumi = new TLatex(186,1.625,"#intL dt = 8.6 #mub^{-1}");
+  TLatex *lumi = new TLatex(186,1.625,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
