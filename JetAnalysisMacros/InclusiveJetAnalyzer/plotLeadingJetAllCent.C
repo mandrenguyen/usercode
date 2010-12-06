@@ -56,7 +56,7 @@ void plotLeadingJetAllCent(){
   c1->cd(1);
   plotLeadingJet(2,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("30-100%",0.25,0.8);
+  drawText("50-100%",0.30,0.8);
   drawPatch(0.976,0.0972,1.1,0.141);
   gPad->SetBottomMargin(0.18);
   gPad->SetLeftMargin(0.24);
@@ -64,7 +64,7 @@ void plotLeadingJetAllCent(){
   c1->cd(2);
   plotLeadingJet(1,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("10-30%",0.08,0.8);
+  drawText("30-50%",0.08,0.8);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
   gPad->SetBottomMargin(0.18);
@@ -72,14 +72,14 @@ void plotLeadingJetAllCent(){
   c1->cd(3);
   plotLeadingJet(2,"data.root","pythia.root","mix.root",true,true,false);
   gPad->SetLogy();
-  drawText("30-100%",0.25,0.8);
+  drawText("20-30%",0.08,0.8);
   drawPatch(0.976,0.0972,1.1,0.141);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(4);
   plotLeadingJet(1,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("10-30%",0.08,0.8);
+  drawText("10-20%",0.08,0.8);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
   gPad->SetBottomMargin(0.18);
