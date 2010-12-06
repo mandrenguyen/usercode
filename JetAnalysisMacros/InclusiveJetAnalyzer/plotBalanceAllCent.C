@@ -49,37 +49,50 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotBalanceAllCent(){
 
-  TCanvas *c1 = new TCanvas("c1","",1650,530);
+  TCanvas *c1 = new TCanvas("c1","",1650,430);
 
-  makeMultiPanelCanvas(c1,4,1,0.0,0.0,0.2,0.15,0.02);
+  makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotBalance(3,"data.root","pythia.root","mix.root",true,false,false);
+  plotBalance(4,"data.root","pythia.root","mix.root",true,false,false);
   drawText("50-100%",0.76,0.24);
-  drawPatch(0.976,0.0972,1.1,0.141);
-
+  drawPatch(0.976,0.0972,1.1,0.191);
+  gPad->SetLeftMargin(0.25);
+  gPad->SetBottomMargin(0.2);
   c1->cd(2);
-  plotBalance(2,"data.root","pythia.root","mix.root",true,true,false);
-  drawText("25-50%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  plotBalance(3,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("30-50%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.191);
+  drawPatch(0.976,0.0972,1.1,0.191);
+  gPad->SetBottomMargin(0.2);
 
   c1->cd(3);
-  plotBalance(1,"data.root","pythia.root","mix.root",true,false,false);
-  drawText("10-25%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  plotBalance(2,"data.root","pythia.root","mix.root",true,true,false);
+  drawText("20-30%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.191);
+  drawPatch(0.976,0.0972,1.1,0.191);
+ gPad->SetBottomMargin(0.2);
 
   c1->cd(4);
+  plotBalance(1,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("10-20%",0.75,0.24);
+  drawPatch(0.976,0.0972,1.1,0.191);
+  drawPatch(-0.00007,0.0972,0.0518,0.191);
+  gPad->SetBottomMargin(0.2);
+  
+  c1->cd(5);
   plotBalance(0,"data.root","pythia.root","mix.root",true,false,true);
   drawText("0-10%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  
-  TLatex *cms = new TLatex(0.35,0.1825,"CMS Preliminary");
+  //  drawPatch(0.976,0.0972,1.1,0.191);
+  gPad->SetBottomMargin(0.2);
+  drawPatch(-0.00007,0.0972,0.0518,0.191);
+
+  TLatex *cms = new TLatex(0.15,0.1825,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 8.6 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.66,0.1825,"#intL dt = 8.6 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -105,16 +118,20 @@ void plotBalance(int cbin,
     cstring = "0-10%";
     cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-    cstring = "10-25%";
-    cut+=" && bin>=4 && bin<10";
+    cstring = "10-20%";
+    cut+=" && bin>=4 && bin<8";
   } else if (cbin==2) {
-     cstring = "25-50%";
-     cut+=" && bin>=10 && bin<20";
-  } else {
-    cstring = "50-100%";
-    cut+=" && bin>=20 && bin<40";
+     cstring = "20-30%";
+     cut+=" && bin>=8 && bin<12";
+  } else if (cbin==3) {
+     cstring = "30-50%";
+     cut+=" && bin>=12 && bin<20";
   }
-
+  else {
+     cstring = "50-100%";
+     cut+=" && bin>=20";
+  }
+  
   // open the data file
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
