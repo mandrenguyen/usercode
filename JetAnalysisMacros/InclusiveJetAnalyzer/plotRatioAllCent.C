@@ -32,7 +32,7 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 
 void plotRatio(int cbin = 0,
 		 TString infname = "data.root",
-		 TString DataPF = "dataPF.root",
+		 TString data = "data.root",
 		 TString mix = "mix.root",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
@@ -59,46 +59,46 @@ void plotRatioAllCent(){
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotRatio(2,"data.root","dataPF.root","mix.root",true,false,false);
+  plotRatio(2,"data.root","data.root","mix.root",true,false,false);
   drawText("30~100%",0.76,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotRatio(1,"data.root","dataPF.root","mix.root",true,true,false);
+  plotRatio(1,"data.root","data.root","mix.root",true,true,false);
   drawText("10~30%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotRatio(0,"data.root","dataPF.root","mix.root",true,false,true);
+  plotRatio(0,"data.root","data.root","mix.root",true,false,true);
   drawText("0~10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
-  TLatex *cms = new TLatex(0.30,4.5,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.086,4.5,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.68,4.5,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.15,4.1,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ratio_all_cent_20101126_v0.gif");
-  c1->Print("./fig/ratio_all_cent_20101126_v0.eps");
-  c1->Print("./fig/ratio_all_cent_20101126_v0.pdf");
+  c1->Print("./fig/ratio_final_20101201_v1.gif");
+  c1->Print("./fig/ratio_final_20101201_v1.eps");
+  c1->Print("./fig/ratio_final_20101201_v1.pdf");
 
 }
 
 void plotRatio(int cbin,
 		 TString infname,
-		 TString DataPF,
+		 TString data,
 		 TString mix,
 		 bool useWeight,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<0.5 ";
+  TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<10 ";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -115,9 +115,9 @@ void plotRatio(int cbin,
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
 
-  // open the DataPF (MC) file
-  TFile *infDataPF = new TFile(DataPF.Data());
-  TTree *ntDataPF = (TTree*) infDataPF->FindObjectAny("nt");
+  // open the data (MC) file
+  TFile *infdata = new TFile(data.Data());
+  TTree *ntdata = (TTree*) infdata->FindObjectAny("nt");
 
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
@@ -126,8 +126,8 @@ void plotRatio(int cbin,
   // Variable Aj
   char *aj = "(et1-et2)/(et1+et2)";
 
-  const int nBin = 12;
-  double bins[nBin+1]={0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.8,1};
+  const int nBin = 14;
+  double bins[nBin+1]={0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.8,1};
   // projection histogram
   TH1D *h = new TH1D("h","",nBin,bins);
   TH1D *hTmp = new TH1D("hTmp","",nBin,bins);
@@ -137,18 +137,64 @@ void plotRatio(int cbin,
    
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntDataPF->Draw(Form("%s>>hEmbedded",aj),Form("(%s)",cut.Data())); 
+    ntdata->Draw(Form("%s>>hEmbedded",aj),Form("(%s)",cut.Data())); 
     ntMix->Draw(Form("%s>>hDataMix",aj),Form("(%s)*weight",cut.Data())); 
   } else {
     // ignore centrality reweighting
-    ntDataPF->Draw(Form("%s>>hEmbedded",aj),Form("(%s)",cut.Data()));
-    ntMix->Draw(Form("%s>>hDataMix",aj),Form("(%s)*weight",cut.Data()));  
+    ntdata->Draw(Form("%s>>hEmbedded",aj),Form("(%s)",cut.Data()));
+    ntMix->Draw(Form("%s>>hDataMix",aj),Form("(%s)",cut.Data()));  
   }
 
+  
   // calculate the statistical error and normalize
   h->Sumw2();
   h->Scale(1./h->GetEntries());
   h->SetMarkerStyle(20);
+
+  double systematicErrorResolution[nBin+1] =
+                  {0.25,0.05,0.02,0.02,0.02,0.02,0.03,0.05,0.07,0.11,0.15,0.25};
+
+  double systematicErrorScale[nBin+1] =
+                  {0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.08,0.10,0.25,0.35,0.40};
+
+  double systematicErrorEfficiency[nBin] =
+                  {0.01,0.01,0.01,0.01,0.01,0.01,0.03,0.04,0.05,0.06,0.07,0.08};
+  double systematicErrorBackground[nBin+1] =
+                  {0.07,0.04,0.04,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.12,0.15};
+
+  double systematicError[nBin];
+
+  for (int b=0;b<nBin;b++)
+  {
+     double sum=0;
+     sum+= systematicErrorResolution[b]*systematicErrorResolution[b];
+     sum+= systematicErrorScale[b]*systematicErrorScale[b];
+     sum+= systematicErrorEfficiency[b]*systematicErrorEfficiency[b];
+     sum+= systematicErrorBackground[b]*systematicErrorBackground[b];
+     systematicError[b]=sqrt(sum);
+     hTmp->SetBinContent(b,1);
+  }
+
+  double sysL=0;
+  double sysH=0;
+  double sumL=0;
+  double sumH=0;
+  
+  for (int i=1;i<=nBin;i++)
+  {
+     if (i<=3) {
+       sysL += systematicError[i-1]*h->GetBinContent(i);
+       sumL += h->GetBinContent(i);
+     } else {
+       sysH += systematicError[i-1]*h->GetBinContent(i);
+       sumH += h->GetBinContent(i);
+     }
+  }
+  
+  cout <<"R = "<<sumH/(sumL+sumH)<<endl;
+  cout <<"sigmaR/R Cor = "<<sysL/sumL+sysH/sumH<<endl;
+  cout <<"sigmaR/R Uncor= "<<sqrt((sysL/sumL)*(sysL/sumL)+(sysH/sumH)*(sysH/sumH))<<endl;
+  cout <<"sigmaL = "<<sysL/sumL<<endl;
 
   hEmbedded->Sumw2();
   hEmbedded->Scale(1./hEmbedded->Integral(0,20));
@@ -159,8 +205,8 @@ void plotRatio(int cbin,
   hEmbedded->SetStats(0);
 
   if(drawXLabel) {
-     hEmbedded->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
-     h->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+     hEmbedded->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+     h->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
   }
   h->GetXaxis()->SetLabelSize(20);
   h->GetXaxis()->SetLabelFont(43);
@@ -179,7 +225,7 @@ void plotRatio(int cbin,
   
 
   h->SetAxisRange(0,0.3,"Y");
-
+  h->SetMarkerColor(2);
   
   h->SetYTitle("Ratio");
   hEmbedded->SetYTitle("Ratio");
@@ -193,48 +239,20 @@ void plotRatio(int cbin,
   hDataMix->SetFillStyle(3004);
   
   h->SetAxisRange(0,5,"Y");
-  hEmbedded->SetAxisRange(0,10,"Y");
+  hEmbedded->SetAxisRange(0,5,"Y");
   h->Divide(hDataMix);
   hEmbedded->Divide(hDataMix);
 
-  TLine *l = new TLine(0,1,1,1);
   h->Draw("");
 
   TH1D *hErr = getErrorBand(h);
 
-
-  double systematicErrorResolution[nBin] =
-                  {0.06,0.05,0.04,0.04,0.04,0.06,0.1,0.18,0.3,0.5,0.5};
-
-  double systematicErrorScale[nBin] =
-                  {0.06,0.05,0.04,0.03,0.02,0.02,0.03,0.04,0.05,0.08,0.1};
-
-  double systematicErrorEfficiency[nBin] =
-                  {0.00,0.00,0.00,0.00,0.00,0.00,0.07,0.07,0.07,0.07,0.07};
-
-  double systematicErrorFake[nBin] =
-                  {0.00,0.00,0.00,0.00,0.00,0.00,0.01,0.02,0.03,0.04,0.04};
-
-  double systematicError[nBin];
-
-  for (int b=0;b<nBin;b++)
-  {
-     double sum=0;
-     sum+= systematicErrorResolution[b]*systematicErrorResolution[b];
-     sum+= systematicErrorScale[b]*systematicErrorScale[b];
-     sum+= systematicErrorEfficiency[b]*systematicErrorEfficiency[b];
-     sum+= systematicErrorFake[b]*systematicErrorFake[b];
-     systematicError[b]=sqrt(sum);
-     hTmp->SetBinContent(b,1);
-  }
-
-
   TGraph *gErrorBand;
 
   if (cbin!=0) {
-     gErrorBand = GetErrorBand(hTmp,systematicError,systematicError,0.025,10);
+     gErrorBand = GetErrorBand(hTmp,systematicError,systematicError,0.025,12);
   } else {
-     gErrorBand = GetErrorBand(hTmp,systematicError,systematicError,0.025,9);
+     gErrorBand = GetErrorBand(hTmp,systematicError,systematicError,0.025,12);
   }
   gErrorBand->Draw("f");
   hEmbedded->SetMarkerStyle(4);
@@ -242,14 +260,17 @@ void plotRatio(int cbin,
   hEmbedded->SetLineColor(4);
   hEmbedded->SetLineStyle(2);
   
-  hEmbedded->Draw("same");
+  //hEmbedded->Draw("same");
+  //h->Fit("pol2");
   h->Draw("same");
+  TLine *l = new TLine(0,1,1,1);
+  l->SetLineStyle(2);
   l->Draw();
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.43,0.73,0.85,0.88); 
-    t3->AddEntry(h,"Data / PYQUEN +Data","pl");
-    t3->AddEntry(hEmbedded,"Data PF / PYQUEN + Data","l");  
+    TLegend *t3=new TLegend(0.46,0.81,0.83,0.95); 
+    t3->AddEntry(h,"Data/PYTHIA Embedded","pl");
+    //t3->AddEntry(hEmbedded,"Data PF / PYQUEN + Data","l");  
     //t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
@@ -287,7 +308,7 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+  if(drawXLabel) hdum->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);
