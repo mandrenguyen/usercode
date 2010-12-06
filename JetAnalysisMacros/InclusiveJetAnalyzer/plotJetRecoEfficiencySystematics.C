@@ -54,32 +54,51 @@ TH1D *getErrorBand(TH1* h);
 
 void plotJetRecoEfficiencySystematics(){
 
-  TCanvas *c1 = new TCanvas("c1","",1250,530);
 
-  makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
+   TCanvas *c1 = new TCanvas("c1","",1650,430);
 
+   makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
+   
   c1->cd(1);
   plotRatio(2,"data-Ineff.root","data.root","data.root",false,false,false);
-  drawText("30~100%",0.76,0.24);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawText("50~100%",0.76,0.24);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetLeftMargin(0.25);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(2);
-  plotRatio(1,"data-Ineff.root","data.root","data.root",false,true,false);
-  drawText("10~30%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  plotRatio(1,"data-Ineff.root","data.root","data.root",false,false,false);
+  drawText("30~50%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
+  plotRatio(1,"data-Ineff.root","data.root","data.root",false,true,false);
+  drawText("20~30%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
+
+  c1->cd(4);
+  plotRatio(1,"data-Ineff.root","data.root","data.root",false,false,false);
+  drawText("10~20%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
+
+  c1->cd(5);
   plotRatio(0,"data-Ineff.root","data.root","data.root",false,false,true);
   drawText("0~10%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  gPad->SetBottomMargin(0.18);
 
   TLatex *cms = new TLatex(0.086,4.5,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.15,4.1,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.15,4.1,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
