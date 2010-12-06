@@ -31,8 +31,8 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
                           const Float_t edge=0.05);
 
 void plotRatio(int cbin = 0,
-		 TString infname = "data-2ndJetCorrected.root",
-		 TString DataPF = "data.root",
+		 TString infname = "pythia.root",
+		 TString DataPF = "pythia.root",
 		 TString mix = "mix.root",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
@@ -52,26 +52,26 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 TH1D *getErrorBand(TH1* h);
 
-void plotEnergyCorrectionSystematics(){
+void plotBackgroundSystematics(){
 
   TCanvas *c1 = new TCanvas("c1","",1250,530);
 
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotRatio(2,"data-2ndJetCorrected.root","data.root","data.root",false,false,false);
-  drawText("30~100%",0.76,0.24);
+  plotRatio(2,"mix.root","mix.root","pythia.root",false,false,false);
+  drawText("30-100%",0.76,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotRatio(1,"data-2ndJetCorrected.root","data.root","data.root",false,true,false);
-  drawText("10~30%",0.75,0.24);
+  plotRatio(1,"mix.root","mix.root","pythia.root",false,true,false);
+  drawText("10-30%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
-  plotRatio(0,"data-2ndJetCorrected.root","data.root","data.root",false,false,true);
-  drawText("0~10%",0.75,0.24);
+  plotRatio(0,"mix.root","mix.root","pythia.root",false,false,true);
+  drawText("0-10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   TLatex *cms = new TLatex(0.086,4.5,"CMS Preliminary");
@@ -79,14 +79,14 @@ void plotEnergyCorrectionSystematics(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.15,4.1,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.15,4.1,"#intL dt = 3 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
-  lumi->Draw(); 
+//  lumi->Draw(); 
 
-  c1->Print("./fig/ratio_sys_energyCorrection_20101201_v1.gif");
-  c1->Print("./fig/ratio_sys_energyCorrection_20101201_v1.eps");
-  c1->Print("./fig/ratio_sys_energyCorrection_20101201_v1.pdf");
+  c1->Print("./fig/ratio_pythiaToMix_20101202_v0.gif");
+  c1->Print("./fig/ratio_pythiaToMix_20101202_v0.eps");
+  c1->Print("./fig/ratio_pythiaToMix_20101202_v0.pdf");
 
 }
 
@@ -98,17 +98,21 @@ void plotRatio(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120&& et1<2000 && et2>50 && dphi>3.14159/3*2&&(et1-et2)/(et1+et2)<10 ";
+  TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<0.55 ";
+  TString cut2="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<0.55 ";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
-    cut+=" && bin>=0 && bin<4";
+    cut+=" && (bin>=0 && bin<4 || bin==-1)";
+    cut2+=" &&(bin>=0 && bin<4 || bin==-1)";
   } else if (cbin==1) {
     cstring = "10-30%";
-    cut+=" && bin>=4 && bin<12";
+    cut+=" && (bin>=4 && bin<12 || bin==-1)";
+    cut2+=" && (bin>=4 && bin<12 || bin==-1)";
   } else {
     cstring = "30-100%";
-    cut+=" && bin>=12 && bin<40";
+    cut+=" && (bin>=12 && bin<40 || bin==-1)";
+    cut2+=" && (bin>=12 && bin<40 || bin==-1)";
   }
 
   // open the data file
@@ -126,14 +130,14 @@ void plotRatio(int cbin,
   // Variable Aj
   char *aj = "(et1-et2)/(et1+et2)";
 
-  const int nBin = 17;
-  double bins[nBin+1]={0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,1};
+  const int nBin = 13;
+  double bins[nBin+1]={0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,1};
   // projection histogram
   TH1D *h = new TH1D("h","",nBin,bins);
   TH1D *hTmp = new TH1D("hTmp","",nBin,bins);
   TH1D *hEmbedded = new TH1D("hEmbedded","",nBin,bins);
   TH1D *hDataMix = new TH1D("hDataMix","",nBin,bins);
-  nt->Draw(Form("%s>>h",aj),Form("(%s)",cut.Data())); 
+  nt->Draw(Form("%s>>h",aj),Form("(%s)*weight",cut2.Data())); 
    
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
@@ -147,7 +151,7 @@ void plotRatio(int cbin,
 
   // calculate the statistical error and normalize
   h->Sumw2();
-  h->Scale(1./h->GetEntries());
+  h->Scale(1./h->Integral(0,20));
   h->SetMarkerStyle(20);
 
   hEmbedded->Sumw2();
@@ -201,15 +205,28 @@ void plotRatio(int cbin,
 
   TH1D *hErr = getErrorBand(h);
 
-  double systematicErrorScale[nBin+1] =
-                  {0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.08,0.10,0.25,0.35,0.40};
+
+  double systematicErrorResolution[nBin] =
+                  {0.06,0.05,0.04,0.04,0.04,0.06,0.1,0.18,0.3,0.5,0.5};
+
+  double systematicErrorScale[nBin] =
+                  {0.06,0.05,0.04,0.03,0.02,0.02,0.03,0.04,0.05,0.08,0.1};
+
+  double systematicErrorEfficiency[nBin] =
+                  {0.00,0.00,0.00,0.00,0.00,0.00,0.07,0.07,0.07,0.07,0.07};
+
+  double systematicErrorBackground[nBin+1] =
+                  {0.07,0.04,0.04,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.12,0.15};
 
   double systematicError[nBin];
 
   for (int b=0;b<nBin;b++)
   {
      double sum=0;
-     sum+= systematicErrorScale[b]*systematicErrorScale[b];
+     //sum+= systematicErrorResolution[b]*systematicErrorResolution[b];
+     //sum+= systematicErrorScale[b]*systematicErrorScale[b];
+     //sum+= systematicErrorEfficiency[b]*systematicErrorEfficiency[b];
+     sum+= systematicErrorBackground[b]*systematicErrorBackground[b];
      systematicError[b]=sqrt(sum);
      hTmp->SetBinContent(b,1);
   }
@@ -229,15 +246,15 @@ void plotRatio(int cbin,
   hEmbedded->SetLineStyle(2);
   
   //hEmbedded->Draw("same");
-  //h->Fit("pol2");
+  //h->Fit("pol1","","",0,1);
   h->Draw("same");
   TLine *l = new TLine(0,1,1,1);
   l->SetLineStyle(2);
   l->Draw();
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.08,0.67,0.50,0.84); 
-    t3->AddEntry(h,"Data energy corrected / Data","pl");
+    TLegend *t3=new TLegend(0.44,0.7,0.86,0.88); 
+    t3->AddEntry(h,"PYTHIA + Data / PYTHIA","pl");
     //t3->AddEntry(hEmbedded,"Data PF / PYQUEN + Data","l");  
     //t3->AddEntry(hDataMix,"unquenched PYQUEN + Data","lf");
     t3->SetFillColor(0);
