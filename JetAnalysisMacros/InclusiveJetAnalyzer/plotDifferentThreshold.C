@@ -86,9 +86,9 @@ void plotDifferentThreshold(double th1 = 120, double th2 = 50){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print(Form("./fig/ratio_sys_resolution_%d_%d_20101126_v0.gif",(int)th1,(int)th2));
-  c1->Print(Form("./fig/ratio_sys_resolution_%d_%d_20101126_v0.eps",(int)th1,(int)th2));
-  c1->Print(Form("./fig/ratio_sys_resolution_%d_%d_20101126_v0.pdf",(int)th1,(int)th2));
+  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.gif");
+  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.eps");
+  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.pdf");
 
 }
 
@@ -134,8 +134,8 @@ void plotRatio(int cbin,
   // Variable Aj
   char *aj = "(et1-et2)/(et1+et2)";
 
-  const int nBin = 12;
-  double bins[nBin+1]={0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.8,1};
+  const int nBin = 14;
+  double bins[nBin+1]={0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.8,1};
   // projection histogram
   TH1D *h = new TH1D("h","",nBin,bins);
   TH1D *hTmp = new TH1D("hTmp","",nBin,bins);
