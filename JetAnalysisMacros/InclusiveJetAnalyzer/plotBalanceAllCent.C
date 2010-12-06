@@ -49,32 +49,37 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotBalanceAllCent(){
 
-  TCanvas *c1 = new TCanvas("c1","",1250,530);
+  TCanvas *c1 = new TCanvas("c1","",1650,530);
 
-  makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
+  makeMultiPanelCanvas(c1,4,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotBalance(2,"data.root","pythia.root","mix.root",true,false,false);
-  drawText("30-100%",0.76,0.24);
+  plotBalance(3,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("50-100%",0.76,0.24);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(2);
-  plotBalance(1,"data.root","pythia.root","mix.root",true,true,false);
-  drawText("10-30%",0.75,0.24);
+  plotBalance(2,"data.root","pythia.root","mix.root",true,true,false);
+  drawText("25-50%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
 
   c1->cd(3);
+  plotBalance(1,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("10-25%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.141);
+
+  c1->cd(4);
   plotBalance(0,"data.root","pythia.root","mix.root",true,false,true);
   drawText("0-10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
-
+  
   TLatex *cms = new TLatex(0.35,0.1825,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.73,0.1825,"#intL dt = 8.6 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -100,11 +105,14 @@ void plotBalance(int cbin,
     cstring = "0-10%";
     cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-    cstring = "10-30%";
-    cut+=" && bin>=4 && bin<12";
+    cstring = "10-25%";
+    cut+=" && bin>=4 && bin<10";
+  } else if (cbin==2) {
+     cstring = "25-50%";
+     cut+=" && bin>=10 && bin<20";
   } else {
-    cstring = "30-100%";
-    cut+=" && bin>=12 && bin<40";
+    cstring = "50-100%";
+    cut+=" && bin>=20 && bin<40";
   }
 
   // open the data file
