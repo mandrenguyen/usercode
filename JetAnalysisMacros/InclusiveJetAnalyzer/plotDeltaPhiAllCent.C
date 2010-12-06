@@ -48,35 +48,54 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotDeltaPhiAllCent(){
 
-  TCanvas *c1 = new TCanvas("c1","",1250,530);
+   TCanvas *c1 = new TCanvas("c1","",1650,430);
 
-  makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
+   makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false);
+  plotDeltaPhi(4,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("30-100%",0.27,0.57);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawText("50-100%",0.37,0.57);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetLeftMargin(0.25);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(2);
-  plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,true,false);
+  plotDeltaPhi(3,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("10-30%",0.23,0.57);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawText("30-50%",0.23,0.57);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
+  plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,true,false);
+  gPad->SetLogy();
+  drawText("20-30%",0.23,0.57);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
+
+  c1->cd(4);
+  plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,false,false);
+  gPad->SetLogy();
+  drawText("10-20%",0.23,0.57);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  gPad->SetBottomMargin(0.18);
+  drawPatch(0.976,0.0972,1.1,0.171);
+
+  c1->cd(5);
   plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,true);
   gPad->SetLogy();
   drawText("0-10%",0.23,0.57);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  gPad->SetBottomMargin(0.18);
 
-  TLatex *cms = new TLatex(0.30,0.49,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.20,0.49,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(1.45,0.49,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(1.75,0.49,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -100,17 +119,27 @@ void plotDeltaPhi(int cbin,
 
   TString cut="et1>120 && et2>50";
   TString cutpp="et1>120 && et2>50";
+ 
+
   TString cstring = "";
   if(cbin==0) {
-    cstring = "0-10%";
-    cut+=" && bin>=0 && bin<4";
+     cstring = "0-10%";
+     cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-    cstring = "10-30%";
-    cut+=" && bin>=4 && bin<12";
-  } else {
-    cstring = "30-100%";
-    cut+=" && bin>=12 && bin<40";
+     cstring = "10-20%";
+     cut+=" && bin>=4 && bin<8";
+  } else if (cbin==2) {
+     cstring = "20-30%";
+     cut+=" && bin>=8 && bin<12";
+  } else if (cbin==3) {
+     cstring = "30-50%";
+     cut+=" && bin>=12 && bin<20";
   }
+  else {
+     cstring = "50-100%";
+     cut+=" && bin>=20";
+  }
+
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
