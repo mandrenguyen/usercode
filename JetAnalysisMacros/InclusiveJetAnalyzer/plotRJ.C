@@ -154,7 +154,7 @@ void plotRJ(  double ajCut=0.24,
   for(int i = 0; i < g->GetN(); ++i){
     double *x = g->GetX();
     double *y = g->GetY();
-    DrawTick(y[i],errorbar,errorbar,x[i],0.012,8.1,16);
+    DrawTick(y[i],0.18*y[i],0.18*y[i],x[i],0.012,8.1,16);
   }
   g->Draw("p same");
   gPythia->SetMarkerColor(4);
@@ -170,7 +170,7 @@ void plotRJ(  double ajCut=0.24,
   pline->Draw();
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.5,0.72,0.9,0.88); 
+    TLegend *t3=new TLegend(0.5,0.77,0.9,0.93); 
     t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     t3->AddEntry(gPythia,"PYTHIA","pl");  
     t3->AddEntry(gMix,"embedded PYTHIA","pl");
@@ -188,7 +188,7 @@ void plotRJ(  double ajCut=0.24,
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
-  TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 3 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 3.4 #mub^{-1}");
   lumi->SetNDC();
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
