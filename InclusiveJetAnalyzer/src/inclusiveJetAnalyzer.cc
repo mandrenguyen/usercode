@@ -28,6 +28,7 @@
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "SimDataFormats/HiGenData/interface/GenHIEvent.h"
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -50,7 +51,7 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
   
 
   jetTag_ = iConfig.getParameter<InputTag>("jetTag");
-  genjetTag_ = iConfig.getParameter<InputTag>("genjetTag");
+  if(isMC_)genjetTag_ = iConfig.getParameter<InputTag>("genjetTag");
 
   verbose_ = iConfig.getUntrackedParameter<bool>("verbose",false);
 
@@ -73,7 +74,7 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
 
 
   cout<<" jet collection : "<<jetTag_<<endl;
-  cout<<" genjet collection : "<<genjetTag_<<endl;
+  if(isMC_)cout<<" genjet collection : "<<genjetTag_<<endl;
 
 
    
@@ -102,7 +103,11 @@ InclusiveJetAnalyzer::beginJob() {
   //  TTree* t= new TTree("t","Jet Response Analyzer");
   t->Branch("run",&jets_.run,"run/I");
   t->Branch("evt",&jets_.evt,"evt/I");
+  t->Branch("lumi",&jets_.lumi,"lumi/I");
   t->Branch("b",&jets_.b,"b/F");
+  t->Branch("vx",&jets_.vx,"vx/F");
+  t->Branch("vy",&jets_.vy,"vy/F");
+  t->Branch("vz",&jets_.vz,"vz/F");
   t->Branch("hf",&jets_.hf,"hf/F");
   t->Branch("nref",&jets_.nref,"nref/I");
   t->Branch("bin",&jets_.bin,"bin/I");
@@ -144,15 +149,16 @@ void
 InclusiveJetAnalyzer::analyze(const Event& iEvent, 
 			     const EventSetup& iSetup) {
   
- int event = iEvent.id().event();
+  int event = iEvent.id().event();
   int run = iEvent.id().run();
-
+  int lumi = iEvent.id().luminosityBlock();
+  
   jets_.run = run;
   jets_.evt = event;
+  jets_.lumi = lumi;
 
   LogDebug("InclusiveJetAnalyzer")<<"START event: "<<event<<" in run "<<run<<endl;
 
-  
 
  int bin = -1;
   double hf = 0.;
@@ -160,7 +166,6 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 
   if(useCentrality_){
     //if(!isMC_){
-
       if(!centrality_) centrality_ = new CentralityProvider(iSetup);      
       centrality_->newEvent(iEvent,iSetup); // make sure you do this first in every event
       //double c = centrality_->centralityValue();
@@ -201,11 +206,21 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    jets_.bin = bin;
    //jets_.hf = hf;
    
+
+   edm::Handle<vector<reco::Vertex> >vertex;
+   iEvent.getByLabel(edm::InputTag("hiSelectedVertex"), vertex);
+
+   if(vertex->size()>0) {
+     jets_.vx=vertex->begin()->x();
+     jets_.vy=vertex->begin()->y();
+     jets_.vz=vertex->begin()->z();
+   }
+   
+
+
    edm::Handle<pat::JetCollection> jets;
    iEvent.getByLabel(jetTag_, jets);
 
-
-  
    
    // FILL JRA TREE
 
@@ -216,7 +231,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      fillL1Bits(iEvent);
      fillHLTBits(iEvent);
    }
-
+   
    for(unsigned int j = 0 ; j < jets->size(); ++j){
      const pat::Jet& jet = (*jets)[j];
      
@@ -280,6 +295,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    t->Fill();
 }
 
+
   
 
 //--------------------------------------------------------------------------------------------------
@@ -325,7 +341,7 @@ void InclusiveJetAnalyzer::fillHLTBits(const edm::Event &iEvent)
   jets_.nHLTBit = triggerNames.size();
 
   for(size_t i=0;i<triggerNames.size();++i) {
-    cout <<triggerNames.triggerName(i)<<endl;
+    //cout <<triggerNames.triggerName(i)<<endl;
     jets_.hltBit[i] = triggerResultsHLT->accept(i);
   }
 }

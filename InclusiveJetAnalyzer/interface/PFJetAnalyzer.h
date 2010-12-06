@@ -56,8 +56,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
 
   edm::InputTag  pfCandidatesTag_, trackTag_;
-  edm::InputTag jetTag_, jetTag2_, jetTag3_;
-  edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_;
+  edm::InputTag jetTag_, jetTag2_, jetTag3_, jetTag4_;
+  edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_, recoJetTag4_;
 
   /// verbose ?
   bool   verbose_;
@@ -67,7 +67,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
 
   TTree *t;
-  edm::Service<TFileService> f;
+  edm::Service<TFileService> fs2;
 
   CentralityProvider * centrality_;
 
@@ -80,11 +80,14 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     
     int nicPu5;
     int nic5;
+    int nic5FJ;
     int nak5;
     int run;
     int evt;
+    int lumi;
     int bin;
     float b;
+    float vx, vy, vz;
     float hf;
 
     float rawpt_icPu5[MAXJETS];
@@ -134,6 +137,21 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float L2_ak5[MAXJETS];
     float L3_ak5[MAXJETS];
     float area_ak5[MAXJETS];
+
+    float rawpt_ic5FJ[MAXJETS];
+    float jtpt_ic5FJ[MAXJETS];
+    float refpt_ic5FJ[MAXJETS];
+    float jteta_ic5FJ[MAXJETS];
+    float refeta_ic5FJ[MAXJETS];
+    float jtphi_ic5FJ[MAXJETS];
+    float refphi_ic5FJ[MAXJETS];
+    float jty_ic5FJ[MAXJETS];
+    float refy_ic5FJ[MAXJETS];
+    float refdrjt_ic5FJ[MAXJETS];
+    float preL1et_ic5FJ[MAXJETS];
+    float L2_ic5FJ[MAXJETS];
+    float L3_ic5FJ[MAXJETS];
+    float area_ic5FJ[MAXJETS];
 
     int nPFcand;
     int candID[MAXPFCANDS];

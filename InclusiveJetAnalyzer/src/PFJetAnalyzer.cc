@@ -47,11 +47,13 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   jetTag_ = iConfig.getParameter<InputTag>("jetTag");
   jetTag2_ = iConfig.getParameter<InputTag>("jetTag2");
   jetTag3_ = iConfig.getParameter<InputTag>("jetTag3");
+  jetTag4_ = iConfig.getParameter<InputTag>("jetTag4");
 
 
   recoJetTag_ = iConfig.getParameter<InputTag>("recoJetTag");
   recoJetTag2_ = iConfig.getParameter<InputTag>("recoJetTag2");
   recoJetTag3_ = iConfig.getParameter<InputTag>("recoJetTag3");
+  recoJetTag4_ = iConfig.getParameter<InputTag>("recoJetTag4");
 
   pfCandidatesTag_ = iConfig.getParameter<InputTag>("pfCandidatesTag");
   trackTag_ = iConfig.getParameter<edm::InputTag>("trackTag");
@@ -65,9 +67,11 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   cout<<" jet collection : "<<jetTag_<<endl;
   cout<<" jet collection 2: "<<jetTag2_<<endl;
   cout<<" jet collection 3: "<<jetTag3_<<endl;
+  cout<<" jet collection 4: "<<jetTag4_<<endl;
 
    jets_.nicPu5 = 0;
    jets_.nic5 = 0;
+   jets_.nic5FJ = 0;
    jets_.nak5 = 0;
    jets_.nPFcand = 0;
 
@@ -94,19 +98,24 @@ PFJetAnalyzer::beginJob() {
 
   //string jetTagTitle = jetTag_.label()+" Jet Analysis Tree"; 
   //t = f->make<TTree>(jetTagName.c_str(),jetTagTitle.c_str());
-  t = f->make<TTree>("t","Jet Analysis Tree");
+  t = fs2->make<TTree>("t","Jet Analysis Tree");
 
 
   //  TTree* t= new TTree("t","Jet Response Analyzer");
   t->Branch("run",&jets_.run,"run/I");
   t->Branch("evt",&jets_.evt,"evt/I");
+  t->Branch("lumi",&jets_.lumi,"lumi/I");
   t->Branch("b",&jets_.b,"b/F");
+  t->Branch("vx",&jets_.vx,"vx/F");
+  t->Branch("vy",&jets_.vy,"vy/F");
+  t->Branch("vz",&jets_.vz,"vz/F");
   t->Branch("hf",&jets_.hf,"hf/F");
   t->Branch("bin",&jets_.bin,"bin/I");
 
   // ICPU5
   t->Branch("nicPu5",&jets_.nicPu5,"nicPu5/I");
   t->Branch("nic5",&jets_.nic5,"nic5/I");
+  t->Branch("nic5FJ",&jets_.nic5FJ,"nic5FJ/I");
   t->Branch("nak5",&jets_.nak5,"nak5/I");
 
   t->Branch("rawpt_icPu5",jets_.rawpt_icPu5,"rawpt_icPu5[nicPu5]/F");
@@ -171,6 +180,26 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refdrjt_ak5",jets_.refdrjt_ak5,"refdrjt_ak5[nak5]/F");
   }
 
+ // IC5FJ
+
+  t->Branch("rawpt_ic5FJ",jets_.rawpt_ic5FJ,"rawpt_ic5FJ[nic5FJ]/F");
+  t->Branch("jtpt_ic5FJ",jets_.jtpt_ic5FJ,"jtpt_ic5FJ[nic5FJ]/F");
+  t->Branch("jteta_ic5FJ",jets_.jteta_ic5FJ,"jteta_ic5FJ[nic5FJ]/F");
+  t->Branch("jty_ic5FJ",jets_.jty_ic5FJ,"jty_ic5FJ[nic5FJ]/F");
+  t->Branch("jtphi_ic5FJ",jets_.jtphi_ic5FJ,"jtphi_ic5FJ[nic5FJ]/F");
+  t->Branch("preL1et_ic5FJ",jets_.preL1et_ic5FJ,"preL1et_ic5FJ[nic5FJ]/F");
+  t->Branch("L2_ic5FJ",jets_.L2_ic5FJ,"L2_ic5FJ[nic5FJ]/F");
+  t->Branch("L3_ic5FJ",jets_.L3_ic5FJ,"L3_ic5FJ[nic5FJ]/F");
+  t->Branch("area_ic5FJ",jets_.area_ic5FJ,"area_ic5FJ[nic5FJ]/F");
+
+  if(isMC_){
+    t->Branch("refpt_ic5FJ",jets_.refpt_ic5FJ,"refpt_ic5FJ[nic5FJ]/F");
+    t->Branch("refeta_ic5FJ",jets_.refeta_ic5FJ,"refeta_ic5FJ[nic5FJ]/F");
+    t->Branch("refy_ic5FJ",jets_.refy_ic5FJ,"refy_ic5FJ[nic5FJ]/F");
+    t->Branch("refphi_ic5FJ",jets_.refphi_ic5FJ,"refphi_ic5FJ[nic5FJ]/F");
+    t->Branch("refdrjt_ic5FJ",jets_.refdrjt_ic5FJ,"refdrjt_ic5FJ[nic5FJ]/F");
+  }
+
   t->Branch("nPFcand",&jets_.nPFcand,"nPFcand/I");
   t->Branch("candID",jets_.candID,"candID[nPFcand]/I");
   t->Branch("candpt",jets_.candpt,"candpt[nPFcand]/F");
@@ -197,17 +226,25 @@ PFJetAnalyzer::analyze(const Event& iEvent,
   
 
 
-
- int event = iEvent.id().event();
+  int event = iEvent.id().event();
   int run = iEvent.id().run();
+  int lumi = iEvent.id().luminosityBlock();
 
   jets_.run = run;
   jets_.evt = event;
+  jets_.lumi = lumi;
 
   LogDebug("PFJetAnalyzer")<<"START event: "<<event<<" in run "<<run<<endl;
   
 
-  
+  edm::Handle<vector<reco::Vertex> >vertex;
+  iEvent.getByLabel(edm::InputTag("hiSelectedVertex"), vertex);  
+ 
+  if(vertex->size()>0) {
+    jets_.vx=vertex->begin()->x();
+    jets_.vy=vertex->begin()->x();
+    jets_.vz=vertex->begin()->z();
+  }
 
  int bin = -1;
   double hf = 0.;
@@ -268,6 +305,9 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    edm::Handle<pat::JetCollection> jets3;
    iEvent.getByLabel(jetTag3_, jets3);
 
+   edm::Handle<pat::JetCollection> jets4;
+   iEvent.getByLabel(jetTag4_, jets4);
+
 
    edm::Handle< edm::View<reco::CaloJet> > recoJetColl;
    iEvent.getByLabel( recoJetTag_, recoJetColl );
@@ -277,6 +317,9 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
    edm::Handle< edm::View<reco::PFJet> > recoJetColl3;
    iEvent.getByLabel(recoJetTag3_, recoJetColl3 );
+
+   edm::Handle< edm::View<reco::CaloJet> > recoJetColl4;
+   iEvent.getByLabel(recoJetTag4_, recoJetColl4 );
 
 
    Handle<PFCandidateCollection> pfCandidates;
@@ -582,6 +625,97 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
 
 
+   jets_.nic5FJ = 0;
+   
+
+   
+   for(unsigned int j = 0 ; j < jets4->size(); ++j){
+     const pat::Jet& jet4 = (*jets4)[j];
+
+     //cout<<" jet pt "<<jet4.pt()<<endl;
+     //if(jet4.pt() < jetPtMin) continue;
+     jets_.rawpt_ic5FJ[jets_.nic5FJ]=jet4.correctedJet("raw").pt();
+     jets_.jtpt_ic5FJ[jets_.nic5FJ] = jet4.pt();                            
+     jets_.jteta_ic5FJ[jets_.nic5FJ] = jet4.eta();
+     jets_.jtphi_ic5FJ[jets_.nic5FJ] = jet4.phi();
+     jets_.jty_ic5FJ[jets_.nic5FJ] = jet4.eta();
+     //  cout<<" abs corr "<<jet4.corrFactor("abs")<<endl;
+     //cout<<" abs corr "<<jet4.corrFactor("L3Absolute")<<endl;
+
+
+       float L2Corr = jet4.correctedJet("rel").pt()/jet4.correctedJet("raw").pt();
+       float L3Corr = jet4.correctedJet("abs").pt()/jet4.correctedJet("rel").pt();
+       
+
+       jets_.L2_ic5FJ[jets_.nic5FJ] = L2Corr;
+       jets_.L3_ic5FJ[jets_.nic5FJ] = L3Corr;
+
+       jets_.area_ic5FJ[jets_.nic5FJ] = jet4.jetArea();
+
+       // Match to reco jet to find unsubtracted jet energy
+       if(1==0){
+	 int recoJetSize4 = recoJetColl4->size();
+	 
+	 jets_.preL1et_ic5FJ[jets_.nic5FJ] = -1;
+	 
+	 //cout<<" patJet_eta "<<jet4.eta()<<" patJet_phi "<<jet4.phi()<<" patJet_et "<<jet4.et()<<endl;
+	 
+	 for(int iRecoJet = 0; iRecoJet < recoJetSize4; ++iRecoJet){
+	   
+	   reco::CaloJet recoJet4 = ((*recoJetColl4)[iRecoJet]);
+	   
+	   
+	   double recoJet_eta = recoJet4.eta();
+	   double recoJet_phi = recoJet4.phi();
+	   //cout<<" recoJet_eta "<<recoJet_eta<<" recoJet_phi "<<recoJet_phi<<" recoJet_et "<<recoJet4.et()<<endl;
+	   
+	   
+	   if(fabs(recoJet4.eta()-jet4.eta()) < 0.001
+	      && fabs(acos(cos((recoJet4.phi()-jet4.phi())))) < 0.001)
+	     {
+	       jets_.preL1et_ic5FJ[jets_.nic5FJ] = recoJet4.et();
+	       
+	       //cout<<"Match found,  recoJet4.et "<<recoJet4.et()<< " recoJet4.eta "<<jet4.eta()<<" recoJet4.phi "<<recoJet4.phi()<<endl;
+	       break;
+	     }
+	 }
+	 if(jets_.preL1et_ic5FJ[jets_.nic5FJ] == -1){
+	   
+	   
+	   //There's a known issue here.  If the background subtraction oversubtracts I've set the patJet.et() to zero.  That would be fine if I had also set the eta and phi.  We could then recover the pre-subtracted energy.  However, I never bothered to set the eta and phi for theses jets (doh!).  Next time I repass the data I won't be so stupid.
+	   
+	   
+	   
+	   if(jet4.et()>0)cout<<"Match *NOT* found,  patJet4.et "<<jet4.et()<< " patJet4.eta "<<jet4.eta()<<" patJet4.phi() "<<jet4.phi()<<endl;
+	 }
+       }
+     if(isMC_){
+       
+       
+       if(jet4.genJet()!=0 && jet4.genJet()->pt()>1.0 && jet4.genJet()->pt()<999999){
+	 jets_.refpt_ic5FJ[jets_.nic5FJ] = jet4.genJet()->pt();
+	 jets_.refeta_ic5FJ[jets_.nic5FJ] = jet4.genJet()->eta();
+	 jets_.refphi_ic5FJ[jets_.nic5FJ] = jet4.genJet()->phi();
+	 jets_.refy_ic5FJ[jets_.nic5FJ] = jet4.genJet()->eta();
+	 
+	 jets_.refdrjt_ic5FJ[jets_.nic5FJ] = reco::deltaR(jet4,*(jet4.genJet()));
+       }        
+       else{
+	 jets_.refpt_ic5FJ[jets_.nic5FJ] = 0;
+	 jets_.refeta_ic5FJ[jets_.nic5FJ] = -999;
+	 jets_.refphi_ic5FJ[jets_.nic5FJ] = -999;
+	 jets_.refy_ic5FJ[jets_.nic5FJ] = -999;
+       }
+       
+     }
+
+     
+     jets_.nic5FJ++;
+     
+   }
+
+
+
    for( unsigned icand=0; icand<pfCandidates->size(); icand++ ) {
      
      const reco::PFCandidate& cand = (*pfCandidates)[icand];
@@ -645,6 +779,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
    jets_.nicPu5 = 0;
    jets_.nic5 = 0;
+   jets_.nic5FJ = 0;
    jets_.nak5 = 0;
    jets_.nPFcand = 0;
    jets_.ntrack = 0;

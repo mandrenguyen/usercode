@@ -101,7 +101,9 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
     unsigned char nref;
     int run;
     int evt;
+    int lumi;
     int bin;
+    float vx, vy, vz;
     float b;
     float hf;
     float rawpt[MAXJETS];
