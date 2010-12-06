@@ -52,24 +52,11 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
   fSmear->SetRange(-35,35);
 
   // Take the tree from the file
-  TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile.c_str());
+  TFile *f = new TFile(infile);
 
-  char *dirname=NULL;
-  if(useAK5PF)dirname = "ak5PFJetAnalyzer";
-  else dirname = "inclusiveJetAnalyzer";
+  char *treename = "icPu5patJets_tree";
 
-  cout<<" looking in directory: "<<dirname<<endl;
-
-  if (!f) {
-    f =  TFile::Open(infile.c_str());
-    f->cd(dirname);
-  }
-
-  char *treename=NULL;
-  if(useAK5PF)treename = "ak5PFpatJets_tree";
-  else treename = "icPu5patJets_tree";
-
-  TTree *t = (TTree*)gDirectory->Get(treename);
+  TTree *t = (TTree*)f->FindObjectAny(treename);
   
     /*  // legacy
    if (t==0) {
@@ -129,7 +116,7 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
 // TTreePlayer->SetBranchStatus("branchname",1);  // activate branchname
 
    // create output file 
-   TFile *fout=new TFile(outfile.c_str(),"RECREATE");
+   TFile *fout=new TFile(outfile,"RECREATE");
    // add a small ntuple for light analysis
    TNtuple *nt = new TNtuple("nt","","et1:eta1:phi1:unc1:et2:eta2:phi2:unc2:et3:eta3:phi3:bin:dphi:dphi2:weight:fRes:run");
 
@@ -153,7 +140,7 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
    TH2F *hLeadingResolutionVsPt = new TH2F("hLeadingResolutionVsPt","hLeadingResolutionVsPt",100,-5.,5.,100,0,500);
    TH2F *hSubLeadingResolutionVsPt = new TH2F("hSubLeadingResolutionVsPt","hSubLeadingResolutionVsPt",100,-5.,5.,100,0,500);
 
-   TFile *fcent_Data = new TFile("CentDist_Data_v10.root");
+   TFile *fcent_Data = new TFile("CentDist_Data_v6.root");
    TH1F *hCent_Data = (TH1F*)fcent_Data->Get("h");
    float cent_integral_Data = 1.;
    if(central==1)cent_integral_Data=hCent_Data->Integral(1,4);
