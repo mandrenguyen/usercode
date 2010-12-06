@@ -48,38 +48,58 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotLeadingJetAllCent(){
 
-  TCanvas *c1 = new TCanvas("c1","",1250,530);
+  TCanvas *c1 = new TCanvas("c1","",1650,430);
 
-  makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
+  makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
+
 
   c1->cd(1);
   plotLeadingJet(2,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
   drawText("30-100%",0.25,0.8);
   drawPatch(0.976,0.0972,1.1,0.141);
+  gPad->SetBottomMargin(0.18);
+  gPad->SetLeftMargin(0.24);
 
   c1->cd(2);
-  plotLeadingJet(1,"data.root","pythia.root","mix.root",true,true,false);
+  plotLeadingJet(1,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
   drawText("10-30%",0.08,0.8);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
   drawPatch(0.976,0.0972,1.1,0.141);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
+  plotLeadingJet(2,"data.root","pythia.root","mix.root",true,true,false);
+  gPad->SetLogy();
+  drawText("30-100%",0.25,0.8);
+  drawPatch(0.976,0.0972,1.1,0.141);
+  gPad->SetBottomMargin(0.18);
+
+  c1->cd(4);
+  plotLeadingJet(1,"data.root","pythia.root","mix.root",true,false,false);
+  gPad->SetLogy();
+  drawText("10-30%",0.08,0.8);
+  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(0.976,0.0972,1.1,0.141);
+  gPad->SetBottomMargin(0.18);
+
+  c1->cd(5);
   plotLeadingJet(0,"data.root","pythia.root","mix.root",true,false,true);
   gPad->SetLogy();
   drawText("0-10%",0.08,0.8);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
+  gPad->SetBottomMargin(0.18);
 
-  TLatex *cms = new TLatex(150,1.8,"CMS Preliminary");
+  TLatex *cms = new TLatex(140,1.625,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
-  cms->Draw();                                                                                                                                        
+  cms->Draw();
 
-  TLatex *lumi = new TLatex(190,1.8,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(186,1.625,"#intL dt = 8.6 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
-  lumi->Draw(); 
+  lumi->Draw();
 
   c1->Print("./fig/dijet_leadingjet_all_cent_20101126_v0.gif");
   c1->Print("./fig/dijet_leadingjet_all_cent_20101126_v0.eps");
@@ -101,15 +121,25 @@ void plotLeadingJet(int cbin,
   TString cut="et1>120 && et2>50 && dphi>2.5";
   TString cutpp="et1>120 && et2>50 && dphi>2.5";
   TString cstring = "";
+
+
+  TString cstring = "";
   if(cbin==0) {
-    cstring = "0-10%";
-    cut+=" && bin>=0 && bin<4";
+     cstring = "0-10%";
+     cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-    cstring = "10-30%";
-    cut+=" && bin>=4 && bin<12";
-  } else {
-    cstring = "30-100%";
-    cut+=" && bin>=12 && bin<40";
+     cstring = "10-20%";
+     cut+=" && bin>=4 && bin<8";
+  } else if (cbin==2) {
+     cstring = "20-30%";
+     cut+=" && bin>=8 && bin<12";
+  } else if (cbin==3) {
+     cstring = "30-50%";
+     cut+=" && bin>=12 && bin<20";
+  }
+  else {
+     cstring = "50-100%";
+     cut+=" && bin>=20";
   }
 
   // open the data file
