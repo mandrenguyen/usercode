@@ -61,35 +61,35 @@ void plotEnergySmearingSystematics(){
 
   c1->cd(1);
   plotRatio(4,"data-smeared.root","data.root","data.root",false,false,false);
-  drawText("50~100%",0.72,0.24);
+  drawText("50-100%",0.72,0.24);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetLeftMargin(0.25);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(2);
   plotRatio(3,"data-smeared.root","data.root","data.root",false,false,false);
-  drawText("30~50%",0.7,0.24);
+  drawText("30-50%",0.7,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
   plotRatio(2,"data-smeared.root","data.root","data.root",false,true,false);
-  drawText("20~30%",0.7,0.24);
+  drawText("20-30%",0.7,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(4);
   plotRatio(1,"data-smeared.root","data.root","data.root",false,false,false);
-  drawText("10~20%",0.7,0.24);
+  drawText("10-20%",0.7,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(5);
   plotRatio(0,"data-smeared.root","data.root","data.root",false,false,true);
-  drawText("0~10%",0.73,0.24);
+  drawText("0-10%",0.73,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   gPad->SetBottomMargin(0.18);
 
@@ -98,14 +98,14 @@ void plotEnergySmearingSystematics(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.15,4.1,"#intL dt = 7 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.15,4.1,"#intL dt = 6.9 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ratio_sys_resolution_20101201_v1.gif");
-  c1->Print("./fig/ratio_sys_resolution_20101201_v1.eps");
-  c1->Print("./fig/ratio_sys_resolution_20101201_v1.pdf");
+  c1->Print("./fig/ratio_sys_resolution_20101207_v0.gif");
+  c1->Print("./fig/ratio_sys_resolution_20101207_v0.eps");
+  c1->Print("./fig/ratio_sys_resolution_20101207_v0.pdf");
 
 }
 
@@ -117,7 +117,7 @@ void plotRatio(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<10 ";
+  TString cut="et1>120&& et1<2000 && et2>50 && dphi>3.1415926/3*2&&(et1-et2)/(et1+et2)<10 ";
   TString cstring = "";
   if(cbin==0) {
      cstring = "0-10%";
@@ -230,7 +230,7 @@ void plotRatio(int cbin,
 
 
   double systematicErrorResolution[nBin+1] =
-                  {0.25,0.05,0.02,0.02,0.02,0.02,0.03,0.05,0.07,0.11,0.15,0.25};
+                  {0.28,0.07,0.03,0.03,0.03,0.03,0.03,0.05,0.07,0.11,0.15,0.25};
 
   double systematicError[nBin];
 

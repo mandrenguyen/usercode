@@ -61,35 +61,35 @@ void plotJetRecoEfficiencySystematics(){
    
   c1->cd(1);
   plotRatio(2,"data-Ineff.root","data.root","data.root",false,false,false);
-  drawText("50~100%",0.76,0.24);
+  drawText("50-100%",0.76,0.24);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetLeftMargin(0.25);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(2);
   plotRatio(1,"data-Ineff.root","data.root","data.root",false,false,false);
-  drawText("30~50%",0.75,0.24);
+  drawText("30-50%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
   plotRatio(1,"data-Ineff.root","data.root","data.root",false,true,false);
-  drawText("20~30%",0.75,0.24);
+  drawText("20-30%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(4);
   plotRatio(1,"data-Ineff.root","data.root","data.root",false,false,false);
-  drawText("10~20%",0.75,0.24);
+  drawText("10-20%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(5);
   plotRatio(0,"data-Ineff.root","data.root","data.root",false,false,true);
-  drawText("0~10%",0.75,0.24);
+  drawText("0-10%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   gPad->SetBottomMargin(0.18);
 
@@ -103,9 +103,9 @@ void plotJetRecoEfficiencySystematics(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ratio_checkIneff_20101201_v2.gif");
-  c1->Print("./fig/ratio_checkIneff_20101201_v2.eps");
-  c1->Print("./fig/ratio_checkIneff_20101201_v2.pdf");
+  c1->Print("./fig/ratio_checkIneff_20101207_v0.gif");
+  c1->Print("./fig/ratio_checkIneff_20101207_v0.eps");
+  c1->Print("./fig/ratio_checkIneff_20101207_v0.pdf");
 
 }
 

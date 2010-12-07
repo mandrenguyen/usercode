@@ -84,9 +84,9 @@ void plotBackgroundSystematics(){
   lumi->SetTextSize(15);
 //  lumi->Draw(); 
 
-  c1->Print("./fig/ratio_pythiaToMix_20101202_v0.gif");
-  c1->Print("./fig/ratio_pythiaToMix_20101202_v0.eps");
-  c1->Print("./fig/ratio_pythiaToMix_20101202_v0.pdf");
+  c1->Print("./fig/ratio_pythiaToMix_20101207_v0.gif");
+  c1->Print("./fig/ratio_pythiaToMix_20101207_v0.eps");
+  c1->Print("./fig/ratio_pythiaToMix_20101207_v0.pdf");
 
 }
 
@@ -98,8 +98,8 @@ void plotRatio(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<0.55 ";
-  TString cut2="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<0.55 ";
+  TString cut="et1>120&& et1<2000 && et2>50 && dphi>3.14159/3*2&&(et1-et2)/(et1+et2)<0.55 ";
+  TString cut2="et1>120&& et1<2000 && et2>50 && dphi>3.14159/3*2&&(et1-et2)/(et1+et2)<0.55 ";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
