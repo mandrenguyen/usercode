@@ -39,8 +39,8 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
     isMC=1;
   }
   if(data_pythia_mix==2){
-    infile = "/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root";
-      //infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Pyquen_DataEmbedded_pt80_v1.root";
+    //infile = "/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root";
+     infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees//merged_jetTree_Pyquen_DataEmbedded_pt80_v2.root";
     if(useAK5PF) outfile = "mix_AK5PF.root";
     else outfile  = "mix.root";
     useWeight = 1;
@@ -75,7 +75,8 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile.c_str());
 
   char *dirname=NULL;
-  if(data_pythia_mix==0 || data_pythia_mix==2){
+  //  if(data_pythia_mix==0 || data_pythia_mix==2){
+  if(data_pythia_mix==0){
     if(useAK5PF)dirname = "ak5PFJetAnalyzer";
     else dirname = "inclusiveJetAnalyzer";
   }
@@ -144,6 +145,7 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
    t->SetBranchAddress("jty",jty);
    t->SetBranchAddress("jtphi",jtphi);
    
+   /*
    if(isMC){
      t->SetBranchAddress("ngen",&ngen);
      t->SetBranchAddress("genpt",genpt);
@@ -152,7 +154,7 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
      t->SetBranchAddress("genphi",genphi);
      t->SetBranchAddress("gendrjt",gendrjt);
    }
-
+   */
 //     This is the loop skeleton
 //       To read only selected branches, Insert statements like:
 // t->SetBranchStatus("*",0);  // disable all branches
