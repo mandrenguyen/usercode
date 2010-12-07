@@ -38,7 +38,6 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
   TTimeStamp myTime;
   gRandom->SetSeed(myTime.GetNanoSec());
 
-
   // Jet energy correction
   JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("CondFormats/JetMETObjects/data/Spring10_Uncertainty_AK5Calo.txt");
   
@@ -70,22 +69,26 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
 //Declaration of leaves types
    Int_t           run;
    Int_t           evt;
+   Int_t           lumi;
    Float_t         b;
    Float_t         hf;
    Int_t           nref;
+   Int_t           ngen;
    Int_t           bin;
-   Float_t         jtpt[999];
-   Float_t         jteta[999];
-   Float_t         jty[999];
-   Float_t         jtphi[999];
-   Float_t         refpt[999];
-   Float_t         refeta[999];
-   Float_t         refy[999];
-   Float_t         refphi[999];
-   Float_t         refdrjt[999];
+   Float_t         jtpt[99];
+   Float_t         jteta[99];
+   Float_t         jty[99];
+   Float_t         jtphi[99];
+   Float_t         genpt[99];
+   Float_t         geneta[99];
+   Float_t         geny[99];
+   Float_t         genphi[99];
+   Float_t         gendrjt[99];
+
 
    // Set branch addresses.
    t->SetBranchAddress("run",&run);
+   t->SetBranchAddress("lumi",&lumi);
    t->SetBranchAddress("evt",&evt);
    t->SetBranchAddress("b",&b);
    t->SetBranchAddress("hf",&hf);
@@ -103,13 +106,14 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
    t->SetBranchAddress("jtphi",jtphi);
    
    if(isMC){
-     t->SetBranchAddress("refpt",refpt);
-     t->SetBranchAddress("refeta",refeta);
-     t->SetBranchAddress("refy",refy);
-     t->SetBranchAddress("refphi",refphi);
-     t->SetBranchAddress("refdrjt",refdrjt);
+     t->SetBranchAddress("ngen",&ngen);
+     t->SetBranchAddress("genpt",genpt);
+     t->SetBranchAddress("geneta",geneta);
+     t->SetBranchAddress("geny",geny);
+     t->SetBranchAddress("genphi",genphi);
+     t->SetBranchAddress("gendrjt",gendrjt);
    }
-
+   
 //     This is the loop skeleton
 //       To read only selected branches, Insert statements like:
 // t->SetBranchStatus("*",0);  // disable all branches
@@ -140,7 +144,7 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
    TH2F *hLeadingResolutionVsPt = new TH2F("hLeadingResolutionVsPt","hLeadingResolutionVsPt",100,-5.,5.,100,0,500);
    TH2F *hSubLeadingResolutionVsPt = new TH2F("hSubLeadingResolutionVsPt","hSubLeadingResolutionVsPt",100,-5.,5.,100,0,500);
 
-   TFile *fcent_Data = new TFile("CentDist_Data_v6.root");
+   TFile *fcent_Data = new TFile("CentDist_Data_v13.root");
    TH1F *hCent_Data = (TH1F*)fcent_Data->Get("h");
    float cent_integral_Data = 1.;
    if(central==1)cent_integral_Data=hCent_Data->Integral(1,4);
@@ -156,7 +160,54 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
       if (i% 10000 == 0) cout <<run<<" "<<i<<" "<<count<<endl;
       nbytes += t->GetEntry(i);
       if (nref==0) continue;
-//      if (run==152625) continue;
+      
+      //Marguerite's HCAL filterering identified these events, but too late for a repass so remove by hand
+      if(isMC==0){
+        if(run== 151211 && evt == 555881 && lumi ==  103 ) continue;
+	if(run== 151238 && evt == 581194 && lumi ==  105 ) continue;
+	if(run== 151238 && evt == 1299690 && lumi ==  242) continue;
+	if(run== 151352 && evt == 55195 && lumi ==  10	 ) continue;
+	if(run== 151878 && evt == 594808 && lumi ==  135 ) continue;
+	if(run== 152047 && evt == 666877 && lumi ==  114 ) continue;
+	if(run== 152112 && evt == 2207843 && lumi ==  426) continue;
+	if(run== 152112 && evt == 3151220 && lumi ==  608) continue;
+	if(run== 152349 && evt == 939393 && lumi ==  220 ) continue;
+	if(run== 152350 && evt == 595632 && lumi ==  111 ) continue;
+	if(run== 152350 && evt == 2482917 && lumi ==  472) continue;
+	if(run== 152350 && evt == 2686548 && lumi ==  512) continue;
+	if(run== 152474 && evt == 2085185 && lumi ==  403) continue;
+	if(run== 152477 && evt == 1890056 && lumi ==  392) continue;
+	if(run== 152485 && evt == 55917 && lumi ==  12	 ) continue;
+	if(run== 152561 && evt == 3406888 && lumi ==  606) continue;
+	if(run== 152561 && evt == 3758331 && lumi ==  670) continue;
+	if(run== 152561 && evt == 4478132 && lumi ==  803) continue;
+	if(run== 152561 && evt == 4797830 && lumi ==  863) continue;
+	if(run== 152561 && evt == 5176016 && lumi ==  936) continue;
+	if(run== 152592 && evt == 22234 && lumi ==  4	 ) continue;
+	if(run== 152592 && evt == 402212 && lumi ==  66	 ) continue;
+	if(run== 152594 && evt == 587793 && lumi ==  110 ) continue;
+	if(run== 152601 && evt == 1417393 && lumi ==  267) continue;
+	if(run== 152602 && evt == 686565 && lumi ==  111 ) continue;
+	if(run== 152602 && evt == 3940942 && lumi ==  684) continue;
+	if(run== 152624 && evt == 995626 && lumi ==  170 ) continue;
+	if(run== 152624 && evt == 1063452 && lumi ==  182) continue;
+	if(run== 152624 && evt == 1250655 && lumi ==  215) continue;
+	if(run== 152624 && evt == 1846646 && lumi ==  322) continue;
+	if(run== 152625 && evt == 1634959 && lumi ==  282) continue;
+	if(run== 152625 && evt == 3162245 && lumi ==  563) continue;
+	if(run== 152641 && evt == 173478 && lumi ==  31	 ) continue;
+	if(run== 152642 && evt == 359181 && lumi ==  57	 ) continue;
+	if(run== 152642 && evt == 1764595 && lumi ==  286) continue;
+	if(run== 152642 && evt == 2686223 && lumi ==  446) continue;
+	if(run== 152721 && evt == 1304320 && lumi ==  249) continue;
+	if(run== 152721 && evt == 1983505 && lumi ==  358) continue;
+	if(run== 152722 && evt == 2963949 && lumi ==  485) continue;
+	if(run== 152741 && evt == 558533 && lumi ==  91	 ) continue;
+	if(run== 152751 && evt == 3432123 && lumi ==  582) continue;
+	if(run== 152791 && evt == 246343 && lumi ==  39  ) continue; 
+      }
+      
+      
       
       int max_jet_index = -1;
       int sub_jet_index = -1;
@@ -218,7 +269,7 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
            }
         }
         if(fabs(jteta[ijet]) < 2 // this is the value that has been changed from 2 -> 3
-           && candPt> sub_jet_pt)
+           && candPt > sub_jet_pt)
           {
 	    third_jet_index = sub_jet_index;
 	    third_jet_pt = sub_jet_pt;
@@ -230,14 +281,13 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
             sub_jet_phi = jtphi[ijet];
             sub_jet_eta = jteta[ijet];
           } else if (fabs(jteta[ijet]) < 2 // this is the value that has been changed from 2 -> 3
-           && candPt> third_jet_pt)
+           && candPt > third_jet_pt)
           {
             third_jet_index = ijet;
             third_jet_pt = candPt;
             third_jet_phi = jtphi[ijet];
             third_jet_eta = jteta[ijet];
           }
-	
       }
 
       float dphi = max_jet_phi - sub_jet_phi;
@@ -289,7 +339,7 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
       var[16]=run;
       nt->Fill(var);
       count++;
-
+      /*  // This would need to be updated to use gen info
       if(isMC){
 
 	float max_ref_pt = refpt[max_jet_index];
@@ -318,7 +368,7 @@ isMC=0, int useWeight=1, int central = 0, int useRawPt = 0, int correctAwaySideJ
 	if(sub_jet_index>-1 && sub_ref_pt>0)hSubLeadingResolutionVsPt->Fill((sub_jet_pt-sub_ref_pt)/sub_ref_pt,sub_ref_pt,weight);
 
       }
-
+      */
    }
 
    // Write to output file.
