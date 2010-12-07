@@ -51,27 +51,30 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
   
 
   jetTag_ = iConfig.getParameter<InputTag>("jetTag");
+
+  isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
+
   if(isMC_)genjetTag_ = iConfig.getParameter<InputTag>("genjetTag");
 
   verbose_ = iConfig.getUntrackedParameter<bool>("verbose",false);
 
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
-  isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
 
-  if(!isMC_)L1gtReadout_ = iConfig.getParameter<edm::InputTag>("L1gtReadout");
-  hltResName_ = iConfig.getUntrackedParameter<string>("hltTrgResults","TriggerResults::HLT");
-
-   
-  if (iConfig.exists("hltTrgNames"))
-    hltTrgNames_ = iConfig.getUntrackedParameter<vector<string> >("hltTrgNames");
-  
-  if (iConfig.exists("hltProcNames"))
-    hltProcNames_ = iConfig.getUntrackedParameter<vector<string> >("hltProcNames");
-  else {
-    hltProcNames_.push_back("FU");
-    hltProcNames_.push_back("HLT");
+  if(!isMC_){
+    L1gtReadout_ = iConfig.getParameter<edm::InputTag>("L1gtReadout");
+    hltResName_ = iConfig.getUntrackedParameter<string>("hltTrgResults","TriggerResults::HLT");
+    
+    
+    if (iConfig.exists("hltTrgNames"))
+      hltTrgNames_ = iConfig.getUntrackedParameter<vector<string> >("hltTrgNames");
+    
+    if (iConfig.exists("hltProcNames"))
+      hltProcNames_ = iConfig.getUntrackedParameter<vector<string> >("hltProcNames");
+    else {
+      hltProcNames_.push_back("FU");
+      hltProcNames_.push_back("HLT");
+    }
   }
-
 
   cout<<" jet collection : "<<jetTag_<<endl;
   if(isMC_)cout<<" genjet collection : "<<genjetTag_<<endl;
@@ -291,7 +294,6 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      }
      
    }
-
    t->Fill();
 }
 

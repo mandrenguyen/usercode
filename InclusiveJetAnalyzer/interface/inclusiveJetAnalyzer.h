@@ -98,7 +98,7 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
 
   struct JRA{
     
-    unsigned char nref;
+    int nref;
     int run;
     int evt;
     int lumi;
@@ -117,7 +117,7 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
     float refy[MAXJETS];
 
 
-    unsigned char ngen;
+    int ngen;
     int genmatchindex[MAXJETS];
     float genpt[MAXJETS];
     float geneta[MAXJETS];
