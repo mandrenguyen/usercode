@@ -105,9 +105,9 @@ void plotDifferentThreshold(double th1 = 120, double th2 = 50){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.gif",th1,th2);
-  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.eps",th1,th2);
-  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.pdf",th1,th2);
+  c1->Print(Form("./fig/ratio_sys_threshold-%f-%f_20101130_v0.gif",th1,th2));
+  c1->Print(Form("./fig/ratio_sys_threshold-%f-%f_20101130_v0.eps",th1,th2));
+  c1->Print(Form("./fig/ratio_sys_threshold-%f-%f_20101130_v0.pdf",th1,th2));
 
 }
 
