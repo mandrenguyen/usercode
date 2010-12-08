@@ -47,26 +47,44 @@ void drawPatch(float x1, float y1, float x2, float y2);
 //---------------------------------------------------------------------
 
 void plotResolutionSysAllCent(){
-
-  TCanvas *c1 = new TCanvas("c1","",1250,530);
-
-  makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
+  TCanvas *c1 = new TCanvas("c1","",1650,430);
+   
+  makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
+   
 
   c1->cd(1);
-  plotEnergyScaleSys(2,"mix.root",true,false,false);
-  drawText("30-100%",0.75,0.34);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  plotEnergyScaleSys(4,"mix.root",true,false,false);
+  drawText("50-100%",0.76,0.24);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetLeftMargin(0.25);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(2);
-  plotEnergyScaleSys(1,"mix.root",true,true,false);
-  drawText("10-30%",0.75,0.34);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  plotEnergyScaleSys(3,"mix.root",true,false,false);
+  drawText("30-50%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
+  plotEnergyScaleSys(2,"mix.root",true,true,false);
+  drawText("20-30%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
+
+  c1->cd(4);
+  plotEnergyScaleSys(1,"mix.root",true,false,false);
+  drawText("10-20%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  drawPatch(0.976,0.0972,1.1,0.171);
+  gPad->SetBottomMargin(0.18);
+
+  c1->cd(5);
   plotEnergyScaleSys(0,"mix.root",true,false,true);
-  drawText("0-10%",0.75,0.34);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawText("0-10%",0.75,0.24);
+  drawPatch(-0.00007,0.0972,0.0518,0.171);
+  gPad->SetBottomMargin(0.18);
 
   TLatex *cms = new TLatex(0.30,3.675,"CMS Preliminary");
   cms->SetTextFont(63);
@@ -78,9 +96,9 @@ void plotResolutionSysAllCent(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ResolutionSystematics_all_cent_20101127_v2.gif");
-  c1->Print("./fig/ResolutionSystematics_all_cent_20101127_v2.eps");
-  c1->Print("./fig/ResolutionSystematics_all_cent_20101127_v2.pdf");
+  c1->Print("./fig/ResolutionSystematics_all_cent_20101207_v0.gif");
+  c1->Print("./fig/ResolutionSystematics_all_cent_20101207_v0.eps");
+  c1->Print("./fig/ResolutionSystematics_all_cent_20101207_v0.pdf");
 
 }
 
@@ -90,22 +108,26 @@ void plotEnergyScaleSys(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120 && et2>50 && dphi>2.5";
+  TString cut="et1>120&& et1<2000 && et2>50 && dphi>3.1415926/3*2&&(et1-et2)/(et1+et2)<10 ";
   TString cstring = "";
-  TString trigcut = "";
   if(cbin==0) {
-    cstring = "0-10%";
-    cut+=" && bin>=0 && bin<4";
-    trigcut =" bin>=0 && bin<4";
+     cstring = "0-10%";
+     cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-    cstring = "10-30%";
-    cut+=" && bin>=4 && bin<12";
-    trigcut =" bin>=4 && bin<12";
-  } else {
-    cstring = "30-100%";
-    cut+=" && bin>=12 && bin<40";
-    trigcut =" bin>=12 && bin<40";
+     cstring = "10-20%";
+     cut+=" && bin>=4 && bin<8";
+  } else if (cbin==2) {
+     cstring = "20-30%";
+     cut+=" && bin>=8 && bin<12";
+  } else if (cbin==3) {
+     cstring = "30-50%";
+     cut+=" && bin>=12 && bin<20";
   }
+  else {
+     cstring = "50-100%";
+     cut+=" && bin>=20";
+  }
+
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
@@ -141,20 +163,6 @@ void plotEnergyScaleSys(int cbin,
   nt->Draw("(et1-et2)/(et1+et2)>>h",Form("(%s)",cut.Data())); 
   nt->Draw("abs(et1*(1+fResA1)-et2*(1+fResA2))/(et1*(1+fResA1)+et2*(1+fResA2))>>hSys1",Form("(%s)",cut.Data())); 
   nt->Draw("abs(et1*(1+fResB1)-et2*(1+fResB2))/(et1*(1+fResB1)+et2*(1+fResB2))>>hSys2",Form("(%s)",cut.Data())); 
-
-  TH1D *h_trig = new TH1D("h_trig","h_trig",380,120,500);
-  TH1D *hSys1_trig = new TH1D("hSys1_trig","hSys1_trig",380,120,500);
-  TH1D *hSys2_trig = new TH1D("hSys2_trig","hSys2_trig",380,120,500);
-   
-  nt->Draw("et1>>h_trig",Form("(%s)",trigcut.Data()));
-  //nt->Draw("abs(et1*(1+fResA1))>>hSys1_trig",Form("(%s)",trigcut.Data()));
-  //nt->Draw("abs(et1*(1+fResB1))>>hSys2_trig",Form("(%s)",trigcut.Data()));
-  nt->Draw("et1>>hSys1_trig",Form("(%s)",trigcut.Data()));
-  nt->Draw("et1>>hSys2_trig",Form("(%s)",trigcut.Data()));
-
-  cout<<" h_trig->Integral() "<<h_trig->Integral()<<endl;
-  cout<<" hSys1_trig->Integral() "<<hSys1_trig->Integral()<<endl;
-  cout<<" hSys2_trig->Integral() "<<hSys2_trig->Integral()<<endl;
 
   // calculate the statistical error and normalize
   //h->Sumw2();
