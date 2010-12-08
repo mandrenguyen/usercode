@@ -56,25 +56,44 @@ TH1D *getErrorBand(TH1* h);
 
 void plotDifferentThreshold(double th1 = 120, double th2 = 50){
 
-  TCanvas *c1 = new TCanvas("c1","",1250,530);
+   TCanvas *c1 = new TCanvas("c1","",1650,430);
+   makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
+   
+   
+   c1->cd(1);
+   plotRatio(4,"data.root","data.root","data.root",th1,th2,false,false,false);
+   drawText("50-100%",0.76,0.24);
+   drawPatch(0.976,0.0972,1.1,0.171);
+   gPad->SetLeftMargin(0.25);
+   gPad->SetBottomMargin(0.18);
 
-  makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
+   c1->cd(2);
+   plotRatio(3,"data.root","data.root","data.root",th1,th2,false,false,false);
+   drawText("30-50%",0.75,0.24);
+   drawPatch(-0.00007,0.0972,0.0518,0.171);
+   drawPatch(0.976,0.0972,1.1,0.171);
+   gPad->SetBottomMargin(0.18);
 
-  c1->cd(1);
-  plotRatio(2,"data.root","data.root","data.root",th1,th2,false,false,false);
-  drawText("30~100%",0.76,0.24);
-  drawPatch(0.976,0.0972,1.1,0.141);
+   c1->cd(3);
+   plotRatio(2,"data.root","data.root","data.root",th1,th2,false,true,false);
+   drawText("20-30%",0.75,0.24);
+   drawPatch(-0.00007,0.0972,0.0518,0.171);
+   gPad->SetBottomMargin(0.18);
+   drawPatch(0.976,0.0972,1.1,0.171);
 
-  c1->cd(2);
-  plotRatio(1,"data.root","data.root","data.root",th1,th2,false,true,false);
-  drawText("10~30%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
+   c1->cd(4);
+   plotRatio(1,"data.root","data.root","data.root",th1,th2,false,false,false);
+   drawText("10-20%",0.75,0.24);
+   drawPatch(-0.00007,0.0972,0.0518,0.171);
+   gPad->SetBottomMargin(0.18);
+   drawPatch(0.976,0.0972,1.1,0.171);
 
-  c1->cd(3);
-  plotRatio(0,"data.root","data.root","data.root",th1,th2,false,false,true);
-  drawText("0~10%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
+   c1->cd(5);
+   plotRatio(0,"data.root","data.root","data.root",th1,th2,false,false,true);
+   drawText("0-10%",0.75,0.24);
+   gPad->SetBottomMargin(0.18);
+   drawPatch(-0.00007,0.0972,0.0518,0.171);
+
 
   TLatex *cms = new TLatex(0.086,4.5,"CMS Preliminary");
   cms->SetTextFont(63);
@@ -105,19 +124,29 @@ void plotRatio(int cbin,
   TString cut="et1>120&& et1<2000 && et2>50 && dphi>2.5&&(et1-et2)/(et1+et2)<10 ";
   TString cut2=Form("et1>%f&& et1<2000 && et2>%f && dphi>2.5&&(et1-et2)/(et1+et2)<10 ",th1,th2);
   TString cstring = "";
+
   if(cbin==0) {
-    cstring = "0-10%";
-    cut+=" && bin>=0 && bin<4";
-    cut2+=" && bin>=0 && bin<4";
+     cstring = "0-10%";
+     cut+=" && (bin>=0 && bin<4 )";
+     cut2+=" &&(bin>=0 && bin<4 )";
   } else if (cbin==1) {
-    cstring = "10-30%";
-    cut+=" && bin>=4 && bin<12";
-    cut2+=" && bin>=4 && bin<12";
+     cstring = "10-20%";
+     cut+=" && (bin>=4 && bin<8  )";
+     cut2+=" && (bin>=4 && bin<8 )";
+  } else if (cbin==2) {
+     cstring = "20-30%";
+     cut+=" && (bin>=8 && bin<12  )";
+     cut2+=" && (bin>=8 && bin<12 )";
+  } else if (cbin==3) {
+     cstring = "30-50%";
+     cut+=" && (bin>=12  && bin<20 )";
+     cut2+=" && (bin>=12 && bin<20 )";
   } else {
-    cstring = "30-100%";
-    cut+=" && bin>=12 && bin<40";
-    cut2+=" && bin>=12 && bin<40";
+     cstring = "50-100%";
+     cut+=" && (bin>=20 &&  bin<40 )";
+     cut2+=" && (bin>=20 && bin<40 )";
   }
+
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
