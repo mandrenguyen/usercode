@@ -105,9 +105,9 @@ void plotDifferentThreshold(double th1 = 120, double th2 = 50){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.gif");
-  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.eps");
-  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.pdf");
+  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.gif",th1,th2);
+  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.eps",th1,th2);
+  c1->Print("./fig/ratio_sys_threshold-%f-%f_20101130_v0.pdf",th1,th2);
 
 }
 
@@ -279,7 +279,7 @@ void plotRatio(int cbin,
   hEmbedded->SetLineStyle(2);
   
   //hEmbedded->Draw("same");
-  h->Fit("pol2","","",0,1);
+  //h->Fit("pol2","","",0,1);
   h->Draw("same");
   TLine *l = new TLine(0,1,1,1);
   l->SetLineStyle(2);
