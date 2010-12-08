@@ -60,21 +60,21 @@ void plotJetRecoEfficiencySystematics(){
    makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
    
   c1->cd(1);
-  plotRatio(2,"data-Ineff.root","data.root","data.root",false,false,false);
+  plotRatio(4,"data-Ineff.root","data.root","data.root",false,false,false);
   drawText("50-100%",0.76,0.24);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetLeftMargin(0.25);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(2);
-  plotRatio(1,"data-Ineff.root","data.root","data.root",false,false,false);
+  plotRatio(3,"data-Ineff.root","data.root","data.root",false,false,false);
   drawText("30-50%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
   gPad->SetBottomMargin(0.18);
 
   c1->cd(3);
-  plotRatio(1,"data-Ineff.root","data.root","data.root",false,true,false);
+  plotRatio(2,"data-Ineff.root","data.root","data.root",false,true,false);
   drawText("20-30%",0.75,0.24);
   drawPatch(-0.00007,0.0972,0.0518,0.171);
   drawPatch(0.976,0.0972,1.1,0.171);
@@ -103,9 +103,9 @@ void plotJetRecoEfficiencySystematics(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ratio_checkIneff_20101207_v0.gif");
-  c1->Print("./fig/ratio_checkIneff_20101207_v0.eps");
-  c1->Print("./fig/ratio_checkIneff_20101207_v0.pdf");
+  c1->Print("./fig/ratio_checkIneff_20101207_v2.gif");
+  c1->Print("./fig/ratio_checkIneff_20101207_v2.eps");
+  c1->Print("./fig/ratio_checkIneff_20101207_v2.pdf");
 
 }
 
@@ -120,14 +120,21 @@ void plotRatio(int cbin,
   TString cut="et1>120&& et1<2000 && et2>50 && dphi>3.1415926/3*2&&(et1-et2)/(et1+et2)<10 ";
   TString cstring = "";
   if(cbin==0) {
-    cstring = "0-10%";
-    cut+=" && bin>=0 && bin<4";
+     cstring = "0-10%";
+     cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-    cstring = "10-30%";
-    cut+=" && bin>=4 && bin<12";
-  } else {
-    cstring = "30-100%";
-    cut+=" && bin>=12 && bin<40";
+     cstring = "10-20%";
+     cut+=" && bin>=4 && bin<8";
+  } else if (cbin==2) {
+     cstring = "20-30%";
+     cut+=" && bin>=8 && bin<12";
+  } else if (cbin==3) {
+     cstring = "30-50%";
+     cut+=" && bin>=12 && bin<20";
+  }
+  else {
+     cstring = "50-100%";
+     cut+=" && bin>=20";
   }
 
   // open the data file

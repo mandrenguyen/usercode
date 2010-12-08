@@ -21,6 +21,25 @@
 
 using namespace std;
 
+TGraphAsymmErrors *divideGraph(TGraphAsymmErrors *a,TGraphAsymmErrors *b)
+{
+   TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors();
+   for (int i=0;i<a->GetN();i++)
+   {
+      double x,y;
+      double x2,y2;
+      a->GetPoint(i,x,y);
+      b->GetPoint(i,x2,y2);
+      double errYL = a->GetErrorYlow(i);
+      double errYH = a->GetErrorYhigh(i);
+      double errYL2 = b->GetErrorYlow(i);
+      double errYH2 = b->GetErrorYhigh(i);
+      gEfficiency->SetPointError(i,0,0,sqrt(errYL*errYL+errYL2*errYL2),sqrt(errYH*errYH+errYH2*errYH2));
+      gEfficiency->SetPoint(i,x,y/y2);
+   }
+   return gEfficiency;
+}
+
 TGraphAsymmErrors *calcEff(TH1* h1, TH1* hCut,double *npart)
 {
    TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors();
@@ -41,17 +60,19 @@ TGraphAsymmErrors *calcEff(TH1* h1, TH1* hCut,double *npart)
 
 
 
-void plotRBNew(  double ajCut=0.145,
+void plotRBNew(  double ajCut=0.15,
 	      double ajCut2 = 0.15,
 		 TString infname = "data.root",
-		 TString pythia = "pythia.root",
+		 TString pythia = "pythia-1.root",
 		 TString mix = "mix.root",
+		 TString titleForComparison = "embedded PYTHIA",
+		 TString titleForFile = "Result",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
 		 bool drawLeg = true)
 {		
 
-  int threshold1 = 90;
+  int threshold1 = 100;
   int threshold2 = 120;
   gStyle->SetErrorX(0); 
   TString cut1=Form("et1>%d",threshold1);
@@ -172,56 +193,63 @@ void plotRBNew(  double ajCut=0.145,
   nt->Draw("bin>>h",Form("(et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s",ajCut,cut1.Data()));
   nt->Draw("bin>>hCut",Form("%s",cut1.Data()));
   TGraphAsymmErrors *g = calcEff(hCut,h,npart);
+  g->SetMarkerSize(1.5);
 
   cout <<cut2.Data()<<endl;
   nt->Draw("bin>>h2",Form("(et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s",ajCut2,cut2.Data()));
   nt->Draw("bin>>h2Cut",Form("%s",cut2.Data()));
   TGraphAsymmErrors *g2 = calcEff(h2Cut,h2,npart2);
+  g2->SetMarkerSize(1.5);
 
 
   ntPythia->Draw("bin>>h",Form("(et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s",ajCut2,cut2.Data()));
   ntPythia->Draw("bin>>hCut",Form("%s",cut2.Data()));
   TGraphAsymmErrors *gPythia = calcEff(hCut,h,npart);
+  gPythia->SetMarkerSize(1.5);
+
   
-  ntMix->Draw("bin>>h",Form("(et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s",ajCut2,cut2.Data()));
-  ntMix->Draw("bin>>hCut",Form("%s",cut2.Data()));
+  ntMix->Draw("bin>>h",Form("weight*((et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s)",ajCut2,cut2.Data()));
+  ntMix->Draw("bin>>hCut",Form("weight*(%s)",cut2.Data()));
   TGraphAsymmErrors *gMix = calcEff(hCut,h,npart);
+  gMix->SetMarkerSize(1.5);
 
   TCanvas *c = new TCanvas("c","",500,500);
   //  hTmp->SetMaximum(g->GetY()[0]*2.2);
-  hTmp->SetMaximum(1.3*gPythia->GetY()[0]);
+  hTmp->SetMaximum(1.4*gPythia->GetY()[0]);
   hTmp->SetMinimum(0.);
 
   hTmp->SetXTitle("N_{part}");
-  hTmp->SetYTitle(Form("R_{B}",ajCut));
+  hTmp->SetYTitle(Form("R_{B}(A_{J}<%.2f)",ajCut));
   hTmp->GetXaxis()->CenterTitle();
   hTmp->GetYaxis()->CenterTitle();
-  hTmp->GetYaxis()->SetTitleOffset(1.5);
+  hTmp->GetYaxis()->SetTitleOffset(1.0);
   hTmp->Draw();
 
   double errorbar = 0.02;
-  /*
+/*
   for(int i = 0; i < g->GetN(); ++i){
     double *x = g->GetX();
     double *y = g->GetY();
-    DrawTick(y[i],0.18*y[i],0.18*y[i],x[i],0.012,8.1,16);
+//    DrawTick(y[i],0.18*y[i],0.18*y[i],x[i],0.012,8.1,16);
   }
   g->Draw("p same");
+  g2->SetMarkerStyle(4);
   */
-  
   for(int i = 0; i < g2->GetN(); ++i){
     double *x = g2->GetX();
     double *y = g2->GetY();
-    DrawTick(y[i],0.15*y[i],0.15*y[i],x[i],0.012,8.1,16);
+    double errBck = 1- (0.4848-(6.581e-05)*x[i])/0.5;
+    double err = sqrt(0.063*0.063+0.048*0.048+errBck*errBck);
+    err= 0.14;
+    DrawTick(y[i],err*y[i],err*y[i],x[i],0.012,8.1,16);
   }
-  //g2->SetMarkerStyle(4);
-  g2->Draw("p same");
   gPythia->SetMarkerColor(4);
   gPythia->SetLineColor(4);
   gMix->SetMarkerColor(2);
   gMix->SetLineColor(2);
   gMix->Draw("p same");
   gPythia->Draw("p same");
+  g2->Draw("p same");
 
   TLine* pline = new TLine(0,gPythia->GetY()[0],400,gPythia->GetY()[0]);
   pline->SetLineColor(4);
@@ -232,7 +260,7 @@ void plotRBNew(  double ajCut=0.145,
     TLegend *t3=new TLegend(0.5,0.77,0.9,0.93); 
     t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     t3->AddEntry(gPythia,"PYTHIA","pl");  
-    t3->AddEntry(gMix,"embedded PYTHIA","pl");
+    t3->AddEntry(gMix,titleForComparison.Data(),"pl");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -253,11 +281,32 @@ void plotRBNew(  double ajCut=0.145,
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c->Print(Form("RB_%f_vs_Npart.eps",ajCut));
-  c->Print(Form("RB_%f_vs_Npart.C",ajCut));
-  c->Print(Form("RB_%f_vs_Npart.gif",ajCut));
+  c->Print(Form("fig/RB_%f_%s_vs_Npart.eps",ajCut,titleForFile.Data()));
+  c->Print(Form("fig/RB_%f_%s_vs_Npart.C",ajCut,titleForFile.Data()));
+  c->Print(Form("fig/RB_%f_%s_vs_Npart.gif",ajCut,titleForFile.Data()));
 
+  /*
+  TCanvas *c1 = new TCanvas("c1","",500,500);
+
+  gMix->Draw("ap");
+  gMix->Fit("pol1");
+*/
+  TCanvas *c2 = new TCanvas("c2","",500,500);
+
+  TGraphAsymmErrors *gRatio = divideGraph(g2,gMix);
+  gRatio->Draw("ap");
+  gRatio->Fit("pol1");
+  gRatio->Fit("pol0");
+
+  c2->Print(Form("fig/RB_Ratio_%f_%s_vs_Npart.eps",ajCut,titleForFile.Data()));
+  c2->Print(Form("fig/RB_Ratio_%f_%s_vs_Npart.C",ajCut,titleForFile.Data()));
+  c2->Print(Form("fig/RB_Ratio_%f_%s_vs_Npart.gif",ajCut,titleForFile.Data()));
+  
 }
+
+
+// 6.3 % for smearing
+// 4% for energy correction
 
 
 
