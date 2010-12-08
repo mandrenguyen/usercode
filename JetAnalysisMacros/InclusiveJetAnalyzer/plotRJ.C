@@ -147,7 +147,7 @@ void plotRJ(  double ajCut=0.24,
   hTmp->SetYTitle(Form("R_{A>%0.2f}",ajCut));
   hTmp->GetXaxis()->CenterTitle();
   hTmp->GetYaxis()->CenterTitle();
-  hTmp->GetYaxis()->SetTitleOffset(1.5);
+  hTmp->GetYaxis()->SetTitleOffset(1.0);
   hTmp->Draw();
 
   double errorbar = 0.02;
