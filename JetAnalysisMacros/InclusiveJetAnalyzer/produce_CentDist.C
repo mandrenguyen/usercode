@@ -7,7 +7,8 @@ void produce_CentDist(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTr
 
   TH1F *h=new TH1F("h","h",40,0,40);
 
-  t->Draw("bin>>h");
+  t->Draw("bin>>h","jtpt[0]>120&&abs(jteta[0])<2");
+//  t->Draw("bin>>h");
   
   TFile *fout = new TFile(outfile,"RECREATE");
   h->Write();
