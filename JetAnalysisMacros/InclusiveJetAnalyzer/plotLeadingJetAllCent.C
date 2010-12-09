@@ -54,7 +54,7 @@ void plotLeadingJetAllCent(){
 
 
   c1->cd(1);
-  plotLeadingJet(4,"data.root","pythia.root","mix.root",true,false,false);
+  plotLeadingJet(-1,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
   drawText("(a)",0.22,0.9);
   drawText(" 0-100%",0.28,0.8);
