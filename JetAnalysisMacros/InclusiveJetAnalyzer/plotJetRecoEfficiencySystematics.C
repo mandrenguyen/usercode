@@ -103,9 +103,9 @@ void plotJetRecoEfficiencySystematics(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 
-  c1->Print("./fig/ratio_checkIneff_20101207_v2.gif");
-  c1->Print("./fig/ratio_checkIneff_20101207_v2.eps");
-  c1->Print("./fig/ratio_checkIneff_20101207_v2.pdf");
+  c1->Print("./fig/ratio_checkIneff_20101207_v1.gif");
+  c1->Print("./fig/ratio_checkIneff_20101207_v1.eps");
+  c1->Print("./fig/ratio_checkIneff_20101207_v1.pdf");
 
 }
 
@@ -186,8 +186,8 @@ void plotRatio(int cbin,
   hEmbedded->SetStats(0);
 
   if(drawXLabel) {
-     hEmbedded->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
-     h->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+     hEmbedded->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+     h->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
   }
   h->GetXaxis()->SetLabelSize(20);
   h->GetXaxis()->SetLabelFont(43);

@@ -182,7 +182,7 @@ void plotEnergyScaleSys(int cbin,
   hSys1->SetStats(0);
   hSys1->Draw("hist");
 
-  if(drawXLabel) hSys1->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  if(drawXLabel) hSys1->SetXTitle("A_{J} #equiv (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
 
   hSys1->GetXaxis()->SetLabelSize(22);
   hSys1->GetXaxis()->SetLabelFont(43);
@@ -259,7 +259,7 @@ void drawDum(float min, float max, double drawXLabel){
 
   hdum->SetStats(0);
 
-  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1} - E_{T}^{j2})/(E_{T}^{j1} + E_{T}^{j2})");
+  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (p_{T}^{j1} - p_{T}^{j2})/(p_{T}^{j1} + p_{T}^{j2})");
   hdum->GetXaxis()->SetLabelSize(20);
   hdum->GetXaxis()->SetLabelFont(43);
   hdum->GetXaxis()->SetTitleSize(22);
