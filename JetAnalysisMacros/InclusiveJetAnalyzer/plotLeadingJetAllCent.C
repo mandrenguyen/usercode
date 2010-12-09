@@ -202,7 +202,7 @@ void plotLeadingJet(int cbin,
 
    
   hDataMix->SetStats(0);
-  if(drawXLabel) hDataMix->SetXTitle("Leading Jet p_{T} (GeV)");
+  if(drawXLabel) hDataMix->SetXTitle("Leading Jet p_{T} (GeV/c)");
 
   hDataMix->GetXaxis()->SetLabelSize(22);
   hDataMix->GetXaxis()->SetLabelFont(43);
