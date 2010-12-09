@@ -167,7 +167,7 @@ void plotEnergyScaleSys(int cbin,
 
   hSys1->GetXaxis()->SetNdivisions(905,true);
   
-  if(drawXLabel)hSys1->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  if(drawXLabel)hSys1->SetXTitle("A_{J} #equiv (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
 
   hSys1->GetYaxis()->SetLabelSize(22);
   hSys1->GetYaxis()->SetLabelFont(43);
