@@ -48,58 +48,69 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotLeadingJetAllCent(){
 
-  TCanvas *c1 = new TCanvas("c1","",1650,430);
+  TCanvas *c1 = new TCanvas("c1","",1050,700);
 
-  makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
+  makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.15,0.02);
 
 
   c1->cd(1);
   plotLeadingJet(4,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("50-100%",0.30,0.8);
-  drawPatch(0.976,0.0972,1.1,0.141);
-  gPad->SetBottomMargin(0.18);
-  gPad->SetLeftMargin(0.24);
+  drawText("(a)",0.22,0.9);
+  drawText(" 0-100%",0.28,0.8);
+  //  drawPatch(0.976,0.0972,1.1,0.141);
+  // gPad->SetBottomMargin(0.18);
+  //  gPad->SetLeftMargin(0.24);
 
   c1->cd(2);
-  plotLeadingJet(3,"data.root","pythia.root","mix.root",true,false,false);
+  plotLeadingJet(4,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("30-50%",0.08,0.8);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
-  gPad->SetBottomMargin(0.18);
+  drawText("50-100%",0.08,0.8);
+  drawText("(b)",0.02,0.9);
 
   c1->cd(3);
-  plotLeadingJet(2,"data.root","pythia.root","mix.root",true,true,false);
+  plotLeadingJet(3,"data.root","pythia.root","mix.root",true,false,true);
   gPad->SetLogy();
-  drawText("20-30%",0.08,0.8);
-  drawPatch(0.976,0.0972,1.1,0.141);
-  gPad->SetBottomMargin(0.18);
-
-  c1->cd(4);
-  plotLeadingJet(1,"data.root","pythia.root","mix.root",true,false,false);
-  gPad->SetLogy();
-  drawText("10-20%",0.08,0.8);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(0.976,0.0972,1.1,0.141);
-  gPad->SetBottomMargin(0.18);
-
-  c1->cd(5);
-  plotLeadingJet(0,"data.root","pythia.root","mix.root",true,false,true);
-  gPad->SetLogy();
-  drawText("0-10%",0.08,0.8);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  gPad->SetBottomMargin(0.18);
-
-  TLatex *cms = new TLatex(140,1.625,"CMS Preliminary");
+  drawText("30-50%",0.08,0.8);
+  drawText("(c)",0.02,0.9);
+  //  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  //  drawPatch(0.976,0.0972,1.1,0.141);
+  //  gPad->SetBottomMargin(0.18);
+  TLatex *cms = new TLatex(140,1.525,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();
 
-  TLatex *lumi = new TLatex(186,1.625,"#intL dt = 7 #mub^{-1}");
+  TLatex *lumi = new TLatex(186,1.525,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
+
+  c1->cd(4);
+  plotLeadingJet(2,"data.root","pythia.root","mix.root",true,false,false);
+  gPad->SetLogy();
+  drawText("20-30%",0.28,0.8);
+  drawText("(d)",0.22,0.93);
+  drawPatch(0.976,0.0972,1.1,0.141);
+
+  //  gPad->SetBottomMargin(0.22);
+  
+  c1->cd(5);
+  plotLeadingJet(1,"data.root","pythia.root","mix.root",true,true,false);
+  gPad->SetLogy();
+  drawText("10-20%",0.08,0.8);
+  drawText("(e)",0.02,0.93);
+ drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(0.976,0.0972,1.1,0.141);
+  //  gPad->SetBottomMargin(0.22);
+
+  c1->cd(6);
+  plotLeadingJet(0,"data.root","pythia.root","mix.root",true,false,false);
+  gPad->SetLogy();
+  drawText("0-10%",0.08,0.8);
+  drawText("(f)",0.02,0.93);
+  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  //  gPad->SetBottomMargin(0.22);
 
   c1->Print("./fig/dijet_leadingjet_all_cent_20101126_v0.gif");
   c1->Print("./fig/dijet_leadingjet_all_cent_20101126_v0.eps");
@@ -123,7 +134,11 @@ void plotLeadingJet(int cbin,
 
 
   TString cstring = "";
-  if(cbin==0) {
+  if(cbin==-1) {  
+     cstring = "0-100%";
+     cut+=" && bin>=0 && bin<40";
+  }
+  else if(cbin==0) {
      cstring = "0-10%";
      cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
@@ -213,14 +228,14 @@ void plotLeadingJet(int cbin,
 
 
 
-
+  hDataMix->SetTitleOffset(1.9,"X");
   hDataMix->Draw("hist");
   //hPythia->Draw("same");
   h->Draw("same");
 
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.25,0.64,0.79,0.90);
+    TLegend *t3=new TLegend(0.35,0.61,0.89,0.87);
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
