@@ -189,8 +189,8 @@ void plotRatio(int cbin,
   hEmbedded->SetStats(0);
 
   if(drawXLabel) {
-     hEmbedded->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
-     h->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+     hEmbedded->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
+     h->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
   }
   h->GetXaxis()->SetLabelSize(20);
   h->GetXaxis()->SetLabelFont(43);
