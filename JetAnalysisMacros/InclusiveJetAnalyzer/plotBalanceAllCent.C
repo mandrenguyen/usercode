@@ -49,53 +49,64 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotBalanceAllCent(){
 
-  TCanvas *c1 = new TCanvas("c1","",1650,430);
+   TCanvas *c1 = new TCanvas("c1","",1050,700);
+   makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.2,0.02);
 
-  makeMultiPanelCanvas(c1,5,1,0.0,0.0,0.2,0.15,0.02);
-
+ 
   c1->cd(1);
-  plotBalance(4,"data.root","pythia.root","mix.root",true,false,false);
-  drawText("50-100%",0.76,0.24);
-  drawPatch(0.976,0.0972,1.1,0.171);
-  gPad->SetLeftMargin(0.25);
-  gPad->SetBottomMargin(0.18);
+  plotBalance(-1,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("(a)",0.22,0.9);
+  drawText(" 0-100%",0.70,0.1);
+  drawPatch(0.05,0.0,0.2,0.05);
+
   c1->cd(2);
-  plotBalance(3,"data.root","pythia.root","mix.root",true,false,false);
-  drawText("30-50%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.171);
-  drawPatch(0.976,0.0972,1.1,0.171);
-  gPad->SetBottomMargin(0.18);
+  plotBalance(4,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("50-100%",0.7,0.1);
+  drawText("(b)",0.02,0.9);
 
   c1->cd(3);
-  plotBalance(2,"data.root","pythia.root","mix.root",true,true,false);
-  drawText("20-30%",0.75,0.24);
-  drawPatch(-0.00007,0.0972,0.0518,0.171);
-  drawPatch(0.976,0.0972,1.1,0.171);
- gPad->SetBottomMargin(0.18);
+  plotBalance(3,"data.root","pythia.root","mix.root",true,false,true);
+  drawText("30-50%",0.7,0.1);
+  drawText("(c)",0.02,0.9);
 
-  c1->cd(4);
-  plotBalance(1,"data.root","pythia.root","mix.root",true,false,false);
-  drawText("10-20%",0.75,0.24);
-  drawPatch(0.976,0.0972,1.1,0.171);
-  drawPatch(-0.00007,0.0972,0.0518,0.171);
-  gPad->SetBottomMargin(0.18);
-  
-  c1->cd(5);
-  plotBalance(0,"data.root","pythia.root","mix.root",true,false,true);
-  drawText("0-10%",0.75,0.24);
-  //  drawPatch(0.976,0.0972,1.1,0.191);
-  gPad->SetBottomMargin(0.18);
-  drawPatch(-0.00007,0.0972,0.0518,0.171);
-
-  TLatex *cms = new TLatex(0.15,0.1825,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.17,0.2125,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.66,0.1825,"#intL dt = 7 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.66,0.2125,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
+
+
+
+
+  c1->cd(4);
+  plotBalance(2,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("20-30%",0.7,0.3);
+  drawText("(d)",0.22,0.93);
+  drawPatch(0.05,0.972,0.2,1.1);
+  drawPatch(0.9,0.0972,1.12,0.191);
+
+  //  gPad->SetBottomMargin(0.22);                                                                                                                     
+
+  c1->cd(5);
+  plotBalance(1,"data.root","pythia.root","mix.root",true,true,false);
+  drawText("10-20%",0.7,0.3);
+  drawText("(e)",0.02,0.93);
+  drawPatch(-0.00007,0.0972,0.128,0.195);
+  drawPatch(0.9,0.0972,1.12,0.191);
+  drawPatch(0.976,0.0972,1.1,0.141);
+  //  gPad->SetBottomMargin(0.22);                                                                                                                     
+
+  c1->cd(6);
+  plotBalance(0,"data.root","pythia.root","mix.root",true,false,false);
+  drawText("0-10%",0.7,0.3);
+  drawText("(f)",0.02,0.93);
+  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawPatch(-0.00007,0.0972,0.128,0.195);
+        
 
   c1->Print("./fig/dijet_imbalance_all_cent_20101126_v0.gif");
   c1->Print("./fig/dijet_imbalance_all_cent_20101126_v0.eps");
@@ -114,12 +125,16 @@ void plotBalance(int cbin,
   TString cut="et1>120 && et2>50 && dphi>2.0944";
   TString cutpp="et1>120 && et2>50 && dphi>2.0944";
   TString cstring = "";
-  if(cbin==0) {
-    cstring = "0-10%";
-    cut+=" && bin>=0 && bin<4";
+  if(cbin==-1) {
+     cstring = "0-100%";
+     cut+=" && bin>=0 && bin<40";
+  }
+  else if(cbin==0) {
+     cstring = "0-10%";
+     cut+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-    cstring = "10-20%";
-    cut+=" && bin>=4 && bin<8";
+     cstring = "10-20%";
+     cut+=" && bin>=4 && bin<8";
   } else if (cbin==2) {
      cstring = "20-30%";
      cut+=" && bin>=8 && bin<12";
@@ -193,10 +208,13 @@ void plotBalance(int cbin,
   hDataMix->GetYaxis()->SetTitleOffset(2.4);
   hDataMix->GetYaxis()->CenterTitle();
   
-  if(drawXLabel) hDataMix->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");  
+  if(drawXLabel) hDataMix->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");  
   hDataMix->SetYTitle("Event Fraction");
-  hDataMix->SetAxisRange(0,0.2,"Y");
+  hDataMix->SetAxisRange(0,0.24,"Y");
   hDataMix->GetXaxis()->SetNdivisions(905,true);
+  
+  hDataMix->SetTitleOffset(2,"X");
+  hDataMix->SetTitleOffset(3,"Y");
 
   hDataMix->Draw("hist");
   //hPythia->Draw("hist");  
@@ -205,7 +223,7 @@ void plotBalance(int cbin,
   cout<<" mean value of data "<<h->GetMean()<<endl;
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.35,0.675,0.89,0.88); 
+    TLegend *t3=new TLegend(0.35,0.635,0.89,0.84); 
     t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     //t3->AddEntry(hPythia,"PYTHIA","lf");  
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
