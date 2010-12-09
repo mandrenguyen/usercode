@@ -120,7 +120,6 @@ void plotLeadingJet(int cbin,
 
   TString cut="et1>120 && et2>50 && dphi>2.5";
   TString cutpp="et1>120 && et2>50 && dphi>2.5";
-  TString cstring = "";
 
 
   TString cstring = "";
@@ -188,7 +187,7 @@ void plotLeadingJet(int cbin,
 
    
   hDataMix->SetStats(0);
-  if(drawXLabel) hDataMix->SetXTitle("Leading Jet E_{T} (GeV)");
+  if(drawXLabel) hDataMix->SetXTitle("Leading Jet p_{T} (GeV)");
 
   hDataMix->GetXaxis()->SetLabelSize(22);
   hDataMix->GetXaxis()->SetLabelFont(43);
