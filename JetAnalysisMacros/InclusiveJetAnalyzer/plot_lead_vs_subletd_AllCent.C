@@ -95,7 +95,7 @@ void plot_lead_vs_subletd_AllCent() {
   lumi->Draw();
   
   c1->cd(3);
-  gPad->SetRightMargin(0.1);
+  gPad->SetRightMargin(0.15);
 
  
   c1->cd(4);
@@ -113,7 +113,7 @@ void plot_lead_vs_subletd_AllCent() {
   plotBal_vs_Imbal(0,"mix.root",true,false,true,1);
   drawText("0-10%",px,py);
   drawPatch(-0.00007,0.0972,0.0318,0.141);
-  gPad->SetRightMargin(0.1);
+  gPad->SetRightMargin(0.15);
  
  
   //gPad->SetRightMargin(0.1);
@@ -230,8 +230,8 @@ void plotBal_vs_Imbal(int cbin,
   h->GetYaxis()->SetTitleFont(43);
   h->GetYaxis()->SetTitleOffset(3.1);
   h->GetYaxis()->CenterTitle();
-  //gPad->SetLogz();
-  h->Draw("box");
+  gPad->SetLogz();
+  h->Draw("zcol");
     
   TLegend *t3[10]; 
 
