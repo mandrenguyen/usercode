@@ -1,4 +1,4 @@
-
+!
 
 void easyLeg( TLegend *a=0 , char * head="")
 {

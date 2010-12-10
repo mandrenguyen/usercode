@@ -89,7 +89,7 @@ void plot_lead_vs_subletd_AllCent() {
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();
-  TLatex *lumi = new TLatex(200,225,"#intL dt = 7.3 #mub^{-1}");
+  TLatex *lumi = new TLatex(200,225,"#intL dt = 6.7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();

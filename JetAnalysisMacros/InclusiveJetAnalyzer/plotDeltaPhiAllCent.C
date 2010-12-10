@@ -81,7 +81,7 @@ void plotDeltaPhiAllCent(){
    cms->SetTextSize(18);
    cms->Draw();                                                                                                                                        
 
-   TLatex *lumi = new TLatex(2.00,0.49,"#intL dt = 7.3 #mub^{-1}");
+   TLatex *lumi = new TLatex(2.00,0.49,"#intL dt = 6.7 #mub^{-1}");
    lumi->SetTextFont(63);
    lumi->SetTextSize(15);
    lumi->Draw(); 
