@@ -76,12 +76,12 @@ void plotLeadingJetAllCent(){
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.976,0.0972,1.1,0.141);
   //  gPad->SetBottomMargin(0.18);
-  TLatex *cms = new TLatex(140,1.525,"CMS Preliminary");
+  TLatex *cms = new TLatex(140,1.525,"CMS");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();
 
-  TLatex *lumi = new TLatex(186,1.525,"#intL dt = 6.7 #mub^{-1}");
+  TLatex *lumi = new TLatex(160,1.525,"#intL dt = 6.7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
@@ -238,8 +238,8 @@ hDataMix->GetXaxis()->SetNdivisions(505,true);
 
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.35,0.61,0.89,0.87);
-    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    TLegend *t3=new TLegend(0.35,0.65,0.89,0.87);
+    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);

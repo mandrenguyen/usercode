@@ -76,12 +76,12 @@ void plotDeltaPhiAllCent(){
    //  drawPatch(-0.00007,0.0972,0.0518,0.141);                                                                                                         
    //  drawPatch(0.976,0.0972,1.1,0.141);                                                                                                               
    //  gPad->SetBottomMargin(0.18);                                                                                                                     
-   TLatex *cms = new TLatex(0.5,0.49,"CMS Preliminary");
+   TLatex *cms = new TLatex(0.5,0.39,"CMS");
    cms->SetTextFont(63);
    cms->SetTextSize(18);
    cms->Draw();                                                                                                                                        
 
-   TLatex *lumi = new TLatex(2.00,0.49,"#intL dt = 6.7 #mub^{-1}");
+   TLatex *lumi = new TLatex(1.00,0.39,"#intL dt = 6.7 #mub^{-1}");
    lumi->SetTextFont(63);
    lumi->SetTextSize(15);
    lumi->Draw(); 
@@ -243,8 +243,8 @@ void plotDeltaPhi(int cbin,
   h->Draw("same");
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.15,0.63,0.69,0.88);
-    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    TLegend *t3=new TLegend(0.15,0.63,0.69,0.83);
+    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);

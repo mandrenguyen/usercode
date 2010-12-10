@@ -69,13 +69,13 @@ void plotBalanceAllCent(){
   drawText("30-50%",0.7,0.1);
   drawText("(c)",0.02,0.9);
 
-  TLatex *cms = new TLatex(0.17,0.2125,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.17,0.2125,"CMS");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
 
-  TLatex *lumi = new TLatex(0.66,0.2125,"#intL dt = 6.7 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.4,0.2125,"#intL dt = 6.7 #mub^{-1}");
 
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
@@ -201,7 +201,7 @@ void plotBalance(int cbin,
   hDataMix->GetXaxis()->SetLabelFont(43);
   hDataMix->GetXaxis()->SetTitleSize(24);
   hDataMix->GetXaxis()->SetTitleFont(43);
-  hDataMix->GetXaxis()->SetTitleOffset(1.4);
+  hDataMix->GetXaxis()->SetTitleOffset(1.8);
   hDataMix->GetXaxis()->CenterTitle();
   
   
@@ -218,7 +218,7 @@ void plotBalance(int cbin,
   hDataMix->GetXaxis()->SetNdivisions(905,true);
   hDataMix->GetYaxis()->SetNdivisions(505,true);
   
-  hDataMix->SetTitleOffset(2,"X");
+  hDataMix->SetTitleOffset(2.4,"X");
   hDataMix->SetTitleOffset(3,"Y");
 
   hDataMix->Draw("hist");
@@ -229,9 +229,9 @@ void plotBalance(int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.35,0.635,0.89,0.84); 
-    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     //t3->AddEntry(hPythia,"PYTHIA","lf");  
-    t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
+    t3->AddEntry(hDataMix,"Embedded PYTHIA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);

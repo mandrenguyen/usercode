@@ -79,17 +79,17 @@ void plot_lead_vs_subletd_AllCent() {
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   c1->cd(1);
-  TLatex *datalabel = new TLatex(125,225,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV");
+  TLatex *datalabel = new TLatex(125,225,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV");
   datalabel->SetTextFont(63);
   datalabel->SetTextSize(18);
   datalabel->Draw();
 
   c1->cd(3);
-  TLatex *cms = new TLatex(125,225,"CMS Preliminary");
+  TLatex *cms = new TLatex(165,225,"CMS");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();
-  TLatex *lumi = new TLatex(200,225,"#intL dt = 6.7 #mub^{-1}");
+  TLatex *lumi = new TLatex(190,225,"#intL dt = 6.7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
