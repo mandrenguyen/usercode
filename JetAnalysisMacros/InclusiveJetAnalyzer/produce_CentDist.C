@@ -1,4 +1,4 @@
-void produce_CentDist(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_v10.root",char *outfile="CentDist_Data_v10.root")
+void produce_CentDist(char *infile="/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_v14.root",char *outfile="CentDist_Data_v14.root")
 {
   
   TFile *fin = TFile::Open(infile);
