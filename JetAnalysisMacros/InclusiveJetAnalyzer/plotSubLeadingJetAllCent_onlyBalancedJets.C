@@ -82,7 +82,7 @@ void plotSubLeadingJetAllCent_onlyBalancedJets() {
   imb->SetTextSize(18);
   imb->Draw();  
   
-  TLatex *lumi = new TLatex(170,1.8,"#intL dt = 7 #mub^{-1}");
+  TLatex *lumi = new TLatex(170,1.8,"#intL dt = 7.3 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 

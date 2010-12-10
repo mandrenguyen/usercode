@@ -188,11 +188,9 @@ void plotRJ(  double ajCut=0.24,
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
-<<<<<<< plotRJ.C
-  TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 7 #mub^{-1}");
-=======
-  TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 3.4 #mub^{-1}");
->>>>>>> 1.3
+
+  TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 7.3 #mub^{-1}");
+
   lumi->SetNDC();
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
