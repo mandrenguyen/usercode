@@ -56,8 +56,9 @@ void plot_lead_vs_subletd_AllCent() {
 
    TCanvas *c1 = new TCanvas("c1","",1250,1100);
    
-   makeMultiPanelCanvas(c1,3,3,0.0,0.0,0.2,0.15,0.02);
-   
+   //makeMultiPanelCanvas(c1,3,3,0.0,0.0,0.2,0.15,0.02);
+   c1->Divide(3,3,0.,0.);
+
    c1->cd(1);
    plotBal_vs_Imbal(2,"data.root",true,false,false,0);
    float px(0.25),py(0.75);
@@ -77,57 +78,72 @@ void plot_lead_vs_subletd_AllCent() {
   drawText("0-10%",px,py);
   drawPatch(-0.00007,0.0972,0.0518,0.141);
 
-  TLatex *cms = new TLatex(60,200,"CMS Preliminary");
+  c1->cd(1);
+  TLatex *datalabel = new TLatex(125,225,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV");
+  datalabel->SetTextFont(63);
+  datalabel->SetTextSize(18);
+  datalabel->Draw();
+
+  c1->cd(3);
+  TLatex *cms = new TLatex(125,225,"CMS Preliminary");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();
-  TLatex *lumi = new TLatex(130,200,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(200,225,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
+  
+  c1->cd(3);
   gPad->SetRightMargin(0.1);
 
  
   c1->cd(4);
   plotBal_vs_Imbal(2,"mix.root",true,false,false,1);
-  drawText("30-100%",65,170);
+  drawText("30-100%",px,py);
   //drawPatch(0.06,0.912,0.19,0.999);
   c1->cd(5);
   plotBal_vs_Imbal(1,"mix.root",true,true,false,1);
   //  gPad->SetLogy();
-  drawText("10-30%",65,170);
+  drawText("10-30%",px,py);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.966,0.0972,1.1,0.141);
   
   c1->cd(6);
   plotBal_vs_Imbal(0,"mix.root",true,false,true,1);
-  drawText("0-10%",65,170);
-   drawPatch(-0.00007,0.0972,0.0318,0.141);
-  TLatex *mix = new TLatex(60,200,"embedded PYTHIA");
+  drawText("0-10%",px,py);
+  drawPatch(-0.00007,0.0972,0.0318,0.141);
+  gPad->SetRightMargin(0.1);
+ 
+ 
+  //gPad->SetRightMargin(0.1);
+
+  c1->cd(4);
+  TLatex *mix = new TLatex(125,225,"embedded PYTHIA");
   mix->SetTextFont(63);
   mix->SetTextSize(18);
   mix->Draw();
-  gPad->SetRightMargin(0.1);
+  
 
-   
-
+  /*
   c1->cd(7);
   plotBal_vs_Imbal(2,"pythia.root",true,false,false,2);
   drawText("30-100%",65,170);
   //drawPatch(0.966,0.0972,1.1,0.141);
   //drawPatch(0.06,0.922,0.19,0.999);
-
-  c1->cd(8);
+  */
+  c1->cd(7);
   plotBal_vs_Imbal(1,"pythia.root",true,true,false,2);
-  drawText("10-30%",65,170);
+  //drawText("10-30%",65,170);
   //drawPatch(-0.00007,0.0972,0.1318,0.141);
   //drawPatch(0.956,0.0992,1.1,0.141);
+  /*
   c1->cd(9);
   plotBal_vs_Imbal(0,"pythia.root",true,false,true,2);
   drawText("0-10%",65,170);
   drawPatch(-0.00007,0.0972,0.1318,0.141);
-  
-  TLatex *pythia = new TLatex(60,200,"PYTHIA");
+  */
+  TLatex *pythia = new TLatex(125,225,"PYTHIA");
   pythia->SetTextFont(63);
   pythia->SetTextSize(18);
 
@@ -135,7 +151,7 @@ void plot_lead_vs_subletd_AllCent() {
   pythia->Draw();
 
 
-  gPad->SetRightMargin(0.1);
+  //gPad->SetRightMargin(0.1);
 
 
 
@@ -178,7 +194,7 @@ void plotBal_vs_Imbal(int cbin,
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
   // projection histogram
-  TH2D *h = new TH2D("h","",100,50.001,219.999,100,50.001,219.999);
+  TH2D *h = new TH2D("h","",28,120.001,259.999,40,50.001,249.999);
   h->GetZaxis()->SetRangeUser(0.001,4.2);
   char* var="et2:et1";
   
@@ -214,13 +230,14 @@ void plotBal_vs_Imbal(int cbin,
   h->GetYaxis()->SetTitleFont(43);
   h->GetYaxis()->SetTitleOffset(3.1);
   h->GetYaxis()->CenterTitle();
-  h->Draw("colz");
+  //gPad->SetLogz();
+  h->Draw("box");
     
   TLegend *t3[10]; 
 
   if(drawLeg){
     t3[kind]=new TLegend(0.05,0.69,0.59,0.85);
-    //   t3->AddEntry(hBal,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+
     char* legOps;
     if ( kind ==0)  legOps = "pl";
     else  legOps = "lf";

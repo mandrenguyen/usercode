@@ -74,7 +74,9 @@ void plotBalanceAllCent(){
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
 
-  TLatex *lumi = new TLatex(0.66,0.2125,"#intL dt = 7 #mub^{-1}");
+
+  TLatex *lumi = new TLatex(0.66,0.2125,"#intL dt = 7.3 #mub^{-1}");
+
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 
@@ -122,8 +124,10 @@ void plotBalance(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
+
   TString cut="et1>120 && et2>50 && dphi>2.0944";
   TString cutpp="et1>120 && et2>50 && dphi>2.0944";
+
   TString cstring = "";
   if(cbin==-1) {
      cstring = "0-100%";
@@ -212,6 +216,7 @@ void plotBalance(int cbin,
   hDataMix->SetYTitle("Event Fraction");
   hDataMix->SetAxisRange(0,0.24,"Y");
   hDataMix->GetXaxis()->SetNdivisions(905,true);
+  hDataMix->GetYaxis()->SetNdivisions(505,true);
   
   hDataMix->SetTitleOffset(2,"X");
   hDataMix->SetTitleOffset(3,"Y");

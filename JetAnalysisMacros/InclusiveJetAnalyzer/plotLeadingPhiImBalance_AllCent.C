@@ -75,7 +75,7 @@ void plotLeadingPhiImBalance_AllCent(){
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
-  TLatex *lumi = new TLatex(0.4,2.49,"#intL dt = 3.4 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.4,2.49,"#intL dt = 7 #mub^{-1}");
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw(); 

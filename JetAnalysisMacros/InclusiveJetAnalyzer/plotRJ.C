@@ -43,9 +43,9 @@ TGraphAsymmErrors *calcEff(TH1* h1, TH1* h2,double *npart)
 
 void plotRJ(  double ajCut=0.24,
 	      int cbin = 0,
-		 TString infname = "/d101/yetkin/data/data.root",
-		 TString pythia = "/d101/yetkin/data/pythia.root",
-		 TString mix = "/d101/yetkin/data/mix.root",
+		 TString infname = "data.root",
+		 TString pythia = "pythia.root",
+		 TString mix = "mix.root",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
 		 bool drawLeg = true)
@@ -188,7 +188,11 @@ void plotRJ(  double ajCut=0.24,
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
+<<<<<<< plotRJ.C
+  TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 7 #mub^{-1}");
+=======
   TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 3.4 #mub^{-1}");
+>>>>>>> 1.3
   lumi->SetNDC();
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
@@ -197,6 +201,7 @@ void plotRJ(  double ajCut=0.24,
   c->Print(Form("Rj_vs_Npart.eps",ajCut));
   c->Print(Form("Rj_vs_Npart.C",ajCut));
   c->Print(Form("Rj_vs_Npart.gif",ajCut));
+  c->Print(Form("Rj_vs_Npart.pdf",ajCut));
 
 }
 

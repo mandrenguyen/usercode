@@ -81,7 +81,7 @@ void plotDeltaPhiAllCent(){
    cms->SetTextSize(18);
    cms->Draw();                                                                                                                                        
 
-   TLatex *lumi = new TLatex(2.00,0.49,"#intL dt = 7 #mub^{-1}");
+   TLatex *lumi = new TLatex(2.00,0.49,"#intL dt = 7.3 #mub^{-1}");
    lumi->SetTextFont(63);
    lumi->SetTextSize(15);
    lumi->Draw(); 
@@ -91,14 +91,14 @@ void plotDeltaPhiAllCent(){
    gPad->SetLogy();
    drawText("20-30%",0.28,0.55);
    drawText("(d)",0.22,0.93);
-   drawPatch(0.976,0.0972,1.1,0.141);
+   //drawPatch(0.976,0.0972,1.1,0.141);
    c1->cd(5);
    plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,true,false);
    gPad->SetLogy();
    drawText("10-20%",0.08,0.55);
    drawText("(e)",0.02,0.93);
-   drawPatch(-0.00007,0.0972,0.0518,0.141);
-   drawPatch(0.976,0.0972,1.1,0.141);
+   //   drawPatch(-0.00007,0.0972,0.0518,0.141);
+   //drawPatch(0.976,0.0972,1.1,0.141);
    //  gPad->SetBottomMargin(0.22);                                                                                                                     
 
    c1->cd(6);
@@ -106,7 +106,7 @@ void plotDeltaPhiAllCent(){
    gPad->SetLogy();
    drawText("0-10%",0.08,0.55);
    drawText("(f)",0.02,0.93);
-   drawPatch(-0.00007,0.0972,0.0518,0.141);
+   //   drawPatch(-0.00007,0.0972,0.0518,0.141);
    //  gPad->SetBottomMargin(0.22);                                 
 
   c1->Print("./fig/dijet_dphi_all_cent_20101126_v0.gif");
@@ -169,7 +169,9 @@ void plotDeltaPhi(int cbin,
   // projection histogram
   TH1D *h = new TH1D("h","",20,0,3.14159);
   TH1D *hPythia = new TH1D("hPythia","",20,0,3.14159);
-  TH1D *hDataMix = new TH1D("hDataMix","",20,0,3.14159);
+  TH1D *hDataMix;
+  if(cbin==2) hDataMix= new TH1D("hDataMix","",20,0,3.14159);
+  else hDataMix= new TH1D("hDataMix","",20,0.0001,3.14159);
 
   
   nt->Draw("dphi>>h",Form("(%s)",cut.Data())); 
@@ -207,7 +209,7 @@ void plotDeltaPhi(int cbin,
   hDataMix->GetXaxis()->SetLabelFont(43);
   hDataMix->GetXaxis()->SetTitleSize(24);
   hDataMix->GetXaxis()->SetTitleFont(43);
-  hDataMix->GetXaxis()->SetTitleOffset(1.4);
+  hDataMix->GetXaxis()->SetTitleOffset(1.7);
   hDataMix->GetXaxis()->CenterTitle();
 
   //hDataMix->GetXaxis()->SetNdivisions(905,true);
@@ -221,9 +223,19 @@ void plotDeltaPhi(int cbin,
   hDataMix->GetYaxis()->SetTitleOffset(2.4);
   hDataMix->GetYaxis()->CenterTitle();
 
-  hPythia->SetAxisRange(9E-4,0.9,"Y");
-  hDataMix->SetAxisRange(9E-4,0.9,"Y");
-  h->SetAxisRange(9E-4,0.9,"Y");
+  if(cbin==2){
+  hDataMix->SetAxisRange(1e-3,0.9,"Y");
+  }
+  else{
+  hDataMix->SetAxisRange(1.00001e-3,0.9,"Y");
+  }
+  if(cbin==2){
+    hDataMix->GetXaxis()->SetRangeUser(0.,acos(-1.));
+  }
+  else{
+    hDataMix->GetXaxis()->SetRangeUser(0.1,acos(-1.));
+  }
+
 
 
   hDataMix->Draw("hist");
