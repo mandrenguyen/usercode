@@ -20,7 +20,7 @@
 
 
 // Note that centrality flag is somewhat deprecated, just use central = 0 to make the tree and make cuts in the plotting macros
-int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, int useAK5PF=0, int correctAwaySideJet = 0, int smearEnergy = 0, int simulateIneff = 0){
+int analyzeJetTrees(int data_pythia_mix=1, int central = 0, int useRawPt = 0, int useIC5=1, int correctAwaySideJet = 0, int smearEnergy = 0, int simulateIneff = 0){
   
   string infile;
   string outfile;
@@ -28,20 +28,19 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
   int isMC = 0;
 
   if(data_pythia_mix==0){
-    infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_v13.root";
-    if(useAK5PF) outfile = "data_AK5PF.root";
+    infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Data_v14.root";
+    if(useIC5) outfile = "data_IC5.root";
     else outfile  = "data.root";
   }
   if(data_pythia_mix==1){
     infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees/merged_jetTree_Pyquen_pt80_v4.root";
-    if(useAK5PF) outfile = "pythia_AK5PF.root";
+    if(useIC5) outfile = "pythia_IC5.root";
     else outfile  = "pythia.root";
     isMC=1;
   }
   if(data_pythia_mix==2){
-    //infile = "/afs/cern.ch/user/e/edwenger/public/dijets/dijetTreeDM_pt80.root";
      infile = "/castor/cern.ch/user/m/mnguyen//HIDATA/JetTrees//merged_jetTree_Pyquen_DataEmbedded_pt80_v2.root";
-    if(useAK5PF) outfile = "mix_AK5PF.root";
+    if(useIC5) outfile = "mix_IC5.root";
     else outfile  = "mix.root";
     useWeight = 1;
     isMC=1;
@@ -75,13 +74,13 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile.c_str());
 
   char *dirname=NULL;
-  //  if(data_pythia_mix==0 || data_pythia_mix==2){
-  if(data_pythia_mix==0){
-    if(useAK5PF)dirname = "ak5PFJetAnalyzer";
+    if(data_pythia_mix==0 || data_pythia_mix==2){
+  //if(data_pythia_mix==0){
+    if(useIC5)dirname = "ic5JetAnalyzer";
     else dirname = "inclusiveJetAnalyzer";
   }
   else{
-    if(useAK5PF)dirname = "ak5PFJetAnalyzer_ppMC";
+    if(useIC5)dirname = "ic5JetAnalyzer_ppMC";
     else dirname = "inclusiveJetAnalyzer_ppMC";
   }
   cout<<" looking in directory: "<<dirname<<endl;
@@ -92,7 +91,7 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
   }
 
   char *treename=NULL;
-  if(useAK5PF)treename = "ak5PFpatJets_tree";
+  if(useIC5)treename = "ic5patJets_tree";
   else treename = "icPu5patJets_tree";
 
   TTree *t = (TTree*)gDirectory->Get(treename);
@@ -101,7 +100,7 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
    if (t==0) {
    cout <<"Tree 't' is not found! Use icPu5patJets_tree instead..."<<endl;
    //t = (TTree*)gDirectory->Get("icPu5patJets_tree");
-   t = (TTree*)gDirectory->Get("ak5PFpatJets_tree");
+   t = (TTree*)gDirectory->Get("ic5patJets_tree");
    if (t==0) return 0;
    }
     */
@@ -246,6 +245,23 @@ int analyzeJetTrees(int data_pythia_mix=2, int central = 0, int useRawPt = 0, in
 	if(run== 152741 && evt == 558533 && lumi ==  91	 ) continue;
 	if(run== 152751 && evt == 3432123 && lumi ==  582) continue;
 	if(run== 152791 && evt == 246343 && lumi ==  39  ) continue; 
+	if(run==152722 && evt == 2963949 && lumi == 485  ) continue; 
+	if(run==152721 && evt == 1304320 && lumi == 249) continue;
+	if(run==152721 && evt == 1983505 && lumi == 358) continue;
+	if(run==152652 && evt == 1807781 && lumi == 320) continue;
+	if(run==152957 && evt == 5429107 && lumi == 912) continue;
+	if(run==152957 && evt == 5308902 && lumi == 890) continue;
+	if(run==152957 && evt == 4942453 && lumi == 823) continue;
+	if(run==152957 && evt == 3416438 && lumi == 555) continue;
+	if(run==152957 && evt == 2344086 && lumi == 376) continue;
+	if(run==152957 && evt == 1512943 && lumi == 240) continue;
+	if(run==152957 && evt == 934279 && lumi == 150 ) continue;
+	if(run==152791 && evt == 562383 && lumi == 90	) continue;
+	if(run==152791 && evt == 246343 && lumi == 39	) continue;
+	if(run==152785 && evt == 1320640 && lumi == 237) continue;
+	if(run==152766 && evt == 949850 && lumi == 156	) continue;
+	if(run==152745 && evt == 1028981 && lumi == 169) continue; 
+	  
       }
 
       int max_jet_index = -1;
