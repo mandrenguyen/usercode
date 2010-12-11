@@ -20,7 +20,7 @@
 
 
 // Note that centrality flag is somewhat deprecated, just use central = 0 to make the tree and make cuts in the plotting macros
-int analyzeJetTrees(int data_pythia_mix=1, int central = 0, int useRawPt = 0, int useIC5=1, int correctAwaySideJet = 0, int smearEnergy = 0, int simulateIneff = 0){
+int analyzeJetTrees(int data_pythia_mix=0, int central = 0, int useRawPt = 0, int useIC5=0, int correctAwaySideJet = 0, int smearEnergy = 0, int simulateIneff = 0){
   
   string infile;
   string outfile;
