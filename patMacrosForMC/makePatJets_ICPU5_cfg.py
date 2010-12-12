@@ -12,7 +12,7 @@ process = cms.Process('HIJETS')
 
 # Input source
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring("/store/relval/CMSSW_3_9_1/RelValHydjetQ_MinBias_2760GeV/GEN-SIM-RECO/START39_V4HI_special-v1/0065/623EF1F5-E6E6-DF11-AAA8-0018F3D096C6.root")
+                            fileNames = cms.untracked.vstring("dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Bass_MinBias_2760GeV/GEN-SIM-RECODEBUG/START39_V7HI-v1/0000/FED91C44-9AFA-DF11-B174-0002C90B3976.root")
                             )
 
 process.maxEvents = cms.untracked.PSet(
@@ -75,7 +75,7 @@ process.heavyIon
 
 process.hiGen = cms.Sequence(
 #Careful when using embedded samples
-    process.hiGenParticles +
+    #process.hiGenParticles +
     process.hiGenParticlesForJets *
     process.hiRecoGenJets +
     process.genPartons *
