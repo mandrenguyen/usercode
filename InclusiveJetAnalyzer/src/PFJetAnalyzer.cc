@@ -800,39 +800,30 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	    ) continue;
 	 
 
-	 //reco::Track track_pfCand = cand.track();
-	 // working with 2 different track collections so this doesn't work
-	 // if(cand.trackRef() != trackref) continue;
+	 // if working with 2 different track collections this doesn't work
+	 if(cand.trackRef() != trackref) continue;
 
-	 if(fabs(cand.pt()-track.pt())>0.001||fabs(cand.eta()-track.eta())>0.001||fabs(acos(cos(cand.phi()-track.phi())))>0.001) continue;
+	 //if(fabs(cand.pt()-track.pt())>0.001||fabs(cand.eta()-track.eta())>0.001||fabs(acos(cos(cand.phi()-track.phi())))>0.001) continue;
 
 	 pfCandMatchFound = 1;
-	 cout<<" found matching pf cand "<<endl;
-    
-	 cout<<" elements in block = "<<cand.elementsInBlocks().size()<<endl;
+
 	 for(unsigned iblock=0; iblock<cand.elementsInBlocks().size(); iblock++) {
-	   cout<<" getting block ref "<<endl;
+
 	   PFBlockRef blockRef = cand.elementsInBlocks()[iblock].first;
-      	   cout<<" got block ref "<<endl;
-      
-	   cout<<" getting block index "<<endl;
 	   unsigned indexInBlock = cand.elementsInBlocks()[iblock].second;
-	   cout<<" block index = "<<indexInBlock<<endl;
-	   if(cand.elements()) cout<<" yes "<<endl;
-	   else cout<<" no "<<endl;
+
 	   
 	   const edm::OwnVector<  reco::PFBlockElement>&  elements = (*blockRef).elements();
-	   cout<<" hello "<<endl;
+
 	   //This tells you what type of element it is:
-	   cout<<" block type"<<elements[indexInBlock].type()<<endl;
+	   //cout<<" block type"<<elements[indexInBlock].type()<<endl;
 	   
 	   switch (elements[indexInBlock].type()) {
 	     
 	   case PFBlockElement::ECAL: {
 	     reco::PFClusterRef clusterRef = elements[indexInBlock].clusterRef();
 	     double eet = clusterRef->energy()/cosh(clusterRef->eta());
-	     //if(verbose_)cout<<" ecal energy "<<clusterRef->energy()<<endl;
-	     cout<<" ecal energy "<<clusterRef->energy()<<endl;
+	     if(verbose_)cout<<" ecal energy "<<clusterRef->energy()<<endl;
 	     jets_.tracksumecal[jets_.ntrack] += eet;
 	     break;
 	   }
@@ -840,8 +831,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	   case PFBlockElement::HCAL: {
 	     reco::PFClusterRef clusterRef = elements[indexInBlock].clusterRef();
 	     double eet = clusterRef->energy()/cosh(clusterRef->eta());
-	     //if(verbose_)cout<<" hcal energy "<<clusterRef->energy()<<endl;
-	     cout<<" hcal energy "<<clusterRef->energy()<<endl;
+	     if(verbose_)cout<<" hcal energy "<<clusterRef->energy()<<endl;
 	     jets_.tracksumhcal[jets_.ntrack] += eet;
 	     break; 
 	   }       
