@@ -13,6 +13,10 @@
 <use name="DataFormats/ParticleFlowReco">
 <use name="DataFormats/TrackReco">
 <use name=HLTrigger/HLTcore>
+<use name=SimTracker/Records>
+<use name=SimTracker/TrackAssociation>
+<use name=DataFormats/RecoCandidate>
+<use name=Geometry/TrackerGeometryBuilder>
 <flags EDM_PLUGIN=1>
 <export>
    <lib name=MNguyenInclusiveJetAnalyzer>
@@ -31,4 +35,8 @@
    <use name="DataFormats/ParticleFlowReco">
    <use name="DataFormats/TrackReco">
    <use name=HLTrigger/HLTcore>
+   <use name=SimTracker/Records>	
+   <use name=SimTracker/TrackAssociation>
+   <use name=DataFormats/RecoCandidate>
+   <use name=Geometry/TrackerGeometryBuilder>
 </export>

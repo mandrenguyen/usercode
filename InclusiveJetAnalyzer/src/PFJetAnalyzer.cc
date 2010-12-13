@@ -31,6 +31,11 @@
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticleFwd.h"
+#include "SimTracker/Records/interface/TrackAssociatorRecord.h"
+#include "DataFormats/RecoCandidate/interface/TrackAssociation.h"
+#include "SimTracker/TrackAssociation/interface/TrackAssociatorByHits.h"
 
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
@@ -68,7 +73,10 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
 
+  hasSimInfo_ = iConfig.getUntrackedParameter<bool>("hasSimInfo");
+  simTracksTag_ = iConfig.getParameter<InputTag>("SimTracks");
 
+  cout<<" tracks : "<<trackTag_<<endl;
   cout<<" jet collection : "<<jetTag_<<endl;
   cout<<" jet collection 2: "<<jetTag2_<<endl;
   cout<<" jet collection 3: "<<jetTag3_<<endl;
@@ -219,6 +227,7 @@ PFJetAnalyzer::beginJob() {
   t->Branch("trackphi",jets_.trackphi,"trackphi[ntrack]/F");
   t->Branch("tracksumecal",jets_.tracksumecal,"tracksumecal[ntrack]/F");
   t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
+  t->Branch("trackfake",jets_.trackfake,"trackfake[ntrack]/I");
 
 
   TH1D::SetDefaultSumw2();
@@ -335,7 +344,22 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
    Handle<vector<Track> > tracks;
    iEvent.getByLabel(trackTag_, tracks);
+   
+  // do reco-to-sim association
 
+  Handle<TrackingParticleCollection>  TPCollectionHfake;
+  Handle<edm::View<reco::Track> >  trackCollection;
+  ESHandle<TrackAssociatorBase> theAssociator;
+  const TrackAssociatorByHits *theAssociatorByHits;
+  reco::RecoToSimCollection recSimColl;
+  
+  if(hasSimInfo_) {
+    iEvent.getByLabel(simTracksTag_,TPCollectionHfake);
+    iEvent.getByLabel(trackTag_,trackCollection);
+    iSetup.get<TrackAssociatorRecord>().get("TrackAssociatorByHits",theAssociator);
+    theAssociatorByHits = (const TrackAssociatorByHits*) theAssociator.product();  
+    recSimColl= theAssociatorByHits->associateRecoToSim(trackCollection,TPCollectionHfake,&iEvent);
+  }
 
 
    
@@ -768,6 +792,8 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        //cout<<" jets_.nPFcand "<<jets_.nPFcand<<endl;
    }
    
+   cout<<" ntracks: "<<tracks->size()<<endl;
+
    for(unsigned int it=0; it<tracks->size(); ++it){
      const reco::Track & track = (*tracks)[it];
 
@@ -781,7 +807,17 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      jets_.tracksumhcal[jets_.ntrack] = 0.;
 
 
-     reco::TrackRef trackref=reco::TrackRef(tracks,it);
+     jets_.trackfake[jets_.ntrack]=0;
+    
+
+     reco::TrackRef trackRef=reco::TrackRef(tracks,it);
+
+
+     if(hasSimInfo_)
+       if(recSimColl.find(edm::RefToBase<reco::Track>(trackRef)) == recSimColl.end())
+	 jets_.trackfake[jets_.ntrack]=1;
+     
+
 
      int pfCandMatchFound = 0;
 
@@ -801,9 +837,8 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 
 
 	 // if working with 2 different track collections this doesn't work
-	 if(cand.trackRef() != trackref) continue;
-
-	 //if(fabs(cand.pt()-track.pt())>0.001||fabs(cand.eta()-track.eta())>0.001||fabs(acos(cos(cand.phi()-track.phi())))>0.001) continue;
+	 if(cand.trackRef() != trackRef) continue;
+	  //if(fabs(cand.pt()-track.pt())>0.001||fabs(cand.eta()-track.eta())>0.001||fabs(acos(cos(cand.phi()-track.phi())))>0.001) continue;
 
 	 pfCandMatchFound = 1;
 
