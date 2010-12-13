@@ -165,6 +165,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float trackpt[MAXTRACKS];
     float tracketa[MAXTRACKS];
     float trackphi[MAXTRACKS];
+    float tracksumecal[MAXTRACKS];
+    float tracksumhcal[MAXTRACKS];
 
 
   };

@@ -3,7 +3,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 ivars = VarParsing.VarParsing('standard')
 ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
-ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/mnguyen/HICorePhysics/Jet50-PromptReco-Runs_151217_RECOPAT-v0/9dff160a979f15b232d23f89936b0238/RECOPAT_10_1_MY1.root"
+ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/mnguyen/HICorePhysics/Jet50-PromptReco-OfficialJSON_hiGoodMergedTracks_Runs_152652_to_152957_RECOPAT-v1/760bdb5085e074829f50ca45fe83f6ca/RECOPAT_255_1_HCm.root"
 
 ivars.output = 'jetTree.root'
 ivars.maxEvents = -1
@@ -23,6 +23,9 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 #process.load('Configuration/StandardSequences/ReconstructionHeavyIons_cff')
 #process.load("RecoHI.Configuration.Reconstruction_hiPF_cff")
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
+
+
+
 #process.GlobalTag.globaltag = 'MC_39Y_V4HI::All'
 process.GlobalTag.globaltag = 'GR10_P_V12::All'  #39X
 process.MessageLogger.cerr.FwkReport.reportEvery=1
@@ -70,41 +73,23 @@ process.HeavyIonGlobalParameters = cms.PSet(
     )
 
 
+# run one jet algo, but others are now added in the source code
+# Don't change the jet collections, it's not configurable for the moment
+
 process.PFJetAnalyzer = cms.EDAnalyzer("PFJetAnalyzer",
                                        jetTag = cms.InputTag("icPu5patJets"),
-                                       recoJetTag = cms.InputTag("icPu5CaloJets"),
+                                       jetTag2 = cms.InputTag("ic5PFpatJets"),
+                                       jetTag3 = cms.InputTag("ak5PFpatJets"),
+                                       jetTag4 = cms.InputTag("ic5patJets"),
+                                       recoJetTag = cms.InputTag("iterativeConePu5CaloJets"),
+                                       recoJetTag2 = cms.InputTag("ic5PFJets"),
+                                       recoJetTag3 = cms.InputTag("ak5PFJets"),
+                                       recoJetTag4 = cms.InputTag("ic5Jets"),
                                        pfCandidatesTag  = cms.InputTag("particleFlow",""),
+                                       trackTag  = cms.InputTag("hiGoodMergedTracks"),
                                        isMC = cms.untracked.bool(False), 
                                        useCentrality = cms.untracked.bool(True)
                                        )
-
-process.ic3PFJetAnalyzer = process.PFJetAnalyzer.clone()
-process.ic3PFJetAnalyzer.jetTag = 'ic3PFpatJets'
-process.ic3PFJetAnalyzer.recoJetTag = 'ic3PFJets'
-
-process.ic4PFJetAnalyzer = process.PFJetAnalyzer.clone()
-process.ic4PFJetAnalyzer.jetTag = 'ic4PFpatJets'
-process.ic4PFJetAnalyzer.recoJetTag = 'ic4PFJets'
-
-process.ic5PFJetAnalyzer = process.PFJetAnalyzer.clone()
-process.ic5PFJetAnalyzer.jetTag = 'ic5PFpatJets'
-process.ic5PFJetAnalyzer.recoJetTag = 'ic5PFJets'
-
-process.ak3PFJetAnalyzer = process.PFJetAnalyzer.clone()
-process.ak3PFJetAnalyzer.jetTag = 'ak3PFpatJets'
-process.ak3PFJetAnalyzer.recoJetTag = 'ak3PFJets'
-
-process.ak4PFJetAnalyzer = process.PFJetAnalyzer.clone()
-process.ak4PFJetAnalyzer.jetTag = 'ak4PFpatJets'
-process.ak4PFJetAnalyzer.recoJetTag = 'ak4PFJets'
-
-process.ak5PFJetAnalyzer = process.PFJetAnalyzer.clone()
-process.ak5PFJetAnalyzer.jetTag = 'ak5PFpatJets'
-process.ak5PFJetAnalyzer.recoJetTag = 'ak5PFJets'
-
-process.ak7PFJetAnalyzer = process.PFJetAnalyzer.clone()
-process.ak7PFJetAnalyzer.jetTag = 'ak7PFpatJets'
-process.ak7PFJetAnalyzer.recoJetTag = 'ak7PFJets'
 
 
 
@@ -116,13 +101,7 @@ process.TFileService = cms.Service("TFileService",
 process.jetSkimPath = cms.Path(process.jetSkimSequence)
 
 process.p = cms.Path(    process.jetSkimSequence
-                         #*process.ic3PFJetAnalyzer
-                         #*process.ic4PFJetAnalyzer
-                         #*process.ic5PFJetAnalyzer
-                         #*process.ak3PFJetAnalyzer
-                         #*process.ak4PFJetAnalyzer
-                         *process.ak5PFJetAnalyzer
-                         #*process.ak7PFJetAnalyzer
+                         *process.PFJetAnalyzer    
                          )
 
 ## Schedule

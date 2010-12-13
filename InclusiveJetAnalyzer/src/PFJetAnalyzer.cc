@@ -31,10 +31,15 @@
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/ParticleFlowReco/interface/PFBlock.h"
+#include "DataFormats/ParticleFlowReco/interface/PFCluster.h"
+#include "DataFormats/ParticleFlowReco/interface/PFClusterFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 using namespace std;
 using namespace edm;
@@ -212,6 +217,8 @@ PFJetAnalyzer::beginJob() {
   t->Branch("trackpt",jets_.trackpt,"trackpt[ntrack]/F");
   t->Branch("tracketa",jets_.tracketa,"tracketa[ntrack]/F");
   t->Branch("trackphi",jets_.trackphi,"trackphi[ntrack]/F");
+  t->Branch("tracksumecal",jets_.tracksumecal,"tracksumecal[ntrack]/F");
+  t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
 
 
   TH1D::SetDefaultSumw2();
@@ -769,10 +776,99 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      jets_.trackpt[jets_.ntrack] = track.pt();
      jets_.tracketa[jets_.ntrack] = track.eta();
      jets_.trackphi[jets_.ntrack] = track.phi();
+
+     jets_.tracksumecal[jets_.ntrack] = 0.;
+     jets_.tracksumhcal[jets_.ntrack] = 0.;
+
+
+     reco::TrackRef trackref=reco::TrackRef(tracks,it);
+
+     int pfCandMatchFound = 0;
+
+     // loop over pf candidates to get calo-track matching info	
+       for( unsigned icand=0; icand<pfCandidates->size(); icand++ ) {
+	 
+	 const reco::PFCandidate& cand = (*pfCandidates)[icand];
+    
+	 float cand_type = cand.particleId();
+
+	 // only charged hadrons and leptons can be asscociated with a track
+	 if(!(cand_type == PFCandidate::h ||     //type1
+	      cand_type == PFCandidate::e ||     //type2
+	      cand_type == PFCandidate::mu      //type3
+	      )
+	    ) continue;
+	 
+
+	 //reco::Track track_pfCand = cand.track();
+	 // working with 2 different track collections so this doesn't work
+	 // if(cand.trackRef() != trackref) continue;
+
+	 if(fabs(cand.pt()-track.pt())>0.001||fabs(cand.eta()-track.eta())>0.001||fabs(acos(cos(cand.phi()-track.phi())))>0.001) continue;
+
+	 pfCandMatchFound = 1;
+	 cout<<" found matching pf cand "<<endl;
+    
+	 cout<<" elements in block = "<<cand.elementsInBlocks().size()<<endl;
+	 for(unsigned iblock=0; iblock<cand.elementsInBlocks().size(); iblock++) {
+	   cout<<" getting block ref "<<endl;
+	   PFBlockRef blockRef = cand.elementsInBlocks()[iblock].first;
+      	   cout<<" got block ref "<<endl;
+      
+	   cout<<" getting block index "<<endl;
+	   unsigned indexInBlock = cand.elementsInBlocks()[iblock].second;
+	   cout<<" block index = "<<indexInBlock<<endl;
+	   if(cand.elements()) cout<<" yes "<<endl;
+	   else cout<<" no "<<endl;
+	   
+	   const edm::OwnVector<  reco::PFBlockElement>&  elements = (*blockRef).elements();
+	   cout<<" hello "<<endl;
+	   //This tells you what type of element it is:
+	   cout<<" block type"<<elements[indexInBlock].type()<<endl;
+	   
+	   switch (elements[indexInBlock].type()) {
+	     
+	   case PFBlockElement::ECAL: {
+	     reco::PFClusterRef clusterRef = elements[indexInBlock].clusterRef();
+	     double eet = clusterRef->energy()/cosh(clusterRef->eta());
+	     //if(verbose_)cout<<" ecal energy "<<clusterRef->energy()<<endl;
+	     cout<<" ecal energy "<<clusterRef->energy()<<endl;
+	     jets_.tracksumecal[jets_.ntrack] += eet;
+	     break;
+	   }
+	     
+	   case PFBlockElement::HCAL: {
+	     reco::PFClusterRef clusterRef = elements[indexInBlock].clusterRef();
+	     double eet = clusterRef->energy()/cosh(clusterRef->eta());
+	     //if(verbose_)cout<<" hcal energy "<<clusterRef->energy()<<endl;
+	     cout<<" hcal energy "<<clusterRef->energy()<<endl;
+	     jets_.tracksumhcal[jets_.ntrack] += eet;
+	     break; 
+	   }       
+	   case PFBlockElement::TRACK: {
+	     //This is just the reference to the track itself, since tracks can never be linked to other tracks
+	     break; 
+	   }       
+	   default:
+	     break;
+	   }
+	   // Could do more stuff here, e.g., pre-shower, HF
+	   
+	 }
+	 
+       }
+
+       if(!pfCandMatchFound){
+	 jets_.tracksumecal[jets_.ntrack] =-1;
+	 jets_.tracksumhcal[jets_.ntrack] =-1;
+
+       }
+
      jets_.ntrack++;
+       
    }
-
-
+   
+   
    t->Fill();
 
 
