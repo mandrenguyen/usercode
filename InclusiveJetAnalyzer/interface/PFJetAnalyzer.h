@@ -55,7 +55,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   
 
 
-  edm::InputTag  pfCandidatesTag_, trackTag_;
+  edm::InputTag  pfCandidatesTag_, trackTag_, simTracksTag_;
   edm::InputTag jetTag_, jetTag2_, jetTag3_, jetTag4_;
   edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_, recoJetTag4_;
 
@@ -65,6 +65,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   bool useCentrality_;
   bool isMC_;
 
+  bool hasSimInfo_;
 
   TTree *t;
   edm::Service<TFileService> fs2;
@@ -167,7 +168,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float trackphi[MAXTRACKS];
     float tracksumecal[MAXTRACKS];
     float tracksumhcal[MAXTRACKS];
-
+    int trackfake[MAXTRACKS];
 
   };
 
