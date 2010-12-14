@@ -3,7 +3,7 @@
 
 void plotPPBalance_Ratio(){
 
-  bool isPF = false;
+  bool isPF = true;
 
   TString data_tag;
   TString mc_tag;
@@ -37,7 +37,7 @@ void plotPPBalance_Ratio(){
 
 
   // canvas setting ---
-  TCanvas *c1 = new TCanvas("c1","",490,530);
+  TCanvas *c1 = new TCanvas("c1","",550,600);
 
   // dum styling ----
   TH1F *hDum = new TH1F("hDum","",10,0,1.0);
@@ -46,23 +46,23 @@ void plotPPBalance_Ratio(){
   hDum->SetFillStyle(3005);
 
   hDum->SetStats(0);
-  hDum->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  hDum->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
   hDum->SetYTitle("Data/PYTHIA");
 
-  hDum->GetXaxis()->SetLabelSize(20);
+  hDum->GetXaxis()->SetLabelSize(30);
   hDum->GetXaxis()->SetLabelFont(43);
-  hDum->GetXaxis()->SetTitleSize(24);
+  hDum->GetXaxis()->SetTitleSize(30);
   hDum->GetXaxis()->SetTitleFont(43);
-  hDum->GetXaxis()->SetTitleOffset(1.2);
+  hDum->GetXaxis()->SetTitleOffset(1.3);
   hDum->GetXaxis()->CenterTitle();
 
   hDum->GetXaxis()->SetNdivisions(905,true);
   
-  hDum->GetYaxis()->SetLabelSize(20);
+  hDum->GetYaxis()->SetLabelSize(30);
   hDum->GetYaxis()->SetLabelFont(43);
-  hDum->GetYaxis()->SetTitleSize(22);
+  hDum->GetYaxis()->SetTitleSize(30);
   hDum->GetYaxis()->SetTitleFont(43);
-  hDum->GetYaxis()->SetTitleOffset(1.8);
+  hDum->GetYaxis()->SetTitleOffset(1.7);
   hDum->GetYaxis()->CenterTitle();
 
   hDum->SetAxisRange(0,5,"Y");
@@ -75,6 +75,8 @@ void plotPPBalance_Ratio(){
 
   hDum->Draw("hist");
 
+  hDijetBal_data->SetMarkerSize(2.0);
+  hDijetBal_data->SetMarkerSize(2.0);
   hDijetBal_data->Sumw2();
   hDijetBal_mc->Sumw2();
   hDijetBal_data->Divide(hDijetBal_mc);
@@ -89,19 +91,19 @@ void plotPPBalance_Ratio(){
   t3->SetBorderSize(0);
   t3->SetFillStyle(0);
   t3->SetTextFont(63);
-  t3->SetTextSize(15);
+  t3->SetTextSize(20);
   t3->Draw();
 
 
   // other labeling
-  TLatex *cms = new TLatex(0.06,4.5,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.06,4.5,"CMS");
   cms->SetTextFont(63);
-  cms->SetTextSize(17);
+  cms->SetTextSize(20);
   cms->Draw();
 
-  TLatex *lumi = new TLatex(0.41,4.5,"#intL dt = 35.1 pb^{-1}");
+  TLatex *lumi = new TLatex(0.3,4.5,"#intL dt = 35.1 pb^{-1}");
   lumi->SetTextFont(63);
-  lumi->SetTextSize(15);
+  lumi->SetTextSize(18);
   lumi->Draw();
 
   
@@ -109,7 +111,7 @@ void plotPPBalance_Ratio(){
   if(!isPF) jetf = new TLatex(0.06,4.0,"anti-k_{T} (R=0.5) CaloJets");
   else jetf = new TLatex(0.06,4.0,"anti-k_{T} (R=0.5) PFJets");
   jetf->SetTextFont(63);
-  jetf->SetTextSize(15);
+  jetf->SetTextSize(20);
   jetf->Draw();
 
   c1->Print(Form("./fig/ratio_%s_%s_v1.gif",data_tag.Data(),jetfinder_tag.Data()));

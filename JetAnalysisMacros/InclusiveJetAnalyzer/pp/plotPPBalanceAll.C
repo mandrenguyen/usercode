@@ -37,7 +37,7 @@ void plotPPBalanceAll(){
 
 
   // canvas setting ---
-  TCanvas *c1 = new TCanvas("c1","",490,530);
+  TCanvas *c1 = new TCanvas("c1","",560,620);
 
   // dum styling ----
   TH1F *hDum = new TH1F("hDum","",10,0,1.0);
@@ -46,21 +46,21 @@ void plotPPBalanceAll(){
   hDum->SetFillStyle(3005);
 
   hDum->SetStats(0);
-  hDum->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  hDum->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
   hDum->SetYTitle("Event Fraction");
 
-  hDum->GetXaxis()->SetLabelSize(20);
+  hDum->GetXaxis()->SetLabelSize(30);
   hDum->GetXaxis()->SetLabelFont(43);
-  hDum->GetXaxis()->SetTitleSize(24);
+  hDum->GetXaxis()->SetTitleSize(30);
   hDum->GetXaxis()->SetTitleFont(43);
-  hDum->GetXaxis()->SetTitleOffset(1.2);
+  hDum->GetXaxis()->SetTitleOffset(1.4);
   hDum->GetXaxis()->CenterTitle();
 
   hDum->GetXaxis()->SetNdivisions(905,true);
   
-  hDum->GetYaxis()->SetLabelSize(20);
+  hDum->GetYaxis()->SetLabelSize(30);
   hDum->GetYaxis()->SetLabelFont(43);
-  hDum->GetYaxis()->SetTitleSize(22);
+  hDum->GetYaxis()->SetTitleSize(30);
   hDum->GetYaxis()->SetTitleFont(43);
   hDum->GetYaxis()->SetTitleOffset(1.8);
   hDum->GetYaxis()->CenterTitle();
@@ -71,11 +71,13 @@ void plotPPBalanceAll(){
   // data, mc styling
   hDijetBal_mc->SetLineColor(kBlue);
   hDijetBal_mc->SetFillColor(kAzure-8);
-  hDijetBal_mc->SetFillStyle(3005);
-
+  hDijetBal_mc->SetFillStyle(3352);
+// 3352
   hDum->Draw("hist");
-
+  
+  hDijetBal_mc->SetMarkerSize(2.0);
   hDijetBal_mc->Draw("histsame");
+  hDijetBal_data->SetMarkerSize(2.0);
   hDijetBal_data->Draw("pzsame");
 
 
@@ -88,27 +90,27 @@ void plotPPBalanceAll(){
   t3->SetBorderSize(0);
   t3->SetFillStyle(0);
   t3->SetTextFont(63);
-  t3->SetTextSize(15);
+  t3->SetTextSize(20);
   t3->Draw();
 
 
   // other labeling
-  TLatex *cms = new TLatex(0.34,0.23,"CMS Preliminary");
+  TLatex *cms = new TLatex(0.20,0.23,"CMS");
   cms->SetTextFont(63);
-  cms->SetTextSize(17);
+  cms->SetTextSize(20);
   cms->Draw();
 
-  TLatex *lumi = new TLatex(0.70,0.23,"#intL dt = 35.1 pb^{-1}");
+  TLatex *lumi = new TLatex(0.35,0.23,"#intL dt = 35.1 pb^{-1}");
   lumi->SetTextFont(63);
-  lumi->SetTextSize(15);
+  lumi->SetTextSize(18);
   lumi->Draw();
 
   
   TLatex *jetf;
-  if(!isPF) jetf = new TLatex(0.477,0.21,"anti-k_{T} (R=0.5) CaloJets");
-  else jetf = new TLatex(0.477,0.21,"anti-k_{T} (R=0.5) PFJets");
+  if(!isPF) jetf = new TLatex(0.46,0.21,"anti-k_{T} (R=0.5) CaloJets");
+  else jetf = new TLatex(0.46,0.21,"anti-k_{T} (R=0.5) PFJets");
   jetf->SetTextFont(63);
-  jetf->SetTextSize(15);
+  jetf->SetTextSize(20);
   jetf->Draw();
 
   c1->Print(Form("./fig/%s_%s_v1.gif",data_tag.Data(),jetfinder_tag.Data()));
