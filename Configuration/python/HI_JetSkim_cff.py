@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 # HLT jet trigger
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 hltJetHI = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-hltJetHI.HLTPaths = ["HLT_HIJet35U"]
+hltJetHI.HLTPaths = ["HLT_HIJet50U"]
 hltJetHI.throw = False
 hltJetHI.andOr = True
 
@@ -27,7 +27,7 @@ icPu5CaloJetsL2L3 = cms.EDProducer('CaloJetCorrectionProducer',
 # leading jet E_T filter
 jetEtFilter = cms.EDFilter("EtMinCaloJetCountFilter",
     src = cms.InputTag("icPu5CaloJetsL2L3"),
-    etMin = cms.double(200.0),
+    etMin = cms.double(100.0),
     minNumber = cms.uint32(1)
     )
 
@@ -40,7 +40,7 @@ jetEtFilter = cms.EDFilter("EtMinCaloJetCountFilter",
 
 #from RecoHI.HiEgammaAlgos.hiEcalSpikeFilter_cfi import *
 from CmsHi.PhotonAnalysis.hiEcalRecHitSpikeFilter_cfi import *
-hiEcalRecHitSpikeFilter.minEt = 50.0
+hiEcalRecHitSpikeFilter.minEt = 20.0
 
 #HCAL cleaning
 from JetMETAnalysis.HcalReflagging.hbherechitreflaggerJETMET_cfi import *
@@ -64,10 +64,4 @@ jetSkimSequence = cms.Sequence(hltJetHI
                                * hbheReflagNewTimeEnv
                                * hcalTimingFilter
                                )
-#jetSkimPath = cms.Path(hltJetHI
-#                                 * collisionEventSelection
-#                                 #* icPu5CaloJetsL2L3
-#                                 #* jetEtFilter
-#                                 #* dijetEtFilter
-#                                 * hiEcalRecHitSpikeFilter
-#                                 )
+
