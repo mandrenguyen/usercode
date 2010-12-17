@@ -22,6 +22,14 @@ void plotTriggeredCentrality(){
   TChain* t = new TChain("hltanalysis/HltTree");
   t->Add("/d101/yetkin/AllPhysics/runsWithTowerCut/r151153/OpenHLT_*.root");
   t->Add("/d101/yetkin/AllPhysics/runsWithTowerCut/r151350/OpenHLT_*.root");
+
+
+  TChain* tj = new TChain("hltanalysis/HltTree");
+  tj->Add("/d101/yetkin/AllPhysics/runsWithTowerCut/r151153/OpenHLT_*.root");
+  tj->Add("/d101/yetkin/AllPhysics/runsWithTowerCut/r151350/OpenHLT_*.root");
+
+
+
   /*
   TChain* t = new TChain("anaPixelHitMB/PixelTree");
   TChain* t2 = new TChain("anaPixelHitJet50U/PixelTree");
