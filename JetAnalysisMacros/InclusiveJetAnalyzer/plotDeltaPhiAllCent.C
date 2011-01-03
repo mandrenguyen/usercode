@@ -1,5 +1,6 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
+#include <iostream>
 #include "TCanvas.h"
 #include "TError.h"
 #include "TPad.h"
@@ -35,8 +36,9 @@ void plotDeltaPhi(int cbin = 0,
 		 bool drawXLabel = false,
 		 bool drawLeg = false);
 
+void plotPPDPhiAll();
+
 void drawText(const char *text, float xp, float yp);
-void drawDum(float min, float max, double drawXLabel);
 
 //--------------------------------------------------------------
 // drawPatch() is a crazy way of removing 0 in the second and third 
@@ -54,48 +56,56 @@ void plotDeltaPhiAllCent(){
 
 
    c1->cd(1);
-   plotDeltaPhi(-1,"data.root","pythia.root","mix.root",true,false,false);
-   gPad->SetLogy();
+   //   plotDeltaPhi(-1,"data.root","pythia.root","mix.root",true,false,false);
+   plotPPDPhiAll();  
+ gPad->SetLogy();
    drawText("(a)",0.22,0.9);
-   drawText(" 0-100%",0.28,0.55);
+   //drawText(" 0-100%",0.28,0.55);
    //  drawPatch(0.976,0.0972,1.1,0.141);                                                                                                               
    // gPad->SetBottomMargin(0.18);                                                                                                                      
    //  gPad->SetLeftMargin(0.24);                                                                                                                       
 
    c1->cd(2);
-   plotDeltaPhi(4,"data.root","pythia.root","mix.root",true,false,false);
+   plotDeltaPhi(4,"data.root","pythia.root","mix.root",true,false,true);
    gPad->SetLogy();
-   drawText("50-100%",0.08,0.55);
+   drawText("50-100%",0.6,0.85);
    drawText("(b)",0.02,0.9);
 
-   c1->cd(3);
-   plotDeltaPhi(3,"data.root","pythia.root","mix.root",true,false,true);
-   gPad->SetLogy();
-   drawText("30-50%",0.08,0.55);
-   drawText("(c)",0.02,0.9);
-   //  drawPatch(-0.00007,0.0972,0.0518,0.141);                                                                                                         
-   //  drawPatch(0.976,0.0972,1.1,0.141);                                                                                                               
-   //  gPad->SetBottomMargin(0.18);                                                                                                                     
-   TLatex *cms = new TLatex(0.5,0.39,"CMS");
-   cms->SetTextFont(63);
-   cms->SetTextSize(18);
-   cms->Draw();                                                                                                                                        
-
-   TLatex *lumi = new TLatex(1.00,0.39,"#intL dt = 6.7 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.55,0.35,"#intL dt = 6.7 #mub^{-1}");
    lumi->SetTextFont(63);
    lumi->SetTextSize(15);
    lumi->Draw(); 
 
+  TLatex *jetf;
+  jetf = new TLatex(0.5,0.035,"Iterative Cone, R=0.5");
+  jetf->SetTextFont(63);
+  jetf->SetTextSize(15);
+  jetf->Draw();
+
+   c1->cd(3);
+   plotDeltaPhi(3,"data.root","pythia.root","mix.root",true,false,false);
+   gPad->SetLogy();
+   drawText("30-50%",0.6,0.85);
+   drawText("(c)",0.02,0.9);
+
+   TLatex tsel;
+   tsel.SetNDC();
+   tsel.SetTextFont(63);
+   tsel.SetTextSize(15);
+   tsel.DrawLatex(0.15,0.78,"p_{T,1} > 120 GeV/c");
+   tsel.DrawLatex(0.15,0.68,"p_{T,2} > 50 GeV/c");
+   
+ 
    c1->cd(4);
    plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText("20-30%",0.28,0.55);
+   drawText("20-30%",0.7,0.85);
    drawText("(d)",0.22,0.93);
    //drawPatch(0.976,0.0972,1.1,0.141);
    c1->cd(5);
    plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,true,false);
    gPad->SetLogy();
-   drawText("10-20%",0.08,0.55);
+   drawText("10-20%",0.6,0.85);
    drawText("(e)",0.02,0.93);
    //   drawPatch(-0.00007,0.0972,0.0518,0.141);
    //drawPatch(0.976,0.0972,1.1,0.141);
@@ -104,7 +114,7 @@ void plotDeltaPhiAllCent(){
    c1->cd(6);
    plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText("0-10%",0.08,0.55);
+   drawText("0-10%",0.6,0.85);
    drawText("(f)",0.02,0.93);
    //   drawPatch(-0.00007,0.0972,0.0518,0.141);
    //  gPad->SetBottomMargin(0.22);                                 
@@ -167,11 +177,11 @@ void plotDeltaPhi(int cbin,
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
 
   // projection histogram
-  TH1D *h = new TH1D("h","",20,0,3.14159);
-  TH1D *hPythia = new TH1D("hPythia","",20,0,3.14159);
+  TH1D *h = new TH1D("h","",15,0,3.14159);
+  TH1D *hPythia = new TH1D("hPythia","",15,0,3.14159);
   TH1D *hDataMix;
-  if(cbin==2) hDataMix= new TH1D("hDataMix","",20,0,3.14159);
-  else hDataMix= new TH1D("hDataMix","",20,0.0001,3.14159);
+  if(cbin==2) hDataMix= new TH1D("hDataMix","",15,0,3.14159);
+  else hDataMix= new TH1D("hDataMix","",15,0.0001,3.14159);
 
   
   nt->Draw("dphi>>h",Form("(%s)",cut.Data())); 
@@ -224,10 +234,10 @@ void plotDeltaPhi(int cbin,
   hDataMix->GetYaxis()->CenterTitle();
 
   if(cbin==2){
-  hDataMix->SetAxisRange(1e-3,0.9,"Y");
+  hDataMix->SetAxisRange(5e-4,0.9,"Y");
   }
   else{
-  hDataMix->SetAxisRange(1.00001e-3,0.9,"Y");
+  hDataMix->SetAxisRange(5e-4,0.9,"Y");
   }
   if(cbin==2){
     hDataMix->GetXaxis()->SetRangeUser(0.,acos(-1.));
@@ -246,7 +256,7 @@ void plotDeltaPhi(int cbin,
     TLegend *t3=new TLegend(0.15,0.63,0.69,0.83);
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
-    t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
+    t3->AddEntry(hDataMix,"PYTHIA+DATA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -276,37 +286,6 @@ void drawText(const char *text, float xp, float yp){
   tex->Draw();
 }
 
-void drawDum(float min, float max, double drawXLabel){
-
-  TH1D *hdum = new TH1D("hdum","",20,0,1);
-  hdum->SetMaximum(max);
-
-  hdum->SetStats(0);
-
-  if(drawXLabel) hdum->SetXTitle("(p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");
-  hdum->GetXaxis()->SetLabelSize(20);
-  hdum->GetXaxis()->SetLabelFont(43);
-  hdum->GetXaxis()->SetTitleSize(22);
-  hdum->GetXaxis()->SetTitleFont(43);
-  hdum->GetXaxis()->SetTitleOffset(1.5);
-  hdum->GetXaxis()->CenterTitle();
-
-  hdum->GetXaxis()->SetNdivisions(905,true);
-
-  hdum->SetYTitle("Event Fraction");
-
-  hdum->GetYaxis()->SetLabelSize(20);
-  hdum->GetYaxis()->SetLabelFont(43);
-  hdum->GetYaxis()->SetTitleSize(20);
-  hdum->GetYaxis()->SetTitleFont(43);
-  hdum->GetYaxis()->SetTitleOffset(2.5);
-  hdum->GetYaxis()->CenterTitle();
-
-  hdum->SetAxisRange(0,0.2,"Y");
-
-  hdum->Draw("");
-
-}
 
 void makeMultiPanelCanvas(TCanvas*& canv,
                           const Int_t columns,
@@ -379,4 +358,109 @@ void makeMultiPanelCanvas(TCanvas*& canv,
          pad[i][j]->SetNumber(columns*j+i+1);
       }
    }
+}
+
+
+void plotPPDPhiAll(){
+
+  bool isPF = false;
+
+  TString data_tag;
+  TString mc_tag;
+  TString jetfinder, jetfinder_tag;
+
+  if(!isPF){
+    data_tag = "hdata_ak5calo_DijetDPhi";
+    mc_tag = "hmc_ak5calo_DijetDPhi_histonly";
+    jetfinder_tag = "calo";
+  }else{
+    data_tag = "hdata_ak5pf_DijetDPhi";
+    mc_tag = "hmc_ak5pf_DijetDPhi_histonly";
+    jetfinder_tag ="pf";
+  }
+
+  TFile *fDATA = new TFile(Form("./pp/%s.root",data_tag.Data()));
+  TFile *fMC = new TFile(Form("./pp/%s.root",mc_tag.Data()));
+
+  TH1F *hDijetBal_data = (TH1F*) fDATA->Get("hDataDijetDPhi");
+  TH1F *hDijetBal_mc = (TH1F*) fMC->Get("hQCDDijetDPhi");
+
+
+  // normalization should be matched with what's in ANA
+  hDijetBal_data->Scale(1./hDijetBal_data->Integral());
+  hDijetBal_data->Rebin(2);
+
+  hDijetBal_mc->Scale(1./hDijetBal_mc->Integral());
+  hDijetBal_mc->Rebin(2);
+
+  cout<<"Bin Width = "<<hDijetBal_data->GetBinWidth(1)<<endl;
+  cout<<"Number of bins = "<<hDijetBal_data->GetNbinsX()<<endl;
+  cout<<"Max Bin Edge "<<hDijetBal_data->GetBinLowEdge(20)+hDijetBal_data->GetBinWidth(1)<<endl;
+
+
+
+  hDijetBal_mc->GetXaxis()->SetLabelSize(22);
+  hDijetBal_mc->GetXaxis()->SetLabelFont(43);
+  hDijetBal_mc->GetXaxis()->SetTitleSize(24);
+  hDijetBal_mc->GetXaxis()->SetTitleFont(43);
+  hDijetBal_mc->GetXaxis()->SetTitleOffset(1.7);
+  hDijetBal_mc->GetXaxis()->CenterTitle();
+
+  //hDijetBal_mc->GetXaxis()->SetNdivisions(905,true);
+
+  hDijetBal_mc->SetYTitle("Event Fraction");
+
+  hDijetBal_mc->GetYaxis()->SetLabelSize(22);
+  hDijetBal_mc->GetYaxis()->SetLabelFont(43);
+  hDijetBal_mc->GetYaxis()->SetTitleSize(22);
+  hDijetBal_mc->GetYaxis()->SetTitleFont(43);
+  hDijetBal_mc->GetYaxis()->SetTitleOffset(2.4);
+  hDijetBal_mc->GetYaxis()->CenterTitle();
+  // data, mc styling
+  hDijetBal_mc->SetLineColor(kBlue);
+  hDijetBal_mc->SetFillColor(kAzure-8);
+  hDijetBal_mc->SetFillStyle(3005);
+
+  //hDum->Draw("hist");
+
+  hDijetBal_mc->SetAxisRange(5e-4,0.9,"Y");
+
+
+
+  hDijetBal_mc->Draw("hist");
+  hDijetBal_data->Draw("pzsame");
+
+
+  // Legend
+    TLegend *t3a=new TLegend(0.37,0.63,0.69,0.83);
+  //t3a->SetHeader("ant-k_{T} (R=0.5) CaloJets");
+  t3a->AddEntry(hDijetBal_data,"pp  #sqrt{s}=7.0 TeV","pl");
+  t3a->AddEntry(hDijetBal_mc,"PYTHIA","lf");
+  t3a->SetFillColor(0);
+  t3a->SetBorderSize(0);
+  t3a->SetFillStyle(0);
+  t3a->SetTextFont(63);
+  t3a->SetTextSize(15);
+  t3a->Draw();
+
+
+  // other labeling
+  TLatex *cms = new TLatex(0.35,0.33,"CMS");
+  cms->SetTextFont(63);
+  cms->SetTextSize(17);
+  cms->Draw();
+
+  TLatex *lumi_pp = new TLatex(0.8,0.35,"#intL dt = 35.1 pb^{-1}");
+  lumi_pp->SetTextFont(63);
+  lumi_pp->SetTextSize(15);
+  lumi_pp->Draw();
+
+  
+  TLatex *jetf;
+  jetf = new TLatex(0.75,0.035,"Anti-k_{T}, R=0.5");
+  jetf->SetTextFont(63);
+  jetf->SetTextSize(15);
+  jetf->Draw();
+
+
 }

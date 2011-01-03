@@ -65,33 +65,38 @@ void plot_lead_vs_subletd_AllCent() {
    drawText("30-100%",px,py);
    //  drawPatch(0.976,0.0972,1.1,0.141);
    
+
   c1->cd(2);
   plotBal_vs_Imbal(1,"data.root",true,true,false,0);
 
-  drawText("10-30%",px,py);
+  drawText("10-30%",0.06,py);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.976,0.0972,1.1,0.141);
+
+  drawText("#Delta#phi_{12} > #frac{2}{3}#pi rad",0.06,py+0.12);
+
+
 
   c1->cd(3);
   plotBal_vs_Imbal(0,"data.root",true,false,true,0);
 
-  drawText("0-10%",px,py);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
+  drawText("0-10%",0.05,py);
+  //drawPatch(-0.00007,0.0972,0.0518,0.141);
 
   c1->cd(1);
-  TLatex *datalabel = new TLatex(125,225,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV");
+  TLatex *datalabel = new TLatex(130,225,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV");
   datalabel->SetTextFont(63);
   datalabel->SetTextSize(18);
   datalabel->Draw();
 
   c1->cd(3);
-  TLatex *cms = new TLatex(165,225,"CMS");
+  TLatex *cms = new TLatex(130,225,"CMS");
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();
-  TLatex *lumi = new TLatex(190,225,"#intL dt = 6.7 #mub^{-1}");
+  TLatex *lumi = new TLatex(155,225,"#intL dt = 6.7 #mub^{-1}");
   lumi->SetTextFont(63);
-  lumi->SetTextSize(15);
+  lumi->SetTextSize(18);
   lumi->Draw();
   
   c1->cd(3);
@@ -105,21 +110,21 @@ void plot_lead_vs_subletd_AllCent() {
   c1->cd(5);
   plotBal_vs_Imbal(1,"mix.root",true,true,false,1);
   //  gPad->SetLogy();
-  drawText("10-30%",px,py);
+  drawText("10-30%",0.05,py);
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.966,0.0972,1.1,0.141);
   
   c1->cd(6);
   plotBal_vs_Imbal(0,"mix.root",true,false,true,1);
-  drawText("0-10%",px,py);
-  drawPatch(-0.00007,0.0972,0.0318,0.141);
+  drawText("0-10%",0.05,py);
+  //drawPatch(-0.00007,0.0972,0.0318,0.141);
   gPad->SetRightMargin(0.15);
  
  
   //gPad->SetRightMargin(0.1);
 
   c1->cd(4);
-  TLatex *mix = new TLatex(125,225,"embedded PYTHIA");
+  TLatex *mix = new TLatex(125,225,"PYTHIA+DATA");
   mix->SetTextFont(63);
   mix->SetTextSize(18);
   mix->Draw();
@@ -147,9 +152,9 @@ void plot_lead_vs_subletd_AllCent() {
   pythia->SetTextFont(63);
   pythia->SetTextSize(18);
 
-
+  
   pythia->Draw();
-
+  
 
   //gPad->SetRightMargin(0.1);
 
@@ -172,7 +177,7 @@ void plotBal_vs_Imbal(int cbin,
 		      )
 {
   
-   TString cut="";//  "et1>120 && et2>50";
+   TString cut="dphi>2./3.*acos(-1.) &&";//  "et1>120 && et2>50";
 
    TString cstring = "";
   if(cbin==0) {
@@ -201,7 +206,6 @@ void plotBal_vs_Imbal(int cbin,
   cout<<" infname.Data() "<<infname.Data()<<endl;
   if(infname.BeginsWith("pythia")){
     nt->Draw(Form("%s>>h",var)); 
-    cout<<" hello "<<endl;
   }
   else nt->Draw(Form("%s>>h",var),Form("(%s)",cut.Data())); 
     
@@ -216,14 +220,14 @@ void plotBal_vs_Imbal(int cbin,
 
    
   h->SetStats(0);
-  if(drawXLabel) h->SetXTitle("Leading jet E_{T} (GeV)");
+  if(drawXLabel) h->SetXTitle("Leading jet p_{T} (GeV/c)");
   h->GetXaxis()->SetLabelSize(20);
   h->GetXaxis()->SetLabelFont(43);
   h->GetXaxis()->SetTitleSize(22);
   h->GetXaxis()->SetTitleFont(43);
   h->GetXaxis()->SetTitleOffset(2.6);
   h->GetXaxis()->CenterTitle();
-  h->SetYTitle("Subleading jet E_{T} (GeV)");
+  h->SetYTitle("Subleading jet p_{T} (GeV/c)");
   h->GetYaxis()->SetLabelSize(20);
   h->GetYaxis()->SetLabelFont(43);
   h->GetYaxis()->SetTitleSize(20);
@@ -231,6 +235,8 @@ void plotBal_vs_Imbal(int cbin,
   h->GetYaxis()->SetTitleOffset(3.1);
   h->GetYaxis()->CenterTitle();
   gPad->SetLogz();
+
+  if(cbin!=0)h->GetZaxis()->SetTickLength(0);
   h->Draw("zcol");
     
   TLegend *t3[10]; 

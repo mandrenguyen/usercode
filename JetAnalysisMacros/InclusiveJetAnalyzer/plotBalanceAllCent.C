@@ -36,8 +36,9 @@ void plotBalance(int cbin = 0,
 		 bool drawXLabel = false,
 		 bool drawLeg = false);
 
+void plotPPBalanceAll();
+
 void drawText(const char *text, float xp, float yp);
-void drawDum(float min, float max, double drawXLabel);
 
 //--------------------------------------------------------------
 // drawPatch() is a crazy way of removing 0 in the second and third 
@@ -54,60 +55,69 @@ void plotBalanceAllCent(){
 
  
   c1->cd(1);
-  plotBalance(-1,"data.root","pythia.root","mix.root",true,false,false);
-  drawText("(a)",0.22,0.9);
-  drawText(" 0-100%",0.70,0.1);
-  drawPatch(0.05,0.0,0.2,0.05);
+  //plotBalance(-1,"data.root","pythia.root","mix.root",true,false,false);
+  //drawText(" 0-100%",0.70,0.1);
+  //drawPatch(0.05,0.0,0.2,0.05);
+  plotPPBalanceAll();
+  drawText("(a)",0.25,0.885);
 
   c1->cd(2);
-  plotBalance(4,"data.root","pythia.root","mix.root",true,false,false);
+  plotBalance(4,"data.root","pythia.root","mix.root",true,false,true);
   drawText("50-100%",0.7,0.1);
-  drawText("(b)",0.02,0.9);
+  drawText("(b)",0.05,0.885);
+
+
+  TLatex *jetf_PbPb;
+  jetf_PbPb = new TLatex(0.477,0.14,"Iterative Cone, R=0.5");
+  jetf_PbPb->SetTextFont(63);
+  jetf_PbPb->SetTextSize(15);
+  jetf_PbPb->Draw();
+
+
+  TLatex *lumi_PbPb = new TLatex(0.50,0.23,"#intL dt = 6.7 #mub^{-1}");
+  lumi_PbPb->SetTextFont(63);
+  lumi_PbPb->SetTextSize(15);
+  lumi_PbPb->Draw();
 
   c1->cd(3);
-  plotBalance(3,"data.root","pythia.root","mix.root",true,false,true);
+  plotBalance(3,"data.root","pythia.root","mix.root",true,false,false);
   drawText("30-50%",0.7,0.1);
-  drawText("(c)",0.02,0.9);
+  drawText("(c)",0.05,0.885);
 
-  TLatex *cms = new TLatex(0.17,0.2125,"CMS");
-  cms->SetTextFont(63);
-  cms->SetTextSize(18);
-  cms->Draw();                                                                                                                                        
-
-
-  TLatex *lumi = new TLatex(0.4,0.2125,"#intL dt = 6.7 #mub^{-1}");
-
-  lumi->SetTextFont(63);
-  lumi->SetTextSize(15);
-  lumi->Draw(); 
-
+  TLatex tsel;
+  tsel.SetNDC();
+  tsel.SetTextFont(63);
+  tsel.SetTextSize(15);
+  tsel.DrawLatex(0.55,0.75,"p_{T,1} > 120 GeV/c");
+  tsel.DrawLatex(0.55,0.65,"p_{T,2} > 50 GeV/c");
+  tsel.DrawLatex(0.55,0.55,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
 
 
 
   c1->cd(4);
   plotBalance(2,"data.root","pythia.root","mix.root",true,false,false);
   drawText("20-30%",0.7,0.3);
-  drawText("(d)",0.22,0.93);
-  drawPatch(0.05,0.972,0.2,1.1);
-  drawPatch(0.9,0.0972,1.12,0.191);
+  drawText("(d)",0.25,0.92);
+  //drawPatch(0.05,0.972,0.2,1.1);
+  //drawPatch(0.9,0.0972,1.12,0.191);
 
   //  gPad->SetBottomMargin(0.22);                                                                                                                     
 
   c1->cd(5);
   plotBalance(1,"data.root","pythia.root","mix.root",true,true,false);
   drawText("10-20%",0.7,0.3);
-  drawText("(e)",0.02,0.93);
-  drawPatch(-0.00007,0.0972,0.128,0.195);
-  drawPatch(0.9,0.0972,1.12,0.191);
-  drawPatch(0.976,0.0972,1.1,0.141);
+  drawText("(e)",0.05,0.92);
+  //drawPatch(-0.00007,0.0972,0.128,0.195);
+  //drawPatch(0.9,0.0972,1.12,0.191);
+  //drawPatch(0.976,0.0972,1.1,0.141);
   //  gPad->SetBottomMargin(0.22);                                                                                                                     
 
   c1->cd(6);
   plotBalance(0,"data.root","pythia.root","mix.root",true,false,false);
   drawText("0-10%",0.7,0.3);
-  drawText("(f)",0.02,0.93);
-  drawPatch(-0.00007,0.0972,0.0518,0.141);
-  drawPatch(-0.00007,0.0972,0.128,0.195);
+  drawText("(f)",0.05,0.92);
+  //drawPatch(-0.00007,0.0972,0.0518,0.141);
+  //drawPatch(-0.00007,0.0972,0.128,0.195);
         
 
   c1->Print("./fig/dijet_imbalance_all_cent_20101126_v0.gif");
@@ -165,9 +175,13 @@ void plotBalance(int cbin,
 
 
   // projection histogram
-  TH1D *h = new TH1D("h","",20,0,1);
-  TH1D *hPythia = new TH1D("hPythia","",20,0,1);
-  TH1D *hDataMix = new TH1D("hDataMix","",20,0,1);
+  TH1D *h = new TH1D("h","",25,0,1.5);
+  TH1D *hPythia = new TH1D("hPythia","",25,0,1.5);
+  TH1D *hDataMix;
+  if(cbin==2) hDataMix= new TH1D("hDataMix","",25,0,1.5);
+  else if(cbin==0) hDataMix= new TH1D("hDataMix","",25,0.0001,1.5);
+  else hDataMix= new TH1D("hDataMix","",25,0.0001,1.5);
+
   nt->Draw("(et1-et2)/(et1+et2)>>h",Form("(%s)",cut.Data())); 
    
   if (useWeight) {
@@ -201,7 +215,7 @@ void plotBalance(int cbin,
   hDataMix->GetXaxis()->SetLabelFont(43);
   hDataMix->GetXaxis()->SetTitleSize(24);
   hDataMix->GetXaxis()->SetTitleFont(43);
-  hDataMix->GetXaxis()->SetTitleOffset(1.8);
+  hDataMix->GetXaxis()->SetTitleOffset(2.4);
   hDataMix->GetXaxis()->CenterTitle();
   
   
@@ -209,18 +223,21 @@ void plotBalance(int cbin,
   hDataMix->GetYaxis()->SetLabelFont(43);
   hDataMix->GetYaxis()->SetTitleSize(22);
   hDataMix->GetYaxis()->SetTitleFont(43);
-  hDataMix->GetYaxis()->SetTitleOffset(2.4);
+  hDataMix->GetYaxis()->SetTitleOffset(3);
   hDataMix->GetYaxis()->CenterTitle();
   
-  if(drawXLabel) hDataMix->SetXTitle("A_{J} = (p_{T}^{j1}-p_{T}^{j2})/(p_{T}^{j1}+p_{T}^{j2})");  
+  if(drawXLabel) hDataMix->SetXTitle("A_{J} = (p_{T,1}-p_{T,2})/(p_{T,1}+p_{T,2})");  
   hDataMix->SetYTitle("Event Fraction");
-  hDataMix->SetAxisRange(0,0.24,"Y");
-  hDataMix->GetXaxis()->SetNdivisions(905,true);
+  if(cbin==2)hDataMix->SetAxisRange(0,0.999,"X");
+  else hDataMix->SetAxisRange(0.001,0.999,"X");
+
+  if(cbin==2)hDataMix->SetAxisRange(0,0.26,"Y");
+  else hDataMix->SetAxisRange(0.0001,0.26,"Y");
+
+  //hDataMix->GetXaxis()->SetNdivisions(905,true);
   hDataMix->GetYaxis()->SetNdivisions(505,true);
   
-  hDataMix->SetTitleOffset(2.4,"X");
-  hDataMix->SetTitleOffset(3,"Y");
-
+ 
   hDataMix->Draw("hist");
   //hPythia->Draw("hist");  
   h->Draw("same");
@@ -228,10 +245,10 @@ void plotBalance(int cbin,
   cout<<" mean value of data "<<h->GetMean()<<endl;
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.35,0.635,0.89,0.84); 
+    TLegend *t3=new TLegend(0.44,0.6,0.89,0.8); 
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
     //t3->AddEntry(hPythia,"PYTHIA","lf");  
-    t3->AddEntry(hDataMix,"Embedded PYTHIA","lf");
+    t3->AddEntry(hDataMix,"PYTHIA+DATA","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -261,38 +278,6 @@ void drawText(const char *text, float xp, float yp){
   tex->Draw();
 }
 
-void drawDum(float min, float max, double drawXLabel){
-
-  TH1D *hdum = new TH1D("hdum","",20,0,1);
-  hdum->SetMaximum(max);
-
-  hdum->SetStats(0);
-
-  if(drawXLabel) hdum->SetXTitle("A_{J} #equiv (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
-  /*
-  hdum->GetXaxis()->SetLabelSize(20);
-  hdum->GetXaxis()->SetLabelFont(43);
-  hdum->GetXaxis()->SetTitleSize(22);
-  hdum->GetXaxis()->SetTitleFont(43);
-  hdum->GetXaxis()->SetTitleOffset(1.5);
-  hdum->GetXaxis()->CenterTitle();
-  */
-  hdum->GetXaxis()->SetNdivisions(905,true);
-
-  hdum->SetYTitle("Event Fraction");
-  /*
-  hdum->GetYaxis()->SetLabelSize(20);
-  hdum->GetYaxis()->SetLabelFont(43);
-  hdum->GetYaxis()->SetTitleSize(20);
-  hdum->GetYaxis()->SetTitleFont(43);
-  hdum->GetYaxis()->SetTitleOffset(2.5);
-  hdum->GetYaxis()->CenterTitle();
-  */
-  hdum->SetAxisRange(0,0.2,"Y");
-
-  hdum->Draw("");
-
-}
 
 void makeMultiPanelCanvas(TCanvas*& canv,
                           const Int_t columns,
@@ -365,4 +350,124 @@ void makeMultiPanelCanvas(TCanvas*& canv,
          pad[i][j]->SetNumber(columns*j+i+1);
       }
    }
+}
+
+
+void plotPPBalanceAll(){
+
+  bool isPF = false;
+
+  TString data_tag;
+  TString mc_tag;
+  TString jetfinder, jetfinder_tag;
+
+  if(!isPF){
+    data_tag = "hdata_ak5calo_DijetBalance";
+    mc_tag = "hmc_ak5calo_DijetBalance_histonly";
+    jetfinder_tag = "calo";
+  }else{
+    data_tag = "hdata_ak5pf_DijetBalance";
+    mc_tag = "hmc_ak5pf_DijetBalance_histonly";
+    jetfinder_tag ="pf";
+  }
+
+  TFile *fDATA = new TFile(Form("./pp/%s.root",data_tag.Data()));
+  TFile *fMC = new TFile(Form("./pp/%s.root",mc_tag.Data()));
+
+  TH1F *hDijetBal_data = (TH1F*) fDATA->Get("hDataDijetBalance");
+  TH1F *hDijetBal_mc = (TH1F*) fMC->Get("hQCDDijetBalance");
+
+
+  // normalization should be matched with what's in ANA
+  hDijetBal_data->Scale(1./hDijetBal_data->Integral());
+  hDijetBal_data->Rebin(2);
+
+  hDijetBal_mc->Scale(1./hDijetBal_mc->Integral());
+  hDijetBal_mc->Rebin(2);
+
+  cout<<"Bin Width, pp = "<<hDijetBal_data->GetBinWidth(1)<<endl;
+  cout<<"# of bins, pp = "<<hDijetBal_data->GetNbinsX()<<endl;
+  cout<<"Max Bin Center, pp = "<<hDijetBal_data->GetBinCenter(25)<<endl;
+
+
+  // canvas setting ---
+  //  TCanvas *c1 = new TCanvas("c1","",490,530);
+
+  // dum styling ----
+  /*
+  TH1F *hDum = new TH1F("hDum","",10,0,1.0);
+  hDum->SetLineColor(kBlue);
+  hDum->SetFillColor(kAzure-8);
+  hDum->SetFillStyle(3005);
+  */
+  hDijetBal_mc->SetStats(0);
+  hDijetBal_mc->SetXTitle("A_{J} = (E_{T}^{j1}-E_{T}^{j2})/(E_{T}^{j1}+E_{T}^{j2})");
+  hDijetBal_mc->SetYTitle("Event Fraction");
+
+  hDijetBal_mc->GetXaxis()->SetLabelSize(22);
+  hDijetBal_mc->GetXaxis()->SetLabelFont(43);
+  hDijetBal_mc->GetXaxis()->SetTitleSize(24);
+  hDijetBal_mc->GetXaxis()->SetTitleFont(43);
+  hDijetBal_mc->GetXaxis()->SetTitleOffset(2.4);
+  hDijetBal_mc->GetXaxis()->CenterTitle();
+
+  hDijetBal_mc->GetXaxis()->SetNdivisions(905,true);
+  hDijetBal_mc->GetYaxis()->SetNdivisions(505,true);
+
+  hDijetBal_mc->GetYaxis()->SetLabelSize(22);
+  hDijetBal_mc->GetYaxis()->SetLabelFont(43);
+  hDijetBal_mc->GetYaxis()->SetTitleSize(22);
+  hDijetBal_mc->GetYaxis()->SetTitleFont(43);
+  hDijetBal_mc->GetYaxis()->SetTitleOffset(3.);
+  hDijetBal_mc->GetYaxis()->CenterTitle();
+
+  hDijetBal_mc->SetAxisRange(0.0001,0.26,"Y");
+  hDijetBal_mc->SetAxisRange(0.0001,1.0,"X");
+
+ 
+
+  // data, mc styling
+  hDijetBal_mc->SetLineColor(kBlue);
+  hDijetBal_mc->SetFillColor(kAzure-8);
+  hDijetBal_mc->SetFillStyle(3005);
+
+  hDijetBal_mc->Draw("hist");
+
+  hDijetBal_mc->Draw("hist");
+  hDijetBal_data->Draw("pzsame");
+
+
+  // Legend
+    TLegend *t3a=new TLegend(0.57,0.6,0.89,0.8); 
+  //t3a->SetHeader("ant-k_{T} (R=0.5) CaloJets");
+  t3a->AddEntry(hDijetBal_data,"pp  #sqrt{s}=7.0 TeV","pl");
+  t3a->AddEntry(hDijetBal_mc,"PYTHIA","lf");
+  t3a->SetFillColor(0);
+  t3a->SetBorderSize(0);
+  t3a->SetFillStyle(0);
+  t3a->SetTextFont(63);
+  t3a->SetTextSize(15);
+  t3a->Draw();
+
+
+  // other labeling
+  TLatex *cms = new TLatex(0.34,0.23,"CMS");
+  cms->SetTextFont(63);
+  cms->SetTextSize(17);
+  cms->Draw();
+
+  TLatex *lumi_pp = new TLatex(0.50,0.23,"#intL dt = 35.1 pb^{-1}");
+  lumi_pp->SetTextFont(63);
+  lumi_pp->SetTextSize(15);
+  lumi_pp->Draw();
+
+  
+  TLatex *jetf_pp;
+  if(!isPF) jetf_pp = new TLatex(0.477,0.14,"Anti-k_{T}, R=0.5");
+  else jetf_pp = new TLatex(0.477,0.14,"anti-k_{T} (R=0.5) PFJets");
+  jetf_pp->SetTextFont(63);
+  jetf_pp->SetTextSize(15);
+  jetf_pp->Draw();
+
+
 }
