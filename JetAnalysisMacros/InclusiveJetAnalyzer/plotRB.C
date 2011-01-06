@@ -82,7 +82,7 @@ TGraphAsymmErrors *calcEffpythia(TH1* h1, TH1* hCut,double *npart)
 void plotRB(  double ajCut=0.15,
 	      double ajCut2 = 0.15,
 		 TString infname = "data.root",
-		 TString pythia = "pythia.root",
+		 TString pythia = "pythia-1.root",
 		 TString mix = "mix.root",
 		 TString titleForComparison = "PYTHIA+DATA",
 		 TString titleForFile = "Result",
@@ -304,8 +304,8 @@ void plotRB(  double ajCut=0.15,
   tsel.SetTextFont(63);
   tsel.SetTextSize(15);
   tsel.DrawLatex(0.25,0.35,"p_{T,1} > 120 GeV/c");
-  tsel.DrawLatex(0.25,0.275,"p_{T,2} > 50 GeV/c");
-  tsel.DrawLatex(0.25,0.20,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
+//  tsel.DrawLatex(0.25,0.275,"p_{T,2} > 50 GeV/c");
+  tsel.DrawLatex(0.25,0.275,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
 
   TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 6.7 #mub^{-1}");
   lumi->SetNDC();
