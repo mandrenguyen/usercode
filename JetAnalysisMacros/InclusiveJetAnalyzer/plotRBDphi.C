@@ -79,7 +79,7 @@ TGraphAsymmErrors *calcEffpythia(TH1* h1, TH1* hCut,double *npart)
 void plotRBDphi(  double dphiCut=3.026,
 	      double dphiCut2 = 3.026,
 		 TString infname = "data.root",
-		 TString pythia = "pythia.root",
+		 TString pythia = "pythia-1.root",
 		 TString mix = "mix.root",
 		 bool useWeight = true,
 		 bool drawXLabel = false,
@@ -300,7 +300,7 @@ void plotRBDphi(  double dphiCut=3.026,
   tsel.SetTextSize(15);
   tsel.DrawLatex(0.25,0.35,"p_{T,1} > 120 GeV/c");
   tsel.DrawLatex(0.25,0.275,"p_{T,2} > 50 GeV/c");
-  tsel.DrawLatex(0.25,0.20,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
+//  tsel.DrawLatex(0.25,0.20,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
 
   TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 6.7 #mub^{-1}");
   lumi->SetNDC();
