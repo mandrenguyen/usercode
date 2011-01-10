@@ -4,12 +4,17 @@
 #ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
 #ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt80_START39V7HI_GEN_SIM_RAW_RECO_393_v1/bb84e5a80bcc166dca2e76096130a4ba/Pyquen_UnquenchedDiJet_Pt80_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_1_1_I9V.root"
+ivars.files = "dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/himc/Fall10/Hydjet_Bass_MinBias_2760GeV/GEN-SIM-RECODEBUG/START39_V7HI-v1/0000/FED91C44-9AFA-DF11-B174-0002C90B3976.root"
 
-#ivars.output = 'patJets_AMPT_Pyquen_DiJet_Pt80.root'
-#ivars.maxEvents = -1
-#ivars.initialEvent = 1
+ivars.register('outputNtuple',
+                                "Ntuple.root",
+                                VarParsing.VarParsing.multiplicity.singleton,
+                                VarParsing.VarParsing.varType.string,
+                                "Ntuples for Jet Analysis")
 
-#ivars.parseArguments()
+ivars.outputNtuple = 'Ntuple.root'
+
+ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
@@ -157,6 +162,27 @@ process.patJets.addGenJetMatch      = True
 process.load("RecoHI.HiJetAlgos.HiL1Corrector_cff")
 
 process.patJets.embedCaloTowers = cms.bool(False)
+
+
+# set up vertex matching
+process.iterativeConePu5CaloJets.doPVCorrection = cms.bool(True)
+process.iterativeConePu5CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.ic5CaloJets.doPVCorrection = cms.bool(True)
+process.ic5CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.ak5CaloJets.doPVCorrection = cms.bool(True)
+process.ak5CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.ak7CaloJets.doPVCorrection = cms.bool(True)
+process.ak7CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.kt4CaloJets.doPVCorrection = cms.bool(True)
+process.kt4CaloJets.srcPVs = 'hiSelectedVertex'
+
+process.kt6CaloJets.doPVCorrection = cms.bool(True)
+process.kt6CaloJets.srcPVs = 'hiSelectedVertex'
+
 
 ### IC5, Calo  ###
 
@@ -367,8 +393,8 @@ process.ic5PFpatSequence = cms.Sequence(process.ic5PFJets*process.ic5PFsub*proce
 
 
 process.akPu5corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("akPu5CaloJets"),
-                                                    corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_AK5Calo"),
-                                                                          L3Absolute = cms.string("HI_L3Absolute_AK5Calo"),
+                                                    corrLevels = cms.PSet(L2Relative = cms.string("L2Relative_AK5Calo"),
+                                                                          L3Absolute = cms.string("L3Absolute_AK5Calo"),
                                                                           L5Flavor = cms.string("none")))
 process.akPu5clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('ak5HiGenJets'))
 process.akPu5match = process.patJetGenJetMatch.clone(src = cms.InputTag("akPu5CaloJets"),
@@ -383,8 +409,8 @@ process.akPu5patSequence = cms.Sequence(process.akPu5CaloJets*process.akPu5corr*
 
 
 process.akPu7corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("akPu7CaloJets"),
-                                                    corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_AK7Calo"),
-                                                                          L3Absolute = cms.string("HI_L3Absolute_AK7Calo"),
+                                                    corrLevels = cms.PSet(L2Relative = cms.string("L2Relative_AK7Calo"),
+                                                                          L3Absolute = cms.string("L3Absolute_AK7Calo"),
                                                                           L5Flavor = cms.string("none")))
 process.akPu7clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('ak7HiGenJets'))
 process.akPu7match = process.patJetGenJetMatch.clone(src = cms.InputTag("akPu7CaloJets"),
@@ -399,8 +425,8 @@ process.akPu7patSequence = cms.Sequence(process.akPu7CaloJets*process.akPu7corr*
 
 
 process.ktPu4corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("ktPu4CaloJets"),
-                                                    corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_KT4Calo"),
-                                                                          L3Absolute = cms.string("HI_L3Absolute_KT4Calo"),
+                                                    corrLevels = cms.PSet(L2Relative = cms.string("L2Relative_KT4Calo"),
+                                                                          L3Absolute = cms.string("L3Absolute_KT4Calo"),
                                                                           L5Flavor = cms.string("none")))
 process.ktPu4clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('kt4HiGenJets'))
 process.ktPu4match = process.patJetGenJetMatch.clone(src = cms.InputTag("ktPu4CaloJets"),
@@ -415,8 +441,8 @@ process.ktPu4patSequence = cms.Sequence(process.ktPu4CaloJets*process.ktPu4corr*
 
 
 process.ktPu6corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("ktPu6CaloJets"),
-                                                    corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_KT6Calo"),
-                                                                          L3Absolute = cms.string("HI_L3Absolute_KT6Calo"),
+                                                    corrLevels = cms.PSet(L2Relative = cms.string("L2Relative_KT6Calo"),
+                                                                          L3Absolute = cms.string("L3Absolute_KT6Calo"),
                                                                           L5Flavor = cms.string("none")))
 process.ktPu6clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('kt6HiGenJets'))
 process.ktPu6match = process.patJetGenJetMatch.clone(src = cms.InputTag("ktPu6CaloJets"),
@@ -429,8 +455,8 @@ process.ktPu6patJets = process.patJets.clone(jetSource  = cms.InputTag("ktPu6Cal
 process.ktPu6patSequence = cms.Sequence(process.ktPu6CaloJets*process.ktPu6corr*process.ktPu6clean*process.ktPu6match*process.ktPu6parton*process.ktPu6patJets)
 
 process.icPu5corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("iterativeConePu5CaloJets"),
-                                                    corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_IC5Calo"),
-                                                                          L3Absolute = cms.string("HI_L3Absolute_IC5Calo"),
+                                                    corrLevels = cms.PSet(L2Relative = cms.string("L2Relative_IC5Calo"),
+                                                                          L3Absolute = cms.string("L3Absolute_IC5Calo"),
                                                                           L5Flavor = cms.string("none")))
 process.icPu5clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('iterativeCone5HiGenJets'))
 process.icPu5match = process.patJetGenJetMatch.clone(src = cms.InputTag("iterativeConePu5CaloJets"),
@@ -441,6 +467,43 @@ process.icPu5patJets = process.patJets.clone(jetSource  = cms.InputTag("iterativ
                                              genPartonMatch= cms.InputTag("icPu5parton"),
                                              jetCorrFactorsSource = cms.VInputTag(cms.InputTag("icPu5corr")))
 process.icPu5patSequence = cms.Sequence(process.iterativeConePu5CaloJets*process.icPu5corr*process.icPu5clean*process.icPu5match*process.icPu5parton*process.icPu5patJets)
+
+process.iterativeConePu4CaloJets = process.iterativeConePu5CaloJets.clone()
+process.iterativeConePu4CaloJets.rParam       = cms.double(0.4)
+process.iterativeConePu4CaloJets.radiusPU = 0.4
+
+process.icPu4corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("iterativeConePu4CaloJets"),
+                                                    corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_IC4Calo"),
+                                                                          L3Absolute = cms.string("HI_L3Absolute_IC4Calo"),
+                                                                          L5Flavor = cms.string("none")))
+process.icPu4clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('iterativeCone4HiGenJets'))
+process.icPu4match = process.patJetGenJetMatch.clone(src = cms.InputTag("iterativeConePu4CaloJets"),
+                                                     matched = cms.InputTag("icPu4clean"))
+process.icPu4parton = process.patJetPartonMatch.clone(src = cms.InputTag("iterativeConePu4CaloJets"))
+process.icPu4patJets = process.patJets.clone(jetSource  = cms.InputTag("iterativeConePu4CaloJets"),
+                                             genJetMatch = cms.InputTag("icPu4match"),
+                                             genPartonMatch= cms.InputTag("icPu4parton"),
+                                             jetCorrFactorsSource = cms.VInputTag(cms.InputTag("icPu4corr")))
+process.icPu4patSequence = cms.Sequence(process.iterativeConePu4CaloJets*process.icPu4corr*process.icPu4clean*process.icPu4match*process.icPu4parton*process.icPu4patJets)
+
+process.iterativeConePu3CaloJets = process.iterativeConePu5CaloJets.clone()
+process.iterativeConePu3CaloJets.rParam       = cms.double(0.3)
+process.iterativeConePu3CaloJets.radiusPU = 0.3
+
+process.icPu3corr = process.patJetCorrFactors.clone(jetSource = cms.InputTag("iterativeConePu3CaloJets"),
+                                                    corrLevels = cms.PSet(L2Relative = cms.string("HI_L2Relative_IC3Calo"),
+                                                                          L3Absolute = cms.string("HI_L3Absolute_IC3Calo"),
+                                                                          L5Flavor = cms.string("none")))
+process.icPu3clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('iterativeCone3HiGenJets'))
+process.icPu3match = process.patJetGenJetMatch.clone(src = cms.InputTag("iterativeConePu3CaloJets"),
+                                                     matched = cms.InputTag("icPu3clean"))
+process.icPu3parton = process.patJetPartonMatch.clone(src = cms.InputTag("iterativeConePu3CaloJets"))
+process.icPu3patJets = process.patJets.clone(jetSource  = cms.InputTag("iterativeConePu3CaloJets"),
+                                             genJetMatch = cms.InputTag("icPu3match"),
+                                             genPartonMatch= cms.InputTag("icPu3parton"),
+                                             jetCorrFactorsSource = cms.VInputTag(cms.InputTag("icPu3corr")))
+process.icPu3patSequence = cms.Sequence(process.iterativeConePu3CaloJets*process.icPu3corr*process.icPu3clean*process.icPu3match*process.icPu3parton*process.icPu3patJets)
+
 
 
 #begin small cones
@@ -690,6 +753,10 @@ process.jpticPu5patJets = process.patJets.clone(jetSource  =cms.InputTag("JetPlu
                                                 jetCorrFactorsSource = cms.VInputTag(cms.InputTag("jpticPu5corr")))
 process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticPu5corr*process.jpticPu5clean*process.jpticPu5match*process.jpticPu5parton*process.jpticPu5patJets)
 
+# set JPT to look at the right track collection:
+process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodMergedTracks'
+process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodMergedTracks'
+process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiGoodMergedTracks'
 
 
 process.runAllJets = cms.Sequence(
@@ -704,6 +771,8 @@ process.runAllJets = cms.Sequence(
     process.ak7PFpatSequence +
     process.ic5PFpatSequence +
     process.icPu5patSequence +
+    process.icPu4patSequence +
+    process.icPu3patSequence +
     process.icPu5JPTpatSequence +
     process.ak3patSequence +
     process.ak4patSequence +
@@ -722,21 +791,35 @@ process.runAllJets = cms.Sequence(
 #    process.ktPu6patSequence +
 )
 
-process.load("MNguyen.InclusiveJetAnalyzer.inclusiveJetAnalyzer_cff")
-process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_cff")
-# track efficiency anlayzer
-#process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
+
+process.load("MNguyen.InclusiveJetAnalyzer.inclusiveJetAnalyzer_ppMC_cff")
+process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_ppMC_cff")
+
+
+#Eric's version of the track efficiency analyzer -- needs debug content
+process.load("SimTracker.TrackAssociation.TrackAssociatorByHits_cfi")
+process.load("SimTracker.TrackAssociation.trackingParticleRecoTrackAsssociation_cfi")
+process.TrackAssociatorByHits.SimToRecoDenominator = cms.string('reco')
+
+process.hitrkPixelEffAnalyzer = cms.EDAnalyzer('HiPixelTrkEffAnalyzer',
+                                               tracks = cms.untracked.InputTag('hiGoodMergedTracks'),
+                                               label_tp_effic = cms.untracked.InputTag('mergedtruth','MergedTrackTruth'),
+                                               label_tp_fake = cms.untracked.InputTag('mergedtruth','MergedTrackTruth'),
+                                               associatormap = cms.untracked.InputTag('tpRecoAssocMerged12Tracks'),
+                                               vertices = cms.untracked.InputTag('hiSelectedVertex',''),
+                                               beamspot = cms.untracked.InputTag('offlineBeamSpot'),
+                                               fillHistograms = cms.bool(True),
+                                               fillNtuples = cms.bool(False),
+                                               constPtBins = cms.bool(False),
+                                               lowPtMode = cms.bool(False),
+                                               doAssociation = cms.untracked.bool(True),
+                                               hasSimInfo = cms.untracked.bool(True)
+                                               )
+
+
 #for tree output
 process.TFileService = cms.Service("TFileService",
-                                                                     fileName=cms.string("JetAnalysisTTrees.root"))
-
-
-
-#actually only works on raw b/c of it needs random numbers which aren't stored
-#process.load("Configuration.StandardSequences.ValidationHeavyIons_cff")
-
-# put it all together
-
+                                  fileName=cms.string(ivars.outputNtuple))
 
 
 process.path = cms.Path(
@@ -748,10 +831,10 @@ process.path = cms.Path(
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
     process.hiGen*
-    process.runAllJets*
-    process.allJetAnalyzers*
-    process.PFJetAnalyzerSequence    
-    #*process.hiTrackValidation
+    process.runAllJets
+    *process.hitrkPixelEffAnalyzer
+    *process.allJetAnalyzers
+    *process.PFJetAnalyzerSequence
     )
 
 process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
@@ -761,8 +844,6 @@ process.output = cms.OutputModule("PoolOutputModule",
                                   fileName = cms.untracked.string("PAT.root")
                                   )
 
-#process.output.outputCommands.extend(["drop *_towerMaker_*_*"])
-#process.output.outputCommands.extend(["keep *_hiSelectedTracks_*_HIJETS"])
 process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
 process.output.outputCommands.extend(["keep *_particleFlow_*_*"])
 process.output.outputCommands.extend(["keep *_mergedtruth_*_*"])
