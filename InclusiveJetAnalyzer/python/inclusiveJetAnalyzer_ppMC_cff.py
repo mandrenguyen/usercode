@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
-inclusiveJetAnalyzer_ppMC = cms.EDAnalyzer("InclusiveJetAnalyzer",
+inclusiveJetAnalyzer = cms.EDAnalyzer("InclusiveJetAnalyzer",
                                       jetTag = cms.InputTag("icPu5patJets"),
                                       genjetTag = cms.InputTag("iterativeCone5HiGenJets"),
-                                      isMC = cms.untracked.bool(False), 
+                                      isMC = cms.untracked.bool(True), 
                                       useCentrality = cms.untracked.bool(True),
                                       L1gtReadout = cms.InputTag("gtDigis"),
                                       hltTrgResults = cms.untracked.string("TriggerResults::HLT"),
@@ -14,87 +14,87 @@ inclusiveJetAnalyzer_ppMC = cms.EDAnalyzer("InclusiveJetAnalyzer",
                                       )
 
 
-ic3JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ic3JetAnalyzer_ppMC.jetTag = 'ic3patJets'
-ic3JetAnalyzer_ppMC.genjetTag = 'iterativeCone3HiGenJets'
+ic3JetAnalyzer = inclusiveJetAnalyzer.clone()
+ic3JetAnalyzer.jetTag = 'ic3patJets'
+ic3JetAnalyzer.genjetTag = 'iterativeCone3HiGenJets'
 
-ic4JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ic4JetAnalyzer_ppMC.jetTag = 'ic4patJets'
-ic4JetAnalyzer_ppMC.genjetTag = 'iterativeCone4HiGenJets'
+ic4JetAnalyzer = inclusiveJetAnalyzer.clone()
+ic4JetAnalyzer.jetTag = 'ic4patJets'
+ic4JetAnalyzer.genjetTag = 'iterativeCone4HiGenJets'
 
-ic5JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ic5JetAnalyzer_ppMC.jetTag = 'ic5patJets'
-ic4JetAnalyzer_ppMC.genjetTag = 'iterativeCone5HiGenJets'
+ic5JetAnalyzer = inclusiveJetAnalyzer.clone()
+ic5JetAnalyzer.jetTag = 'ic5patJets'
+ic4JetAnalyzer.genjetTag = 'iterativeCone5HiGenJets'
 
-ak3JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak3JetAnalyzer_ppMC.jetTag = 'ak3patJets'
-ak3JetAnalyzer_ppMC.genjetTag = 'ak3HiGenJets'
+ak3JetAnalyzer = inclusiveJetAnalyzer.clone()
+ak3JetAnalyzer.jetTag = 'ak3patJets'
+ak3JetAnalyzer.genjetTag = 'ak3HiGenJets'
 
-ak4JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak4JetAnalyzer_ppMC.jetTag = 'ak4patJets'
-ak4JetAnalyzer_ppMC.genjetTag = 'ak4HiGenJets'
+ak4JetAnalyzer = inclusiveJetAnalyzer.clone()
+ak4JetAnalyzer.jetTag = 'ak4patJets'
+ak4JetAnalyzer.genjetTag = 'ak4HiGenJets'
 
-ak5JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak5JetAnalyzer_ppMC.jetTag = 'ak5patJets'
-ak5JetAnalyzer_ppMC.genjetTag = 'ak5HiGenJets'
+ak5JetAnalyzer = inclusiveJetAnalyzer.clone()
+ak5JetAnalyzer.jetTag = 'ak5patJets'
+ak5JetAnalyzer.genjetTag = 'ak5HiGenJets'
 
-ak7JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak7JetAnalyzer_ppMC.jetTag = 'ak7patJets'
-ak7JetAnalyzer_ppMC.genjetTag = 'ak7HiGenJets'
+ak7JetAnalyzer = inclusiveJetAnalyzer.clone()
+ak7JetAnalyzer.jetTag = 'ak7patJets'
+ak7JetAnalyzer.genjetTag = 'ak7HiGenJets'
 
-kt4JetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-kt4JetAnalyzer_ppMC.jetTag = 'kt4patJets'
-kt4JetAnalyzer_ppMC.genjetTag = 'kt4HiGenJets'
+kt4JetAnalyzer = inclusiveJetAnalyzer.clone()
+kt4JetAnalyzer.jetTag = 'kt4patJets'
+kt4JetAnalyzer.genjetTag = 'kt4HiGenJets'
 
-ic3PFJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ic3PFJetAnalyzer_ppMC.jetTag = 'ic3PFpatJets'
-ic3PFJetAnalyzer_ppMC.genjetTag = 'iterativeCone3HiGenJets'
+ic3PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+ic3PFJetAnalyzer.jetTag = 'ic3PFpatJets'
+ic3PFJetAnalyzer.genjetTag = 'iterativeCone3HiGenJets'
 
-ic4PFJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ic4PFJetAnalyzer_ppMC.jetTag = 'ic4PFpatJets'
-ic4PFJetAnalyzer_ppMC.genjetTag = 'iterativeCone4HiGenJets'
+ic4PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+ic4PFJetAnalyzer.jetTag = 'ic4PFpatJets'
+ic4PFJetAnalyzer.genjetTag = 'iterativeCone4HiGenJets'
 
-ic5PFJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ic5PFJetAnalyzer_ppMC.jetTag = 'ic5PFpatJets'
-ic5PFJetAnalyzer_ppMC.genjetTag = 'iterativeCone5HiGenJets'
+ic5PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+ic5PFJetAnalyzer.jetTag = 'ic5PFpatJets'
+ic5PFJetAnalyzer.genjetTag = 'iterativeCone5HiGenJets'
 
-ak3PFJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak3PFJetAnalyzer_ppMC.jetTag = 'ak3PFpatJets'
-ak3PFJetAnalyzer_ppMC.genjetTag = 'ak3HiGenJets'
+ak3PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+ak3PFJetAnalyzer.jetTag = 'ak3PFpatJets'
+ak3PFJetAnalyzer.genjetTag = 'ak3HiGenJets'
 
-ak4PFJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak4PFJetAnalyzer_ppMC.jetTag = 'ak4PFpatJets'
-ak4PFJetAnalyzer_ppMC.genjetTag = 'ak4HiGenJets'
+ak4PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+ak4PFJetAnalyzer.jetTag = 'ak4PFpatJets'
+ak4PFJetAnalyzer.genjetTag = 'ak4HiGenJets'
 
-ak5PFJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak5PFJetAnalyzer_ppMC.jetTag = 'ak5PFpatJets'
-ak5PFJetAnalyzer_ppMC.genjetTag = 'ak5HiGenJets'
+ak5PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+ak5PFJetAnalyzer.jetTag = 'ak5PFpatJets'
+ak5PFJetAnalyzer.genjetTag = 'ak5HiGenJets'
 
-ak7PFJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-ak7PFJetAnalyzer_ppMC.jetTag = 'ak7PFpatJets'
-ak7PFJetAnalyzer_ppMC.genjetTag = 'ak7HiGenJets'
+ak7PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+ak7PFJetAnalyzer.jetTag = 'ak7PFpatJets'
+ak7PFJetAnalyzer.genjetTag = 'ak7HiGenJets'
 
-icPu5JPTJetAnalyzer_ppMC = inclusiveJetAnalyzer_ppMC.clone()
-icPu5JPTJetAnalyzer_ppMC.jetTag = 'jpticPu5patJets'
-icPu5JPTJetAnalyzer_ppMC.genjetTag = 'iterativeCone5HiGenJets'
+icPu5JPTJetAnalyzer = inclusiveJetAnalyzer.clone()
+icPu5JPTJetAnalyzer.jetTag = 'jpticPu5patJets'
+icPu5JPTJetAnalyzer.genjetTag = 'iterativeCone5HiGenJets'
 
-allJetAnalyzers_ppMC = cms.Sequence(                         inclusiveJetAnalyzer_ppMC
-                                                        *ic3JetAnalyzer_ppMC
-                                                        *ic4JetAnalyzer_ppMC
-                                                        *ic5JetAnalyzer_ppMC
-                                                        *ak3JetAnalyzer_ppMC
-                                                        *ak4JetAnalyzer_ppMC
-                                                        *ak5JetAnalyzer_ppMC
-                                                        *kt4JetAnalyzer_ppMC
-                                                        *ak7JetAnalyzer_ppMC
-                                                        *ic3PFJetAnalyzer_ppMC
-                                                        *ic4PFJetAnalyzer_ppMC
-                                                        *ic5PFJetAnalyzer_ppMC
-                                                        *ak3PFJetAnalyzer_ppMC
-                                                        *ak4PFJetAnalyzer_ppMC
-                                                        *ak5PFJetAnalyzer_ppMC
-                                                        *ak7PFJetAnalyzer_ppMC
-                                                        *icPu5JPTJetAnalyzer_ppMC
+allJetAnalyzers = cms.Sequence(                         inclusiveJetAnalyzer
+                                                        *ic3JetAnalyzer
+                                                        *ic4JetAnalyzer
+                                                        *ic5JetAnalyzer
+                                                        *ak3JetAnalyzer
+                                                        *ak4JetAnalyzer
+                                                        *ak5JetAnalyzer
+                                                        *kt4JetAnalyzer
+                                                        *ak7JetAnalyzer
+                                                        *ic3PFJetAnalyzer
+                                                        *ic4PFJetAnalyzer
+                                                        *ic5PFJetAnalyzer
+                                                        *ak3PFJetAnalyzer
+                                                        *ak4PFJetAnalyzer
+                                                        *ak5PFJetAnalyzer
+                                                        *ak7PFJetAnalyzer
+                                                        *icPu5JPTJetAnalyzer
                                                         )
 
 
