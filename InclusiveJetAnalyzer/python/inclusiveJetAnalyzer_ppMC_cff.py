@@ -74,6 +74,10 @@ ak7PFJetAnalyzer = inclusiveJetAnalyzer.clone()
 ak7PFJetAnalyzer.jetTag = 'ak7PFpatJets'
 ak7PFJetAnalyzer.genjetTag = 'ak7HiGenJets'
 
+kt4PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+kt4PFJetAnalyzer.jetTag = 'kt4PFpatJets'
+kt4PFJetAnalyzer.genjetTag = 'kt4HiGenJets'
+
 icPu5JPTJetAnalyzer = inclusiveJetAnalyzer.clone()
 icPu5JPTJetAnalyzer.jetTag = 'jpticPu5patJets'
 icPu5JPTJetAnalyzer.genjetTag = 'iterativeCone5HiGenJets'
@@ -85,8 +89,8 @@ allJetAnalyzers = cms.Sequence(                         inclusiveJetAnalyzer
                                                         *ak3JetAnalyzer
                                                         *ak4JetAnalyzer
                                                         *ak5JetAnalyzer
-                                                        *kt4JetAnalyzer
                                                         *ak7JetAnalyzer
+                                                        *kt4JetAnalyzer
                                                         *ic3PFJetAnalyzer
                                                         *ic4PFJetAnalyzer
                                                         *ic5PFJetAnalyzer
@@ -94,6 +98,7 @@ allJetAnalyzers = cms.Sequence(                         inclusiveJetAnalyzer
                                                         *ak4PFJetAnalyzer
                                                         *ak5PFJetAnalyzer
                                                         *ak7PFJetAnalyzer
+                                                        *kt4PFJetAnalyzer
                                                         *icPu5JPTJetAnalyzer
                                                         )
 
