@@ -240,7 +240,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet.pt()<<endl;
      if(jet.pt() < jetPtMin) continue;
-     jets_.rawpt[jets_.nref]=jet.correctedJet("raw").pt();
+     jets_.rawpt[jets_.nref]=jet.correctedJet("Uncorrected").pt();
      jets_.jtpt[jets_.nref] = jet.pt();                            
      jets_.jteta[jets_.nref] = jet.eta();
      jets_.jtphi[jets_.nref] = jet.phi();
@@ -278,12 +278,13 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 	 const pat::Jet& jet = (*jets)[ijet];
 	 
 	 if(jet.genJet()){
-	   if(fabs(genjet.pt()-jet.genJet()->pt()<0.0001) &&
-	      fabs(genjet.eta()-jet.genJet()->eta()<0.0001) &&
-	      fabs(genjet.phi()-jet.genJet()->phi()<0.0001)){
+	   if(fabs(genjet.pt()-jet.genJet()->pt())<0.0001 &&
+	      fabs(genjet.eta()-jet.genJet()->eta())<0.0001 &&
+	      (fabs(genjet.phi()-jet.genJet()->phi())<0.0001 || fabs(genjet.phi()-jet.genJet()->phi() - 2.0*TMath::Pi()) < 0.0001 )){
 	     
 	     jets_.genmatchindex[jets_.ngen] = (int)ijet;
 	     jets_.gendrjt[jets_.ngen] = reco::deltaR(jet,genjet);	
+
 	     break;
 	   }            		
 	 }
