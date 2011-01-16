@@ -51,11 +51,14 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
   virtual void beginJob();
 
+
+  void getPartons( const edm::Event & iEvent, const edm::EventSetup & iEs );
+
  private:
   
 
 
-  edm::InputTag  pfCandidatesTag_, trackTag_, simTracksTag_;
+  edm::InputTag  pfCandidatesTag_, trackTag_, simTracksTag_, genParticleTag_;
   edm::InputTag jetTag_, jetTag2_, jetTag3_, jetTag4_;
   edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_, recoJetTag4_;
 
@@ -170,6 +173,11 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float tracksumhcal[MAXTRACKS];
     int trackfake[MAXTRACKS];
 
+    int parton1_flavor, parton2_flavor;
+    float parton1_pt, parton2_pt;
+    float parton1_phi, parton2_phi;
+    float parton1_eta, parton2_eta;
+    float parton1_y, parton2_y;
   };
 
   JRA jets_;

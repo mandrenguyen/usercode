@@ -73,6 +73,8 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
 
+  genParticleTag_ = iConfig.getParameter<InputTag>("genParticleTag");
+
   hasSimInfo_ = iConfig.getUntrackedParameter<bool>("hasSimInfo");
   simTracksTag_ = iConfig.getParameter<InputTag>("SimTracks");
 
@@ -229,6 +231,19 @@ PFJetAnalyzer::beginJob() {
   t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
   t->Branch("trackfake",jets_.trackfake,"trackfake[ntrack]/I");
 
+  if(isMC_){
+    t->Branch("parton1_flavor",&jets_.parton1_flavor,"parton1_flavor/I");
+    t->Branch("parton2_flavor",&jets_.parton2_flavor,"parton2_flavor/I");
+    t->Branch("parton1_pt",&jets_.parton1_pt,"parton1_pt/F");
+    t->Branch("parton2_pt",&jets_.parton2_pt,"parton2_pt/F");
+    t->Branch("parton2_eta",&jets_.parton2_eta,"parton2_eta/F");
+    t->Branch("parton1_eta",&jets_.parton1_eta,"parton1_eta/F");
+    t->Branch("parton2_phi",&jets_.parton2_phi,"parton2_phi/F");
+    t->Branch("parton1_phi",&jets_.parton1_phi,"parton1_phi/F");
+    t->Branch("parton1_y",&jets_.parton1_y,"parton1_y/F");
+    t->Branch("parton2_y",&jets_.parton2_y,"parton2_y/F");
+  }
+  
 
   TH1D::SetDefaultSumw2();
   
@@ -770,7 +785,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        int particleId = (int)cand.particleId();
        float particlePt = cand.pt();
        
-       if(particlePt<0.9) continue;
+       if(particlePt<0.3) continue;
        
 
        // can use varid thresholds if we want
@@ -792,7 +807,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        //cout<<" jets_.nPFcand "<<jets_.nPFcand<<endl;
    }
    
-   cout<<" ntracks: "<<tracks->size()<<endl;
+   //cout<<" ntracks: "<<tracks->size()<<endl;
 
    for(unsigned int it=0; it<tracks->size(); ++it){
      const reco::Track & track = (*tracks)[it];
@@ -894,6 +909,8 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    }
    
    
+   if(isMC_)getPartons(iEvent, iSetup );
+
    t->Fill();
 
 
@@ -908,6 +925,35 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 }
 
   
+// copied from PhysicsTools/JetMCAlgos/plugins/PartonSelector.cc
+void PFJetAnalyzer::getPartons( const Event& iEvent, const EventSetup& iEs )
+{
+
+  //edm::Handle <reco::CandidateView> genParticles;
+  edm::Handle <reco::GenParticleCollection> genParticles;
+  iEvent.getByLabel (genParticleTag_, genParticles );
+
+  auto_ptr<GenParticleRefVector> thePartons ( new GenParticleRefVector);
+
+
+    const GenParticle & parton1 = (*genParticles)[ 6 ];
+    jets_.parton1_flavor = abs(parton1.pdgId());
+    jets_.parton1_pt = parton1.pt();
+    jets_.parton1_phi =  parton1.phi();
+    jets_.parton1_eta = parton1.eta();
+    jets_.parton1_y = parton1.y();
+
+    const GenParticle & parton2 = (*genParticles)[ 7 ];
+    jets_.parton2_flavor = abs(parton2.pdgId());
+    jets_.parton2_pt = parton2.pt();
+    jets_.parton2_phi =  parton2.phi();
+    jets_.parton2_eta = parton2.eta();
+    jets_.parton2_y = parton2.y();
+
+
+
+
+}
 
 
 
