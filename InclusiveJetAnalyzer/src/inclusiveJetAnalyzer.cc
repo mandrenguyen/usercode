@@ -27,8 +27,10 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "SimDataFormats/HiGenData/interface/GenHIEvent.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -98,9 +100,9 @@ InclusiveJetAnalyzer::beginJob() {
 
   centrality_ = 0;
 
-  string jetTagName = jetTag_.label()+"_tree"; 
+  //string jetTagName = jetTag_.label()+"_tree"; 
   string jetTagTitle = jetTag_.label()+" Jet Analysis Tree"; 
-  t = fs1->make<TTree>(jetTagName.c_str(),jetTagTitle.c_str());
+  t = fs1->make<TTree>("t",jetTagTitle.c_str());
 
 
   //  TTree* t= new TTree("t","Jet Response Analyzer");
@@ -121,12 +123,24 @@ InclusiveJetAnalyzer::beginJob() {
   t->Branch("jtphi",jets_.jtphi,"jtphi[nref]/F");
 
   if(isMC_){
+    t->Branch("pthat",&jets_.pthat,"pthat/F");    
+
+    // Only matched gen jets
+    t->Branch("refpt",jets_.refpt,"refpt[nref]/F");
+    t->Branch("refeta",jets_.refeta,"refeta[nref]/F");
+    t->Branch("refy",jets_.refy,"refy[nref]/F");
+    t->Branch("refphi",jets_.refphi,"refphi[nref]/F");
+    t->Branch("refdphijt",jets_.refdphijt,"refdphijt[nref]/F");
+    t->Branch("refdrjt",jets_.refdrjt,"refdrjt[nref]/F");
+
+    // For all gen jets, matched or unmatched
     t->Branch("ngen",&jets_.ngen,"ngen/I");
     t->Branch("genmatchindex",jets_.genmatchindex,"genmatchindex[ngen]/I");
     t->Branch("genpt",jets_.genpt,"genpt[ngen]/F");
     t->Branch("geneta",jets_.geneta,"geneta[ngen]/F");
     t->Branch("geny",jets_.geny,"geny[ngen]/F");
     t->Branch("genphi",jets_.genphi,"genphi[ngen]/F");
+    t->Branch("gendphijt",jets_.gendphijt,"gendphijt[ngen]/F");
     t->Branch("gendrjt",jets_.gendrjt,"gendrjt[ngen]/F");
   }
   
@@ -239,13 +253,22 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      const pat::Jet& jet = (*jets)[j];
      
      //cout<<" jet pt "<<jet.pt()<<endl;
-     if(jet.pt() < jetPtMin) continue;
+     //if(jet.pt() < jetPtMin) continue;
      jets_.rawpt[jets_.nref]=jet.correctedJet("Uncorrected").pt();
      jets_.jtpt[jets_.nref] = jet.pt();                            
      jets_.jteta[jets_.nref] = jet.eta();
      jets_.jtphi[jets_.nref] = jet.phi();
      jets_.jty[jets_.nref] = jet.eta();
      
+	 
+     if(jet.genJet()){
+       jets_.refpt[jets_.nref] = jet.genJet()->pt();                            
+       jets_.refeta[jets_.nref] = jet.genJet()->eta();
+       jets_.refphi[jets_.nref] = jet.genJet()->phi();
+       jets_.refy[jets_.nref] = jet.genJet()->eta();
+       jets_.refdphijt[jets_.nref] = reco::deltaPhi(jet.phi(),jet.genJet()->phi());	
+       jets_.refdrjt[jets_.nref] = reco::deltaR(jet.eta(),jet.phi(),jet.genJet()->eta(),jet.genJet()->phi());	       
+     }            	
      
      jets_.nref++;
        
@@ -255,8 +278,15 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 
    if(isMC_){
 
-   edm::Handle<vector<reco::GenJet> >genjets;
-   iEvent.getByLabel(genjetTag_, genjets);
+     edm::Handle<GenEventInfoProduct> hEventInfo;
+     iEvent.getByLabel("generator",hEventInfo);
+     jets_.pthat = hEventInfo->binningValues()[0];
+
+     // pthat and qscale equivalent
+     //double qscale_ = hEventInfo->qScale();
+
+     edm::Handle<vector<reco::GenJet> >genjets;
+     iEvent.getByLabel(genjetTag_, genjets);
 
      for(unsigned int igen = 0 ; igen < genjets->size(); ++igen){
        const reco::GenJet & genjet = (*genjets)[igen];
@@ -283,6 +313,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 	      (fabs(genjet.phi()-jet.genJet()->phi())<0.0001 || fabs(genjet.phi()-jet.genJet()->phi() - 2.0*TMath::Pi()) < 0.0001 )){
 	     
 	     jets_.genmatchindex[jets_.ngen] = (int)ijet;
+	     jets_.gendphijt[jets_.ngen] = reco::deltaPhi(jet.phi(),genjet.phi());	
 	     jets_.gendrjt[jets_.ngen] = reco::deltaR(jet,genjet);	
 
 	     break;

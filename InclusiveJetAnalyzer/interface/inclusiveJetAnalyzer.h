@@ -106,23 +106,27 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
     float vx, vy, vz;
     float b;
     float hf;
+
     float rawpt[MAXJETS];
     float jtpt[MAXJETS];
-    float refpt[MAXJETS];
     float jteta[MAXJETS];
-    float refeta[MAXJETS];
     float jtphi[MAXJETS];
-    float refphi[MAXJETS];
     float jty[MAXJETS];
+    float refpt[MAXJETS];
+    float refeta[MAXJETS];
+    float refphi[MAXJETS];
     float refy[MAXJETS];
+    float refdphijt[MAXJETS];
+    float refdrjt[MAXJETS];
 
-
+    float pthat;
     int ngen;
     int genmatchindex[MAXJETS];
     float genpt[MAXJETS];
     float geneta[MAXJETS];
     float genphi[MAXJETS];
     float geny[MAXJETS];
+    float gendphijt[MAXJETS];
     float gendrjt[MAXJETS];
 
     // hlt
