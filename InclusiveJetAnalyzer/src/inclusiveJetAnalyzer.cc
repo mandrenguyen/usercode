@@ -254,7 +254,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet.pt()<<endl;
      //if(jet.pt() < jetPtMin) continue;
-     jets_.rawpt[jets_.nref]=jet.correctedJet("Uncorrected").pt();
+     jets_.rawpt[jets_.nref]=jet.correctedJet("raw").pt();
      jets_.jtpt[jets_.nref] = jet.pt();                            
      jets_.jteta[jets_.nref] = jet.eta();
      jets_.jtphi[jets_.nref] = jet.phi();
@@ -280,10 +280,10 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 
      edm::Handle<GenEventInfoProduct> hEventInfo;
      iEvent.getByLabel("generator",hEventInfo);
-     jets_.pthat = hEventInfo->binningValues()[0];
+     //jets_.pthat = hEventInfo->binningValues()[0];
 
      // pthat and qscale equivalent
-     //double qscale_ = hEventInfo->qScale();
+     jets_.pthat = hEventInfo->qScale();
 
      edm::Handle<vector<reco::GenJet> >genjets;
      iEvent.getByLabel(genjetTag_, genjets);
