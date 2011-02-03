@@ -17,6 +17,7 @@
 #include "TLatex.h"
 #include "TString.h"
 #include "TStyle.h"
+#include "TGaxis.h"
 
 #endif
 
