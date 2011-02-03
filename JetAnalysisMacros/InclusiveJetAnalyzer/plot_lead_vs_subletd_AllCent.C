@@ -155,6 +155,43 @@ void plot_lead_vs_subletd_AllCent() {
   
   pythia->Draw();
   
+  // below is to draw a dummy histogram without axis and put axis by hand
+  c1->cd(8);
+  TH2D *hDummy = new TH2D("hDummy","",28,120.001,259.999,40,50.001,249.999);
+  hDummy->SetStats(0);
+  hDummy->GetXaxis()->SetLabelSize(20);
+  hDummy->GetXaxis()->SetLabelFont(43);
+  hDummy->GetXaxis()->SetTitleSize(22);
+  hDummy->GetXaxis()->SetTitleFont(43);
+  hDummy->GetXaxis()->SetTitleOffset(2.6);
+  hDummy->GetYaxis()->SetLabelSize(20);
+  hDummy->GetYaxis()->SetLabelFont(43);
+  hDummy->GetYaxis()->SetTitleSize(20);
+  hDummy->GetYaxis()->SetTitleFont(43);
+  hDummy->GetYaxis()->SetTitleOffset(3.1);
+
+  hDummy->GetXaxis()->SetNdivisions(000,true);
+  hDummy->GetYaxis()->SetNdivisions(000,true);
+  hDummy->GetXaxis()->SetAxisColor(0);
+
+  hDummy->Draw("");
+
+  TGaxis *aaxis = new TGaxis(120.001,249.999, 259.999,249.999, 120.001,259.999, 3,"+");
+  aaxis->SetTitle("Leading jet p_{T} (GeV/c)");
+  aaxis->SetLabelSize(20);
+  aaxis->SetLabelFont(43);
+  aaxis->SetTitleSize(22);
+  aaxis->SetTitleFont(43);
+  aaxis->SetTitleOffset(2.6);
+  aaxis->CenterTitle();
+  aaxis->Draw("");
+
+  c1->cd(9);
+  TH2D *hDummy2 = (TH2D*) hDummy->Clone("hDummy2");
+  hDummy2->Draw("");
+  hDummy2->GetYaxis()->SetAxisColor(0);
+  aaxis->Draw("");
+  gPad->SetRightMargin(0.15);
 
   //gPad->SetRightMargin(0.1);
 
