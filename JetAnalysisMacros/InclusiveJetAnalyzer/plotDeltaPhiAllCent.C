@@ -177,11 +177,11 @@ void plotDeltaPhi(int cbin,
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
 
   // projection histogram
-  TH1D *h = new TH1D("h","",15,0,3.14159);
-  TH1D *hPythia = new TH1D("hPythia","",15,0,3.14159);
+  TH1D *h = new TH1D("h","",30,0,3.14159);
+  TH1D *hPythia = new TH1D("hPythia","",30,0,3.14159);
   TH1D *hDataMix;
-  if(cbin==2) hDataMix= new TH1D("hDataMix","",15,0,3.14159);
-  else hDataMix= new TH1D("hDataMix","",15,0.0001,3.14159);
+  if(cbin==2) hDataMix= new TH1D("hDataMix","",30,0,3.14159);
+  else hDataMix= new TH1D("hDataMix","",30,0.0001,3.14159);
 
   
   nt->Draw("dphi>>h",Form("(%s)",cut.Data())); 
@@ -201,19 +201,19 @@ void plotDeltaPhi(int cbin,
   h->Scale(1./h->GetEntries());
   h->SetMarkerStyle(20);
 
-  hPythia->Scale(1./hPythia->Integral(0,20));
+  hPythia->Scale(1./hPythia->Integral());
   hPythia->SetLineColor(kBlue);
   hPythia->SetFillColor(kAzure-8);
   hPythia->SetFillStyle(3005);
    
-  hDataMix->Scale(1./hDataMix->Integral(0,20));
+  hDataMix->Scale(1./hDataMix->Integral());
   hDataMix->SetLineColor(kRed);
   hDataMix->SetFillColor(kRed-9);
   hDataMix->SetFillStyle(3004);
 
   hDataMix->SetStats(0);
 
-  if(drawXLabel) hDataMix->SetXTitle("#Delta#phi (rad)");
+  if(drawXLabel) hDataMix->SetXTitle("#Delta#phi_{1,2}");
 
   hDataMix->GetXaxis()->SetLabelSize(22);
   hDataMix->GetXaxis()->SetLabelFont(43);
@@ -222,7 +222,7 @@ void plotDeltaPhi(int cbin,
   hDataMix->GetXaxis()->SetTitleOffset(1.7);
   hDataMix->GetXaxis()->CenterTitle();
 
-  //hDataMix->GetXaxis()->SetNdivisions(905,true);
+  //hDataMix->GetXaxis()->SetNdivisions(705,true);
 
   hDataMix->SetYTitle("Event Fraction");
 
@@ -234,10 +234,10 @@ void plotDeltaPhi(int cbin,
   hDataMix->GetYaxis()->CenterTitle();
 
   if(cbin==2){
-  hDataMix->SetAxisRange(5e-4,0.9,"Y");
+  hDataMix->SetAxisRange(5e-4,0.6,"Y");
   }
   else{
-  hDataMix->SetAxisRange(5e-4,0.9,"Y");
+  hDataMix->SetAxisRange(5e-4,0.6,"Y");
   }
   if(cbin==2){
     hDataMix->GetXaxis()->SetRangeUser(0.,acos(-1.));
@@ -254,7 +254,7 @@ void plotDeltaPhi(int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.15,0.63,0.69,0.83);
-    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
     t3->AddEntry(hDataMix,"PYTHIA+DATA","lf");
     t3->SetFillColor(0);
@@ -388,10 +388,10 @@ void plotPPDPhiAll(){
 
   // normalization should be matched with what's in ANA
   hDijetBal_data->Scale(1./hDijetBal_data->Integral());
-  hDijetBal_data->Rebin(2);
+  //hDijetBal_data->Rebin(2);
 
   hDijetBal_mc->Scale(1./hDijetBal_mc->Integral());
-  hDijetBal_mc->Rebin(2);
+  //hDijetBal_mc->Rebin(2);
 
   cout<<"Bin Width = "<<hDijetBal_data->GetBinWidth(1)<<endl;
   cout<<"Number of bins = "<<hDijetBal_data->GetNbinsX()<<endl;
@@ -406,7 +406,7 @@ void plotPPDPhiAll(){
   hDijetBal_mc->GetXaxis()->SetTitleOffset(1.7);
   hDijetBal_mc->GetXaxis()->CenterTitle();
 
-  //hDijetBal_mc->GetXaxis()->SetNdivisions(905,true);
+  hDijetBal_mc->GetXaxis()->SetNdivisions(705,true);
 
   hDijetBal_mc->SetYTitle("Event Fraction");
 
@@ -423,7 +423,7 @@ void plotPPDPhiAll(){
 
   //hDum->Draw("hist");
 
-  hDijetBal_mc->SetAxisRange(5e-4,0.9,"Y");
+  hDijetBal_mc->SetAxisRange(5e-4,0.6,"Y");
 
 
 
@@ -434,7 +434,7 @@ void plotPPDPhiAll(){
   // Legend
     TLegend *t3a=new TLegend(0.37,0.63,0.69,0.83);
   //t3a->SetHeader("ant-k_{T} (R=0.5) CaloJets");
-  t3a->AddEntry(hDijetBal_data,"pp  #sqrt{s}=7.0 TeV","pl");
+  t3a->AddEntry(hDijetBal_data,"pp  #sqrt{s}=7.0 TeV","p");
   t3a->AddEntry(hDijetBal_mc,"PYTHIA","lf");
   t3a->SetFillColor(0);
   t3a->SetBorderSize(0);
