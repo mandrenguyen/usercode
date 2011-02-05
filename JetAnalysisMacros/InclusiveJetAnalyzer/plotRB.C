@@ -165,7 +165,7 @@ void plotRB(  double ajCut=0.15,
   npartValue[38] = 3.16107;
   npartValue[39] = 2.7877;
 
-  TH1D *hTmp = new TH1D("hTmp","",100,0,400);
+  TH1D *hTmp = new TH1D("hTmp","",100,-10,400);
   TH1D *h = new TH1D("h","",nBin,m);
   TH1D *hCut = new TH1D("hCut","",nBin,m);
   TH1D *h2 = new TH1D("h2","",nBin,m);
@@ -212,26 +212,26 @@ void plotRB(  double ajCut=0.15,
   nt->Draw("bin>>h",Form("(et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s",ajCut,cut1.Data()));
   nt->Draw("bin>>hCut",Form("%s",cut1.Data()));
   TGraphAsymmErrors *g = calcEff(hCut,h,npart);
-  g->SetMarkerSize(1.8);
+  g->SetMarkerSize(1.25);
 
   cout <<cut2.Data()<<endl;
   nt->Draw("bin>>h2",Form("(et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s",ajCut2,cut2.Data()));
   nt->Draw("bin>>h2Cut",Form("%s",cut2.Data()));
   TGraphAsymmErrors *g2 = calcEff(h2Cut,h2,npart2);
-  g2->SetMarkerSize(1.8);
+  g2->SetMarkerSize(1.25);
 
 
   ntPythia->Draw("bin>>h",Form("(et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s",ajCut2,cut2.Data()));
   ntPythia->Draw("bin>>hCut",Form("%s",cut2.Data()));
   cout<<" pythia "<<endl;
   TGraphAsymmErrors *gPythia = calcEffpythia(hCut,h,npart);
-  gPythia->SetMarkerSize(1.8);
+  gPythia->SetMarkerSize(1.7);
 
   
   ntMix->Draw("bin>>h",Form("weight*((et1-et2)/(et1+et2)<%f&&dphi>3.14159*2/3&&%s)",ajCut2,cut2.Data()));
   ntMix->Draw("bin>>hCut",Form("weight*(%s)",cut2.Data()));
   TGraphAsymmErrors *gMix = calcEff(hCut,h,npart);
-  gMix->SetMarkerSize(1.8);
+  gMix->SetMarkerSize(1.25);
 
   TCanvas *c = new TCanvas("c","",500,500);
   //  hTmp->SetMaximum(g->GetY()[0]*2.2);
@@ -267,7 +267,7 @@ void plotRB(  double ajCut=0.15,
   }
   gPythia->SetMarkerColor(4);
   gPythia->SetLineColor(4);
-  gPythia->SetMarkerStyle(21);
+  gPythia->SetMarkerStyle(29);
   gMix->SetMarkerColor(2);
   gMix->SetLineColor(2);
   gMix->Draw("p same");
@@ -282,9 +282,9 @@ void plotRB(  double ajCut=0.15,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.5,0.77,0.9,0.93); 
-    t3->AddEntry(g,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(gPythia,"PYTHIA","pl");  
-    t3->AddEntry(gMix,titleForComparison.Data(),"pl");
+    t3->AddEntry(g,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    t3->AddEntry(gPythia,"PYTHIA","p");  
+    t3->AddEntry(gMix,titleForComparison.Data(),"p");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -303,9 +303,9 @@ void plotRB(  double ajCut=0.15,
   tsel.SetNDC();
   tsel.SetTextFont(63);
   tsel.SetTextSize(15);
-  tsel.DrawLatex(0.25,0.35,"p_{T,1} > 120 GeV/c");
+  tsel.DrawLatex(0.25,0.275,"p_{T,1} > 120 GeV/c");
 //  tsel.DrawLatex(0.25,0.275,"p_{T,2} > 50 GeV/c");
-  tsel.DrawLatex(0.25,0.275,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
+  tsel.DrawLatex(0.25,0.275,"#Delta#phi_{12} > #frac{2}{3}#pi");
 
   TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 6.7 #mub^{-1}");
   lumi->SetNDC();

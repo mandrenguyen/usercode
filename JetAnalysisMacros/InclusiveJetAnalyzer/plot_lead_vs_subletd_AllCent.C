@@ -74,7 +74,7 @@ void plot_lead_vs_subletd_AllCent() {
   //  drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  drawPatch(0.976,0.0972,1.1,0.141);
 
-  drawText("#Delta#phi_{12} > #frac{2}{3}#pi rad",0.06,py+0.12);
+  drawText("#Delta#phi_{12} > #frac{2}{3}#pi",0.06,py+0.12);
 
 
 

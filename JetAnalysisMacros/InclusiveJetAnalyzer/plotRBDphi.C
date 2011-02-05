@@ -160,7 +160,7 @@ void plotRBDphi(  double dphiCut=3.026,
   npartValue[38] = 3.16107;
   npartValue[39] = 2.7877;
 
-  TH1D *hTmp = new TH1D("hTmp","",100,0,400);
+  TH1D *hTmp = new TH1D("hTmp","",100,-10,400);
   TH1D *h = new TH1D("h","",nBin,m);
   TH1D *hCut = new TH1D("hCut","",nBin,m);
   TH1D *h2 = new TH1D("h2","",nBin,m);
@@ -207,24 +207,24 @@ void plotRBDphi(  double dphiCut=3.026,
   nt->Draw("bin>>h",Form("dphi>%f&&%s",dphiCut,cut1.Data()));
   nt->Draw("bin>>hCut",Form("%s",cut1.Data()));
   TGraphAsymmErrors *g = calcEff(hCut,h,npart);
-  g->SetMarkerSize(1.8);
+  g->SetMarkerSize(1.25);
 
   cout <<cut2.Data()<<endl;
   nt->Draw("bin>>h2",Form("dphi>%f&&%s",dphiCut2,cut2.Data()));
   nt->Draw("bin>>h2Cut",Form("%s",cut2.Data()));
   TGraphAsymmErrors *g2 = calcEff(h2Cut,h2,npart2);
-  g2->SetMarkerSize(1.8);
+  g2->SetMarkerSize(1.25);
 
 
   ntPythia->Draw("bin>>h",Form("dphi>%f&&%s",dphiCut2,cut2.Data()));
   ntPythia->Draw("bin>>hCut",Form("%s",cut2.Data()));
   TGraphAsymmErrors *gPythia = calcEffpythia(hCut,h,npart);
-  gPythia->SetMarkerSize(1.8);
+  gPythia->SetMarkerSize(1.7);
   
   ntMix->Draw("bin>>h",Form("weight*(dphi>%f&&%s)",dphiCut2,cut2.Data()));
   ntMix->Draw("bin>>hCut",Form("weight*(%s)",cut2.Data()));
   TGraphAsymmErrors *gMix = calcEff(hCut,h,npart);
-  gMix->SetMarkerSize(1.8);
+  gMix->SetMarkerSize(1.25);
 
   TCanvas *c = new TCanvas("c","",500,500);
   //  hTmp->SetMaximum(g->GetY()[0]*2.2);
@@ -232,7 +232,7 @@ void plotRBDphi(  double dphiCut=3.026,
   hTmp->SetMinimum(0.);
 
   hTmp->SetXTitle("N_{part}");
-  hTmp->SetYTitle(Form("R_{B}(#Delta#phi > %.3f)",dphiCut));
+  hTmp->SetYTitle(Form("R_{B}(#Delta#phi_{12} > %.3f)",dphiCut));
   hTmp->GetXaxis()->CenterTitle();
   hTmp->GetYaxis()->CenterTitle();
   hTmp->GetYaxis()->SetTitleOffset(1.2);
@@ -261,7 +261,7 @@ void plotRBDphi(  double dphiCut=3.026,
   }
   gPythia->SetMarkerColor(4);
   gPythia->SetLineColor(4);
-  gPythia->SetMarkerStyle(21);
+  gPythia->SetMarkerStyle(29);
 
   gMix->SetMarkerColor(2);
   gMix->SetLineColor(2);
@@ -277,9 +277,9 @@ void plotRBDphi(  double dphiCut=3.026,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.5,0.77,0.9,0.93); 
-    t3->AddEntry(g,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(gPythia,"PYTHIA","pl");  
-    t3->AddEntry(gMix,"PYTHIA+DATA","pl");
+    t3->AddEntry(g,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    t3->AddEntry(gPythia,"PYTHIA","p");  
+    t3->AddEntry(gMix,"PYTHIA+DATA","p");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);

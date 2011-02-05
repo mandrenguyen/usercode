@@ -1,5 +1,3 @@
-#if !defined(__CINT__) || defined(__MAKECINT__)
-
 #include "TCanvas.h"
 #include "TError.h"
 #include "TPad.h"
@@ -20,7 +18,6 @@
 #include "DrawTick.C"
 #include "TGraphAsymmErrors.h"
 #include "TF1.h"
-#endif
 
 
 //---------------------------------------------------------------------
@@ -80,6 +77,7 @@ void plotDeltaEAllCent(){
   drawPatch(0.94,0.0972,1.1,0.141);
   drawText("(a)",0.22,0.9);
 
+
   c1->cd(2);
   plotDE(1,"data.root","pythia.root","mix.root",true,true,false);
   drawText("10-30%",0.75,0.24);
@@ -91,9 +89,9 @@ void plotDeltaEAllCent(){
   tsel.SetNDC();
   tsel.SetTextFont(63);
   tsel.SetTextSize(15);
-  tsel.DrawLatex(0.55,0.90,"p_{T,1} > 120 GeV/c");
-  tsel.DrawLatex(0.55,0.85,"p_{T,2} > 50 GeV/c");
-  tsel.DrawLatex(0.55,0.80,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
+  tsel.DrawLatex(0.55,0.9,"p_{T,1} > 120 GeV/c");
+  tsel.DrawLatex(0.55,0.825,"p_{T,2} > 50 GeV/c");
+  tsel.DrawLatex(0.55,0.75,"#Delta#phi_{12} > #frac{2}{3}#pi");
 
 
   c1->cd(3);
@@ -113,9 +111,6 @@ void plotDeltaEAllCent(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 */
-
-
-
   c1->Print("./fig/deltaPtOverPt1_all_cent_20101219_v1.gif");
   c1->Print("./fig/deltaPtOverPt1_all_cent_20101219_v1.eps");
   c1->Print("./fig/deltaPtOverPt1_all_cent_20101219_v1.pdf");
@@ -132,8 +127,8 @@ void plotDE(  int cbin,
 		 bool drawLeg)
 {		
   gStyle->SetErrorX(0); 
-  TString cut="et1>120&&et2>50";
-  TString cutpp="et1>120&&et2>50";
+  TString cut="et1>120&&et2>50&&dphi>3.14159265359*2/3";
+  TString cutpp="et1>120&&et2>50&&dphi>3.14159265359*2/3";
   TString trigcut = "";
   TString cstring = "";
   TString divide = "";
@@ -172,7 +167,8 @@ void plotDE(  int cbin,
 
   const int nBin = 4;
 //  double m[nBin+1] = {100,110,120,130,140,170,240};
-  double m[nBin+1] = {120,130,140,170,240};
+//  double m[nBin+1] = {120,130,140,170,240};
+    double m[nBin+1] = {120,140,160,180,240};
   
   
 
@@ -206,11 +202,10 @@ void plotDE(  int cbin,
      hTmp->GetXaxis()->CenterTitle();
   }
 
-  hTmp->SetYTitle(Form("#LT (p_{T,1} - p_{T,2} ) / p_{T,1} #GT"));
-  if (type==0) hTmp->SetYTitle(Form("<(p_{T,1}-p_{T,2})> (GeV/c)"));
+  hTmp->SetYTitle(Form("<(p_{T,1}-p_{T,2})/p_{T,1}>"));
+  if (type==0) hTmp->SetYTitle(Form("<(p_{T}^{1}-p_{T}^{2})> (GeV/c)"));
   hTmp->GetYaxis()->CenterTitle();
-  //hTmp->GetYaxis()->SetTitleOffset(1.5);
-  hTmp->GetYaxis()->SetTitleSize(0.055);
+  hTmp->GetYaxis()->SetTitleOffset(1.5);
   hTmp->GetXaxis()->SetLabelSize(22);
   hTmp->GetXaxis()->SetLabelFont(43);
 
@@ -269,14 +264,14 @@ void plotDE(  int cbin,
     DrawTick(y[i],0.082*y[i],0.082*y[i],x[i],tickSize,4,1);
   }
   g->Draw("p same");
-  g->SetMarkerSize(1);
-  gPythia->SetMarkerSize(1);
+  g->SetMarkerSize(1.25);
+  gPythia->SetMarkerSize(1.7);
   gPythia->SetMarkerColor(4);
-  gPythia->SetMarkerStyle(21);
+  gPythia->SetMarkerStyle(29);
   gPythia->SetLineColor(4);
   gMix->SetMarkerColor(2);
   gMix->SetMarkerStyle(21);
-  gMix->SetMarkerSize(1);
+  gMix->SetMarkerSize(1.25);
   gMix->SetLineColor(2);
   g->SetName("g");
   gPythia->SetName("gPythia");
@@ -293,9 +288,9 @@ void plotDE(  int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.43,0.76,0.93,0.93); 
-    t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(gPythia,"PYTHIA","pl");  
-    t3->AddEntry(gMix,"PYTHIA+DATA","pl");
+    t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    t3->AddEntry(gPythia,"PYTHIA","p");  
+    t3->AddEntry(gMix,"embedded PYTHIA","p");
     //t3->AddEntry(f,"Constant Ratio","l");
     //t3->AddEntry(f2,"Constant Difference","l");
     t3->SetFillColor(0);
@@ -360,7 +355,6 @@ void plotBalanceRatio(int cbin,
   TH1D *hPythia = new TH1D("hPythia","",20,0,1);
   TH1D *hDataMix = new TH1D("hDataMix","",20,0,1);
   nt->Draw("(et1-et2)/(et1+et2)>>h",Form("(%s)",cut.Data())); 
-
   
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
@@ -419,7 +413,7 @@ void plotBalanceRatio(int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.31,0.675,0.85,0.88); 
-    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     t3->AddEntry(hPythia,"PYTHIA","lf");  
     t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
     t3->SetFillColor(0);

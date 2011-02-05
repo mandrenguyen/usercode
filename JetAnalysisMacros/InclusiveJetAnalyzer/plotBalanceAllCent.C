@@ -90,7 +90,7 @@ void plotBalanceAllCent(){
   tsel.SetTextSize(15);
   tsel.DrawLatex(0.55,0.75,"p_{T,1} > 120 GeV/c");
   tsel.DrawLatex(0.55,0.65,"p_{T,2} > 50 GeV/c");
-  tsel.DrawLatex(0.55,0.55,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
+  tsel.DrawLatex(0.55,0.55,"#Delta#phi_{12} > #frac{2}{3}#pi");
 
 
 
@@ -246,7 +246,7 @@ void plotBalance(int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.44,0.6,0.89,0.8); 
-    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //t3->AddEntry(hPythia,"PYTHIA","lf");  
     t3->AddEntry(hDataMix,"PYTHIA+DATA","lf");
     t3->SetFillColor(0);
@@ -440,7 +440,7 @@ void plotPPBalanceAll(){
   // Legend
     TLegend *t3a=new TLegend(0.57,0.6,0.89,0.8); 
   //t3a->SetHeader("ant-k_{T} (R=0.5) CaloJets");
-  t3a->AddEntry(hDijetBal_data,"pp  #sqrt{s}=7.0 TeV","pl");
+  t3a->AddEntry(hDijetBal_data,"pp  #sqrt{s}=7.0 TeV","p");
   t3a->AddEntry(hDijetBal_mc,"PYTHIA","lf");
   t3a->SetFillColor(0);
   t3a->SetBorderSize(0);
