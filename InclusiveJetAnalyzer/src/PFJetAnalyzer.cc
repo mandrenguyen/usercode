@@ -393,19 +393,19 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet.pt()<<endl;
      //if(jet.pt() < jetPtMin) continue;
-     jets_.rawpt_icPu5[jets_.nicPu5]=jet.correctedJet("raw").pt();
+     jets_.rawpt_icPu5[jets_.nicPu5]=jet.correctedJet("Uncorrected").pt();
      jets_.jtpt_icPu5[jets_.nicPu5] = jet.pt();                            
      jets_.jteta_icPu5[jets_.nicPu5] = jet.eta();
      jets_.jtphi_icPu5[jets_.nicPu5] = jet.phi();
      jets_.jty_icPu5[jets_.nicPu5] = jet.eta();
 
 
-     //  cout<<" abs corr "<<jet.corrFactor("abs")<<endl;
+     //  cout<<" abs corr "<<jet.corrFactor("L3Absolute")<<endl;
      //cout<<" abs corr "<<jet.corrFactor("L3Absolute")<<endl;
 
 
-     float L2Corr = jet.correctedJet("rel").pt()/jet.correctedJet("raw").pt();
-     float L3Corr = jet.correctedJet("abs").pt()/jet.correctedJet("rel").pt();
+     float L2Corr = jet.correctedJet("L2Relative").pt()/jet.correctedJet("Uncorrected").pt();
+     float L3Corr = jet.correctedJet("L3Absolute").pt()/jet.correctedJet("L2Relative").pt();
      
      
      jets_.L2_icPu5[jets_.nicPu5] = L2Corr;
@@ -493,17 +493,17 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      //cout<<" jet pt "<<jet2.pt()<<endl;
      //if(jet2.pt() < jetPtMin) continue;
-     jets_.rawpt_ic5[jets_.nic5]=jet2.correctedJet("raw").pt();
+     jets_.rawpt_ic5[jets_.nic5]=jet2.correctedJet("Uncorrected").pt();
      jets_.jtpt_ic5[jets_.nic5] = jet2.pt();                            
      jets_.jteta_ic5[jets_.nic5] = jet2.eta();
      jets_.jtphi_ic5[jets_.nic5] = jet2.phi();
      jets_.jty_ic5[jets_.nic5] = jet2.eta();
-     //  cout<<" abs corr "<<jet2.corrFactor("abs")<<endl;
+     //  cout<<" abs corr "<<jet2.corrFactor("L3Absolute")<<endl;
      //cout<<" abs corr "<<jet2.corrFactor("L3Absolute")<<endl;
 
 
-       float L2Corr = jet2.correctedJet("rel").pt()/jet2.correctedJet("raw").pt();
-       float L3Corr = jet2.correctedJet("abs").pt()/jet2.correctedJet("rel").pt();
+       float L2Corr = jet2.correctedJet("L2Relative").pt()/jet2.correctedJet("Uncorrected").pt();
+       float L3Corr = jet2.correctedJet("L3Absolute").pt()/jet2.correctedJet("L2Relative").pt();
        
 
        jets_.L2_ic5[jets_.nic5] = L2Corr;
@@ -584,18 +584,18 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet3.pt()<<endl;
      //if(jet3.pt() < jetPtMin) continue;
-     jets_.rawpt_ak5[jets_.nak5]=jet3.correctedJet("raw").pt();
+     jets_.rawpt_ak5[jets_.nak5]=jet3.correctedJet("Uncorrected").pt();
      jets_.jtpt_ak5[jets_.nak5] = jet3.pt();                            
      jets_.jteta_ak5[jets_.nak5] = jet3.eta();
      jets_.jtphi_ak5[jets_.nak5] = jet3.phi();
      jets_.jty_ak5[jets_.nak5] = jet3.eta();
-     //  cout<<" abs corr "<<jet3.corrFactor("abs")<<endl;
+     //  cout<<" abs corr "<<jet3.corrFactor("L3Absolute")<<endl;
      //cout<<" abs corr "<<jet3.corrFactor("L3Absolute")<<endl;
 
 
 
-       float L2Corr = jet3.correctedJet("rel").pt()/jet3.correctedJet("raw").pt();
-       float L3Corr = jet3.correctedJet("abs").pt()/jet3.correctedJet("rel").pt();
+       float L2Corr = jet3.correctedJet("L2Relative").pt()/jet3.correctedJet("Uncorrected").pt();
+       float L3Corr = jet3.correctedJet("L3Absolute").pt()/jet3.correctedJet("L2Relative").pt();
        
 
        jets_.L2_ak5[jets_.nak5] = L2Corr;
@@ -680,17 +680,17 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      //cout<<" jet pt "<<jet4.pt()<<endl;
      //if(jet4.pt() < jetPtMin) continue;
-     jets_.rawpt_ic5FJ[jets_.nic5FJ]=jet4.correctedJet("raw").pt();
+     jets_.rawpt_ic5FJ[jets_.nic5FJ]=jet4.correctedJet("Uncorrected").pt();
      jets_.jtpt_ic5FJ[jets_.nic5FJ] = jet4.pt();                            
      jets_.jteta_ic5FJ[jets_.nic5FJ] = jet4.eta();
      jets_.jtphi_ic5FJ[jets_.nic5FJ] = jet4.phi();
      jets_.jty_ic5FJ[jets_.nic5FJ] = jet4.eta();
-     //  cout<<" abs corr "<<jet4.corrFactor("abs")<<endl;
+     //  cout<<" abs corr "<<jet4.corrFactor("L3Absolute")<<endl;
      //cout<<" abs corr "<<jet4.corrFactor("L3Absolute")<<endl;
 
 
-       float L2Corr = jet4.correctedJet("rel").pt()/jet4.correctedJet("raw").pt();
-       float L3Corr = jet4.correctedJet("abs").pt()/jet4.correctedJet("rel").pt();
+       float L2Corr = jet4.correctedJet("L2Relative").pt()/jet4.correctedJet("Uncorrected").pt();
+       float L3Corr = jet4.correctedJet("L3Absolute").pt()/jet4.correctedJet("L2Relative").pt();
        
 
        jets_.L2_ic5FJ[jets_.nic5FJ] = L2Corr;
