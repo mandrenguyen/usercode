@@ -215,7 +215,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
 
 
 
-   double jetPtMin = 35.;
+  //double jetPtMin = 35.;
 
 
    // loop the events
@@ -269,7 +269,16 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
        jets_.refdphijt[jets_.nref] = reco::deltaPhi(jet.phi(),jet.genJet()->phi());	
        jets_.refdrjt[jets_.nref] = reco::deltaR(jet.eta(),jet.phi(),jet.genJet()->eta(),jet.genJet()->phi());	       
      }            	
-     
+     else{
+       jets_.refpt[jets_.nref] = -999.;
+       jets_.refeta[jets_.nref] = -999.;
+       jets_.refphi[jets_.nref] = -999.;
+       jets_.refy[jets_.nref] = -999.;
+       jets_.refdphijt[jets_.nref] = -999.;
+       jets_.refdrjt[jets_.nref] = -999.;
+     }
+
+ 
      jets_.nref++;
        
        
@@ -282,7 +291,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      iEvent.getByLabel("generator",hEventInfo);
      //jets_.pthat = hEventInfo->binningValues()[0];
 
-     // pthat and qscale equivalent
+     // binning values and qscale appear to be equivalent, but binning values not always present
      jets_.pthat = hEventInfo->qScale();
 
      edm::Handle<vector<reco::GenJet> >genjets;
@@ -291,37 +300,41 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      for(unsigned int igen = 0 ; igen < genjets->size(); ++igen){
        const reco::GenJet & genjet = (*genjets)[igen];
        
+       float genjet_pt = genjet.pt();
        
-       jets_.genpt[jets_.ngen] = genjet.pt();                            
-       jets_.geneta[jets_.ngen] = genjet.eta();
-       jets_.genphi[jets_.ngen] = genjet.phi();
-       jets_.geny[jets_.ngen] = genjet.eta();
-       
+       // threshold to reduce size of output in minbias PbPb
+       if(genjet_pt>20.){
 
-       // find matching patJet if there is one
-
-       jets_.gendrjt[jets_.ngen] = -1.0;
-       jets_.genmatchindex[jets_.ngen] = -1;
-       
-       
-       for(unsigned int ijet = 0 ; ijet < jets->size(); ++ijet){
-	 const pat::Jet& jet = (*jets)[ijet];
+	 jets_.genpt[jets_.ngen] = genjet_pt;                            
+	 jets_.geneta[jets_.ngen] = genjet.eta();
+	 jets_.genphi[jets_.ngen] = genjet.phi();
+	 jets_.geny[jets_.ngen] = genjet.eta();
 	 
-	 if(jet.genJet()){
-	   if(fabs(genjet.pt()-jet.genJet()->pt())<0.0001 &&
-	      fabs(genjet.eta()-jet.genJet()->eta())<0.0001 &&
-	      (fabs(genjet.phi()-jet.genJet()->phi())<0.0001 || fabs(genjet.phi()-jet.genJet()->phi() - 2.0*TMath::Pi()) < 0.0001 )){
-	     
-	     jets_.genmatchindex[jets_.ngen] = (int)ijet;
-	     jets_.gendphijt[jets_.ngen] = reco::deltaPhi(jet.phi(),genjet.phi());	
-	     jets_.gendrjt[jets_.ngen] = reco::deltaR(jet,genjet);	
-
-	     break;
-	   }            		
+	 
+	 // find matching patJet if there is one
+	 
+	 jets_.gendrjt[jets_.ngen] = -1.0;
+	 jets_.genmatchindex[jets_.ngen] = -1;
+	 
+	 
+	 for(unsigned int ijet = 0 ; ijet < jets->size(); ++ijet){
+	   const pat::Jet& jet = (*jets)[ijet];
+	   
+	   if(jet.genJet()){
+	     if(fabs(genjet.pt()-jet.genJet()->pt())<0.0001 &&
+		fabs(genjet.eta()-jet.genJet()->eta())<0.0001 &&
+		(fabs(genjet.phi()-jet.genJet()->phi())<0.0001 || fabs(genjet.phi()-jet.genJet()->phi() - 2.0*TMath::Pi()) < 0.0001 )){
+	       
+	       jets_.genmatchindex[jets_.ngen] = (int)ijet;
+	       jets_.gendphijt[jets_.ngen] = reco::deltaPhi(jet.phi(),genjet.phi());	
+	       jets_.gendrjt[jets_.ngen] = reco::deltaR(jet,genjet);	
+	       
+	       break;
+	     }            		
+	   }
 	 }
+	 jets_.ngen++;
        }
-       jets_.ngen++;
-       
        
      }
      
