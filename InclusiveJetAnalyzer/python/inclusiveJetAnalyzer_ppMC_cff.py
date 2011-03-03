@@ -4,7 +4,7 @@ inclusiveJetAnalyzer = cms.EDAnalyzer("InclusiveJetAnalyzer",
                                       jetTag = cms.InputTag("icPu5patJets"),
                                       genjetTag = cms.InputTag("iterativeCone5HiGenJets"),
                                       isMC = cms.untracked.bool(True), 
-                                      useCentrality = cms.untracked.bool(True),
+                                      useCentrality = cms.untracked.bool(False),
                                       L1gtReadout = cms.InputTag("gtDigis"),
                                       hltTrgResults = cms.untracked.string("TriggerResults::HLT"),
                                       hltTrgNames  = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core',
@@ -46,6 +46,10 @@ kt4JetAnalyzer = inclusiveJetAnalyzer.clone()
 kt4JetAnalyzer.jetTag = 'kt4patJets'
 kt4JetAnalyzer.genjetTag = 'kt4HiGenJets'
 
+kt6JetAnalyzer = inclusiveJetAnalyzer.clone()
+kt6JetAnalyzer.jetTag = 'kt6patJets'
+kt6JetAnalyzer.genjetTag = 'kt6HiGenJets'
+
 ic3PFJetAnalyzer = inclusiveJetAnalyzer.clone()
 ic3PFJetAnalyzer.jetTag = 'ic3PFpatJets'
 ic3PFJetAnalyzer.genjetTag = 'iterativeCone3HiGenJets'
@@ -78,6 +82,10 @@ kt4PFJetAnalyzer = inclusiveJetAnalyzer.clone()
 kt4PFJetAnalyzer.jetTag = 'kt4PFpatJets'
 kt4PFJetAnalyzer.genjetTag = 'kt4HiGenJets'
 
+kt6PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+kt6PFJetAnalyzer.jetTag = 'kt6PFpatJets'
+kt6PFJetAnalyzer.genjetTag = 'kt6HiGenJets'
+
 icPu5JPTJetAnalyzer = inclusiveJetAnalyzer.clone()
 icPu5JPTJetAnalyzer.jetTag = 'jpticPu5patJets'
 icPu5JPTJetAnalyzer.genjetTag = 'iterativeCone5HiGenJets'
@@ -91,6 +99,7 @@ allJetAnalyzers = cms.Sequence(                         inclusiveJetAnalyzer
                                                         *ak5JetAnalyzer
                                                         *ak7JetAnalyzer
                                                         *kt4JetAnalyzer
+                                                        *kt6JetAnalyzer
                                                         *ic3PFJetAnalyzer
                                                         *ic4PFJetAnalyzer
                                                         *ic5PFJetAnalyzer
@@ -99,6 +108,7 @@ allJetAnalyzers = cms.Sequence(                         inclusiveJetAnalyzer
                                                         *ak5PFJetAnalyzer
                                                         *ak7PFJetAnalyzer
                                                         *kt4PFJetAnalyzer
+                                                        *kt6PFJetAnalyzer
                                                         *icPu5JPTJetAnalyzer
                                                         )
 

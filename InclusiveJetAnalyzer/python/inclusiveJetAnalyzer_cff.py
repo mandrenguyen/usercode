@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 inclusiveJetAnalyzer = cms.EDAnalyzer("InclusiveJetAnalyzer",
                                       jetTag = cms.InputTag("icPu5patJets"),
                                       genjetTag = cms.InputTag("iterativeCone5HiGenJets"),
-                                      isMC = cms.untracked.bool(False), 
+                                      isMC = cms.untracked.bool(True), 
                                       useCentrality = cms.untracked.bool(True),
                                       L1gtReadout = cms.InputTag("gtDigis"),
                                       hltTrgResults = cms.untracked.string("TriggerResults::HLT"),
@@ -73,6 +73,10 @@ ak5PFJetAnalyzer.genjetTag = 'ak5HiGenJets'
 ak7PFJetAnalyzer = inclusiveJetAnalyzer.clone()
 ak7PFJetAnalyzer.jetTag = 'ak7PFpatJets'
 ak7PFJetAnalyzer.genjetTag = 'ak7HiGenJets'
+
+kt4PFJetAnalyzer = inclusiveJetAnalyzer.clone()
+kt4PFJetAnalyzer.jetTag = 'kt4PFpatJets'
+kt4PFJetAnalyzer.genjetTag = 'kt4HiGenJets'
 
 icPu5JPTJetAnalyzer = inclusiveJetAnalyzer.clone()
 icPu5JPTJetAnalyzer.jetTag = 'jpticPu5patJets'
