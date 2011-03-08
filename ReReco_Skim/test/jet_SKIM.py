@@ -17,10 +17,17 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = 'GR_R_39X_V6B::All'
 
 process.load('MNguyen.ReReco_Skim.Skims_HI_cff')
+
+process.hltJetHI.HLTPaths = ["HLT_HIJet35U"]
+
+process.jetEtFilter.etMin = cms.double(60.0)
+
 process.load('Configuration.EventContent.EventContentHeavyIons_cff')
 
+
+
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.1 $'),
+    version = cms.untracked.string('$Revision: 1.2 $'),
     annotation = cms.untracked.string('centralSkimsHI nevts:1'),
     name = cms.untracked.string('PyReleaseValidation')
 )
@@ -33,10 +40,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
 fileNames = cms.untracked.vstring(
-    '/store/hidata/HIRun2010/HICorePhysics/RAW-RECO/v3/000/151/350/141AE965-E5F2-DF11-87F4-003048635E3C.root',  
-    '/store/hidata/HIRun2010/HICorePhysics/RAW-RECO/v3/000/151/350/428A0466-E5F2-DF11-8CB9-00E08178C181.root',
-    '/store/hidata/HIRun2010/HICorePhysics/RAW-RECO/v3/000/151/350/1C7AE565-E5F2-DF11-B155-002481E154EC.root',
-    '/store/hidata/HIRun2010/HICorePhysics/RAW-RECO/v3/000/151/350/F41B6265-E5F2-DF11-95B4-0025B3E06484.root',
+'/store/hidata/HIRun2010/HIAllPhysics/RECO/ZS-v2/0004/620269CF-A648-E011-A9F2-003048FEC040.root',
     )
 )
 
