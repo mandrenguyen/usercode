@@ -16,11 +16,11 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 # Other statements
 process.GlobalTag.globaltag = 'GR_R_39X_V6B::All'
 
-process.load('HeavyIonsAnalysis.Configuration.Skims_HI_cff')
-process.load('MNguyen.ReReco_Skim.EventContentHeavyIons_cff')
+process.load('MNguyen.ReReco_Skim.Skims_HI_cff')
+process.load('Configuration.EventContent.EventContentHeavyIons_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.4 $'),
+    version = cms.untracked.string('$Revision: 1.1 $'),
     annotation = cms.untracked.string('centralSkimsHI nevts:1'),
     name = cms.untracked.string('PyReleaseValidation')
 )
