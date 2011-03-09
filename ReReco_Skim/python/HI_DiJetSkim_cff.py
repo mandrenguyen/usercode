@@ -53,5 +53,5 @@ diJetSkimSequence = cms.Sequence(noBSChalo *
                                  primaryVertexFilter *
                                  hltJetHI 
                                  * icPu5CaloJetsL2L3
-                                 * jetEtFilter
+                                 #* jetEtFilter
                                  )
