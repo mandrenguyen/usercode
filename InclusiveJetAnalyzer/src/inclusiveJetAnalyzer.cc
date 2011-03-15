@@ -254,7 +254,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet.pt()<<endl;
      //if(jet.pt() < jetPtMin) continue;
-     jets_.rawpt[jets_.nref]=jet.correctedJet("raw").pt();
+     jets_.rawpt[jets_.nref]=jet.correctedJet("Uncorrected").pt();
      jets_.jtpt[jets_.nref] = jet.pt();                            
      jets_.jteta[jets_.nref] = jet.eta();
      jets_.jtphi[jets_.nref] = jet.phi();
