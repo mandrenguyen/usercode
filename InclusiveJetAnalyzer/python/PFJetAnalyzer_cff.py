@@ -11,8 +11,9 @@ PFJetAnalyzer = cms.EDAnalyzer("PFJetAnalyzer",
                                recoJetTag4 = cms.InputTag("ic5CaloJets"),
                                pfCandidatesTag  = cms.InputTag("particleFlow",""),
                                trackTag  = cms.InputTag("hiGoodMergedTracks"),
-
+                               
                                isMC = cms.untracked.bool(True), 
+                               genParticleTag = cms.InputTag("hiGenParticles"),
                                useCentrality = cms.untracked.bool(True),
                                hasSimInfo = cms.untracked.bool(False),
                                SimTracks = cms.InputTag("mergedtruth","MergedTrackTruth")
