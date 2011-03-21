@@ -84,10 +84,10 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   cout<<" jet collection 3: "<<jetTag3_<<endl;
   cout<<" jet collection 4: "<<jetTag4_<<endl;
 
-   jets_.nicPu5 = 0;
-   jets_.nic5 = 0;
-   jets_.nic5FJ = 0;
-   jets_.nak5 = 0;
+   jets_.nj1 = 0;
+   jets_.nj2 = 0;
+   jets_.nj3 = 0;
+   jets_.nj4 = 0;
    jets_.nPFcand = 0;
 
 
@@ -128,91 +128,91 @@ PFJetAnalyzer::beginJob() {
   t->Branch("bin",&jets_.bin,"bin/I");
 
   // ICPU5
-  t->Branch("nicPu5",&jets_.nicPu5,"nicPu5/I");
-  t->Branch("nic5",&jets_.nic5,"nic5/I");
-  t->Branch("nic5FJ",&jets_.nic5FJ,"nic5FJ/I");
-  t->Branch("nak5",&jets_.nak5,"nak5/I");
+  t->Branch("nj1",&jets_.nj1,"nj1/I");
+  t->Branch("nj2",&jets_.nj2,"nj2/I");
+  t->Branch("nj3",&jets_.nj3,"nj3/I");
+  t->Branch("nj4",&jets_.nj4,"nj4/I");
 
-  t->Branch("rawpt_icPu5",jets_.rawpt_icPu5,"rawpt_icPu5[nicPu5]/F");
-  t->Branch("jtpt_icPu5",jets_.jtpt_icPu5,"jtpt_icPu5[nicPu5]/F");
-  t->Branch("jteta_icPu5",jets_.jteta_icPu5,"jteta_icPu5[nicPu5]/F");
-  t->Branch("jty_icPu5",jets_.jty_icPu5,"jty_icPu5[nicPu5]/F");
-  t->Branch("jtphi_icPu5",jets_.jtphi_icPu5,"jtphi_icPu5[nicPu5]/F");
-  t->Branch("preL1et_icPu5",jets_.preL1et_icPu5,"preL1et_icPu5[nicPu5]/F");
-  t->Branch("L2_icPu5",jets_.L2_icPu5,"L2_icPu5[nicPu5]/F");
-  t->Branch("L3_icPu5",jets_.L3_icPu5,"L3_icPu5[nicPu5]/F");
-  t->Branch("area_icPu5",jets_.area_icPu5,"area_icPu5[nicPu5]/F");
+  t->Branch("rawpt_j1",jets_.rawpt_j1,"rawpt_j1[nj1]/F");
+  t->Branch("jtpt_j1",jets_.jtpt_j1,"jtpt_j1[nj1]/F");
+  t->Branch("jteta_j1",jets_.jteta_j1,"jteta_j1[nj1]/F");
+  t->Branch("jty_j1",jets_.jty_j1,"jty_j1[nj1]/F");
+  t->Branch("jtphi_j1",jets_.jtphi_j1,"jtphi_j1[nj1]/F");
+  t->Branch("preL1et_j1",jets_.preL1et_j1,"preL1et_j1[nj1]/F");
+  t->Branch("L2_j1",jets_.L2_j1,"L2_j1[nj1]/F");
+  t->Branch("L3_j1",jets_.L3_j1,"L3_j1[nj1]/F");
+  t->Branch("area_j1",jets_.area_j1,"area_j1[nj1]/F");
 
   if(isMC_){
-    t->Branch("refpt_icPu5",jets_.refpt_icPu5,"refpt_icPu5[nicPu5]/F");
-    t->Branch("refeta_icPu5",jets_.refeta_icPu5,"refeta_icPu5[nicPu5]/F");
-    t->Branch("refy_icPu5",jets_.refy_icPu5,"refy_icPu5[nicPu5]/F");
-    t->Branch("refphi_icPu5",jets_.refphi_icPu5,"refphi_icPu5[nicPu5]/F");
-    t->Branch("refdrjt_icPu5",jets_.refdrjt_icPu5,"refdrjt_icPu5[nicPu5]/F");
+    t->Branch("refpt_j1",jets_.refpt_j1,"refpt_j1[nj1]/F");
+    t->Branch("refeta_j1",jets_.refeta_j1,"refeta_j1[nj1]/F");
+    t->Branch("refy_j1",jets_.refy_j1,"refy_j1[nj1]/F");
+    t->Branch("refphi_j1",jets_.refphi_j1,"refphi_j1[nj1]/F");
+    t->Branch("refdrjt_j1",jets_.refdrjt_j1,"refdrjt_j1[nj1]/F");
   }
 
 
-  // IC5
+  // J2
 
-  t->Branch("rawpt_ic5",jets_.rawpt_ic5,"rawpt_ic5[nic5]/F");
-  t->Branch("jtpt_ic5",jets_.jtpt_ic5,"jtpt_ic5[nic5]/F");
-  t->Branch("jteta_ic5",jets_.jteta_ic5,"jteta_ic5[nic5]/F");
-  t->Branch("jty_ic5",jets_.jty_ic5,"jty_ic5[nic5]/F");
-  t->Branch("jtphi_ic5",jets_.jtphi_ic5,"jtphi_ic5[nic5]/F");
-  t->Branch("preL1et_ic5",jets_.preL1et_ic5,"preL1et_ic5[nic5]/F");
-  t->Branch("L2_ic5",jets_.L2_ic5,"L2_ic5[nic5]/F");
-  t->Branch("L3_ic5",jets_.L3_ic5,"L3_ic5[nic5]/F");
-  t->Branch("area_ic5",jets_.area_ic5,"area_ic5[nic5]/F");
+  t->Branch("rawpt_j2",jets_.rawpt_j2,"rawpt_j2[nj2]/F");
+  t->Branch("jtpt_j2",jets_.jtpt_j2,"jtpt_j2[nj2]/F");
+  t->Branch("jteta_j2",jets_.jteta_j2,"jteta_j2[nj2]/F");
+  t->Branch("jty_j2",jets_.jty_j2,"jty_j2[nj2]/F");
+  t->Branch("jtphi_j2",jets_.jtphi_j2,"jtphi_j2[nj2]/F");
+  t->Branch("preL1et_j2",jets_.preL1et_j2,"preL1et_j2[nj2]/F");
+  t->Branch("L2_j2",jets_.L2_j2,"L2_j2[nj2]/F");
+  t->Branch("L3_j2",jets_.L3_j2,"L3_j2[nj2]/F");
+  t->Branch("area_j2",jets_.area_j2,"area_j2[nj2]/F");
 
   if(isMC_){
-    t->Branch("refpt_ic5",jets_.refpt_ic5,"refpt_ic5[nic5]/F");
-    t->Branch("refeta_ic5",jets_.refeta_ic5,"refeta_ic5[nic5]/F");
-    t->Branch("refy_ic5",jets_.refy_ic5,"refy_ic5[nic5]/F");
-    t->Branch("refphi_ic5",jets_.refphi_ic5,"refphi_ic5[nic5]/F");
-    t->Branch("refdrjt_ic5",jets_.refdrjt_ic5,"refdrjt_ic5[nic5]/F");
+    t->Branch("refpt_j2",jets_.refpt_j2,"refpt_j2[nj2]/F");
+    t->Branch("refeta_j2",jets_.refeta_j2,"refeta_j2[nj2]/F");
+    t->Branch("refy_j2",jets_.refy_j2,"refy_j2[nj2]/F");
+    t->Branch("refphi_j2",jets_.refphi_j2,"refphi_j2[nj2]/F");
+    t->Branch("refdrjt_j2",jets_.refdrjt_j2,"refdrjt_j2[nj2]/F");
   }
 
 
 
 
-  // AK5
+  // J3
 
-  t->Branch("rawpt_ak5",jets_.rawpt_ak5,"rawpt_ak5[nak5]/F");
-  t->Branch("jtpt_ak5",jets_.jtpt_ak5,"jtpt_ak5[nak5]/F");
-  t->Branch("jteta_ak5",jets_.jteta_ak5,"jteta_ak5[nak5]/F");
-  t->Branch("jty_ak5",jets_.jty_ak5,"jty_ak5[nak5]/F");
-  t->Branch("jtphi_ak5",jets_.jtphi_ak5,"jtphi_ak5[nak5]/F");
-  t->Branch("preL1et_ak5",jets_.preL1et_ak5,"preL1et_ak5[nak5]/F");
-  t->Branch("L2_ak5",jets_.L2_ak5,"L2_ak5[nak5]/F");
-  t->Branch("L3_ak5",jets_.L3_ak5,"L3_ak5[nak5]/F");
-  t->Branch("area_ak5",jets_.area_ak5,"area_ak5[nak5]/F");
+  t->Branch("rawpt_j3",jets_.rawpt_j3,"rawpt_j3[nj3]/F");
+  t->Branch("jtpt_j3",jets_.jtpt_j3,"jtpt_j3[nj3]/F");
+  t->Branch("jteta_j3",jets_.jteta_j3,"jteta_j3[nj3]/F");
+  t->Branch("jty_j3",jets_.jty_j3,"jty_j3[nj3]/F");
+  t->Branch("jtphi_j3",jets_.jtphi_j3,"jtphi_j3[nj3]/F");
+  t->Branch("preL1et_j3",jets_.preL1et_j3,"preL1et_j3[nj3]/F");
+  t->Branch("L2_j3",jets_.L2_j3,"L2_j3[nj3]/F");
+  t->Branch("L3_j3",jets_.L3_j3,"L3_j3[nj3]/F");
+  t->Branch("area_j3",jets_.area_j3,"area_j3[nj3]/F");
 
   if(isMC_){
-    t->Branch("refpt_ak5",jets_.refpt_ak5,"refpt_ak5[nak5]/F");
-    t->Branch("refeta_ak5",jets_.refeta_ak5,"refeta_ak5[nak5]/F");
-    t->Branch("refy_ak5",jets_.refy_ak5,"refy_ak5[nak5]/F");
-    t->Branch("refphi_ak5",jets_.refphi_ak5,"refphi_ak5[nak5]/F");
-    t->Branch("refdrjt_ak5",jets_.refdrjt_ak5,"refdrjt_ak5[nak5]/F");
+    t->Branch("refpt_j3",jets_.refpt_j3,"refpt_j3[nj3]/F");
+    t->Branch("refeta_j3",jets_.refeta_j3,"refeta_j3[nj3]/F");
+    t->Branch("refy_j3",jets_.refy_j3,"refy_j3[nj3]/F");
+    t->Branch("refphi_j3",jets_.refphi_j3,"refphi_j3[nj3]/F");
+    t->Branch("refdrjt_j3",jets_.refdrjt_j3,"refdrjt_j3[nj3]/F");
   }
 
- // IC5FJ
+ // J4
 
-  t->Branch("rawpt_ic5FJ",jets_.rawpt_ic5FJ,"rawpt_ic5FJ[nic5FJ]/F");
-  t->Branch("jtpt_ic5FJ",jets_.jtpt_ic5FJ,"jtpt_ic5FJ[nic5FJ]/F");
-  t->Branch("jteta_ic5FJ",jets_.jteta_ic5FJ,"jteta_ic5FJ[nic5FJ]/F");
-  t->Branch("jty_ic5FJ",jets_.jty_ic5FJ,"jty_ic5FJ[nic5FJ]/F");
-  t->Branch("jtphi_ic5FJ",jets_.jtphi_ic5FJ,"jtphi_ic5FJ[nic5FJ]/F");
-  t->Branch("preL1et_ic5FJ",jets_.preL1et_ic5FJ,"preL1et_ic5FJ[nic5FJ]/F");
-  t->Branch("L2_ic5FJ",jets_.L2_ic5FJ,"L2_ic5FJ[nic5FJ]/F");
-  t->Branch("L3_ic5FJ",jets_.L3_ic5FJ,"L3_ic5FJ[nic5FJ]/F");
-  t->Branch("area_ic5FJ",jets_.area_ic5FJ,"area_ic5FJ[nic5FJ]/F");
+  t->Branch("rawpt_j4",jets_.rawpt_j4,"rawpt_j4[nj4]/F");
+  t->Branch("jtpt_j4",jets_.jtpt_j4,"jtpt_j4[nj4]/F");
+  t->Branch("jteta_j4",jets_.jteta_j4,"jteta_j4[nj4]/F");
+  t->Branch("jty_j4",jets_.jty_j4,"jty_j4[nj4]/F");
+  t->Branch("jtphi_j4",jets_.jtphi_j4,"jtphi_j4[nj4]/F");
+  t->Branch("preL1et_j4",jets_.preL1et_j4,"preL1et_j4[nj4]/F");
+  t->Branch("L2_j4",jets_.L2_j4,"L2_j4[nj4]/F");
+  t->Branch("L3_j4",jets_.L3_j4,"L3_j4[nj4]/F");
+  t->Branch("area_j4",jets_.area_j4,"area_j4[nj4]/F");
 
   if(isMC_){
-    t->Branch("refpt_ic5FJ",jets_.refpt_ic5FJ,"refpt_ic5FJ[nic5FJ]/F");
-    t->Branch("refeta_ic5FJ",jets_.refeta_ic5FJ,"refeta_ic5FJ[nic5FJ]/F");
-    t->Branch("refy_ic5FJ",jets_.refy_ic5FJ,"refy_ic5FJ[nic5FJ]/F");
-    t->Branch("refphi_ic5FJ",jets_.refphi_ic5FJ,"refphi_ic5FJ[nic5FJ]/F");
-    t->Branch("refdrjt_ic5FJ",jets_.refdrjt_ic5FJ,"refdrjt_ic5FJ[nic5FJ]/F");
+    t->Branch("refpt_j4",jets_.refpt_j4,"refpt_j4[nj4]/F");
+    t->Branch("refeta_j4",jets_.refeta_j4,"refeta_j4[nj4]/F");
+    t->Branch("refy_j4",jets_.refy_j4,"refy_j4[nj4]/F");
+    t->Branch("refphi_j4",jets_.refphi_j4,"refphi_j4[nj4]/F");
+    t->Branch("refdrjt_j4",jets_.refdrjt_j4,"refdrjt_j4[nj4]/F");
   }
 
   t->Branch("nPFcand",&jets_.nPFcand,"nPFcand/I");
@@ -328,7 +328,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    iEvent.getByLabel(jetTag_, jets);
 
    // add a few more jet algos to the same ntuple
-   // default is icPu5
+   // default is j1
 
    edm::Handle<pat::JetCollection> jets2;
    iEvent.getByLabel(jetTag2_, jets2);
@@ -384,7 +384,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
 
 
-   jets_.nicPu5 = 0;
+   jets_.nj1 = 0;
    
 
    
@@ -393,11 +393,11 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet.pt()<<endl;
      //if(jet.pt() < jetPtMin) continue;
-     jets_.rawpt_icPu5[jets_.nicPu5]=jet.correctedJet("Uncorrected").pt();
-     jets_.jtpt_icPu5[jets_.nicPu5] = jet.pt();                            
-     jets_.jteta_icPu5[jets_.nicPu5] = jet.eta();
-     jets_.jtphi_icPu5[jets_.nicPu5] = jet.phi();
-     jets_.jty_icPu5[jets_.nicPu5] = jet.eta();
+     jets_.rawpt_j1[jets_.nj1]=jet.correctedJet("Uncorrected").pt();
+     jets_.jtpt_j1[jets_.nj1] = jet.pt();                            
+     jets_.jteta_j1[jets_.nj1] = jet.eta();
+     jets_.jtphi_j1[jets_.nj1] = jet.phi();
+     jets_.jty_j1[jets_.nj1] = jet.eta();
 
 
      //  cout<<" abs corr "<<jet.corrFactor("L3Absolute")<<endl;
@@ -408,18 +408,18 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      float L3Corr = jet.correctedJet("L3Absolute").pt()/jet.correctedJet("L2Relative").pt();
      
      
-     jets_.L2_icPu5[jets_.nicPu5] = L2Corr;
-     jets_.L3_icPu5[jets_.nicPu5] = L3Corr;
+     jets_.L2_j1[jets_.nj1] = L2Corr;
+     jets_.L3_j1[jets_.nj1] = L3Corr;
      
      
-     jets_.area_icPu5[jets_.nicPu5] = jet.jetArea();
+     jets_.area_j1[jets_.nj1] = jet.jetArea();
      
      // Match to reco jet to find unsubtracted jet energy
      
      if(1==0){
 	 int recoJetSize = recoJetColl->size();
 	 
-	 jets_.preL1et_icPu5[jets_.nicPu5] = -1;
+	 jets_.preL1et_j1[jets_.nj1] = -1;
 	 
 	 //cout<<" patJet_eta "<<jet.eta()<<" patJet_phi "<<jet.phi()<<" patJet_et "<<jet.et()<<endl;
 	 
@@ -436,13 +436,13 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	   if(fabs(recoJet.eta()-jet.eta()) < 0.001
 	      && fabs(acos(cos((recoJet.phi()-jet.phi())))) < 0.001)
 	     {
-	       jets_.preL1et_icPu5[jets_.nicPu5] = recoJet.et();
+	       jets_.preL1et_j1[jets_.nj1] = recoJet.et();
 	       
 	       //cout<<"Match found,  recoJet.et "<<recoJet.et()<< " recoJet.eta "<<jet.eta()<<" recoJet.phi "<<recoJet.phi()<<endl;
 	       break;
 	     }
 	 }
-	 if(jets_.preL1et_icPu5[jets_.nicPu5] == -1){
+	 if(jets_.preL1et_j1[jets_.nj1] == -1){
 	   
 	   
 	   //There's a known issue here.  If the background subtraction oversubtracts I've set the patJet.et() to zero.  That would be fine if I had also set the eta and phi.  We could then recover the pre-subtracted energy.  However, I never bothered to set the eta and phi for theses jets (doh!).  Next time I repass the data I won't be so stupid.
@@ -456,25 +456,25 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
        
        if(jet.genJet()!=0 && jet.genJet()->pt()>1.0 && jet.genJet()->pt()<999999){
-	 jets_.refpt_icPu5[jets_.nicPu5] = jet.genJet()->pt();
-	 jets_.refeta_icPu5[jets_.nicPu5] = jet.genJet()->eta();
-	 jets_.refphi_icPu5[jets_.nicPu5] = jet.genJet()->phi();
-	 jets_.refy_icPu5[jets_.nicPu5] = jet.genJet()->eta();
+	 jets_.refpt_j1[jets_.nj1] = jet.genJet()->pt();
+	 jets_.refeta_j1[jets_.nj1] = jet.genJet()->eta();
+	 jets_.refphi_j1[jets_.nj1] = jet.genJet()->phi();
+	 jets_.refy_j1[jets_.nj1] = jet.genJet()->eta();
 	 
-	 jets_.refdrjt_icPu5[jets_.nicPu5] = reco::deltaR(jet,*(jet.genJet()));
+	 jets_.refdrjt_j1[jets_.nj1] = reco::deltaR(jet,*(jet.genJet()));
        }        
        else{
-	 jets_.refpt_icPu5[jets_.nicPu5] = 0;
-	 jets_.refeta_icPu5[jets_.nicPu5] = -999;
-	 jets_.refphi_icPu5[jets_.nicPu5] = -999;
-	 jets_.refy_icPu5[jets_.nicPu5] = -999;
+	 jets_.refpt_j1[jets_.nj1] = 0;
+	 jets_.refeta_j1[jets_.nj1] = -999;
+	 jets_.refphi_j1[jets_.nj1] = -999;
+	 jets_.refy_j1[jets_.nj1] = -999;
        }
        
      }
 
 
 
-       jets_.nicPu5++;
+       jets_.nj1++;
        
        
    }
@@ -484,7 +484,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
 
 
-   jets_.nic5 = 0;
+   jets_.nj2 = 0;
    
 
    
@@ -493,11 +493,11 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      //cout<<" jet pt "<<jet2.pt()<<endl;
      //if(jet2.pt() < jetPtMin) continue;
-     jets_.rawpt_ic5[jets_.nic5]=jet2.correctedJet("Uncorrected").pt();
-     jets_.jtpt_ic5[jets_.nic5] = jet2.pt();                            
-     jets_.jteta_ic5[jets_.nic5] = jet2.eta();
-     jets_.jtphi_ic5[jets_.nic5] = jet2.phi();
-     jets_.jty_ic5[jets_.nic5] = jet2.eta();
+     jets_.rawpt_j2[jets_.nj2]=jet2.correctedJet("Uncorrected").pt();
+     jets_.jtpt_j2[jets_.nj2] = jet2.pt();                            
+     jets_.jteta_j2[jets_.nj2] = jet2.eta();
+     jets_.jtphi_j2[jets_.nj2] = jet2.phi();
+     jets_.jty_j2[jets_.nj2] = jet2.eta();
      //  cout<<" abs corr "<<jet2.corrFactor("L3Absolute")<<endl;
      //cout<<" abs corr "<<jet2.corrFactor("L3Absolute")<<endl;
 
@@ -506,16 +506,16 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        float L3Corr = jet2.correctedJet("L3Absolute").pt()/jet2.correctedJet("L2Relative").pt();
        
 
-       jets_.L2_ic5[jets_.nic5] = L2Corr;
-       jets_.L3_ic5[jets_.nic5] = L3Corr;
+       jets_.L2_j2[jets_.nj2] = L2Corr;
+       jets_.L3_j2[jets_.nj2] = L3Corr;
 
-       jets_.area_ic5[jets_.nic5] = jet2.jetArea();
+       jets_.area_j2[jets_.nj2] = jet2.jetArea();
 
        // Match to reco jet to find unsubtracted jet energy
        if(1==0){
 	 int recoJetSize2 = recoJetColl2->size();
 	 
-	 jets_.preL1et_ic5[jets_.nic5] = -1;
+	 jets_.preL1et_j2[jets_.nj2] = -1;
 	 
 	 //cout<<" patJet_eta "<<jet2.eta()<<" patJet_phi "<<jet2.phi()<<" patJet_et "<<jet2.et()<<endl;
 	 
@@ -532,13 +532,13 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	   if(fabs(recoJet2.eta()-jet2.eta()) < 0.001
 	      && fabs(acos(cos((recoJet2.phi()-jet2.phi())))) < 0.001)
 	     {
-	       jets_.preL1et_ic5[jets_.nic5] = recoJet2.et();
+	       jets_.preL1et_j2[jets_.nj2] = recoJet2.et();
 	       
 	       //cout<<"Match found,  recoJet2.et "<<recoJet2.et()<< " recoJet2.eta "<<jet2.eta()<<" recoJet2.phi "<<recoJet2.phi()<<endl;
 	       break;
 	     }
 	 }
-	 if(jets_.preL1et_ic5[jets_.nic5] == -1){
+	 if(jets_.preL1et_j2[jets_.nj2] == -1){
 	   
 	   
 	   //There's a known issue here.  If the background subtraction oversubtracts I've set the patJet.et() to zero.  That would be fine if I had also set the eta and phi.  We could then recover the pre-subtracted energy.  However, I never bothered to set the eta and phi for theses jets (doh!).  Next time I repass the data I won't be so stupid.
@@ -552,29 +552,29 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
        
        if(jet2.genJet()!=0 && jet2.genJet()->pt()>1.0 && jet2.genJet()->pt()<999999){
-	 jets_.refpt_ic5[jets_.nic5] = jet2.genJet()->pt();
-	 jets_.refeta_ic5[jets_.nic5] = jet2.genJet()->eta();
-	 jets_.refphi_ic5[jets_.nic5] = jet2.genJet()->phi();
-	 jets_.refy_ic5[jets_.nic5] = jet2.genJet()->eta();
+	 jets_.refpt_j2[jets_.nj2] = jet2.genJet()->pt();
+	 jets_.refeta_j2[jets_.nj2] = jet2.genJet()->eta();
+	 jets_.refphi_j2[jets_.nj2] = jet2.genJet()->phi();
+	 jets_.refy_j2[jets_.nj2] = jet2.genJet()->eta();
 	 
-	 jets_.refdrjt_ic5[jets_.nic5] = reco::deltaR(jet2,*(jet2.genJet()));
+	 jets_.refdrjt_j2[jets_.nj2] = reco::deltaR(jet2,*(jet2.genJet()));
        }        
        else{
-	 jets_.refpt_ic5[jets_.nic5] = 0;
-	 jets_.refeta_ic5[jets_.nic5] = -999;
-	 jets_.refphi_ic5[jets_.nic5] = -999;
-	 jets_.refy_ic5[jets_.nic5] = -999;
+	 jets_.refpt_j2[jets_.nj2] = 0;
+	 jets_.refeta_j2[jets_.nj2] = -999;
+	 jets_.refphi_j2[jets_.nj2] = -999;
+	 jets_.refy_j2[jets_.nj2] = -999;
        }
        
      }
 
      
-     jets_.nic5++;
+     jets_.nj2++;
      
    }
    
 
-   jets_.nak5 = 0;
+   jets_.nj3 = 0;
    
    //cout<<" jets size "<<jets->size()<<endl;
 
@@ -584,11 +584,11 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet3.pt()<<endl;
      //if(jet3.pt() < jetPtMin) continue;
-     jets_.rawpt_ak5[jets_.nak5]=jet3.correctedJet("Uncorrected").pt();
-     jets_.jtpt_ak5[jets_.nak5] = jet3.pt();                            
-     jets_.jteta_ak5[jets_.nak5] = jet3.eta();
-     jets_.jtphi_ak5[jets_.nak5] = jet3.phi();
-     jets_.jty_ak5[jets_.nak5] = jet3.eta();
+     jets_.rawpt_j3[jets_.nj3]=jet3.correctedJet("Uncorrected").pt();
+     jets_.jtpt_j3[jets_.nj3] = jet3.pt();                            
+     jets_.jteta_j3[jets_.nj3] = jet3.eta();
+     jets_.jtphi_j3[jets_.nj3] = jet3.phi();
+     jets_.jty_j3[jets_.nj3] = jet3.eta();
      //  cout<<" abs corr "<<jet3.corrFactor("L3Absolute")<<endl;
      //cout<<" abs corr "<<jet3.corrFactor("L3Absolute")<<endl;
 
@@ -598,16 +598,16 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        float L3Corr = jet3.correctedJet("L3Absolute").pt()/jet3.correctedJet("L2Relative").pt();
        
 
-       jets_.L2_ak5[jets_.nak5] = L2Corr;
-       jets_.L3_ak5[jets_.nak5] = L3Corr;
+       jets_.L2_j3[jets_.nj3] = L2Corr;
+       jets_.L3_j3[jets_.nj3] = L3Corr;
 
-       jets_.area_ak5[jets_.nak5] = jet3.jetArea();
+       jets_.area_j3[jets_.nj3] = jet3.jetArea();
 
        // Match to reco jet to find unsubtracted jet energy
        if(1==0){
        int recoJetSize3 = recoJetColl3->size();
        
-       jets_.preL1et_ak5[jets_.nak5] = -1;
+       jets_.preL1et_j3[jets_.nj3] = -1;
        
        //cout<<" patJet_eta "<<jet3.eta()<<" patJet_phi "<<jet3.phi()<<" patJet_et "<<jet3.et()<<endl;
 
@@ -624,13 +624,13 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 if(fabs(recoJet3.eta()-jet3.eta()) < 0.001
 	    && fabs(acos(cos((recoJet3.phi()-jet3.phi())))) < 0.001)
 	   {
-	     jets_.preL1et_ak5[jets_.nak5] = recoJet3.et();
+	     jets_.preL1et_j3[jets_.nj3] = recoJet3.et();
 	     
 	     //cout<<"Match found,  recoJet3.et "<<recoJet3.et()<< " recoJet3.eta "<<jet3.eta()<<" recoJet3.phi "<<recoJet3.phi()<<endl;
 	     break;
 	   }
        }
-       if(jets_.preL1et_ak5[jets_.nak5] == -1){
+       if(jets_.preL1et_j3[jets_.nj3] == -1){
 
 	 
 	 //  There's a known issue here.  If the background subtraction oversubtracts I've set the patJet.et() to zero.  That would be fine if I had also set the eta and phi.  We could then recover the pre-subtracted energy.  However, I never bothered to set the eta and phi for theses jets (doh!).  Next time I repass the data I won't be so stupid.
@@ -644,25 +644,25 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
        
        if(jet3.genJet()!=0 && jet3.genJet()->pt()>1.0 && jet3.genJet()->pt()<999999){
-	 jets_.refpt_ak5[jets_.nak5] = jet3.genJet()->pt();
-	 jets_.refeta_ak5[jets_.nak5] = jet3.genJet()->eta();
-	 jets_.refphi_ak5[jets_.nak5] = jet3.genJet()->phi();
-	 jets_.refy_ak5[jets_.nak5] = jet3.genJet()->eta();
+	 jets_.refpt_j3[jets_.nj3] = jet3.genJet()->pt();
+	 jets_.refeta_j3[jets_.nj3] = jet3.genJet()->eta();
+	 jets_.refphi_j3[jets_.nj3] = jet3.genJet()->phi();
+	 jets_.refy_j3[jets_.nj3] = jet3.genJet()->eta();
 	 
-	 jets_.refdrjt_ak5[jets_.nak5] = reco::deltaR(jet3,*(jet3.genJet()));
+	 jets_.refdrjt_j3[jets_.nj3] = reco::deltaR(jet3,*(jet3.genJet()));
        }        
        else{
-	 jets_.refpt_ak5[jets_.nak5] = 0;
-	 jets_.refeta_ak5[jets_.nak5] = -999;
-	 jets_.refphi_ak5[jets_.nak5] = -999;
-	 jets_.refy_ak5[jets_.nak5] = -999;
+	 jets_.refpt_j3[jets_.nj3] = 0;
+	 jets_.refeta_j3[jets_.nj3] = -999;
+	 jets_.refphi_j3[jets_.nj3] = -999;
+	 jets_.refy_j3[jets_.nj3] = -999;
        }
        
      }
 
 
 
-       jets_.nak5++;
+       jets_.nj3++;
        
        
    }
@@ -671,7 +671,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
 
 
-   jets_.nic5FJ = 0;
+   jets_.nj4 = 0;
    
 
    
@@ -680,11 +680,11 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      //cout<<" jet pt "<<jet4.pt()<<endl;
      //if(jet4.pt() < jetPtMin) continue;
-     jets_.rawpt_ic5FJ[jets_.nic5FJ]=jet4.correctedJet("Uncorrected").pt();
-     jets_.jtpt_ic5FJ[jets_.nic5FJ] = jet4.pt();                            
-     jets_.jteta_ic5FJ[jets_.nic5FJ] = jet4.eta();
-     jets_.jtphi_ic5FJ[jets_.nic5FJ] = jet4.phi();
-     jets_.jty_ic5FJ[jets_.nic5FJ] = jet4.eta();
+     jets_.rawpt_j4[jets_.nj4]=jet4.correctedJet("Uncorrected").pt();
+     jets_.jtpt_j4[jets_.nj4] = jet4.pt();                            
+     jets_.jteta_j4[jets_.nj4] = jet4.eta();
+     jets_.jtphi_j4[jets_.nj4] = jet4.phi();
+     jets_.jty_j4[jets_.nj4] = jet4.eta();
      //  cout<<" abs corr "<<jet4.corrFactor("L3Absolute")<<endl;
      //cout<<" abs corr "<<jet4.corrFactor("L3Absolute")<<endl;
 
@@ -693,16 +693,16 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        float L3Corr = jet4.correctedJet("L3Absolute").pt()/jet4.correctedJet("L2Relative").pt();
        
 
-       jets_.L2_ic5FJ[jets_.nic5FJ] = L2Corr;
-       jets_.L3_ic5FJ[jets_.nic5FJ] = L3Corr;
+       jets_.L2_j4[jets_.nj4] = L2Corr;
+       jets_.L3_j4[jets_.nj4] = L3Corr;
 
-       jets_.area_ic5FJ[jets_.nic5FJ] = jet4.jetArea();
+       jets_.area_j4[jets_.nj4] = jet4.jetArea();
 
        // Match to reco jet to find unsubtracted jet energy
        if(1==0){
 	 int recoJetSize4 = recoJetColl4->size();
 	 
-	 jets_.preL1et_ic5FJ[jets_.nic5FJ] = -1;
+	 jets_.preL1et_j4[jets_.nj4] = -1;
 	 
 	 //cout<<" patJet_eta "<<jet4.eta()<<" patJet_phi "<<jet4.phi()<<" patJet_et "<<jet4.et()<<endl;
 	 
@@ -719,13 +719,13 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	   if(fabs(recoJet4.eta()-jet4.eta()) < 0.001
 	      && fabs(acos(cos((recoJet4.phi()-jet4.phi())))) < 0.001)
 	     {
-	       jets_.preL1et_ic5FJ[jets_.nic5FJ] = recoJet4.et();
+	       jets_.preL1et_j4[jets_.nj4] = recoJet4.et();
 	       
 	       //cout<<"Match found,  recoJet4.et "<<recoJet4.et()<< " recoJet4.eta "<<jet4.eta()<<" recoJet4.phi "<<recoJet4.phi()<<endl;
 	       break;
 	     }
 	 }
-	 if(jets_.preL1et_ic5FJ[jets_.nic5FJ] == -1){
+	 if(jets_.preL1et_j4[jets_.nj4] == -1){
 	   
 	   
 	   //There's a known issue here.  If the background subtraction oversubtracts I've set the patJet.et() to zero.  That would be fine if I had also set the eta and phi.  We could then recover the pre-subtracted energy.  However, I never bothered to set the eta and phi for theses jets (doh!).  Next time I repass the data I won't be so stupid.
@@ -739,24 +739,24 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
        
        if(jet4.genJet()!=0 && jet4.genJet()->pt()>1.0 && jet4.genJet()->pt()<999999){
-	 jets_.refpt_ic5FJ[jets_.nic5FJ] = jet4.genJet()->pt();
-	 jets_.refeta_ic5FJ[jets_.nic5FJ] = jet4.genJet()->eta();
-	 jets_.refphi_ic5FJ[jets_.nic5FJ] = jet4.genJet()->phi();
-	 jets_.refy_ic5FJ[jets_.nic5FJ] = jet4.genJet()->eta();
+	 jets_.refpt_j4[jets_.nj4] = jet4.genJet()->pt();
+	 jets_.refeta_j4[jets_.nj4] = jet4.genJet()->eta();
+	 jets_.refphi_j4[jets_.nj4] = jet4.genJet()->phi();
+	 jets_.refy_j4[jets_.nj4] = jet4.genJet()->eta();
 	 
-	 jets_.refdrjt_ic5FJ[jets_.nic5FJ] = reco::deltaR(jet4,*(jet4.genJet()));
+	 jets_.refdrjt_j4[jets_.nj4] = reco::deltaR(jet4,*(jet4.genJet()));
        }        
        else{
-	 jets_.refpt_ic5FJ[jets_.nic5FJ] = 0;
-	 jets_.refeta_ic5FJ[jets_.nic5FJ] = -999;
-	 jets_.refphi_ic5FJ[jets_.nic5FJ] = -999;
-	 jets_.refy_ic5FJ[jets_.nic5FJ] = -999;
+	 jets_.refpt_j4[jets_.nj4] = 0;
+	 jets_.refeta_j4[jets_.nj4] = -999;
+	 jets_.refphi_j4[jets_.nj4] = -999;
+	 jets_.refy_j4[jets_.nj4] = -999;
        }
        
      }
 
      
-     jets_.nic5FJ++;
+     jets_.nj4++;
      
    }
 
@@ -915,10 +915,10 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
 
 
-   jets_.nicPu5 = 0;
-   jets_.nic5 = 0;
-   jets_.nic5FJ = 0;
-   jets_.nak5 = 0;
+   jets_.nj1 = 0;
+   jets_.nj2 = 0;
+   jets_.nj3 = 0;
+   jets_.nj4 = 0;
    jets_.nPFcand = 0;
    jets_.ntrack = 0;
 
