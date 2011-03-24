@@ -768,7 +768,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      
        float particleEta = cand.eta();
        
-       if(fabs(particleEta)>2.5) continue;
+       //if(fabs(particleEta)>2.5) continue;
        
       
 
