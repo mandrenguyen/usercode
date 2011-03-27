@@ -172,6 +172,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float tracksumecal[MAXTRACKS];
     float tracksumhcal[MAXTRACKS];
     int trackfake[MAXTRACKS];
+    int trackqual[MAXTRACKS];
 
     int parton1_flavor, parton2_flavor;
     float parton1_pt, parton2_pt;

@@ -219,7 +219,7 @@ PFJetAnalyzer::beginJob() {
   t->Branch("candID",jets_.candID,"candID[nPFcand]/I");
   t->Branch("candpt",jets_.candpt,"candpt[nPFcand]/F");
   t->Branch("candeta",jets_.candeta,"candeta[nPFcand]/F");
-  t->Branch("candy",jets_.candy,"candy[nPFcand]/F");
+  //t->Branch("candy",jets_.candy,"candy[nPFcand]/F");
   t->Branch("candphi",jets_.candphi,"candphi[nPFcand]/F");
 
   t->Branch("ntrack",&jets_.ntrack,"ntrack/I");
@@ -229,9 +229,10 @@ PFJetAnalyzer::beginJob() {
   t->Branch("trackphi",jets_.trackphi,"trackphi[ntrack]/F");
   t->Branch("tracksumecal",jets_.tracksumecal,"tracksumecal[ntrack]/F");
   t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
-  t->Branch("trackfake",jets_.trackfake,"trackfake[ntrack]/I");
+  t->Branch("trackqual",jets_.trackqual,"trackqual[ntrack]/I");
 
   if(isMC_){
+    t->Branch("trackfake",jets_.trackfake,"trackfake[ntrack]/I");
     t->Branch("parton1_flavor",&jets_.parton1_flavor,"parton1_flavor/I");
     t->Branch("parton2_flavor",&jets_.parton2_flavor,"parton2_flavor/I");
     t->Branch("parton1_pt",&jets_.parton1_pt,"parton1_pt/F");
@@ -801,7 +802,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        jets_.candpt[jets_.nPFcand] = particlePt;
        jets_.candeta[jets_.nPFcand] = particleEta;
        jets_.candphi[jets_.nPFcand] = cand.phi();
-       jets_.candy[jets_.nPFcand] = cand.y();
+       //jets_.candy[jets_.nPFcand] = cand.y();
        jets_.nPFcand++;
 
        //cout<<" jets_.nPFcand "<<jets_.nPFcand<<endl;
@@ -821,9 +822,10 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      jets_.tracksumecal[jets_.ntrack] = 0.;
      jets_.tracksumhcal[jets_.ntrack] = 0.;
 
+     reco::TrackBase::TrackQuality trackQualityTight = TrackBase::qualityByName("highPurity");
+     jets_.trackqual[jets_.ntrack]=(int)track.quality(trackQualityTight);
 
      jets_.trackfake[jets_.ntrack]=0;
-    
 
      reco::TrackRef trackRef=reco::TrackRef(tracks,it);
 
