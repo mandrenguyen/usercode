@@ -8,7 +8,9 @@ process.Timing = cms.Service("Timing")
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
     #'/store/relval/CMSSW_3_10_0/RelValQCD_Pt_80_120/GEN-SIM-RECO/START310_V3-v1/0050/54ED7C66-680E-E011-BD9F-001A92810ADE.root'
-    '/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'                                                              )
+    #'/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'                                                              
+    '/store/user/davidlw/Hydjet_Bass_MinBias_2760GeV/Pyquen_UnquenchedDiJet_Pt50_GEN-SIM-RECO_393_v2/1243c1b8707a4e7eb28eae64e1474920/hiReco_RAW2DIGI_RECO_9_1_ZVb.root'
+    )
                             )
 
 process.maxEvents = cms.untracked.PSet(
@@ -90,7 +92,7 @@ muons.inputCollectionLabels = cms.VInputTag("hiGoodTracks", "globalMuons", "stan
 
 #Track Reco
 process.rechits = cms.Sequence(process.siPixelRecHits * process.siStripMatchedRecHits)
-process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking * muonRecoPbPb)
+process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
 
 # good track selection
 process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
@@ -303,8 +305,8 @@ process.runAllJets = cms.Sequence(
     process.icPu5patSequence +
     process.akPu5PFpatSequence +
     process.akPu4PFpatSequence +
-    process.akPu3PFpatSequence #+
-    #process.icPu5JPTpatSequence 
+    process.akPu3PFpatSequence +
+    process.icPu5JPTpatSequence 
 )
 
 # jet analysis trees
@@ -330,7 +332,8 @@ process.inclusiveJetAnalyzerSequence = cms.Sequence(                  process.in
 process.load("SimTracker.TrackAssociation.TrackAssociatorByHits_cfi")
 process.load("SimTracker.TrackAssociation.trackingParticleRecoTrackAsssociation_cfi")
 process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_cff")
-#process.PFJetAnalyzer.hasSimInfo = cms.untracked.bool(True)
+process.PFJetAnalyzer.hasSimInfo = cms.untracked.bool(True)
+process.PFJetAnalyzer.trackTag = cms.InputTag("hiGoodTracks")
 process.PFJetAnalyzer.jetTag2 = cms.InputTag("akPu5PFpatJets")
 process.PFJetAnalyzer.recoJetTag2 = cms.InputTag("akPu5PFJets")
 process.PFJetAnalyzer.jetTag3 = cms.InputTag("akPu4PFpatJets")
@@ -356,6 +359,7 @@ process.path = cms.Path(
     process.hiGoodTracksSelection*
     #process.conformalPixelTrackReco *
     #process.hiGoodMergedTracks *
+    muonRecoPbPb*
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
     process.hiGen*
