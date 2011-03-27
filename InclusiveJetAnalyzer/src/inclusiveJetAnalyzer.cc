@@ -56,8 +56,10 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
 
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
 
-  if(isMC_)genjetTag_ = iConfig.getParameter<InputTag>("genjetTag");
-
+  if(isMC_){
+    genjetTag_ = iConfig.getParameter<InputTag>("genjetTag");
+    eventInfoTag_ = iConfig.getParameter<InputTag>("eventInfoTag");
+  }
   verbose_ = iConfig.getUntrackedParameter<bool>("verbose",false);
 
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
@@ -288,7 +290,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    if(isMC_){
 
      edm::Handle<GenEventInfoProduct> hEventInfo;
-     iEvent.getByLabel("generator",hEventInfo);
+     iEvent.getByLabel(eventInfoTag_,hEventInfo);
      //jets_.pthat = hEventInfo->binningValues()[0];
 
      // binning values and qscale appear to be equivalent, but binning values not always present

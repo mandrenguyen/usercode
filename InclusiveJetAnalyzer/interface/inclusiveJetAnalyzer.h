@@ -64,7 +64,7 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
   
 
 
-  edm::InputTag   jetTag_, genjetTag_, L1gtReadout_; 
+  edm::InputTag   jetTag_, genjetTag_, eventInfoTag_, L1gtReadout_; 
 
 
   /// verbose ?
