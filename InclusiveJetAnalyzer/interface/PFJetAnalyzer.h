@@ -58,7 +58,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   
 
 
-  edm::InputTag  pfCandidatesTag_, trackTag_, simTracksTag_, genParticleTag_;
+  edm::InputTag  pfCandidatesTag_, trackTag_, simTracksTag_, genParticleTag_, eventInfoTag_;
   edm::InputTag jetTag_, jetTag2_, jetTag3_, jetTag4_;
   edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_, recoJetTag4_;
 
@@ -78,6 +78,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   static const int MAXJETS = 25000;
   static const int MAXPFCANDS = 25000;
   static const int MAXTRACKS = 25000;
+  static const int MAXGENPS = 25000;
   
 
   struct JRA{
@@ -126,6 +127,20 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float area_j2[MAXJETS];
 
 
+    float rawpt_j3[MAXJETS];
+    float jtpt_j3[MAXJETS];
+    float refpt_j3[MAXJETS];
+    float jteta_j3[MAXJETS];
+    float refeta_j3[MAXJETS];
+    float jtphi_j3[MAXJETS];
+    float refphi_j3[MAXJETS];
+    float jty_j3[MAXJETS];
+    float refy_j3[MAXJETS];
+    float refdrjt_j3[MAXJETS];
+    float preL1et_j3[MAXJETS];
+    float L2_j3[MAXJETS];
+    float L3_j3[MAXJETS];
+    float area_j3[MAXJETS];
 
     float rawpt_j4[MAXJETS];
     float jtpt_j4[MAXJETS];
@@ -142,23 +157,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float L3_j4[MAXJETS];
     float area_j4[MAXJETS];
 
-    float rawpt_j3[MAXJETS];
-    float jtpt_j3[MAXJETS];
-    float refpt_j3[MAXJETS];
-    float jteta_j3[MAXJETS];
-    float refeta_j3[MAXJETS];
-    float jtphi_j3[MAXJETS];
-    float refphi_j3[MAXJETS];
-    float jty_j3[MAXJETS];
-    float refy_j3[MAXJETS];
-    float refdrjt_j3[MAXJETS];
-    float preL1et_j3[MAXJETS];
-    float L2_j3[MAXJETS];
-    float L3_j3[MAXJETS];
-    float area_j3[MAXJETS];
-
     int nPFcand;
-    int candID[MAXPFCANDS];
+    int candId[MAXPFCANDS];
     float candpt[MAXPFCANDS];
     float candeta[MAXPFCANDS];
     float candphi[MAXPFCANDS];
@@ -173,6 +173,15 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float tracksumhcal[MAXTRACKS];
     int trackfake[MAXTRACKS];
     int trackqual[MAXTRACKS];
+
+    int ngenp;
+    int genppdgId[MAXGENPS];
+    float genppt[MAXGENPS];
+    float genpeta[MAXGENPS];
+    float genpphi[MAXGENPS];
+    float genpy[MAXGENPS];
+
+    float pthat;
 
     int parton1_flavor, parton2_flavor;
     float parton1_pt, parton2_pt;

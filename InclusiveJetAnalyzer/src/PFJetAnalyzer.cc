@@ -28,6 +28,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "SimDataFormats/HiGenData/interface/GenHIEvent.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
@@ -74,6 +75,7 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
 
   genParticleTag_ = iConfig.getParameter<InputTag>("genParticleTag");
+  eventInfoTag_ = iConfig.getParameter<InputTag>("eventInfoTag");
 
   hasSimInfo_ = iConfig.getUntrackedParameter<bool>("hasSimInfo");
   simTracksTag_ = iConfig.getParameter<InputTag>("SimTracks");
@@ -89,6 +91,8 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
    jets_.nj3 = 0;
    jets_.nj4 = 0;
    jets_.nPFcand = 0;
+   jets_.ntrack = 0;
+   jets_.ngenp = 0;
 
 
    
@@ -216,7 +220,7 @@ PFJetAnalyzer::beginJob() {
   }
 
   t->Branch("nPFcand",&jets_.nPFcand,"nPFcand/I");
-  t->Branch("candID",jets_.candID,"candID[nPFcand]/I");
+  t->Branch("candId",jets_.candId,"candId[nPFcand]/I");
   t->Branch("candpt",jets_.candpt,"candpt[nPFcand]/F");
   t->Branch("candeta",jets_.candeta,"candeta[nPFcand]/F");
   //t->Branch("candy",jets_.candy,"candy[nPFcand]/F");
@@ -232,6 +236,7 @@ PFJetAnalyzer::beginJob() {
   t->Branch("trackqual",jets_.trackqual,"trackqual[ntrack]/I");
 
   if(isMC_){
+    t->Branch("pthat",&jets_.pthat,"pthat/F");    
     t->Branch("trackfake",jets_.trackfake,"trackfake[ntrack]/I");
     t->Branch("parton1_flavor",&jets_.parton1_flavor,"parton1_flavor/I");
     t->Branch("parton2_flavor",&jets_.parton2_flavor,"parton2_flavor/I");
@@ -243,6 +248,13 @@ PFJetAnalyzer::beginJob() {
     t->Branch("parton1_phi",&jets_.parton1_phi,"parton1_phi/F");
     t->Branch("parton1_y",&jets_.parton1_y,"parton1_y/F");
     t->Branch("parton2_y",&jets_.parton2_y,"parton2_y/F");
+
+    t->Branch("ngenp",&jets_.ngenp,"ngenp/I");
+    t->Branch("genppdgId",jets_.genppdgId,"genppdgId[ngenp]/I");
+    t->Branch("genppt",jets_.genppt,"genppt[ngenp]/F");
+    t->Branch("genpeta",jets_.genpeta,"genpeta[ngenp]/F");
+    t->Branch("genpphi",jets_.genpphi,"genpphi[ngenp]/F");
+
   }
   
 
@@ -773,7 +785,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
       
 
-      // PF PID Convention:
+      // PF PId Convention:
       // 1 = Charged Hadrons
       // 2 = Electrons (not included)
       // 3 = Muons
@@ -790,15 +802,15 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
 
        // can use varid thresholds if we want
-       //if(particleID==1 && particlePt < 0.9) continue;
-       //if(particleID==3 && particlePt < 0.9) continue;
-       //if(particleID==4 && particlePt < 0.3) continue;
-       //if(particleID==5 && particlePt < 0.9) continue;
+       //if(particleId==1 && particlePt < 0.9) continue;
+       //if(particleId==3 && particlePt < 0.9) continue;
+       //if(particleId==4 && particlePt < 0.3) continue;
+       //if(particleId==5 && particlePt < 0.9) continue;
 
        
        
 
-       jets_.candID[jets_.nPFcand] = particleId;
+       jets_.candId[jets_.nPFcand] = particleId;
        jets_.candpt[jets_.nPFcand] = particlePt;
        jets_.candeta[jets_.nPFcand] = particleEta;
        jets_.candphi[jets_.nPFcand] = cand.phi();
@@ -910,8 +922,36 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
    }
    
-   
-   if(isMC_)getPartons(iEvent, iSetup );
+   // make configurable, so that gen particles aren't run with MB
+    
+   if(isMC_){
+
+     edm::Handle<GenEventInfoProduct> hEventInfo;
+     iEvent.getByLabel(eventInfoTag_,hEventInfo);
+
+     jets_.pthat = hEventInfo->qScale();
+
+     getPartons(iEvent, iSetup );
+     
+     edm::Handle <reco::GenParticleCollection> genParticles;
+     iEvent.getByLabel (genParticleTag_, genParticles );
+
+
+     for( unsigned igen=0; igen<genParticles->size(); igen++ ) {
+
+       const reco::GenParticle & genp = (*genParticles)[igen];
+       
+       if(genp.status()!=1) continue;
+       
+       jets_.genppt[jets_.ngenp] = genp.pt();
+       jets_.genpeta[jets_.ngenp] = genp.eta();
+       jets_.genpphi[jets_.ngenp] = genp.phi();
+       jets_.genppdgId[jets_.ngenp] = genp.pdgId();
+       
+       jets_.ngenp++;
+     }
+   }
+
 
    t->Fill();
 
@@ -923,6 +963,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    jets_.nj4 = 0;
    jets_.nPFcand = 0;
    jets_.ntrack = 0;
+   jets_.ngenp = 0;
 
 }
 
