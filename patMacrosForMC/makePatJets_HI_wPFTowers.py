@@ -2,14 +2,13 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('HIJETS')
 
-process.Timing = cms.Service("Timing")
+#process.Timing = cms.Service("Timing")
 
 # Input source
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
     #'/store/relval/CMSSW_3_10_0/RelValQCD_Pt_80_120/GEN-SIM-RECO/START310_V3-v1/0050/54ED7C66-680E-E011-BD9F-001A92810ADE.root'
-    #'/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'                                                              
-    '/store/user/davidlw/Hydjet_Bass_MinBias_2760GeV/Pyquen_UnquenchedDiJet_Pt50_GEN-SIM-RECO_393_v2/1243c1b8707a4e7eb28eae64e1474920/hiReco_RAW2DIGI_RECO_9_1_ZVb.root'
+    '/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'                                                                  #'/store/user/davidlw/Hydjet_Bass_MinBias_2760GeV/Pyquen_UnquenchedDiJet_Pt50_GEN-SIM-RECO_393_v2/1243c1b8707a4e7eb28eae64e1474920/hiReco_RAW2DIGI_RECO_9_1_ZVb.root'
     )
                             )
 
@@ -19,7 +18,7 @@ process.maxEvents = cms.untracked.PSet(
 
 #load some general stuff
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START39_V9::All'
+process.GlobalTag.globaltag = 'START39_V7::All'
 
 process.load('Configuration.StandardSequences.GeometryExtended_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
@@ -72,7 +71,7 @@ process.patJetPartonMatch.matched = cms.InputTag("hiGenParticles")
 # pixel triplet tracking (HI Tracking)
 process.load("RecoLocalTracker.Configuration.RecoLocalTracker_cff")
 process.load("RecoHI.Configuration.Reconstruction_HI_cff")
-process.load("RecoHI.HiTracking.LowPtTracking_PbPb_cff")
+#process.load("RecoHI.HiTracking.LowPtTracking_PbPb_cff")
 # Needed to produce "HcalSeverityLevelComputerRcd" used by CaloTowersCreator/towerMakerPF
 process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")
 # keep all the tracks for muon reco, then set high purity flag
@@ -89,10 +88,13 @@ muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJe
 #muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeCone5CaloJets")
 muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("hiGoodTracks")
 muons.inputCollectionLabels = cms.VInputTag("hiGoodTracks", "globalMuons", "standAloneMuons:UpdatedAtVtx")
+process.muonRecoPbpb = muonRecoPbPb
 
 #Track Reco
 process.rechits = cms.Sequence(process.siPixelRecHits * process.siStripMatchedRecHits)
+
 process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
+
 
 # good track selection
 process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
@@ -130,7 +132,7 @@ process.load('RecoHI.HiJetAlgos.HiGenJets_cff')
 
 
 
-process.hiGenParticles.srcVector = cms.vstring('hiSignal')
+#process.hiGenParticles.srcVector = cms.vstring('hiSignal')
 
 process.hiGen = cms.Sequence(
 #Careful when using embedded samples
@@ -311,7 +313,8 @@ process.runAllJets = cms.Sequence(
 
 # jet analysis trees
 process.load("MNguyen.InclusiveJetAnalyzer.inclusiveJetAnalyzer_cff")
-process.inclusiveJetAnalyzer.eventInfoTag = cms.InputTag("hiSignal")
+#process.inclusiveJetAnalyzer.eventInfoTag = cms.InputTag("hiSignal")
+process.icPu5JetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.akPu5PFJetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.akPu5PFJetAnalyzer.jetTag = 'akPu5PFpatJets'
 process.akPu5PFJetAnalyzer.genjetTag = 'ak5HiGenJets'
@@ -323,7 +326,7 @@ process.akPu3PFJetAnalyzer.jetTag = 'akPu3PFpatJets'
 process.akPu3PFJetAnalyzer.genjetTag = 'ak3HiGenJets'
 
 
-process.inclusiveJetAnalyzerSequence = cms.Sequence(                  process.inclusiveJetAnalyzer
+process.inclusiveJetAnalyzerSequence = cms.Sequence(                  process.icPu5JetAnalyzer
                                                                       *process.akPu5PFJetAnalyzer
                                                                       *process.akPu4PFJetAnalyzer
                                                                       *process.akPu3PFJetAnalyzer
@@ -332,14 +335,30 @@ process.inclusiveJetAnalyzerSequence = cms.Sequence(                  process.in
 process.load("SimTracker.TrackAssociation.TrackAssociatorByHits_cfi")
 process.load("SimTracker.TrackAssociation.trackingParticleRecoTrackAsssociation_cfi")
 process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_cff")
+process.PFJetAnalyzer.trackTag  = cms.InputTag("hiGoodTracks")
 process.PFJetAnalyzer.hasSimInfo = cms.untracked.bool(True)
-process.PFJetAnalyzer.trackTag = cms.InputTag("hiGoodTracks")
+process.PFJetAnalyzer.writeGenParticles = cms.untracked.bool(False)
 process.PFJetAnalyzer.jetTag2 = cms.InputTag("akPu5PFpatJets")
 process.PFJetAnalyzer.recoJetTag2 = cms.InputTag("akPu5PFJets")
 process.PFJetAnalyzer.jetTag3 = cms.InputTag("akPu4PFpatJets")
 process.PFJetAnalyzer.recoJetTag3 = cms.InputTag("akPu4PFJets")
 process.PFJetAnalyzer.jetTag4 = cms.InputTag("akPu3PFpatJets")
 process.PFJetAnalyzer.recoJetTag4 = cms.InputTag("akPu3PFJets")
+
+#Frank's analyzer
+from Saved.QM11Ana.Analyzers_cff import trkAnalyzer
+from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_nt
+from Saved.QM11Ana.Analyzers_cff import cutsTPForFak
+from Saved.QM11Ana.Analyzers_cff import cutsTPForEff
+
+process.trkAnalyzer = trkAnalyzer
+process.hitrkEffAnalyzer = hitrkEffAnalyzer_nt
+process.hitrkEffAnalyzer.fillNtuples = cms.bool(False)
+process.cutsTPForFak = cutsTPForFak
+process.cutsTPForEff = cutsTPForEff
+
+process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer)
+
 
 # track efficiency anlayzer
 #process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
@@ -359,25 +378,26 @@ process.path = cms.Path(
     process.hiGoodTracksSelection*
     #process.conformalPixelTrackReco *
     #process.hiGoodMergedTracks *
-    muonRecoPbPb*
+    process.muonRecoPbPb*
     process.HiParticleFlowRecoNoJets*
     process.hiExtra*
     process.hiGen*
     process.PFTowers*
     process.runAllJets*
+    process.franksAnalyzers*
     process.inclusiveJetAnalyzerSequence*
     process.PFJetAnalyzerSequence
     #process.hitrkEffAna*
     #process.hipxltrkEffAna
     )
 
-#process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
+process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
 #
 #process.output = cms.OutputModule("PoolOutputModule",
 #                                  process.jetTrkSkimContentMC,
 #                                  fileName = cms.untracked.string("/tmp/mnguyen/PAT.root")
 #                                  )
-
+#
 #process.output.outputCommands.extend(["drop *_towerMaker_*_*"])
 #process.output.outputCommands.extend(["keep *_PFTowers_*_*"])
 #process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
