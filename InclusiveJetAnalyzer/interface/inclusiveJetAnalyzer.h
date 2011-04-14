@@ -118,6 +118,8 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
     float refy[MAXJETS];
     float refdphijt[MAXJETS];
     float refdrjt[MAXJETS];
+    float refparton_pt[MAXJETS];
+    float refparton_flavor[MAXJETS];
 
     float pthat;
     int ngen;

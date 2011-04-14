@@ -134,6 +134,9 @@ InclusiveJetAnalyzer::beginJob() {
     t->Branch("refphi",jets_.refphi,"refphi[nref]/F");
     t->Branch("refdphijt",jets_.refdphijt,"refdphijt[nref]/F");
     t->Branch("refdrjt",jets_.refdrjt,"refdrjt[nref]/F");
+    // matched parton
+    t->Branch("refparton_pt",jets_.refparton_pt,"refparton_pt[nref]/F");
+    t->Branch("refparton_flavor",jets_.refparton_flavor,"refparton_flavor[nref]/F");
 
     // For all gen jets, matched or unmatched
     t->Branch("ngen",&jets_.ngen,"ngen/I");
@@ -223,7 +226,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    // loop the events
    
    jets_.bin = bin;
-   //jets_.hf = hf;
+   jets_.hf = hf;
    
 
    edm::Handle<vector<reco::Vertex> >vertex;
@@ -278,6 +281,15 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
        jets_.refy[jets_.nref] = -999.;
        jets_.refdphijt[jets_.nref] = -999.;
        jets_.refdrjt[jets_.nref] = -999.;
+     }
+
+     // matched partons
+     if (jet.genParton()) {
+       jets_.refparton_pt[jets_.nref] = jet.genParton()->pt();
+       jets_.refparton_flavor[jets_.nref] = jet.genParton()->pdgId();
+     } else {
+       jets_.refparton_pt[jets_.nref] = -999;
+       jets_.refparton_flavor[jets_.nref] = -999;
      }
 
  
