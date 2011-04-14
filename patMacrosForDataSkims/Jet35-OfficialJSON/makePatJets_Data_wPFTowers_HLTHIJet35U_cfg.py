@@ -62,19 +62,17 @@ process.hiTracksWithTightQualityKeepAll = process.hiTracksWithTightQuality.clone
 process.hiSelectedTracksKeepAll = process.hiSelectedTracks.clone()
 
 process.hiTracksWithTightQualityKeepAll.src = cms.InputTag("hiTracksWithLooseQualityKeepAll")
-process.hiSelectedTracksWithTightQualityKeepAll.src = cms.InputTag("hiTracksWithTightQualityKeepAll")
+process.hiSelectedTracksKeepAll.src = cms.InputTag("hiTracksWithTightQualityKeepAll")
 
 process.hiTracksWithTightQuality.qualityBit = 'loose'
-process.hiSelectedTracks.keepAllTracks = True
 process.hiSelectedTracks.qualityBit = 'tight'
 
 process.hiTracksWithTightQualityKeepAll.qualityBit = 'loose'
-process.hiSelectedTracksKeepAll.keepAllTracks = True
 process.hiSelectedTracksKeepAll.qualityBit = 'tight'
 
 process.hiTracksWithLooseQualityKeepAll.keepAllTracks = True
 process.hiTracksWithTightQualityKeepAll.keepAllTracks = True
-
+process.hiSelectedTracksKeepAll.keepAllTracks = True
 
 
 
