@@ -73,6 +73,7 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
 
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
+  writeGenParticles_ = iConfig.getUntrackedParameter<bool>("writeGenParticles",false);
 
   genParticleTag_ = iConfig.getParameter<InputTag>("genParticleTag");
   eventInfoTag_ = iConfig.getParameter<InputTag>("eventInfoTag");
@@ -248,13 +249,13 @@ PFJetAnalyzer::beginJob() {
     t->Branch("parton1_phi",&jets_.parton1_phi,"parton1_phi/F");
     t->Branch("parton1_y",&jets_.parton1_y,"parton1_y/F");
     t->Branch("parton2_y",&jets_.parton2_y,"parton2_y/F");
-
+  }
+  if(writeGenParticles_){
     t->Branch("ngenp",&jets_.ngenp,"ngenp/I");
     t->Branch("genppdgId",jets_.genppdgId,"genppdgId[ngenp]/I");
     t->Branch("genppt",jets_.genppt,"genppt[ngenp]/F");
     t->Branch("genpeta",jets_.genpeta,"genpeta[ngenp]/F");
     t->Branch("genpphi",jets_.genpphi,"genpphi[ngenp]/F");
-
   }
   
 
@@ -808,7 +809,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        //if(particleId==5 && particlePt < 0.9) continue;
 
        
-       
+       if(particleId==3&&particlePt>100) cout<<" likely a badly reconstructed MUON "<<endl;
 
        jets_.candId[jets_.nPFcand] = particleId;
        jets_.candpt[jets_.nPFcand] = particlePt;
@@ -933,22 +934,24 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      getPartons(iEvent, iSetup );
      
-     edm::Handle <reco::GenParticleCollection> genParticles;
-     iEvent.getByLabel (genParticleTag_, genParticles );
-
-
-     for( unsigned igen=0; igen<genParticles->size(); igen++ ) {
-
-       const reco::GenParticle & genp = (*genParticles)[igen];
+     if(writeGenParticles_){
+       edm::Handle <reco::GenParticleCollection> genParticles;
+       iEvent.getByLabel (genParticleTag_, genParticles );
        
-       if(genp.status()!=1) continue;
        
-       jets_.genppt[jets_.ngenp] = genp.pt();
-       jets_.genpeta[jets_.ngenp] = genp.eta();
-       jets_.genpphi[jets_.ngenp] = genp.phi();
-       jets_.genppdgId[jets_.ngenp] = genp.pdgId();
-       
-       jets_.ngenp++;
+       for( unsigned igen=0; igen<genParticles->size(); igen++ ) {
+	 
+	 const reco::GenParticle & genp = (*genParticles)[igen];
+	 
+	 if(genp.status()!=1) continue;
+	 
+	 jets_.genppt[jets_.ngenp] = genp.pt();
+	 jets_.genpeta[jets_.ngenp] = genp.eta();
+	 jets_.genpphi[jets_.ngenp] = genp.phi();
+	 jets_.genppdgId[jets_.ngenp] = genp.pdgId();
+	 
+	 jets_.ngenp++;
+       }
      }
    }
 
