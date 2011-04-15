@@ -8,7 +8,8 @@ process = cms.Process('HIJETS')
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
     #'/store/relval/CMSSW_3_10_0/RelValQCD_Pt_80_120/GEN-SIM-RECO/START310_V3-v1/0050/54ED7C66-680E-E011-BD9F-001A92810ADE.root'
-    '/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'                                                                  #'/store/user/davidlw/Hydjet_Bass_MinBias_2760GeV/Pyquen_UnquenchedDiJet_Pt50_GEN-SIM-RECO_393_v2/1243c1b8707a4e7eb28eae64e1474920/hiReco_RAW2DIGI_RECO_9_1_ZVb.root'
+    #'/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'
+    '/store/user/davidlw/Hydjet_Bass_MinBias_2760GeV/Pyquen_UnquenchedDiJet_Pt50_GEN-SIM-RECO_393_v2/1243c1b8707a4e7eb28eae64e1474920/hiReco_RAW2DIGI_RECO_9_1_ZVb.root'
     )
                             )
 
@@ -371,30 +372,45 @@ process.PFJetAnalyzer.jetTag4 = cms.InputTag("akPu3PFpatJets")
 process.PFJetAnalyzer.recoJetTag4 = cms.InputTag("akPu3PFJets")
 
 #Frank's analyzer
-#import to avoid conflicst with inclusiveJetAnalyzer
+#import to avoid conflicts with inclusiveJetAnalyzer
 from Saved.QM11Ana.Analyzers_cff import trkAnalyzer
-#from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_nt
+from Saved.QM11Ana.Analyzers_cff import genpAnalyzer
+
 from Saved.QM11Ana.Analyzers_cff import cutsTPForFak
 from Saved.QM11Ana.Analyzers_cff import cutsTPForEff
-from Saved.QM11Ana.Analyzers_cff import genpAnalyzer
+from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_akpu3pf_j1
+from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_akpu3pf_j2
 from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_akpu3pf
+
+from Saved.QM11Ana.Analyzers_cff import cutsTPForFakPxl
+from Saved.QM11Ana.Analyzers_cff import cutsTPForEffPxl
+from Saved.QM11Ana.Analyzers_cff import hipixtrkEffAnalyzer_akpu3pf_j1
+from Saved.QM11Ana.Analyzers_cff import hipixtrkEffAnalyzer_akpu3pf_j2
 from Saved.QM11Ana.Analyzers_cff import hipixtrkEffAnalyzer_akpu3pf
 
+
+
 process.trkAnalyzer = trkAnalyzer
-#process.hitrkEffAnalyzer = hitrkEffAnalyzer_nt
-process.hitrkEffAnalyzer_akpu3pf = hitrkEffAnalyzer_akpu3pf 
-process.hipixtrkEffAnalyzer_akpu3pf = hipixtrkEffAnalyzer_akpu3pf 
-#process.hitrkEffAnalyzer.fillNtuples = cms.bool(False)
 process.cutsTPForFak = cutsTPForFak
 process.cutsTPForEff = cutsTPForEff
+process.hitrkEffAnalyzer_akpu3pf_j1 = hitrkEffAnalyzer_akpu3pf_j1
+process.hitrkEffAnalyzer_akpu3pf_j2 = hitrkEffAnalyzer_akpu3pf_j2
+process.hitrkEffAnalyzer_akpu3pf = hitrkEffAnalyzer_akpu3pf 
+process.cutsTPForFakPxl = cutsTPForFakPxl
+process.cutsTPForEffPxl = cutsTPForEffPxl
+process.hipixtrkEffAnalyzer_akpu3pf_j1 = hipixtrkEffAnalyzer_akpu3pf_j1
+process.hipixtrkEffAnalyzer_akpu3pf_j2 = hipixtrkEffAnalyzer_akpu3pf_j2
+process.hipixtrkEffAnalyzer_akpu3pf = hipixtrkEffAnalyzer_akpu3pf 
 process.genpAnalyzer = genpAnalyzer
 
+process.hitrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer_akpu3pf*process.hitrkEffAnalyzer_akpu3pf_j1*process.hitrkEffAnalyzer_akpu3pf_j2)
+process.hipixtrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFakPxl*process.cutsTPForEffPxl*process.hipixtrkEffAnalyzer_akpu3pf*process.hipixtrkEffAnalyzer_akpu3pf_j1*process.hipixtrkEffAnalyzer_akpu3pf_j2)
+
+
+
 process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks") 
-#process.hitrkEffAnalyzer.tracks = cms.untracked.InputTag("hiGoodMergedTracks") 
 
-
-#process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer*process.hitrkEffAnalyzer_akpu3pf*process.hipxltrkEffAna_akpu3pf*process.genpAnalyzer)
-process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer_akpu3pf*process.hipxltrkEffAna_akpu3pf*process.genpAnalyzer)
+process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_akpu3pf*process.hipixtrkEffAna_akpu3pf*process.genpAnalyzer)
 
 
 # track efficiency anlayzer
