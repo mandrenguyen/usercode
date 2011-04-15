@@ -154,6 +154,8 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refy_j1",jets_.refy_j1,"refy_j1[nj1]/F");
     t->Branch("refphi_j1",jets_.refphi_j1,"refphi_j1[nj1]/F");
     t->Branch("refdrjt_j1",jets_.refdrjt_j1,"refdrjt_j1[nj1]/F");
+    t->Branch("refpartonpt_j1",jets_.refpartonpt_j1,"refpartonpt_j1[nj1]/F");
+    t->Branch("refpartonflavor_j1",jets_.refpartonflavor_j1,"refpartonflavor_j1[nj1]/F");
   }
 
 
@@ -175,6 +177,8 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refy_j2",jets_.refy_j2,"refy_j2[nj2]/F");
     t->Branch("refphi_j2",jets_.refphi_j2,"refphi_j2[nj2]/F");
     t->Branch("refdrjt_j2",jets_.refdrjt_j2,"refdrjt_j2[nj2]/F");
+    t->Branch("refpartonpt_j2",jets_.refpartonpt_j2,"refpartonpt_j2[nj2]/F");
+    t->Branch("refpartonflavor_j2",jets_.refpartonflavor_j2,"refpartonflavor_j2[nj2]/F");
   }
 
 
@@ -198,6 +202,8 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refy_j3",jets_.refy_j3,"refy_j3[nj3]/F");
     t->Branch("refphi_j3",jets_.refphi_j3,"refphi_j3[nj3]/F");
     t->Branch("refdrjt_j3",jets_.refdrjt_j3,"refdrjt_j3[nj3]/F");
+    t->Branch("refpartonpt_j3",jets_.refpartonpt_j3,"refpartonpt_j3[nj3]/F");
+    t->Branch("refpartonflavor_j3",jets_.refpartonflavor_j3,"refpartonflavor_j3[nj3]/F");
   }
 
  // J4
@@ -218,6 +224,8 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refy_j4",jets_.refy_j4,"refy_j4[nj4]/F");
     t->Branch("refphi_j4",jets_.refphi_j4,"refphi_j4[nj4]/F");
     t->Branch("refdrjt_j4",jets_.refdrjt_j4,"refdrjt_j4[nj4]/F");
+    t->Branch("refpartonpt_j4",jets_.refpartonpt_j4,"refpartonpt_j4[nj4]/F");
+    t->Branch("refpartonflavor_j4",jets_.refpartonflavor_j4,"refpartonflavor_j4[nj4]/F");
   }
 
   t->Branch("nPFcand",&jets_.nPFcand,"nPFcand/I");
@@ -335,7 +343,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    // loop the events
    
    jets_.bin = bin;
-   //jets_.hf = hf;
+   jets_.hf = hf;
    
 
    edm::Handle<pat::JetCollection> jets;
@@ -483,6 +491,14 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 jets_.refphi_j1[jets_.nj1] = -999;
 	 jets_.refy_j1[jets_.nj1] = -999;
        }
+      
+       if (jet.genParton()) {
+	 jets_.refpartonpt_j1[jets_.nj1] = jet.genParton()->pt();
+	 jets_.refpartonflavor_j1[jets_.nj1] = jet.genParton()->pdgId();
+       } else {
+	 jets_.refpartonpt_j1[jets_.nj1] = -999;
+	 jets_.refpartonflavor_j1[jets_.nj1] = -999;
+       }
        
      }
 
@@ -579,7 +595,14 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 jets_.refphi_j2[jets_.nj2] = -999;
 	 jets_.refy_j2[jets_.nj2] = -999;
        }
-       
+      
+       if (jet2.genParton()) {
+	 jets_.refpartonpt_j2[jets_.nj2] = jet2.genParton()->pt();
+	 jets_.refpartonflavor_j2[jets_.nj2] = jet2.genParton()->pdgId();
+       } else {
+	 jets_.refpartonpt_j2[jets_.nj2] = -999;
+	 jets_.refpartonflavor_j2[jets_.nj2] = -999;
+       }
      }
 
      
@@ -670,6 +693,14 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 jets_.refeta_j3[jets_.nj3] = -999;
 	 jets_.refphi_j3[jets_.nj3] = -999;
 	 jets_.refy_j3[jets_.nj3] = -999;
+       }
+
+       if (jet3.genParton()) {
+	 jets_.refpartonpt_j3[jets_.nj3] = jet3.genParton()->pt();
+	 jets_.refpartonflavor_j3[jets_.nj3] = jet3.genParton()->pdgId();
+       } else {
+	 jets_.refpartonpt_j3[jets_.nj3] = -999;
+	 jets_.refpartonflavor_j3[jets_.nj3] = -999;
        }
        
      }
@@ -766,7 +797,15 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 jets_.refphi_j4[jets_.nj4] = -999;
 	 jets_.refy_j4[jets_.nj4] = -999;
        }
-       
+
+       if (jet4.genParton()) {
+	 jets_.refpartonpt_j4[jets_.nj4] = jet4.genParton()->pt();
+	 jets_.refpartonflavor_j4[jets_.nj4] = jet4.genParton()->pdgId();
+       } else {
+	 jets_.refpartonpt_j4[jets_.nj4] = -999;
+	 jets_.refpartonflavor_j4[jets_.nj4] = -999;
+       }
+
      }
 
      

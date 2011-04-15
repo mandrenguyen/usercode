@@ -110,7 +110,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float L2_j1[MAXJETS];
     float L3_j1[MAXJETS];
     float area_j1[MAXJETS];
-
+    float refpartonpt_j1[MAXJETS];
+    float refpartonflavor_j1[MAXJETS];
 
     float rawpt_j2[MAXJETS];
     float jtpt_j2[MAXJETS];
@@ -126,7 +127,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float L2_j2[MAXJETS];
     float L3_j2[MAXJETS];
     float area_j2[MAXJETS];
-
+    float refpartonpt_j2[MAXJETS];
+    float refpartonflavor_j2[MAXJETS];
 
     float rawpt_j3[MAXJETS];
     float jtpt_j3[MAXJETS];
@@ -142,6 +144,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float L2_j3[MAXJETS];
     float L3_j3[MAXJETS];
     float area_j3[MAXJETS];
+    float refpartonpt_j3[MAXJETS];
+    float refpartonflavor_j3[MAXJETS];
 
     float rawpt_j4[MAXJETS];
     float jtpt_j4[MAXJETS];
@@ -157,6 +161,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float L2_j4[MAXJETS];
     float L3_j4[MAXJETS];
     float area_j4[MAXJETS];
+    float refpartonpt_j4[MAXJETS];
+    float refpartonflavor_j4[MAXJETS];
 
     int nPFcand;
     int candId[MAXPFCANDS];
