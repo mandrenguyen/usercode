@@ -138,7 +138,7 @@ process.HiParticleFlowRecoNoJets = cms.Sequence(
     * process.trackerDrivenElectronSeeds
     * process.particleFlowReco
     )
-process.trackerDrivenElectronSeeds.TkColList = cms.VInputTag("hiGoodTracks")
+process.trackerDrivenElectronSeeds.TkColList = cms.VInputTag("hiGoodTracksKeepAll")
 
 process.load("HeavyIonsAnalysis.Configuration.analysisProducers_cff")
 process.hiExtra = cms.Sequence(
