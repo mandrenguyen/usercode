@@ -373,24 +373,28 @@ process.PFJetAnalyzer.recoJetTag4 = cms.InputTag("akPu3PFJets")
 #Frank's analyzer
 #import to avoid conflicst with inclusiveJetAnalyzer
 from Saved.QM11Ana.Analyzers_cff import trkAnalyzer
-from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_nt
+#from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_nt
 from Saved.QM11Ana.Analyzers_cff import cutsTPForFak
 from Saved.QM11Ana.Analyzers_cff import cutsTPForEff
 from Saved.QM11Ana.Analyzers_cff import genpAnalyzer
+from Saved.QM11Ana.Analyzers_cff import hitrkEffAnalyzer_akpu3pf
+from Saved.QM11Ana.Analyzers_cff import hipixtrkEffAnalyzer_akpu3pf
 
 process.trkAnalyzer = trkAnalyzer
-process.hitrkEffAnalyzer = hitrkEffAnalyzer_nt
-process.hitrkEffAnalyzer.fillNtuples = cms.bool(False)
+#process.hitrkEffAnalyzer = hitrkEffAnalyzer_nt
+process.hitrkEffAnalyzer_akpu3pf = hitrkEffAnalyzer_akpu3pf 
+process.hipixtrkEffAnalyzer_akpu3pf = hipixtrkEffAnalyzer_akpu3pf 
+#process.hitrkEffAnalyzer.fillNtuples = cms.bool(False)
 process.cutsTPForFak = cutsTPForFak
 process.cutsTPForEff = cutsTPForEff
 process.genpAnalyzer = genpAnalyzer
 
 process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks") 
-process.hitrkEffAnalyzer.tracks = cms.untracked.InputTag("hiGoodMergedTracks") 
+#process.hitrkEffAnalyzer.tracks = cms.untracked.InputTag("hiGoodMergedTracks") 
 
 
-
-process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer*process.genpAnalyzer)
+#process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer*process.hitrkEffAnalyzer_akpu3pf*process.hipxltrkEffAna_akpu3pf*process.genpAnalyzer)
+process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer_akpu3pf*process.hipxltrkEffAna_akpu3pf*process.genpAnalyzer)
 
 
 # track efficiency anlayzer
