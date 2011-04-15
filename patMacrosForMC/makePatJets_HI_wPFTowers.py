@@ -78,19 +78,36 @@ process.load("RecoHI.HiTracking.LowPtTracking_PbPb_cff")
 # Needed to produce "HcalSeverityLevelComputerRcd" used by CaloTowersCreator/towerMakerPF
 process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")
 # keep all the tracks for muon reco, then set high purity flag
-process.hiTracksWithLooseQuality.keepAllTracks = True
-process.hiTracksWithTightQuality.keepAllTracks = True
+# keep all the tracks for muon reco, then set high purity flag
+process.hiTracksWithLooseQualityKeepAll = process.hiTracksWithLooseQuality.clone()
+process.hiTracksWithTightQualityKeepAll = process.hiTracksWithTightQuality.clone()
+process.hiSelectedTracksKeepAll = process.hiSelectedTracks.clone()
+
+process.hiTracksWithTightQualityKeepAll.src = cms.InputTag("hiTracksWithLooseQualityKeepAll")
+process.hiSelectedTracksKeepAll.src = cms.InputTag("hiTracksWithTightQualityKeepAll")
+
 process.hiTracksWithTightQuality.qualityBit = 'loose'
-process.hiSelectedTracks.keepAllTracks = True
 process.hiSelectedTracks.qualityBit = 'tight'
+
+process.hiTracksWithTightQualityKeepAll.qualityBit = 'loose'
+process.hiSelectedTracksKeepAll.qualityBit = 'tight'
+
+process.hiTracksWithLooseQualityKeepAll.keepAllTracks = True
+process.hiTracksWithTightQualityKeepAll.keepAllTracks = True
+process.hiSelectedTracksKeepAll.keepAllTracks = True
+
+
+process.heavyIonTracking += process.hiTracksWithLooseQualityKeepAll*process.hiTracksWithTightQualityKeepAll*process.hiSelectedTracksKeepAll
+
+
 
 # Muon Reco
 from RecoHI.HiMuonAlgos.HiRecoMuon_cff import * 
-process.globalMuons.TrackerCollectionLabel = cms.InputTag("hiGoodTracks")
+process.globalMuons.TrackerCollectionLabel = cms.InputTag("hiGoodTracksKeepAll")
 muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJets")
 #muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeCone5CaloJets")
-muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("hiGoodTracks")
-muons.inputCollectionLabels = cms.VInputTag("hiGoodTracks", "globalMuons", "standAloneMuons:UpdatedAtVtx")
+muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("hiGoodTracksKeepAll")
+muons.inputCollectionLabels = cms.VInputTag("hiGoodTracksKeepAll", "globalMuons", "standAloneMuons:UpdatedAtVtx")
 process.muonRecoPbpb = muonRecoPbPb
 
 #Track Reco
@@ -101,10 +118,13 @@ process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
 
 # good track selection
 process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
-process.hiGoodTracks.keepAllTracks = True
+process.hiGoodTracksKeepAll = process.hiGoodTracks.clone()
+process.hiGoodTracksKeepAll.keepAllTracks = True
+process.hiGoodTracksSelection += process.hiGoodTracksKeepAll
 # merge with pixel tracks
 process.load('Appeltel.PixelTracksRun2010.HiLowPtPixelTracksFromReco_cff')
 process.load('Appeltel.PixelTracksRun2010.HiMultipleMergedTracks_cff')
+process.hiGoodMergedTracks.src = cms.InputTag("hiGoodTracks")
 
 # for PF
 process.load("RecoHI.Configuration.Reconstruction_hiPF_cff")
@@ -365,7 +385,7 @@ process.cutsTPForFak = cutsTPForFak
 process.cutsTPForEff = cutsTPForEff
 process.genpAnalyzer = genpAnalyzer
 
-process.trkAnalyzer.trackSrc = cms.untracked.InputTag("hiGoodMergedTracks") 
+process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks") 
 process.hitrkEffAnalyzer.tracks = cms.untracked.InputTag("hiGoodMergedTracks") 
 
 
