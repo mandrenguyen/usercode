@@ -59,8 +59,9 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
 
   edm::InputTag  pfCandidatesTag_, trackTag_, simTracksTag_, genParticleTag_, eventInfoTag_;
-  edm::InputTag jetTag_, jetTag2_, jetTag3_, jetTag4_;
-  edm::InputTag recoJetTag_, recoJetTag2_, recoJetTag3_, recoJetTag4_;
+  edm::InputTag jetTag1_, jetTag2_, jetTag3_, jetTag4_;
+  edm::InputTag recoJetTag1_, recoJetTag2_, recoJetTag3_, recoJetTag4_;
+  edm::InputTag genJetTag1_, genJetTag2_, genJetTag3_, genJetTag4_;
 
   /// verbose ?
   bool   verbose_;
@@ -77,6 +78,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   CentralityProvider * centrality_;
 
   static const int MAXJETS = 25000;
+  static const int MAXUNMATCH = 25000;
   static const int MAXPFCANDS = 25000;
   static const int MAXTRACKS = 25000;
   static const int MAXGENPS = 25000;
@@ -163,6 +165,30 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float area_j4[MAXJETS];
     float refpartonpt_j4[MAXJETS];
     float refpartonflavor_j4[MAXJETS];
+
+    int nunmatch_j1;
+    float unmatchpt_j1[MAXUNMATCH];
+    float unmatcheta_j1[MAXUNMATCH];
+    float unmatchy_j1[MAXUNMATCH];
+    float unmatchphi_j1[MAXUNMATCH];
+
+    int nunmatch_j2;
+    float unmatchpt_j2[MAXUNMATCH];
+    float unmatcheta_j2[MAXUNMATCH];
+    float unmatchy_j2[MAXUNMATCH];
+    float unmatchphi_j2[MAXUNMATCH];
+
+    int nunmatch_j3;
+    float unmatchpt_j3[MAXUNMATCH];
+    float unmatcheta_j3[MAXUNMATCH];
+    float unmatchy_j3[MAXUNMATCH];
+    float unmatchphi_j3[MAXUNMATCH];
+
+    int nunmatch_j4;
+    float unmatchpt_j4[MAXUNMATCH];
+    float unmatcheta_j4[MAXUNMATCH];
+    float unmatchy_j4[MAXUNMATCH];
+    float unmatchphi_j4[MAXUNMATCH];
 
     int nPFcand;
     int candId[MAXPFCANDS];

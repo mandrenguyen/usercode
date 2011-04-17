@@ -55,16 +55,20 @@ using namespace reco;
 PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   
 
-  jetTag_ = iConfig.getParameter<InputTag>("jetTag");
+  jetTag1_ = iConfig.getParameter<InputTag>("jetTag1");
   jetTag2_ = iConfig.getParameter<InputTag>("jetTag2");
   jetTag3_ = iConfig.getParameter<InputTag>("jetTag3");
   jetTag4_ = iConfig.getParameter<InputTag>("jetTag4");
 
-
-  recoJetTag_ = iConfig.getParameter<InputTag>("recoJetTag");
+  recoJetTag1_ = iConfig.getParameter<InputTag>("recoJetTag1");
   recoJetTag2_ = iConfig.getParameter<InputTag>("recoJetTag2");
   recoJetTag3_ = iConfig.getParameter<InputTag>("recoJetTag3");
   recoJetTag4_ = iConfig.getParameter<InputTag>("recoJetTag4");
+
+  genJetTag1_ = iConfig.getParameter<InputTag>("genJetTag1");
+  genJetTag2_ = iConfig.getParameter<InputTag>("genJetTag2");
+  genJetTag3_ = iConfig.getParameter<InputTag>("genJetTag3");
+  genJetTag4_ = iConfig.getParameter<InputTag>("genJetTag4");
 
   pfCandidatesTag_ = iConfig.getParameter<InputTag>("pfCandidatesTag");
   trackTag_ = iConfig.getParameter<edm::InputTag>("trackTag");
@@ -82,7 +86,7 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
   simTracksTag_ = iConfig.getParameter<InputTag>("SimTracks");
 
   cout<<" tracks : "<<trackTag_<<endl;
-  cout<<" jet collection : "<<jetTag_<<endl;
+  cout<<" jet collection 1: "<<jetTag1_<<endl;
   cout<<" jet collection 2: "<<jetTag2_<<endl;
   cout<<" jet collection 3: "<<jetTag3_<<endl;
   cout<<" jet collection 4: "<<jetTag4_<<endl;
@@ -91,6 +95,10 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
    jets_.nj2 = 0;
    jets_.nj3 = 0;
    jets_.nj4 = 0;
+   jets_.nunmatch_j1 = 0;
+   jets_.nunmatch_j2 = 0;
+   jets_.nunmatch_j3 = 0;
+   jets_.nunmatch_j4 = 0;
    jets_.nPFcand = 0;
    jets_.ntrack = 0;
    jets_.ngenp = 0;
@@ -114,10 +122,7 @@ PFJetAnalyzer::beginJob() {
 
   centrality_ = 0;
 
-  //string jetTagName = jetTag_.label()+"_tree"; 
 
-  //string jetTagTitle = jetTag_.label()+" Jet Analysis Tree"; 
-  //t = f->make<TTree>(jetTagName.c_str(),jetTagTitle.c_str());
   t = fs2->make<TTree>("t","Jet Analysis Tree");
 
 
@@ -149,6 +154,7 @@ PFJetAnalyzer::beginJob() {
   t->Branch("area_j1",jets_.area_j1,"area_j1[nj1]/F");
 
   if(isMC_){
+    // Matched gen jets
     t->Branch("refpt_j1",jets_.refpt_j1,"refpt_j1[nj1]/F");
     t->Branch("refeta_j1",jets_.refeta_j1,"refeta_j1[nj1]/F");
     t->Branch("refy_j1",jets_.refy_j1,"refy_j1[nj1]/F");
@@ -156,6 +162,13 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refdrjt_j1",jets_.refdrjt_j1,"refdrjt_j1[nj1]/F");
     t->Branch("refpartonpt_j1",jets_.refpartonpt_j1,"refpartonpt_j1[nj1]/F");
     t->Branch("refpartonflavor_j1",jets_.refpartonflavor_j1,"refpartonflavor_j1[nj1]/F");
+
+    // Unmatched gen jets
+    t->Branch("nunmatch_j1",&jets_.nunmatch_j1,"nunmatch_j1/I");
+    t->Branch("unmatchpt_j1",jets_.unmatchpt_j1,"unmatchpt_j1[nunmatch_j1]/F");
+    t->Branch("unmatcheta_j1",jets_.unmatcheta_j1,"unmatcheta_j1[nunmatch_j1]/F");
+    t->Branch("unmatchy_j1",jets_.unmatchy_j1,"unmatchy_j1[nunmatch_j1]/F");
+    t->Branch("unmatchphi_j1",jets_.unmatchphi_j1,"unmatchphi_j1[nunmatch_j1]/F");
   }
 
 
@@ -179,6 +192,14 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refdrjt_j2",jets_.refdrjt_j2,"refdrjt_j2[nj2]/F");
     t->Branch("refpartonpt_j2",jets_.refpartonpt_j2,"refpartonpt_j2[nj2]/F");
     t->Branch("refpartonflavor_j2",jets_.refpartonflavor_j2,"refpartonflavor_j2[nj2]/F");
+
+    // Unmatched gen jets
+    t->Branch("nunmatch_j2",&jets_.nunmatch_j2,"nunmatch_j2/I");
+    t->Branch("unmatchpt_j2",jets_.unmatchpt_j2,"unmatchpt_j2[nunmatch_j2]/F");
+    t->Branch("unmatcheta_j2",jets_.unmatcheta_j2,"unmatcheta_j2[nunmatch_j2]/F");
+    t->Branch("unmatchy_j2",jets_.unmatchy_j2,"unmatchy_j2[nunmatch_j2]/F");
+    t->Branch("unmatchphi_j2",jets_.unmatchphi_j2,"unmatchphi_j2[nunmatch_j2]/F");
+
   }
 
 
@@ -204,6 +225,13 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refdrjt_j3",jets_.refdrjt_j3,"refdrjt_j3[nj3]/F");
     t->Branch("refpartonpt_j3",jets_.refpartonpt_j3,"refpartonpt_j3[nj3]/F");
     t->Branch("refpartonflavor_j3",jets_.refpartonflavor_j3,"refpartonflavor_j3[nj3]/F");
+
+    // Unmatched gen jets
+    t->Branch("nunmatch_j3",&jets_.nunmatch_j3,"nunmatch_j3/I");
+    t->Branch("unmatchpt_j3",jets_.unmatchpt_j3,"unmatchpt_j3[nunmatch_j3]/F");
+    t->Branch("unmatcheta_j3",jets_.unmatcheta_j3,"unmatcheta_j3[nunmatch_j3]/F");
+    t->Branch("unmatchy_j3",jets_.unmatchy_j3,"unmatchy_j3[nunmatch_j3]/F");
+    t->Branch("unmatchphi_j3",jets_.unmatchphi_j3,"unmatchphi_j3[nunmatch_j3]/F");
   }
 
  // J4
@@ -226,6 +254,13 @@ PFJetAnalyzer::beginJob() {
     t->Branch("refdrjt_j4",jets_.refdrjt_j4,"refdrjt_j4[nj4]/F");
     t->Branch("refpartonpt_j4",jets_.refpartonpt_j4,"refpartonpt_j4[nj4]/F");
     t->Branch("refpartonflavor_j4",jets_.refpartonflavor_j4,"refpartonflavor_j4[nj4]/F");
+
+    // Unmatched gen jets
+    t->Branch("nunmatch_j4",&jets_.nunmatch_j4,"nunmatch_j4/I");
+    t->Branch("unmatchpt_j4",jets_.unmatchpt_j4,"unmatchpt_j4[nunmatch_j4]/F");
+    t->Branch("unmatcheta_j4",jets_.unmatcheta_j4,"unmatcheta_j4[nunmatch_j4]/F");
+    t->Branch("unmatchy_j4",jets_.unmatchy_j4,"unmatchy_j4[nunmatch_j4]/F");
+    t->Branch("unmatchphi_j4",jets_.unmatchphi_j4,"unmatchphi_j4[nunmatch_j4]/F");
   }
 
   t->Branch("nPFcand",&jets_.nPFcand,"nPFcand/I");
@@ -346,11 +381,8 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    jets_.hf = hf;
    
 
-   edm::Handle<pat::JetCollection> jets;
-   iEvent.getByLabel(jetTag_, jets);
-
-   // add a few more jet algos to the same ntuple
-   // default is j1
+   edm::Handle<pat::JetCollection> jets1;
+   iEvent.getByLabel(jetTag1_, jets1);
 
    edm::Handle<pat::JetCollection> jets2;
    iEvent.getByLabel(jetTag2_, jets2);
@@ -362,8 +394,8 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    iEvent.getByLabel(jetTag4_, jets4);
 
 
-   edm::Handle< edm::View<reco::CaloJet> > recoJetColl;
-   iEvent.getByLabel( recoJetTag_, recoJetColl );
+   edm::Handle< edm::View<reco::CaloJet> > recoJetColl1;
+   iEvent.getByLabel(recoJetTag1_, recoJetColl1 );
    
    edm::Handle< edm::View<reco::PFJet> > recoJetColl2;
    iEvent.getByLabel(recoJetTag2_, recoJetColl2 );
@@ -371,7 +403,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    edm::Handle< edm::View<reco::PFJet> > recoJetColl3;
    iEvent.getByLabel(recoJetTag3_, recoJetColl3 );
 
-   edm::Handle< edm::View<reco::CaloJet> > recoJetColl4;
+   edm::Handle< edm::View<reco::PFJet> > recoJetColl4;
    iEvent.getByLabel(recoJetTag4_, recoJetColl4 );
 
 
@@ -407,60 +439,61 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
 
    jets_.nj1 = 0;
+   jets_.nunmatch_j1 = 0;
    
 
    
-   for(unsigned int j = 0 ; j < jets->size(); ++j){
-     const pat::Jet& jet = (*jets)[j];
+   for(unsigned int j = 0 ; j < jets1->size(); ++j){
+     const pat::Jet& jet1 = (*jets1)[j];
      
-     //cout<<" jet pt "<<jet.pt()<<endl;
-     //if(jet.pt() < jetPtMin) continue;
-     jets_.rawpt_j1[jets_.nj1]=jet.correctedJet("Uncorrected").pt();
-     jets_.jtpt_j1[jets_.nj1] = jet.pt();                            
-     jets_.jteta_j1[jets_.nj1] = jet.eta();
-     jets_.jtphi_j1[jets_.nj1] = jet.phi();
-     jets_.jty_j1[jets_.nj1] = jet.eta();
+     //cout<<" jet pt "<<jet1.pt()<<endl;
+     //if(jet1.pt() < jetPtMin) continue;
+     jets_.rawpt_j1[jets_.nj1]=jet1.correctedJet("Uncorrected").pt();
+     jets_.jtpt_j1[jets_.nj1] = jet1.pt();                            
+     jets_.jteta_j1[jets_.nj1] = jet1.eta();
+     jets_.jtphi_j1[jets_.nj1] = jet1.phi();
+     jets_.jty_j1[jets_.nj1] = jet1.eta();
 
 
-     //  cout<<" abs corr "<<jet.corrFactor("L3Absolute")<<endl;
-     //cout<<" abs corr "<<jet.corrFactor("L3Absolute")<<endl;
+     //  cout<<" abs corr "<<jet1.corrFactor("L3Absolute")<<endl;
+     //cout<<" abs corr "<<jet1.corrFactor("L3Absolute")<<endl;
 
 
-     float L2Corr = jet.correctedJet("L2Relative").pt()/jet.correctedJet("Uncorrected").pt();
-     float L3Corr = jet.correctedJet("L3Absolute").pt()/jet.correctedJet("L2Relative").pt();
+     float L2Corr = jet1.correctedJet("L2Relative").pt()/jet1.correctedJet("Uncorrected").pt();
+     float L3Corr = jet1.correctedJet("L3Absolute").pt()/jet1.correctedJet("L2Relative").pt();
      
      
      jets_.L2_j1[jets_.nj1] = L2Corr;
      jets_.L3_j1[jets_.nj1] = L3Corr;
      
      
-     jets_.area_j1[jets_.nj1] = jet.jetArea();
+     jets_.area_j1[jets_.nj1] = jet1.jetArea();
      
      // Match to reco jet to find unsubtracted jet energy
      
      if(1==0){
-	 int recoJetSize = recoJetColl->size();
+	 int recoJetSize = recoJetColl1->size();
 	 
 	 jets_.preL1et_j1[jets_.nj1] = -1;
 	 
-	 //cout<<" patJet_eta "<<jet.eta()<<" patJet_phi "<<jet.phi()<<" patJet_et "<<jet.et()<<endl;
+	 //cout<<" patJet_eta "<<jet1.eta()<<" patJet_phi "<<jet1.phi()<<" patJet_et "<<jet1.et()<<endl;
 	 
 	 for(int iRecoJet = 0; iRecoJet < recoJetSize; ++iRecoJet){
 	   
-	   reco::CaloJet recoJet = ((*recoJetColl)[iRecoJet]);
+	   reco::CaloJet recoJet1 = ((*recoJetColl1)[iRecoJet]);
 	   
 	   
-	   double recoJet_eta = recoJet.eta();
-	   double recoJet_phi = recoJet.phi();
-	   //cout<<" recoJet_eta "<<recoJet_eta<<" recoJet_phi "<<recoJet_phi<<" recoJet_et "<<recoJet.et()<<endl;
+	   double recoJet_eta = recoJet1.eta();
+	   double recoJet_phi = recoJet1.phi();
+	   //cout<<" recoJet_eta "<<recoJet_eta<<" recoJet_phi "<<recoJet_phi<<" recoJet_et "<<recoJet1.et()<<endl;
 	   
 	   
-	   if(fabs(recoJet.eta()-jet.eta()) < 0.001
-	      && fabs(acos(cos((recoJet.phi()-jet.phi())))) < 0.001)
+	   if(fabs(recoJet1.eta()-jet1.eta()) < 0.001
+	      && fabs(acos(cos((recoJet1.phi()-jet1.phi())))) < 0.001)
 	     {
-	       jets_.preL1et_j1[jets_.nj1] = recoJet.et();
+	       jets_.preL1et_j1[jets_.nj1] = recoJet1.et();
 	       
-	       //cout<<"Match found,  recoJet.et "<<recoJet.et()<< " recoJet.eta "<<jet.eta()<<" recoJet.phi "<<recoJet.phi()<<endl;
+	       //cout<<"Match found,  recoJet1.et "<<recoJet1.et()<< " recoJet1.eta "<<jet1.eta()<<" recoJet1.phi "<<recoJet1.phi()<<endl;
 	       break;
 	     }
 	 }
@@ -471,19 +504,19 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	   
 	   
 	   
-	   if(jet.et()>0)cout<<"Match *NOT* found,  patJet.et "<<jet.et()<< " patJet.eta "<<jet.eta()<<" patJet.phi() "<<jet.phi()<<endl;
+	   if(jet1.et()>0)cout<<"Match *NOT* found,  patJet1.et "<<jet1.et()<< " patJet1.eta "<<jet1.eta()<<" patJet1.phi() "<<jet1.phi()<<endl;
 	 }
        }
      if(isMC_){
        
        
-       if(jet.genJet()!=0 && jet.genJet()->pt()>1.0 && jet.genJet()->pt()<999999){
-	 jets_.refpt_j1[jets_.nj1] = jet.genJet()->pt();
-	 jets_.refeta_j1[jets_.nj1] = jet.genJet()->eta();
-	 jets_.refphi_j1[jets_.nj1] = jet.genJet()->phi();
-	 jets_.refy_j1[jets_.nj1] = jet.genJet()->eta();
+       if(jet1.genJet()!=0 && jet1.genJet()->pt()>1.0 && jet1.genJet()->pt()<999999){
+	 jets_.refpt_j1[jets_.nj1] = jet1.genJet()->pt();
+	 jets_.refeta_j1[jets_.nj1] = jet1.genJet()->eta();
+	 jets_.refphi_j1[jets_.nj1] = jet1.genJet()->phi();
+	 jets_.refy_j1[jets_.nj1] = jet1.genJet()->eta();
 	 
-	 jets_.refdrjt_j1[jets_.nj1] = reco::deltaR(jet,*(jet.genJet()));
+	 jets_.refdrjt_j1[jets_.nj1] = reco::deltaR(jet1,*(jet1.genJet()));
        }        
        else{
 	 jets_.refpt_j1[jets_.nj1] = 0;
@@ -492,30 +525,66 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 jets_.refy_j1[jets_.nj1] = -999;
        }
       
-       if (jet.genParton()) {
-	 jets_.refpartonpt_j1[jets_.nj1] = jet.genParton()->pt();
-	 jets_.refpartonflavor_j1[jets_.nj1] = jet.genParton()->pdgId();
+       if (jet1.genParton()) {
+	 jets_.refpartonpt_j1[jets_.nj1] = jet1.genParton()->pt();
+	 jets_.refpartonflavor_j1[jets_.nj1] = jet1.genParton()->pdgId();
        } else {
 	 jets_.refpartonpt_j1[jets_.nj1] = -999;
 	 jets_.refpartonflavor_j1[jets_.nj1] = -999;
        }
        
      }
-
-
-
-       jets_.nj1++;
-       
-       
+       jets_.nj1++;              
    }
 
+     if(isMC_){
+       edm::Handle<vector<reco::GenJet> >genjets1;
+       iEvent.getByLabel(genJetTag1_, genjets1);
+       
+       for(unsigned int igen = 0 ; igen < genjets1->size(); ++igen){
+	 const reco::GenJet & genjet1 = (*genjets1)[igen];
+	 
+	 float genjet_pt = genjet1.pt();
+	 
+	 // threshold to reduce size of output in minbias PbPb
+	 if(genjet_pt>20.){
+	   
+	   int isMatched=0;
+	   
+	   for(unsigned int ijet = 0 ; ijet < jets1->size(); ++ijet){
+	     const pat::Jet& jet1 = (*jets1)[ijet];
+	     
+	     if(jet1.genJet()){
+	       if(fabs(genjet1.pt()-jet1.genJet()->pt())<0.0001 &&
+		  fabs(genjet1.eta()-jet1.genJet()->eta())<0.0001 &&
+		  (fabs(genjet1.phi()-jet1.genJet()->phi())<0.0001 || fabs(fabs(genjet1.phi()-jet1.genJet()->phi()) - 2.0*TMath::Pi()) < 0.0001 )){
+		 
+		 isMatched =1;
+		 break;
+	       }            		
+	     }
+	   }
+	   
+	   if(!isMatched){
+	     jets_.unmatchpt_j1[jets_.nunmatch_j1] = genjet_pt;                            
+	     jets_.unmatcheta_j1[jets_.nunmatch_j1] = genjet1.eta();
+	     jets_.unmatchphi_j1[jets_.nunmatch_j1] = genjet1.phi();
+	     jets_.unmatchy_j1[jets_.nunmatch_j1] = genjet1.eta();
+	     
+	     jets_.nunmatch_j1++;
+	     
+	   }
+	   
+	 }
+       }
+     }
 
 
 
 
 
    jets_.nj2 = 0;
-   
+   jets_.nunmatch_j2 = 0;
 
    
    for(unsigned int j = 0 ; j < jets2->size(); ++j){
@@ -610,9 +679,54 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      
    }
    
+   if(isMC_){
+     
+     edm::Handle<vector<reco::GenJet> >genjets2;
+     iEvent.getByLabel(genJetTag2_, genjets2);
+     
+     for(unsigned int igen = 0 ; igen < genjets2->size(); ++igen){
+       const reco::GenJet & genjet2 = (*genjets2)[igen];
+       
+       float genjet_pt = genjet2.pt();
+       
+       // threshold to reduce size of output in minbias PbPb
+       if(genjet_pt>20.){
+	 
+	 int isMatched=0;
+	 
+	 for(unsigned int ijet = 0 ; ijet < jets2->size(); ++ijet){
+	   const pat::Jet& jet2 = (*jets2)[ijet];
+	   
+	   if(jet2.genJet()){
+	     if(fabs(genjet2.pt()-jet2.genJet()->pt())<0.0001 &&
+		fabs(genjet2.eta()-jet2.genJet()->eta())<0.0001 &&
+		(fabs(genjet2.phi()-jet2.genJet()->phi())<0.0001 || fabs(fabs(genjet2.phi()-jet2.genJet()->phi()) - 2.0*TMath::Pi()) < 0.0001 )){
+	       
+	       isMatched =1;
+	       break;
+	     }            		
+	   }
+	 }
+	 
+	 if(!isMatched){
+	   jets_.unmatchpt_j2[jets_.nunmatch_j2] = genjet_pt;                            
+	   jets_.unmatcheta_j2[jets_.nunmatch_j2] = genjet2.eta();
+	   jets_.unmatchphi_j2[jets_.nunmatch_j2] = genjet2.phi();
+	   jets_.unmatchy_j2[jets_.nunmatch_j2] = genjet2.eta();
+	   
+	   jets_.nunmatch_j2++;
+	   
+	 }
+       
+       }
+     }
+   }
+
+
 
    jets_.nj3 = 0;
-   
+   jets_.nunmatch_j3 = 0;
+
    //cout<<" jets size "<<jets->size()<<endl;
 
    
@@ -712,12 +826,54 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        
    }
 
+   if(isMC_){
+     
+     edm::Handle<vector<reco::GenJet> >genjets3;
+     iEvent.getByLabel(genJetTag3_, genjets3);
+     
+     for(unsigned int igen = 0 ; igen < genjets3->size(); ++igen){
+       const reco::GenJet & genjet3 = (*genjets3)[igen];
+       
+       float genjet_pt = genjet3.pt();
+       
+       // threshold to reduce size of output in minbias PbPb
+       if(genjet_pt>20.){
+	 
+	 int isMatched=0;
+	 
+	 for(unsigned int ijet = 0 ; ijet < jets3->size(); ++ijet){
+	   const pat::Jet& jet3 = (*jets3)[ijet];
+	   
+	   if(jet3.genJet()){
+	     if(fabs(genjet3.pt()-jet3.genJet()->pt())<0.0001 &&
+		fabs(genjet3.eta()-jet3.genJet()->eta())<0.0001 &&
+		(fabs(genjet3.phi()-jet3.genJet()->phi())<0.0001 || fabs(fabs(genjet3.phi()-jet3.genJet()->phi()) - 2.0*TMath::Pi()) < 0.0001 )){
+	       
+	       isMatched =1;
+	       break;
+	     }            		
+	   }
+	 }
+	 
+	 if(!isMatched){
+	   jets_.unmatchpt_j3[jets_.nunmatch_j3] = genjet_pt;                            
+	   jets_.unmatcheta_j3[jets_.nunmatch_j3] = genjet3.eta();
+	   jets_.unmatchphi_j3[jets_.nunmatch_j3] = genjet3.phi();
+	   jets_.unmatchy_j3[jets_.nunmatch_j3] = genjet3.eta();
+	   
+	   jets_.nunmatch_j3++;
+	   
+	 }
+       
+       }
+     }
+   }
 
 
 
 
    jets_.nj4 = 0;
-   
+   jets_.nunmatch_j4 = 0;
 
    
    for(unsigned int j = 0 ; j < jets4->size(); ++j){
@@ -753,7 +909,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 	 
 	 for(int iRecoJet = 0; iRecoJet < recoJetSize4; ++iRecoJet){
 	   
-	   reco::CaloJet recoJet4 = ((*recoJetColl4)[iRecoJet]);
+	   reco::PFJet recoJet4 = ((*recoJetColl4)[iRecoJet]);
 	   
 	   
 	   double recoJet_eta = recoJet4.eta();
@@ -813,6 +969,49 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      
    }
 
+   if(isMC_){
+     
+     edm::Handle<vector<reco::GenJet> >genjets4;
+     iEvent.getByLabel(genJetTag4_, genjets4);
+     
+     for(unsigned int igen = 0 ; igen < genjets4->size(); ++igen){
+       const reco::GenJet & genjet4 = (*genjets4)[igen];
+       
+       float genjet_pt = genjet4.pt();
+       
+       // threshold to reduce size of output in minbias PbPb
+       if(genjet_pt>20.){
+	 
+	 int isMatched=0;
+	 
+	 for(unsigned int ijet = 0 ; ijet < jets4->size(); ++ijet){
+	   const pat::Jet& jet4 = (*jets4)[ijet];
+	   
+	   if(jet4.genJet()){
+	     if(fabs(genjet4.pt()-jet4.genJet()->pt())<0.0001 &&
+		fabs(genjet4.eta()-jet4.genJet()->eta())<0.0001 &&
+		(fabs(genjet4.phi()-jet4.genJet()->phi())<0.0001 || fabs(fabs(genjet4.phi()-jet4.genJet()->phi()) - 2.0*TMath::Pi()) < 0.0001 )){
+	       
+	       isMatched =1;
+	       break;
+	     }            		
+	   }
+	 }
+	 
+	 if(!isMatched){
+	   jets_.unmatchpt_j4[jets_.nunmatch_j4] = genjet_pt;                            
+	   jets_.unmatcheta_j4[jets_.nunmatch_j4] = genjet4.eta();
+	   jets_.unmatchphi_j4[jets_.nunmatch_j4] = genjet4.phi();
+	   jets_.unmatchy_j4[jets_.nunmatch_j4] = genjet4.eta();
+	   
+	   jets_.nunmatch_j4++;
+	   
+	 }
+       
+       }
+     }
+   }
+
 
 
    for( unsigned icand=0; icand<pfCandidates->size(); icand++ ) {
@@ -855,6 +1054,9 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        jets_.candeta[jets_.nPFcand] = particleEta;
        jets_.candphi[jets_.nPFcand] = cand.phi();
        //jets_.candy[jets_.nPFcand] = cand.y();
+
+       if(particleId==3&&particlePt>100) cout<<" found a misreconstructed MUON, pT =  "<<particlePt<<endl;
+
        jets_.nPFcand++;
 
        //cout<<" jets_.nPFcand "<<jets_.nPFcand<<endl;
