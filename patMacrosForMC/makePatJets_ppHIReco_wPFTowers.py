@@ -14,9 +14,9 @@ process = cms.Process('HIJETS')
 # Input source
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/relval/CMSSW_3_9_9/RelValQCD_Pt_80_120/GEN-SIM-RECO/START39_V9-v1/0000/0622F65F-623D-E011-A38D-002618943949.root'
-    #'/store/relval/CMSSW_3_9_9/RelValZmumuJets_Pt_20_300_GEN/GEN-SIM-RECO/MC_39Y_V8_PU_E7TeV_AVE_2_BX2808-v1/0000/10AD7A1E-FD3D-E011-AC76-0018F3D095EE.root'
+    #'/store/relval/CMSSW_3_9_9/RelValQCD_Pt_80_120/GEN-SIM-RECO/START39_V9-v1/0000/0622F65F-623D-E011-A38D-002618943949.root'
     #'/store/relval/CMSSW_3_9_9/RelValSingleMuPt100/GEN-SIM-RECO/MC_39Y_V8-v1/0000/EEE53664-583D-E011-8433-0018F3D09692.root'
+    '/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt15_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt15_START39V7HI_GEN_SIM_RAW_RECO_393_v1/24f3ed1e4d50df3073080480887969a1/Pyquen_UnquenchedDiJet_Pt15_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_100_1_dYJ.root'
 )
                             )
 
@@ -33,6 +33,18 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load("CommonTools.UtilAlgos.TFileService_cfi")
+
+
+process.HeavyIonGlobalParameters = cms.PSet(
+           centralityVariable = cms.string("HFhits"),
+           nonDefaultGlauberModel = cms.string("Hydjet_Bass"),
+           centralitySrc = cms.InputTag("hiCentrality")
+                     )
+
+from CmsHi.Analysis2010.CommonFunctions_cff import *
+overrideCentrality(process)
+
+
 
 #JEC from DB
 
@@ -362,7 +374,13 @@ process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks")
 process.trkAnalyzer.trackPtMin = 0.5
 process.genpAnalyzer.ptMin = 0.5
 
+process.hitrkEffAnalyzer_akpu3pf.jets = 'ak3PFpatJets'
+process.hitrkEffAnalyzer_akpu3pf_j1.jets = 'ak3PFpatJets'
+process.hitrkEffAnalyzer_akpu3pf_j2.jets = 'ak3PFpatJets'
 
+process.hipixtrkEffAnalyzer_akpu3pf.jets = 'ak3PFpatJets'
+process.hipixtrkEffAnalyzer_akpu3pf_j1.jets = 'ak3PFpatJets'
+process.hipixtrkEffAnalyzer_akpu3pf_j2.jets = 'ak3PFpatJets'
 
 process.hitrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer_akpu3pf*process.hitrkEffAnalyzer_akpu3pf_j1*process.hitrkEffAnalyzer_akpu3pf_j2)
 process.hipixtrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFakPxl*process.cutsTPForEffPxl*process.hipixtrkEffAnalyzer_akpu3pf*process.hipixtrkEffAnalyzer_akpu3pf_j1*process.hipixtrkEffAnalyzer_akpu3pf_j2)
