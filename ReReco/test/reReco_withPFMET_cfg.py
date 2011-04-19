@@ -14,7 +14,7 @@ process = cms.Process('HIJETS')
 # Input source
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/himc/Fall10/Hydjet_Bass_MinBias_2760GeV/GEN-SIM-RECODEBUG/START39_V7HI-v1/0000/A645EAE3-96FA-DF11-9611-1CC1DEEB8798.root'
+'/store/relval/CMSSW_3_9_9/RelValHydjetQ_MinBias_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0000/40B4255D-5A3D-E011-9D80-001BFCDBD100.root'
 )
 )
 
