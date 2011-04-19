@@ -39,6 +39,34 @@ process.HeavyIonGlobalParameters = cms.PSet(
 from CmsHi.Analysis2010.CommonFunctions_cff import *
 overrideCentrality(process)
 
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+process.jec = cms.ESSource("PoolDBESSource",
+                           DBParameters = cms.PSet(
+    messageLevel = cms.untracked.int32(0)
+    ),
+                           timetype = cms.string('runnumber'),
+                           toGet = cms.VPSet(
+    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK3PF"),
+             label = cms.untracked.string("AK3PF")
+             ),
+    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK4PF"),
+             label = cms.untracked.string("AK4PF")
+             ),
+    
+    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK5PF"),
+             label = cms.untracked.string("AK5PF")
+             ),
+    ),
+                           connect = cms.string("sqlite_file:JEC_HI_2011.db"),
+                           
+                           )
+
+
+process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
+
 process.makeCentralityTableTFile = cms.EDAnalyzer('CentralityTableProducer',
                                                   isMC = cms.untracked.bool(True),
                                                   makeDBFromTFile = cms.untracked.bool(False),
@@ -259,7 +287,7 @@ process.akPu4PFJets.sumRecHits = cms.bool(False)
 
 process.akPu4PFcorr = process.patJetCorrFactors.clone(src = cms.InputTag("akPu4PFJets"),
                                                     levels = cms.vstring('L2Relative','L3Absolute'),
-                                                    payload = cms.string('AK5PF')
+                                                    payload = cms.string('AK4PF')
 )
 process.akPu4PFclean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('ak4HiGenJets'))
 process.akPu4PFmatch = process.patJetGenJetMatch.clone(src = cms.InputTag("akPu4PFJets"),
@@ -282,7 +310,7 @@ process.akPu3PFJets.sumRecHits = cms.bool(False)
 
 process.akPu3PFcorr = process.patJetCorrFactors.clone(src = cms.InputTag("akPu3PFJets"),
                                                     levels = cms.vstring('L2Relative','L3Absolute'),
-                                                    payload = cms.string('AK5PF')
+                                                    payload = cms.string('AK3PF')
 )
 process.akPu3PFclean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('ak3HiGenJets'))
 process.akPu3PFmatch = process.patJetGenJetMatch.clone(src = cms.InputTag("akPu3PFJets"),
@@ -349,13 +377,17 @@ process.akPu4PFJetAnalyzer.genjetTag = 'ak4HiGenJets'
 process.akPu3PFJetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.akPu3PFJetAnalyzer.jetTag = 'akPu3PFpatJets'
 process.akPu3PFJetAnalyzer.genjetTag = 'ak3HiGenJets'
+process.icPu5JPTJetAnalyzer = process.inclusiveJetAnalyzer.clone()
+process.icPu5JPTJetAnalyzer.jetTag = 'jpticPu5patJets'
 
 
-process.inclusiveJetAnalyzerSequence = cms.Sequence(                  process.icPu5JetAnalyzer
-                                                                      *process.akPu5PFJetAnalyzer
-                                                                      *process.akPu4PFJetAnalyzer
-                                                                      *process.akPu3PFJetAnalyzer
-                                                                      )
+process.inclusiveJetAnalyzerSequence = cms.Sequence(
+    #process.icPu5JetAnalyzer
+    #*process.akPu5PFJetAnalyzer
+    #*process.akPu4PFJetAnalyzer
+    #*process.akPu3PFJetAnalyzer
+    process.icPu5JPTJetAnalyzer
+    )
 
 process.load("SimTracker.TrackAssociation.TrackAssociatorByHits_cfi")
 process.load("SimTracker.TrackAssociation.trackingParticleRecoTrackAsssociation_cfi")
@@ -364,12 +396,6 @@ process.PFJetAnalyzer.trackTag  = cms.InputTag("hiGoodMergedTracks")
 process.PFJetAnalyzer.hasSimInfo = cms.untracked.bool(True)
 process.PFJetAnalyzer.writeGenParticles = cms.untracked.bool(True)
 process.PFJetAnalyzer.eventInfoTag = cms.InputTag("hiSignal")
-process.PFJetAnalyzer.jetTag2 = cms.InputTag("akPu5PFpatJets")
-process.PFJetAnalyzer.recoJetTag2 = cms.InputTag("akPu5PFJets")
-process.PFJetAnalyzer.jetTag3 = cms.InputTag("akPu4PFpatJets")
-process.PFJetAnalyzer.recoJetTag3 = cms.InputTag("akPu4PFJets")
-process.PFJetAnalyzer.jetTag4 = cms.InputTag("akPu3PFpatJets")
-process.PFJetAnalyzer.recoJetTag4 = cms.InputTag("akPu3PFJets")
 
 #Frank's analyzer
 #import to avoid conflicts with inclusiveJetAnalyzer
@@ -403,18 +429,19 @@ process.hipixtrkEffAnalyzer_akpu3pf_j2 = hipixtrkEffAnalyzer_akpu3pf_j2
 process.hipixtrkEffAnalyzer_akpu3pf = hipixtrkEffAnalyzer_akpu3pf 
 process.genpAnalyzer = genpAnalyzer
 
+process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks")
+process.trkAnalyzer.trackPtMin = 0.5
+process.genpAnalyzer.ptMin = 0.5
+
+
+
 process.hitrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFak*process.cutsTPForEff*process.hitrkEffAnalyzer_akpu3pf*process.hitrkEffAnalyzer_akpu3pf_j1*process.hitrkEffAnalyzer_akpu3pf_j2)
 process.hipixtrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFakPxl*process.cutsTPForEffPxl*process.hipixtrkEffAnalyzer_akpu3pf*process.hipixtrkEffAnalyzer_akpu3pf_j1*process.hipixtrkEffAnalyzer_akpu3pf_j2)
 
 
-
-process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks") 
-
 process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_akpu3pf*process.hipixtrkEffAna_akpu3pf*process.genpAnalyzer)
 
 
-# track efficiency anlayzer
-#process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
 #for tree output
 process.TFileService = cms.Service("TFileService",
                                   fileName=cms.string("JetAnalysisTTrees_hiGoodMergedTracks_seedGoodTracks_v1.root"))
@@ -423,9 +450,7 @@ process.TFileService = cms.Service("TFileService",
 
 # put it all together
 
-
-
-process.path = cms.Path(
+process.jetReco = cms.Path(
     process.makeCentralityTableTFile*
     process.hiTrackReco*
     process.hiGoodTracksSelection*
@@ -436,15 +461,20 @@ process.path = cms.Path(
     process.hiExtra*
     process.hiGen*
     process.PFTowers*
-    process.runAllJets*
+    process.runAllJets
+    )
+
+process.jetAna = cms.Path(
     process.franksAnalyzers*
     process.inclusiveJetAnalyzerSequence*
     process.PFJetAnalyzerSequence
-    #process.hitrkEffAna*
-    #process.hipxltrkEffAna
     )
 
-process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
+
+process.schedule = cms.Schedule(process.jetReco, process.jetAna)
+
+
+#process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
 #
 #process.output = cms.OutputModule("PoolOutputModule",
 #                                  process.jetTrkSkimContentMC,
