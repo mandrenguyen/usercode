@@ -253,7 +253,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      fillL1Bits(iEvent);
      fillHLTBits(iEvent);
    }
-   
+
    for(unsigned int j = 0 ; j < jets->size(); ++j){
      const pat::Jet& jet = (*jets)[j];
      
@@ -401,12 +401,21 @@ void InclusiveJetAnalyzer::fillHLTBits(const edm::Event &iEvent)
 
   jets_.nHLTBit = triggerNames.size();
 
-  for(size_t i=0;i<triggerNames.size();++i) {
-    //cout <<triggerNames.triggerName(i)<<endl;
-    jets_.hltBit[i] = triggerResultsHLT->accept(i);
+  for(size_t i=0;i<hltTrgNames_.size();i++){
+   
+    for(size_t j=0;j<triggerNames.size();++j) {
+      
+      if(triggerNames.triggerName(j) == hltTrgNames_[i]){
+	
+	//cout <<"hltTrgNames_(i) "<<hltTrgNames_[i]<<endl;
+	//cout <<"triggerName(j) "<<triggerNames.triggerName(j)<<endl;
+	//cout<<" result "<<triggerResultsHLT->accept(j)<<endl;
+	jets_.hltBit[i] = triggerResultsHLT->accept(j);
+      }
+      
+    }
   }
 }
-
 
 //--------------------------------------------------------------------------------------------------
 template <typename TYPE>
