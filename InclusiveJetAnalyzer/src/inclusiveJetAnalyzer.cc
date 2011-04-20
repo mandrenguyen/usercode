@@ -311,6 +311,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      edm::Handle<vector<reco::GenJet> >genjets;
      iEvent.getByLabel(genjetTag_, genjets);
 
+     jets_.ngen = 0;
      for(unsigned int igen = 0 ; igen < genjets->size(); ++igen){
        const reco::GenJet & genjet = (*genjets)[igen];
        
