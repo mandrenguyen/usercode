@@ -326,12 +326,13 @@ process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks")
 #process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
 #for tree output
 process.TFileService = cms.Service("TFileService",
-                                   fileName=cms.string("/tmp/mnguyen/inclusiveJetAnalyzer_v1.root"))
+                                   fileName=cms.string("inclusiveJetAnalyzer_v1.root"))
 
 
 
 process.load("MNguyen.Configuration.HI_JetSkim_cff")
 process.hltJetHI.HLTPaths = ["HLT_HIMinBiasHfOrBSC_Core"]
+process.jetSkimSequence.remove(process.jetEtFilter)
 
 process.jetSkimPath = cms.Path(
     process.jetSkimSequence*
