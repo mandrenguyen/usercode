@@ -8,14 +8,18 @@ process = cms.Process('HIJETS')
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
     #'/store/relval/CMSSW_3_10_0/RelValQCD_Pt_80_120/GEN-SIM-RECO/START310_V3-v1/0050/54ED7C66-680E-E011-BD9F-001A92810ADE.root'
-    #'/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'
-    '/store/user/davidlw/Hydjet_Bass_MinBias_2760GeV/Pyquen_UnquenchedDiJet_Pt50_GEN-SIM-RECO_393_v2/1243c1b8707a4e7eb28eae64e1474920/hiReco_RAW2DIGI_RECO_9_1_ZVb.root'
+    '/store/relval/CMSSW_3_9_9/RelValHydjetQ_B0_2760GeV/GEN-SIM-RECO/START39_V7HI-v1/0001/0618A00D-E23D-E011-A7FE-001A9281173E.root'
+    #'/store/user/davidlw/Hydjet_Bass_MinBias_2760GeV/Pyquen_UnquenchedDiJet_Pt50_GEN-SIM-RECO_393_v2/1243c1b8707a4e7eb28eae64e1474920/hiReco_RAW2DIGI_RECO_9_1_ZVb.root'
     )
                             )
 
 process.maxEvents = cms.untracked.PSet(
             input = cms.untracked.int32(-1)
     )
+
+
+isMinBias = False
+
 
 #load some general stuff
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -107,7 +111,6 @@ process.load("RecoHI.HiTracking.LowPtTracking_PbPb_cff")
 # Needed to produce "HcalSeverityLevelComputerRcd" used by CaloTowersCreator/towerMakerPF
 process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")
 # keep all the tracks for muon reco, then set high purity flag
-# keep all the tracks for muon reco, then set high purity flag
 process.hiTracksWithLooseQualityKeepAll = process.hiTracksWithLooseQuality.clone()
 process.hiTracksWithTightQualityKeepAll = process.hiTracksWithTightQuality.clone()
 process.hiSelectedTracksKeepAll = process.hiSelectedTracks.clone()
@@ -141,7 +144,6 @@ process.muonRecoPbpb = muonRecoPbPb
 
 #Track Reco
 process.rechits = cms.Sequence(process.siPixelRecHits * process.siStripMatchedRecHits)
-
 process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
 
 
@@ -185,7 +187,11 @@ process.load('RecoHI.HiJetAlgos.HiGenJets_cff')
 
 
 
-process.hiGenParticles.srcVector = cms.vstring('hiSignal')
+if isMinBias:
+    process.hiGenParticles.srcVector = cms.vstring('generator')
+else:
+    process.hiGenParticles.srcVector = cms.vstring('hiSignal')
+
 
 process.hiGen = cms.Sequence(
 #Careful when using embedded samples
@@ -366,7 +372,10 @@ process.runAllJets = cms.Sequence(
 
 # jet analysis trees
 process.load("MNguyen.InclusiveJetAnalyzer.inclusiveJetAnalyzer_cff")
-process.inclusiveJetAnalyzer.eventInfoTag = cms.InputTag("hiSignal")
+if isMinBias:
+    process.inclusiveJetAnalyzer.eventInfoTag = cms.InputTag("generator")
+else:
+    process.inclusiveJetAnalyzer.eventInfoTag = cms.InputTag("hiSignal")
 process.icPu5JetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.akPu5PFJetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.akPu5PFJetAnalyzer.jetTag = 'akPu5PFpatJets'
@@ -394,9 +403,13 @@ process.load("SimTracker.TrackAssociation.trackingParticleRecoTrackAsssociation_
 process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_cff")
 process.PFJetAnalyzer.trackTag  = cms.InputTag("hiGoodMergedTracks")
 process.PFJetAnalyzer.hasSimInfo = cms.untracked.bool(True)
-process.PFJetAnalyzer.writeGenParticles = cms.untracked.bool(True)
-process.PFJetAnalyzer.eventInfoTag = cms.InputTag("hiSignal")
 
+if isMinBias:
+    process.PFJetAnalyzer.eventInfoTag = cms.InputTag("generator")
+    process.PFJetAnalyzer.genParticleTrhesh = cms.double(2.0)
+else:
+    process.PFJetAnalyzer.eventInfoTag = cms.InputTag("hiSignal")
+    process.PFJetAnalyzer.genParticleTrhesh = cms.double(0.5)
 #Frank's analyzer
 #import to avoid conflicts with inclusiveJetAnalyzer
 from Saved.QM11Ana.Analyzers_cff import trkAnalyzer
@@ -431,7 +444,11 @@ process.genpAnalyzer = genpAnalyzer
 
 process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks")
 process.trkAnalyzer.trackPtMin = 0.5
-process.genpAnalyzer.ptMin = 0.5
+
+if isMinBias:
+    process.genpAnalyzer.ptMin = 0.5
+else:
+    process.genpAnalyzer.ptMin = 2.0
 
 
 
