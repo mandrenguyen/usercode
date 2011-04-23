@@ -68,7 +68,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
   bool useCentrality_;
   bool isMC_;
-  bool writeGenParticles_;
+  double genParticleThresh_;
 
   bool hasSimInfo_;
 

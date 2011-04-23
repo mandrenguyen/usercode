@@ -77,7 +77,7 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
 
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
-  writeGenParticles_ = iConfig.getUntrackedParameter<bool>("writeGenParticles",false);
+  genParticleThresh_ = iConfig.getParameter<double>("genParticleThresh");
 
   genParticleTag_ = iConfig.getParameter<InputTag>("genParticleTag");
   eventInfoTag_ = iConfig.getParameter<InputTag>("eventInfoTag");
@@ -293,7 +293,7 @@ PFJetAnalyzer::beginJob() {
     t->Branch("parton1_y",&jets_.parton1_y,"parton1_y/F");
     t->Branch("parton2_y",&jets_.parton2_y,"parton2_y/F");
   }
-  if(writeGenParticles_){
+  if(genParticleThresh_>0){
     t->Branch("ngenp",&jets_.ngenp,"ngenp/I");
     t->Branch("genppdgId",jets_.genppdgId,"genppdgId[ngenp]/I");
     t->Branch("genppt",jets_.genppt,"genppt[ngenp]/F");
@@ -1175,17 +1175,18 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      getPartons(iEvent, iSetup );
      
-     if(writeGenParticles_){
+     if(genParticleThresh_>0){
        edm::Handle <reco::GenParticleCollection> genParticles;
        iEvent.getByLabel (genParticleTag_, genParticles );
        
        
        for( unsigned igen=0; igen<genParticles->size(); igen++ ) {
-	 
+	
+ 
 	 const reco::GenParticle & genp = (*genParticles)[igen];
 	 
 	 if(genp.status()!=1) continue;
-	 
+	
 	 jets_.genppt[jets_.ngenp] = genp.pt();
 	 jets_.genpeta[jets_.ngenp] = genp.eta();
 	 jets_.genpphi[jets_.ngenp] = genp.phi();

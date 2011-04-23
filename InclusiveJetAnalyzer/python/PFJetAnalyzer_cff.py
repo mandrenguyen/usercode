@@ -17,7 +17,7 @@ PFJetAnalyzer = cms.EDAnalyzer("PFJetAnalyzer",
                                trackTag  = cms.InputTag("hiGoodTracks"),
                                
                                isMC = cms.untracked.bool(True), 
-                               writeGenParticles = cms.untracked.bool(True), 
+                               genParticleThresh = cms.double(0.5), 
                                genParticleTag = cms.InputTag("hiGenParticles"),
                                eventInfoTag = cms.InputTag("generator"),
                                useCentrality = cms.untracked.bool(True),
