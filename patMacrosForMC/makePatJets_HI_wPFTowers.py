@@ -44,29 +44,65 @@ from CmsHi.Analysis2010.CommonFunctions_cff import *
 overrideCentrality(process)
 
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
-process.jec = cms.ESSource("PoolDBESSource",
-                           DBParameters = cms.PSet(
-    messageLevel = cms.untracked.int32(0)
-    ),
-                           timetype = cms.string('runnumber'),
-                           toGet = cms.VPSet(
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK3PF"),
-             label = cms.untracked.string("AK3PF")
-             ),
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK4PF"),
-             label = cms.untracked.string("AK4PF")
-             ),
-    
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK5PF"),
-             label = cms.untracked.string("AK5PF")
-             ),
-    ),
-                           connect = cms.string("sqlite_file:JEC_HI_2011.db"),
-                           
-                           )
+
+
+if useHighPtTrackCollection:
+
+    process.jec = cms.ESSource("PoolDBESSource",
+                               DBParameters = cms.PSet(
+        messageLevel = cms.untracked.int32(0)
+        ),
+                               timetype = cms.string('runnumber'),
+                               toGet = cms.VPSet(
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_hiHighPtTracks_IC5Calo"),
+                 label = cms.untracked.string("IC5Calo")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK3PF"),
+                 label = cms.untracked.string("AK3PF")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK4PF"),
+                 label = cms.untracked.string("AK4PF")
+                 ),
+        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK5PF"),
+                 label = cms.untracked.string("AK5PF")
+                 ),
+        ),
+                               connect = cms.string("sqlite_file:JEC_HI_PFTowers_hiHighPtTracks_2011.db"),
+                               
+                               )
+
+
+else: 
+        
+    process.jec = cms.ESSource("PoolDBESSource",
+                               DBParameters = cms.PSet(
+        messageLevel = cms.untracked.int32(0)
+        ),
+                               timetype = cms.string('runnumber'),
+                               toGet = cms.VPSet(
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK3PF"),
+                 label = cms.untracked.string("AK3PF")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK4PF"),
+                 label = cms.untracked.string("AK4PF")
+                 ),
+        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK5PF"),
+                 label = cms.untracked.string("AK5PF")
+                 ),
+        ),
+                               connect = cms.string("sqlite_file:JEC_HI_2011.db"),
+                               
+                               )
+
 
 
 process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
@@ -376,7 +412,7 @@ process.jpticPu5patJets = process.patJets.clone(jetSource  =cms.InputTag("JetPlu
 process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticPu5corr*process.jpticPu5clean*process.jpticPu5match*process.jpticPu5parton*process.jpticPu5patJets)
 
 # set JPT to look at the right track collection:
-if useHighPtTracks:
+if useHighPtTrackCollection:
     process.trackExtrapolator.trackSrc = cms.InputTag("hiGoodTracks")
     process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodTracks'
     process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodTracks'
