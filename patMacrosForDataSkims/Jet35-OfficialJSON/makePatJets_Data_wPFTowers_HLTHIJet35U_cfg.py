@@ -56,6 +56,7 @@ process.load("RecoHI.Configuration.Reconstruction_HI_cff")
 #process.load("RecoHI.HiTracking.LowPtTracking_PbPb_cff")
 # Needed to produce "HcalSeverityLevelComputerRcd" used by CaloTowersCreator/towerMakerPF
 process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")
+
 # keep all the tracks for muon reco, then set high purity flag
 process.hiTracksWithLooseQualityKeepAll = process.hiTracksWithLooseQuality.clone()
 process.hiTracksWithTightQualityKeepAll = process.hiTracksWithTightQuality.clone()
@@ -75,6 +76,7 @@ process.hiTracksWithTightQualityKeepAll.keepAllTracks = True
 process.hiSelectedTracksKeepAll.keepAllTracks = True
 
 
+process.heavyIonTracking += process.hiTracksWithLooseQualityKeepAll*process.hiTracksWithTightQualityKeepAll*process.hiSelectedTracksKeepAll
 
 
 # Muon Reco
@@ -93,6 +95,7 @@ process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
 process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
 process.hiGoodTracksKeepAll = process.hiGoodTracks.clone()
 process.hiGoodTracksKeepAll.keepAllTracks = True
+process.hiGoodTracksSelection += process.hiGoodTracksKeepAll
 process.load('Appeltel.PixelTracksRun2010.HiLowPtPixelTracksFromReco_cff')
 process.load('Appeltel.PixelTracksRun2010.HiMultipleMergedTracks_cff')
 process.hiGoodMergedTracks.src = cms.InputTag("hiGoodTracks")
@@ -108,10 +111,7 @@ process.HiParticleFlowRecoNoJets = cms.Sequence(
     )
 process.trackerDrivenElectronSeeds.TkColList = cms.VInputTag("hiGoodTracksKeepAll")
 
-#process.load("HeavyIonsAnalysis.Configuration.analysisProducers_cff")
-#process.hiExtra = cms.Sequence(
-#    process.allTracks 
-#    )
+
 
 # Define Jet Algo parameters
 process.load('RecoHI.HiJetAlgos.HiRecoJets_cff')
@@ -192,7 +192,7 @@ process.akPu4PFJets.sumRecHits = cms.bool(False)
 
 process.akPu4PFcorr = process.patJetCorrFactors.clone(src = cms.InputTag("akPu4PFJets"),
                                                     levels = cms.vstring('L2Relative','L3Absolute'),
-                                                    payload = cms.string('AK5PF')
+                                                    payload = cms.string('AK4PF')
 )
 process.akPu4PFpatJets = process.patJets.clone(jetSource  = cms.InputTag("akPu4PFJets"),
                                              jetCorrFactorsSource = cms.VInputTag(cms.InputTag("akPu4PFcorr")))
@@ -209,7 +209,7 @@ process.akPu3PFJets.sumRecHits = cms.bool(False)
 
 process.akPu3PFcorr = process.patJetCorrFactors.clone(src = cms.InputTag("akPu3PFJets"),
                                                     levels = cms.vstring('L2Relative','L3Absolute'),
-                                                    payload = cms.string('AK5PF')
+                                                    payload = cms.string('AK3PF')
 )
 process.akPu3PFpatJets = process.patJets.clone(jetSource  = cms.InputTag("akPu3PFJets"),
                                              jetCorrFactorsSource = cms.VInputTag(cms.InputTag("akPu3PFcorr")))
@@ -264,6 +264,32 @@ process.HeavyIonGlobalParameters = cms.PSet(
 from CmsHi.Analysis2010.CommonFunctions_cff import *
 overrideCentrality(process)
 
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+process.jec = cms.ESSource("PoolDBESSource",
+                           DBParameters = cms.PSet(
+    messageLevel = cms.untracked.int32(0)
+    ),
+                           timetype = cms.string('runnumber'),
+                           toGet = cms.VPSet(
+    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK3PF"),
+             label = cms.untracked.string("AK3PF")
+                              ),
+    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK4PF"),
+             label = cms.untracked.string("AK4PF")
+             ),
+    
+    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK5PF"),
+             label = cms.untracked.string("AK5PF")
+             ),
+    ),
+                           connect = cms.string("sqlite_file:JEC_HI_2011.db"),
+                           
+                           )
+
+process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 
 process.load("MNguyen.InclusiveJetAnalyzer.inclusiveJetAnalyzer_cff")
 process.inclusiveJetAnalyzer.isMC = cms.untracked.bool(False)
@@ -278,11 +304,11 @@ process.akPu3PFJetAnalyzer.jetTag = 'akPu3PFpatJets'
 process.icPu5JPTJetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.icPu5JPTJetAnalyzer.jetTag = 'jpticPu5patJets'
 
-process.inclusiveJetAnalyzerSequence = cms.Sequence(                  process.icPu5JetAnalyzer
-                                                                      *process.akPu5PFJetAnalyzer
-                                                                      *process.akPu4PFJetAnalyzer
-                                                                      *process.akPu3PFJetAnalyzer
-                                                                      *process.icPu5JPTJetAnalyzer
+process.inclusiveJetAnalyzerSequence = cms.Sequence(                  #process.icPu5JetAnalyzer
+                                                                      #*process.akPu5PFJetAnalyzer
+                                                                      #*process.akPu4PFJetAnalyzer
+                                                                      #*process.akPu3PFJetAnalyzer
+                                                                      process.icPu5JPTJetAnalyzer
                                                                       )
 
 process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_cff")
@@ -319,74 +345,70 @@ process.jetSkimPath = cms.Path(
     process.hiGoodMergedTracks*
     process.muonRecoPbPb*
     process.HiParticleFlowRecoNoJets*
-    #process.hiExtra*
     process.PFTowers*
     process.runAllJets*
     process.inclusiveJetAnalyzerSequence*
     process.PFJetAnalyzerSequence
-    #*process.trkAnalyzer
+    *process.trkAnalyzer
     )
 
-#process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
-#
-#process.output = cms.OutputModule("PoolOutputModule",
-#                                  process.jetTrkSkimContent,
-#                                  SelectEvents = cms.untracked.PSet(
-#    SelectEvents = cms.vstring('jetSkimPath')
-#    ),
-#                                  fileName = cms.untracked.string("/tmp/mnguyen/PAT.root"),
-#                                  dataset = cms.untracked.PSet(
-#    filterName = cms.untracked.string('jetSkimPath'),
-#    dataTier = cms.untracked.string('PAT')
-#    )
-#                                  )
-#
-#
-## Save some extra stuff
-##?
-#process.output.outputCommands.extend(["keep *_heavyIon_*_*"])
-## triggger
-#process.output.outputCommands.extend(["keep *_TriggerResults_*_*"])
-##tracks
-##process.output.outputCommands.extend(["keep *_hiSelectedTracks_*_*"])
-##process.output.outputCommands.extend(["keep *_hiGlobalPrimTracks_*_*"])
-#process.output.outputCommands.extend(["keep *_hiGoodTracks_*_*"])
-#process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
-## reco jets
-#process.output.outputCommands.extend(["keep recoCaloJets_*_*_*"])
-#process.output.outputCommands.extend(["keep recoPFJets_*_*_*"])
-##particle flow
-#process.output.outputCommands.extend(["keep *_particleFlow_*_*"])
+process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
+
+process.output = cms.OutputModule("PoolOutputModule",
+                                  process.jetTrkSkimContent,
+                                  SelectEvents = cms.untracked.PSet(
+    SelectEvents = cms.vstring('jetSkimPath')
+    ),
+                                  fileName = cms.untracked.string("PAT.root"),
+                                  dataset = cms.untracked.PSet(
+    filterName = cms.untracked.string('jetSkimPath'),
+    dataTier = cms.untracked.string('PAT')
+    )
+                                  )
+
+
+# Save some extra stuff
+#?
+process.output.outputCommands.extend(["keep *_heavyIon_*_*"])
+# triggger
+process.output.outputCommands.extend(["keep *_TriggerResults_*_*"])
+#tracks
+process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
+# reco jets
+process.output.outputCommands.extend(["keep recoCaloJets_*_*_*"])
+process.output.outputCommands.extend(["keep recoPFJets_*_*_*"])
+#particle flow
+process.output.outputCommands.extend(["keep recoPFCandidates_particleFlow_*_*"])
 #process.output.outputCommands.extend(["keep recoPFClusters_*_*_*"])
 #process.output.outputCommands.extend(["keep recoPFRecHits_*_*_*"])
-##fast jet pf stuff
-#process.output.outputCommands.extend(["keep doubles_*PF*_*_*"])
-#process.output.outputCommands.extend(["keep *_PFTowers_*_*"])
-##calorimeter stuff
-#process.output.outputCommands.extend(["keep *_towerMaker_*_*"])
-#process.output.outputCommands.extend(["keep *_caloTowers_*_*"])
-#process.output.outputCommands.extend(["keep *_hcalnoise_*_*"])
+#fast jet pf stuff
+process.output.outputCommands.extend(["keep doubles_*PF*_*_*"])
+process.output.outputCommands.extend(["keep *_PFTowers_*_*"])
+#calorimeter stuff
+process.output.outputCommands.extend(["keep *_towerMaker_*_*"])
+process.output.outputCommands.extend(["keep *_caloTowers_*_*"])
+process.output.outputCommands.extend(["keep *_hcalnoise_*_*"])
 #process.output.outputCommands.extend(["keep *_hbhereco_*_*"])
 #process.output.outputCommands.extend(["keep *_horeco_*_*"])
 #process.output.outputCommands.extend(["keep *_hfreco_*_*"])
 #process.output.outputCommands.extend(["keep *_ecalRecHit_*_*"])
-#
-##JPT
-#process.output.outputCommands.extend(["keep *_jptic*_*_*"])
-#process.output.outputCommands.extend(["keep *_recoJPT*_*_*"])
-#process.output.outputCommands.extend(["keep *_JetPlusTrack*_*_*"])
-#
-#
-#
-## Save all RECO!
-##process.output.outputCommands.extend(["keep *_*_*_RECO"])
-#
-#process.out_step = cms.EndPath(process.output)
-#
-#
-#
-#
-## Schedule definition
+
+#JPT
+process.output.outputCommands.extend(["keep *_jptic*_*_*"])
+process.output.outputCommands.extend(["keep *_recoJPT*_*_*"])
+process.output.outputCommands.extend(["keep *_JetPlusTrack*_*_*"])
+
+
+
+# Save all RECO!
+#process.output.outputCommands.extend(["keep *_*_*_RECO"])
+
+process.out_step = cms.EndPath(process.output)
+
+
+
+
+# Schedule definition
 #process.schedule = cms.Schedule(process.jetSkimPath,process.out_step)
 
 
