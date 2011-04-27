@@ -376,11 +376,16 @@ process.jpticPu5patJets = process.patJets.clone(jetSource  =cms.InputTag("JetPlu
 process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticPu5corr*process.jpticPu5clean*process.jpticPu5match*process.jpticPu5parton*process.jpticPu5patJets)
 
 # set JPT to look at the right track collection:
-process.trackExtrapolator.trackSrc = cms.InputTag("hiGoodTracks")
-process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodTracks'
-process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodTracks'
-process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiGoodTracks'
-
+if useHighPtTracks:
+    process.trackExtrapolator.trackSrc = cms.InputTag("hiGoodTracks")
+    process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodTracks'
+    process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodTracks'
+    process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiGoodTracks'
+else:
+    process.trackExtrapolator.trackSrc = cms.InputTag("hiHighPtTracks")
+    process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiHighPtTracks'
+    process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiHighPtTracks'
+    process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiHighPtTracks'
 
 process.runAllJets = cms.Sequence(
     process.icPu5patSequence +
