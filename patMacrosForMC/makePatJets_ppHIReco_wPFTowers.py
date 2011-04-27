@@ -52,31 +52,68 @@ overrideCentrality(process)
 #JEC from DB
 
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
-process.jec = cms.ESSource("PoolDBESSource",
-                           DBParameters = cms.PSet(
-    messageLevel = cms.untracked.int32(0)
-    ),
-                           timetype = cms.string('runnumber'),
-                           toGet = cms.VPSet(
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK3PF"),
-             label = cms.untracked.string("AK3PF")
-             ),
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK4PF"),
-             label = cms.untracked.string("AK4PF")
-             ),
+
+
+if useHighPtTrackCollection:
+
+    process.jec = cms.ESSource("PoolDBESSource",
+                               DBParameters = cms.PSet(
+        messageLevel = cms.untracked.int32(0)
+        ),
+                               timetype = cms.string('runnumber'),
+                               toGet = cms.VPSet(
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_hiHighPtTracks_IC5Calo"),
+                                        label = cms.untracked.string("IC5Calo")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK3PF"),
+                 label = cms.untracked.string("AK3PF")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK4PF"),
+                 label = cms.untracked.string("AK4PF")
+                 ),
+        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK5PF"),
+                 label = cms.untracked.string("AK5PF")
+                 ),
+        ),
+                               connect = cms.string("sqlite_file:JEC_HI_PFTowers_hiHighPtTracks_2011.db"),
+                               
+                               )
     
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK5PF"),
-             label = cms.untracked.string("AK5PF")
-             ),
-    ),
-                           connect = cms.string("sqlite_file:JEC_HI_2011.db"),
-                           
-                           )
 
+  else:
 
+      
+
+      process.jec = cms.ESSource("PoolDBESSource",
+                                 DBParameters = cms.PSet(
+          messageLevel = cms.untracked.int32(0)
+          ),
+                                 timetype = cms.string('runnumber'),
+                                 toGet = cms.VPSet(
+          cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                   tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK3PF"),
+                   label = cms.untracked.string("AK3PF")
+                   ),
+          cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                   tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK4PF"),
+                   label = cms.untracked.string("AK4PF")
+                   ),
+          
+          cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                   tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK5PF"),
+                   label = cms.untracked.string("AK5PF")
+                   ),
+          ),
+                                 connect = cms.string("sqlite_file:JEC_HI_2011.db"),
+                                 
+                                 )
+      
+      
 process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 
 
