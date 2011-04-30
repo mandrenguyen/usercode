@@ -413,15 +413,15 @@ process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticP
 
 # set JPT to look at the right track collection:
 if useHighPtTrackCollection:
-    process.trackExtrapolator.trackSrc = cms.InputTag("hiGoodTracks")
-    process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodTracks'
-    process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodTracks'
-    process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiGoodTracks'
-else:
     process.trackExtrapolator.trackSrc = cms.InputTag("hiHighPtTracks")
     process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiHighPtTracks'
     process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiHighPtTracks'
     process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiHighPtTracks'
+else:
+    process.trackExtrapolator.trackSrc = cms.InputTag("hiGoodTracks")
+    process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodTracks'
+    process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodTracks'
+    process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiGoodTracks'
 
 process.runAllJets = cms.Sequence(
     process.icPu5patSequence +
@@ -546,7 +546,8 @@ process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_a
 
 #for tree output
 process.TFileService = cms.Service("TFileService",
-                                  fileName=cms.string("JetAnalysisTTrees_hiGoodMergedTracks_seedGoodTracks_v1.root"))
+                                   #fileName=cms.string("JetAnalysisTTrees_hiGoodMergedTracks_seedGoodTracks_v1.root"))
+                                   fileName=cms.string("JetAnalysisTTrees_hiHighPtTracks_v1.root"))
 
 
 
