@@ -27,7 +27,7 @@ icPu5CaloJetsL2L3 = cms.EDProducer('CaloJetCorrectionProducer',
 # leading jet E_T filter
 jetEtFilter = cms.EDFilter("EtMinCaloJetCountFilter",
     src = cms.InputTag("icPu5CaloJetsL2L3"),
-    etMin = cms.double(100.0),
+    etMin = cms.double(60.0),
     minNumber = cms.uint32(1)
     )
 
@@ -51,17 +51,25 @@ hbheReflagNewTimeEnv.timingshapedcutsParameters.hbheTimingFlagBit=cms.untracked.
 # HCAL Timing
 hcalTimingFilter = cms.EDFilter("HcalTimingFilter",
                                         hbheHits = cms.untracked.InputTag("hbheReflagNewTimeEnv")
-                                        )
+                                )
+
+
+# hcal noise filter
+from CommonTools.RecoAlgos.HBHENoiseFilter_cfi import *
+HBHENoiseFilter.minRatio = cms.double(-99999.0)
+HBHENoiseFilter.maxRatio = cms.double(99999.0)
+HBHENoiseFilter.minZeros = cms.int32(100)
 
 
 # jet skim sequence
 jetSkimSequence = cms.Sequence(hltJetHI
                                * collisionEventSelection
-                               #* icPu5CaloJetsL2L3
-                               #* jetEtFilter
+                               * icPu5CaloJetsL2L3
+                               * jetEtFilter
                                #* dijetEtFilter
                                * hiEcalRecHitSpikeFilter
                                * hbheReflagNewTimeEnv
                                * hcalTimingFilter
+                               * HBHENoiseFilter
                                )
 
