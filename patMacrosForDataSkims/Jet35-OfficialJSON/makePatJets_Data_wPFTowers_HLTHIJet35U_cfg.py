@@ -17,10 +17,12 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
     )
 
+useHighPtTrackCollection = True
+
 #load some general stuff
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.GlobalTag.globaltag = 'GR10_P_V12::All'  #Data
+process.GlobalTag.globaltag = 'GR_R_39X_V6B::All'  
 
 process.load('Configuration.StandardSequences.GeometryExtended_cff')
 #process.load("Configuration.StandardSequences.GeometryDB_cff")
@@ -57,48 +59,61 @@ process.load("RecoHI.Configuration.Reconstruction_HI_cff")
 # Needed to produce "HcalSeverityLevelComputerRcd" used by CaloTowersCreator/towerMakerPF
 process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")
 
-# keep all the tracks for muon reco, then set high purity flag
-process.hiTracksWithLooseQualityKeepAll = process.hiTracksWithLooseQuality.clone()
-process.hiTracksWithTightQualityKeepAll = process.hiTracksWithTightQuality.clone()
-process.hiSelectedTracksKeepAll = process.hiSelectedTracks.clone()
+# keep all the tracks for muon reco, then hack flags such that 'tight' tracks are input into final track selection and final tracks are set to 'highPurity'  (Need a cleaner way to do this)
 
-process.hiTracksWithTightQualityKeepAll.src = cms.InputTag("hiTracksWithLooseQualityKeepAll")
-process.hiSelectedTracksKeepAll.src = cms.InputTag("hiTracksWithTightQualityKeepAll")
+if useHighPtTrackCollection:
+    print "Using hiHighPtTracks collection"
 
-process.hiTracksWithTightQuality.qualityBit = 'loose'
-process.hiSelectedTracks.qualityBit = 'tight'
-
-process.hiTracksWithTightQualityKeepAll.qualityBit = 'loose'
-process.hiSelectedTracksKeepAll.qualityBit = 'tight'
-
-process.hiTracksWithLooseQualityKeepAll.keepAllTracks = True
-process.hiTracksWithTightQualityKeepAll.keepAllTracks = True
-process.hiSelectedTracksKeepAll.keepAllTracks = True
-
-
-process.heavyIonTracking += process.hiTracksWithLooseQualityKeepAll*process.hiTracksWithTightQualityKeepAll*process.hiSelectedTracksKeepAll
+else:
+    print "Using hiGoodTracks collection"
+    process.hiTracksWithLooseQualityKeepAll = process.hiTracksWithLooseQuality.clone()
+    process.hiTracksWithTightQualityKeepAll = process.hiTracksWithTightQuality.clone()
+    process.hiSelectedTracksKeepAll = process.hiSelectedTracks.clone()    
+    process.hiTracksWithTightQualityKeepAll.src = cms.InputTag("hiTracksWithLooseQualityKeepAll")
+    process.hiSelectedTracksKeepAll.src = cms.InputTag("hiTracksWithTightQualityKeepAll")    
+    process.hiTracksWithTightQuality.qualityBit = 'loose'
+    process.hiSelectedTracks.qualityBit = 'tight'    
+    process.hiTracksWithTightQualityKeepAll.qualityBit = 'loose'
+    process.hiSelectedTracksKeepAll.qualityBit = 'tight'    
+    process.hiTracksWithLooseQualityKeepAll.keepAllTracks = True
+    process.hiTracksWithTightQualityKeepAll.keepAllTracks = True
+    process.hiSelectedTracksKeepAll.keepAllTracks = True
+    process.heavyIonTracking += process.hiTracksWithLooseQualityKeepAll*process.hiTracksWithTightQualityKeepAll*process.hiSelectedTracksKeepAll
 
 
 # Muon Reco
 from RecoHI.HiMuonAlgos.HiRecoMuon_cff import * 
-process.globalMuons.TrackerCollectionLabel = cms.InputTag("hiGoodTracksKeepAll")
 muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJets")
-muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("hiGoodTracksKeepAll")
-muons.inputCollectionLabels = cms.VInputTag("hiGoodTracksKeepAll", "globalMuons", "standAloneMuons:UpdatedAtVtx")
-process.muonRecoPbPb = muonRecoPbPb
+if useHighPtTrackCollection:
+    process.globalMuons.TrackerCollectionLabel = cms.InputTag("hiHighPtTracksKeepAll")
+    muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("hiHighPtTracksKeepAll")
+    muons.inputCollectionLabels = cms.VInputTag("hiHighPtTracksKeepAll", "globalMuons", "standAloneMuons:UpdatedAtVtx")
+else:
+    process.globalMuons.TrackerCollectionLabel = cms.InputTag("hiGoodTracksKeepAll")
+    muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("hiGoodTracksKeepAll")
+    muons.inputCollectionLabels = cms.VInputTag("hiGoodTracksKeepAll", "globalMuons", "standAloneMuons:UpdatedAtVtx")
+
+process.muonRecoPbpb = muonRecoPbPb
 
 #Track Reco
 process.rechits = cms.Sequence(process.siPixelRecHits * process.siStripMatchedRecHits)
 process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
 
-# Load Heavy Ion "Good" Track Selection, merged with pixel tracks 
+ #good track selection
 process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
 process.hiGoodTracksKeepAll = process.hiGoodTracks.clone()
 process.hiGoodTracksKeepAll.keepAllTracks = True
 process.hiGoodTracksSelection += process.hiGoodTracksKeepAll
+# "High pT track selection"
+process.hiHighPtTracks.qualityBit = 'highPurity'
+process.hiHighPtTracksKeepAll = process.hiHighPtTracks.clone()
+process.hiHighPtTracksKeepAll.keepAllTracks = True
+process.hiHighPtTrackSelection += process.hiHighPtTracksKeepAll
+# merge with pixel tracks
 process.load('Appeltel.PixelTracksRun2010.HiLowPtPixelTracksFromReco_cff')
 process.load('Appeltel.PixelTracksRun2010.HiMultipleMergedTracks_cff')
 process.hiGoodMergedTracks.src = cms.InputTag("hiGoodTracks")
+
 
 # for PF
 process.load("RecoHI.Configuration.Reconstruction_hiPF_cff")
@@ -109,7 +124,10 @@ process.HiParticleFlowRecoNoJets = cms.Sequence(
     * process.trackerDrivenElectronSeeds
     * process.particleFlowReco
     )
-process.trackerDrivenElectronSeeds.TkColList = cms.VInputTag("hiGoodTracksKeepAll")
+if useHighPtTrackCollection:
+    process.trackerDrivenElectronSeeds.TkColList = cms.VInputTag("hiHighPtTracksKeepAll")
+else:
+    process.trackerDrivenElectronSeeds.TkColList = cms.VInputTag("hiGoodTracksKeepAll")
 
 
 
@@ -238,10 +256,17 @@ process.jpticPu5patJets = process.patJets.clone(jetSource  =cms.InputTag("JetPlu
 process.icPu5JPTpatSequence = cms.Sequence(process.recoJPTJetsHIC*process.jpticPu5corr*process.jpticPu5patJets)
 
 # set JPT to look at the right track collection:
-process.trackExtrapolator.trackSrc = cms.InputTag("hiGoodTracks")
-process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodTracks'
-process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodTracks'
-process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiGoodTracks'
+if useHighPtTrackCollection:
+    process.trackExtrapolator.trackSrc = cms.InputTag("hiHighPtTracks")
+    process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiHighPtTracks'
+    process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiHighPtTracks'
+    process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiHighPtTracks'
+else:
+    process.trackExtrapolator.trackSrc = cms.InputTag("hiGoodTracks")
+    process.JPTiterativeConePu5JetTracksAssociatorAtVertex.tracks = 'hiGoodTracks'
+    process.JPTiterativeConePu5JetTracksAssociatorAtCaloFace.tracks = 'hiGoodTracks'
+    process.JetPlusTrackZSPCorJetIconePu5.tracks = 'hiGoodTracks'
+
 
 
 
@@ -265,30 +290,70 @@ from CmsHi.Analysis2010.CommonFunctions_cff import *
 overrideCentrality(process)
 
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
-process.jec = cms.ESSource("PoolDBESSource",
-                           DBParameters = cms.PSet(
-    messageLevel = cms.untracked.int32(0)
-    ),
-                           timetype = cms.string('runnumber'),
-                           toGet = cms.VPSet(
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK3PF"),
-             label = cms.untracked.string("AK3PF")
-                              ),
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK4PF"),
-             label = cms.untracked.string("AK4PF")
-             ),
-    
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-             tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiSelFix_AK5PF"),
-             label = cms.untracked.string("AK5PF")
-             ),
-    ),
-                           connect = cms.string("sqlite_file:JEC_HI_2011.db"),
-                           
-                           )
 
+
+if useHighPtTrackCollection:
+
+    process.jec = cms.ESSource("PoolDBESSource",
+                               DBParameters = cms.PSet(
+        messageLevel = cms.untracked.int32(0)
+        ),
+                               timetype = cms.string('runnumber'),
+                               toGet = cms.VPSet(
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_hiHighPtTracks_IC5Calo"),
+                 label = cms.untracked.string("IC5Calo")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK3PF"),
+                 label = cms.untracked.string("AK3PF")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK4PF"),
+                 label = cms.untracked.string("AK4PF")
+                 ),
+        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiHighPtTracks_AK5PF"),
+                 label = cms.untracked.string("AK5PF")
+                 ),
+        ),
+                               connect = cms.string("sqlite_file:JEC_HI_PFTowers_hiHighPtTracks_2011.db"),
+                               
+                               )
+
+
+else: 
+    
+    process.jec = cms.ESSource("PoolDBESSource",
+                               DBParameters = cms.PSet(
+                                   messageLevel = cms.untracked.int32(0)
+                                   ),
+                               timetype = cms.string('runnumber'),
+                               toGet = cms.VPSet(
+        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_fromFit_IC5Calo"),
+                 label = cms.untracked.string("IC5Calo")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_EscaleXcheck_v2_AK3PF"),
+                 label = cms.untracked.string("AK3PF")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_EscaleXcheck_AK4PF"),
+                 label = cms.untracked.string("AK4PF")
+                 ),
+        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_EscaleXcheck_AK5PF"),
+                 label = cms.untracked.string("AK5PF")
+                 ),
+        ),
+                               connect = cms.string("sqlite_file:JEC_HI_PFTowers_hiGoodTracks_v2_2011.db"),
+                               
+                               )
+    
 process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 
 process.load("MNguyen.InclusiveJetAnalyzer.inclusiveJetAnalyzer_cff")
@@ -313,7 +378,10 @@ process.inclusiveJetAnalyzerSequence = cms.Sequence(                  #process.i
 
 process.load("MNguyen.InclusiveJetAnalyzer.PFJetAnalyzer_cff")
 process.PFJetAnalyzer.isMC = cms.untracked.bool(False)
-process.PFJetAnalyzer.trackTag = cms.InputTag("hiGoodMergedTracks")
+if useHighPtTrackCollection:
+    process.PFJetAnalyzer.trackTag = cms.InputTag("hiHighPtTracks")
+else:
+    process.PFJetAnalyzer.trackTag = cms.InputTag("hiGoodTracksKeepAll")
 process.PFJetAnalyzer.jetTag2 = cms.InputTag("akPu5PFpatJets")
 process.PFJetAnalyzer.recoJetTag2 = cms.InputTag("akPu5PFJets")
 process.PFJetAnalyzer.jetTag3 = cms.InputTag("akPu4PFpatJets")
@@ -322,88 +390,116 @@ process.PFJetAnalyzer.jetTag4 = cms.InputTag("akPu3PFpatJets")
 process.PFJetAnalyzer.recoJetTag4 = cms.InputTag("akPu3PFJets")
 
 #Frank's analyzer
+
+process.load("PbPbTrackingTools.HiTrackValidator.hitrackvalidator_cfi")
+if useHighPtTrackCollection:
+    process.hitrkvalidator.trklabel=cms.untracked.InputTag("hiHighPtTracks")
+else:
+    process.hitrkvalidator.trklabel=cms.untracked.InputTag("hiGoodTracks")
+
 from Saved.QM11Ana.Analyzers_cff import trkAnalyzer
 process.trkAnalyzer = trkAnalyzer
-process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodMergedTracks")
+if useHighPtTrackCollection:
+    process.trkAnalyzer.trackSrc = cms.InputTag("hiHighPtTracks")
+else:
+    process.trkAnalyzer.trackSrc = cms.InputTag("hiGoodTracks")
 
 # track efficiency anlayzer
 #process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
 #for tree output
 process.TFileService = cms.Service("TFileService",
-                                   fileName=cms.string("JetAnalysisTTrees_hiGoodMergedTracks_seedGoodTracks_v1.root"))
+                                   #fileName=cms.string("JetAnalysisTTrees_hiGoodTracks_v2.root"))
+                                   fileName=cms.string("JetAnalysisTTrees_hiHighPtTracks_v2.root"))
 
 
 
 process.load("MNguyen.Configuration.HI_JetSkim_cff")
 process.hltJetHI.HLTPaths = ["HLT_HIJet35U"]
 
-process.jetSkimPath = cms.Path(
-    process.jetSkimSequence*
-    process.hiTrackReco*
-    process.hiGoodTracksSelection*
-    process.conformalPixelTrackReco *
-    process.hiGoodMergedTracks*
-    process.muonRecoPbPb*
-    process.HiParticleFlowRecoNoJets*
-    process.PFTowers*
-    process.runAllJets*
-    process.inclusiveJetAnalyzerSequence*
-    process.PFJetAnalyzerSequence
-    *process.trkAnalyzer
-    )
+if useHighPtTrackCollection:
+    process.jetSkimPath = cms.Path(
+        process.jetSkimSequence*
+        process.hiTrackReco*
+        process.hiHighPtTrackSelection*
+        process.muonRecoPbPb*
+        process.HiParticleFlowRecoNoJets*
+        process.PFTowers*
+        process.runAllJets*
+        process.inclusiveJetAnalyzerSequence*
+        process.PFJetAnalyzerSequence
+        *process.trkAnalyzer
+        *process.hitrkvalidator
+        )
 
-process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
+else:
+    process.jetSkimPath = cms.Path(
+        process.jetSkimSequence*
+        process.hiTrackReco*
+        process.hiGoodTracksSelection*
+        #process.conformalPixelTrackReco *
+        #process.hiGoodMergedTracks*
+        process.muonRecoPbPb*
+        process.HiParticleFlowRecoNoJets*
+        process.PFTowers*
+        process.runAllJets*
+        process.inclusiveJetAnalyzerSequence*
+        process.PFJetAnalyzerSequence
+        *process.trkAnalyzer
+        *process.hitrkvalidator
+        )
 
-process.output = cms.OutputModule("PoolOutputModule",
-                                  process.jetTrkSkimContent,
-                                  SelectEvents = cms.untracked.PSet(
-    SelectEvents = cms.vstring('jetSkimPath')
-    ),
-                                  fileName = cms.untracked.string("PAT.root"),
-                                  dataset = cms.untracked.PSet(
-    filterName = cms.untracked.string('jetSkimPath'),
-    dataTier = cms.untracked.string('PAT')
-    )
-                                  )
-
-
-# Save some extra stuff
-#?
-process.output.outputCommands.extend(["keep *_heavyIon_*_*"])
-# triggger
-process.output.outputCommands.extend(["keep *_TriggerResults_*_*"])
-#tracks
-process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
-# reco jets
-process.output.outputCommands.extend(["keep recoCaloJets_*_*_*"])
-process.output.outputCommands.extend(["keep recoPFJets_*_*_*"])
-#particle flow
-process.output.outputCommands.extend(["keep recoPFCandidates_particleFlow_*_*"])
-#process.output.outputCommands.extend(["keep recoPFClusters_*_*_*"])
-#process.output.outputCommands.extend(["keep recoPFRecHits_*_*_*"])
-#fast jet pf stuff
-process.output.outputCommands.extend(["keep doubles_*PF*_*_*"])
-process.output.outputCommands.extend(["keep *_PFTowers_*_*"])
-#calorimeter stuff
-process.output.outputCommands.extend(["keep *_towerMaker_*_*"])
-process.output.outputCommands.extend(["keep *_caloTowers_*_*"])
-process.output.outputCommands.extend(["keep *_hcalnoise_*_*"])
-#process.output.outputCommands.extend(["keep *_hbhereco_*_*"])
-#process.output.outputCommands.extend(["keep *_horeco_*_*"])
-#process.output.outputCommands.extend(["keep *_hfreco_*_*"])
-#process.output.outputCommands.extend(["keep *_ecalRecHit_*_*"])
-
-#JPT
-process.output.outputCommands.extend(["keep *_jptic*_*_*"])
-process.output.outputCommands.extend(["keep *_recoJPT*_*_*"])
-process.output.outputCommands.extend(["keep *_JetPlusTrack*_*_*"])
-
-
-
-# Save all RECO!
-#process.output.outputCommands.extend(["keep *_*_*_RECO"])
-
-process.out_step = cms.EndPath(process.output)
+#process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
+#
+#process.output = cms.OutputModule("PoolOutputModule",
+#                                  process.jetTrkSkimContent,
+#                                  SelectEvents = cms.untracked.PSet(
+#    SelectEvents = cms.vstring('jetSkimPath')
+#    ),
+#                                  fileName = cms.untracked.string("PAT.root"),
+#                                  dataset = cms.untracked.PSet(
+#    filterName = cms.untracked.string('jetSkimPath'),
+#    dataTier = cms.untracked.string('PAT')
+#    )
+#                                  )
+#
+#
+## Save some extra stuff
+##?
+#process.output.outputCommands.extend(["keep *_heavyIon_*_*"])
+## triggger
+#process.output.outputCommands.extend(["keep *_TriggerResults_*_*"])
+##tracks
+#process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
+## reco jets
+#process.output.outputCommands.extend(["keep recoCaloJets_*_*_*"])
+#process.output.outputCommands.extend(["keep recoPFJets_*_*_*"])
+##particle flow
+#process.output.outputCommands.extend(["keep recoPFCandidates_particleFlow_*_*"])
+##process.output.outputCommands.extend(["keep recoPFClusters_*_*_*"])
+##process.output.outputCommands.extend(["keep recoPFRecHits_*_*_*"])
+##fast jet pf stuff
+#process.output.outputCommands.extend(["keep doubles_*PF*_*_*"])
+#process.output.outputCommands.extend(["keep *_PFTowers_*_*"])
+##calorimeter stuff
+#process.output.outputCommands.extend(["keep *_towerMaker_*_*"])
+#process.output.outputCommands.extend(["keep *_caloTowers_*_*"])
+#process.output.outputCommands.extend(["keep *_hcalnoise_*_*"])
+##process.output.outputCommands.extend(["keep *_hbhereco_*_*"])
+##process.output.outputCommands.extend(["keep *_horeco_*_*"])
+##process.output.outputCommands.extend(["keep *_hfreco_*_*"])
+##process.output.outputCommands.extend(["keep *_ecalRecHit_*_*"])
+#
+##JPT
+#process.output.outputCommands.extend(["keep *_jptic*_*_*"])
+#process.output.outputCommands.extend(["keep *_recoJPT*_*_*"])
+#process.output.outputCommands.extend(["keep *_JetPlusTrack*_*_*"])
+#
+#
+#
+## Save all RECO!
+##process.output.outputCommands.extend(["keep *_*_*_RECO"])
+#
+#process.out_step = cms.EndPath(process.output)
 
 
 
