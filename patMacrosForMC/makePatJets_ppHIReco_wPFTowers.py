@@ -14,9 +14,9 @@ process = cms.Process('HIJETS')
 # Input source
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    #'/store/relval/CMSSW_3_9_9/RelValQCD_Pt_80_120/GEN-SIM-RECO/START39_V9-v1/0000/0622F65F-623D-E011-A38D-002618943949.root'
+    '/store/relval/CMSSW_3_9_9/RelValQCD_Pt_80_120/GEN-SIM-RECO/START39_V9-v1/0000/0622F65F-623D-E011-A38D-002618943949.root'
     #'/store/relval/CMSSW_3_9_9/RelValSingleMuPt100/GEN-SIM-RECO/MC_39Y_V8-v1/0000/EEE53664-583D-E011-8433-0018F3D09692.root'
-    '/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt15_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt15_START39V7HI_GEN_SIM_RAW_RECO_393_v1/24f3ed1e4d50df3073080480887969a1/Pyquen_UnquenchedDiJet_Pt15_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_100_1_dYJ.root'
+    #'/store/user/davidlw/Pyquen_UnquenchedDiJet_Pt15_START39V7HI_GEN_SIM_RAW_RECO_393_v1/Pyquen_UnquenchedDiJet_Pt15_START39V7HI_GEN_SIM_RAW_RECO_393_v1/24f3ed1e4d50df3073080480887969a1/Pyquen_UnquenchedDiJet_Pt15_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_RECO_100_1_dYJ.root'
 )
                             )
 
@@ -32,6 +32,7 @@ useGoodTightCollection = True
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = 'START39_V7::All'
 
+process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.GeometryExtended_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
@@ -187,8 +188,8 @@ else:
 
 # Muon Reco
 from RecoHI.HiMuonAlgos.HiRecoMuon_cff import * 
-muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJets")
-#muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeCone5CaloJets")
+#muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJets")
+muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeCone5CaloJets")
 
 if useGoodTightCollection:
     process.globalMuons.TrackerCollectionLabel = cms.InputTag("hiGoodTightTracksDirect")
@@ -262,6 +263,9 @@ process.heavyIon
 
 #process.hiGenParticles.srcVector = cms.vstring('hiSignal')
 
+#ignore neutrinos
+process.hiGenParticlesForJets.ignoreParticleIDs += cms.vuint32(12,14,16)
+
 process.hiGen = cms.Sequence(
 #Careful when using embedded samples
     process.hiGenParticles +
@@ -285,8 +289,8 @@ process.patJets.addGenJetMatch      = True
 process.patJets.embedCaloTowers = cms.bool(False)
 
 
-process.iterativeConePu5CaloJets.jetPtMin = 10.0
-process.ak5PFJets.jetPtMin = 10.0
+process.iterativeConePu5CaloJets.jetPtMin = 1.0
+process.ak5PFJets.jetPtMin = 1.0
 
 
 process.load("RecoHI.HiJetAlgos.ParticleTowerProducer_cff")
@@ -488,10 +492,54 @@ process.hipixtrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFakPxl*process.cu
 process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_akpu3pf*process.hipixtrkEffAna_akpu3pf*process.genpAnalyzer)
 
 
+process.load("PbPbTrackingTools.HiTrackValidator.hitrackvalidator_cfi")
+if useHighPtTrackCollection:
+    process.hitrkvalidator.trklabel=cms.untracked.InputTag("hiHighPtTracks")
+else:
+    process.hitrkvalidator.trklabel=cms.untracked.InputTag("hiGoodTracks")
+
+
+process.higoodTrkVal = process.hitrkvalidator.clone(
+    trklabel = "hiGoodTracks",
+    neededCentBins = [0,1,3,11,19,35],
+    jetlabel = "akPu3PFpatJets")
+process.higoodtightTrkVal = process.higoodTrkVal.clone(
+    trklabel=cms.untracked.InputTag("hiGoodTightTracksDirect")
+    )
+process.hihighTrkVal = process.higoodTrkVal.clone(trklabel=cms.untracked.InputTag("hiHighPtTracksDirect"),
+    qualityString = "tight")
+
+process.hiCentrality.produceHFhits = cms.bool(True)
+process.hiCentrality.produceHFtowers = cms.bool(False)
+process.hiCentrality.produceEcalhits = cms.bool(False)
+process.hiCentrality.produceBasicClusters = cms.bool(False)
+process.hiCentrality.produceZDChits = cms.bool(False)
+process.hiCentrality.produceETmidRapidity = cms.bool(False)
+process.hiCentrality.producePixelhits = cms.bool(False)
+process.hiCentrality.produceTracks = cms.bool(False)
+process.hiCentrality.producePixelTracks = cms.bool(False)
+process.hiCentrality.doPixelCut = cms.bool(True)
+
+process.hiValidatorSequence = cms.Sequence(
+    process.hiCentrality*
+    process.higoodTrkVal*
+    process.higoodtightTrkVal*
+    process.hihighTrkVal
+)
+
+
+#Yetkin's analyzer
+from CmsHi.JetAnalysis.ak3PFTowerJetsAna_cff import *
+process.yetkinsAna = akPu3PFtowerJetsAna.clone()
+process.RandomNumberGeneratorService.yetkinsAna = process.RandomNumberGeneratorService.generator.clone(initialSeed = 1)
+process.yetkinsAna.patJetSrc = cms.untracked.InputTag("ak3PFpatJets")
+process.yetkinsAna.doRecoEvtPlane = cms.untracked.bool(False)
+
 #for tree output
 process.TFileService = cms.Service("TFileService",
                                    #fileName=cms.string("JetAnalysisTTrees_hiGoodMergedTracks_seedGoodTracks_v1.root")
-                                   fileName=cms.string("JetAnalysisTTrees_hiHighPtTracks_v2.root")
+                                   #fileName=cms.string("JetAnalysisTTrees_hiHighPtTracks_v2.root")
+                                   fileName=cms.string("JetAnalysisTTrees_hiGoodTightTracks_v1.root")
                                    )
 
 
@@ -499,7 +547,9 @@ process.TFileService = cms.Service("TFileService",
 if useGoodTightCollection:
     process.trackRecoAndSelection = cms.Path(
         process.hiTrackReco*
+        process.hiGoodTracksSelection*
         process.hiGoodTightTracksDirectSelection*
+        process.hiHighPtTrackDirectSelection*
         process.muonRecoPbPb 
         )
 elif useHighPtTrackCollection:
@@ -529,51 +579,9 @@ process.jetAna = cms.Path(
     #process.franksAnalyzers*
     process.inclusiveJetAnalyzerSequence
     #*process.PFJetAnalyzerSequence
+    *process.hiValidatorSequence
+    *process.yetkinsAna
     )
 
 process.schedule = cms.Schedule(process.trackRecoAndSelection, process.jetReco, process.jetAna)
-
-#process.load("HeavyIonsAnalysis.Configuration.analysisEventContent_cff")
-#
-#process.output = cms.OutputModule("PoolOutputModule",
-#                                  process.jetTrkSkimContentMC,
-#                                  fileName = cms.untracked.string("/tmp/mnguyen/PAT.root")
-#                                  )
-#
-#process.output.outputCommands.extend(["keep *_hiGoodTracks_*_*"])
-##process.output.outputCommands.extend(["keep *_hiGoodMergedTracks_*_*"])
-#process.output.outputCommands.extend(["keep *_particleFlow_*_*"])
-#process.output.outputCommands.extend(["keep *_mergedtruth_*_*"])
-#process.output.outputCommands.extend(["keep double*_*PF*_*_*"])
-#process.output.outputCommands.extend(["keep *_heavyIon_*_*"])
-#process.output.outputCommands.extend(["keep *_generator_*_*"])
-#process.output.outputCommands.extend(["keep *_hiSignal_*_*"])
-#process.output.outputCommands.extend(["keep *_genParticles_*_*"])
-#process.output.outputCommands.extend(["keep *_hiGenParticles_*_*"])
-#process.output.outputCommands.extend(["keep *_TriggerResults_*_*"])
-#process.output.outputCommands.extend(["keep *_heavyIon_*_*"])
-## reco jets
-#process.output.outputCommands.extend(["keep recoCaloJets_*_*_*"])
-#process.output.outputCommands.extend(["keep recoPFJets_*_*_*"])
-##particle flow
-#process.output.outputCommands.extend(["keep recoPFClusters_*_*_*"])
-#process.output.outputCommands.extend(["keep recoPFRecHits_*_*_*"])
-##fast jet pf stuff
-#process.output.outputCommands.extend(["keep doubles_*PF*_*_*"])
-##calorimeter stuff
-#process.output.outputCommands.extend(["keep *_towerMaker_*_*"])
-#process.output.outputCommands.extend(["keep *_PFTowers_*_*"])
-#process.output.outputCommands.extend(["keep *_caloTowers_*_*"])
-#process.output.outputCommands.extend(["keep *_hcalnoise_*_*"])
-#process.output.outputCommands.extend(["keep *_hbhereco_*_*"])
-#process.output.outputCommands.extend(["keep *_horeco_*_*"])
-#process.output.outputCommands.extend(["keep *_hfreco_*_*"])
-#process.output.outputCommands.extend(["keep *_ecalRecHit_*_*"])
-#
-#process.output.outputCommands.extend(["keep *_muons_*_*"])
-#
-#
-#process.out_step = cms.EndPath(process.output)
-
-
 
