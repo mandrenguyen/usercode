@@ -1173,7 +1173,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      jets_.pthat = hEventInfo->qScale();
 
-     getPartons(iEvent, iSetup );
+     //getPartons(iEvent, iSetup );
      
      if(genParticleThresh_>0){
        edm::Handle <reco::GenParticleCollection> genParticles;
