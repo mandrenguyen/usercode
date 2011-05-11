@@ -1135,7 +1135,8 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      int count1dhits = 0;
      double chi2n_hit1D = 0;
-     for (trackingRecHit_iterator ith = track.recHitsBegin(), trackingRecHit_iterator edh = track.recHitsEnd(); ith != edh; ++ith) {
+     trackingRecHit_iterator edh = track.recHitsEnd();
+     for (trackingRecHit_iterator ith = track.recHitsBegin(); ith != edh; ++ith) {
        const TrackingRecHit * hit = ith->get();
        DetId detid = hit->geographicalId();
        if (hit->isValid()) {
@@ -1143,8 +1144,8 @@ PFJetAnalyzer::analyze(const Event& iEvent,
        }
      }
      if (count1dhits > 0) {
-       double chi2 = tk.chi2();
-       double ndof = tk.ndof();
+       double chi2 = track.chi2();
+       double ndof = track.ndof();
        chi2n_hit1D = (chi2+count1dhits)/double(ndof+count1dhits);
      }
 
