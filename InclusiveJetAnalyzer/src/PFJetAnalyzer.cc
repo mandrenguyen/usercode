@@ -148,7 +148,6 @@ PFJetAnalyzer::beginJob() {
   t->Branch("bsx",&jets_.bsx,"bsx/F");
   t->Branch("bsy",&jets_.bsy,"bsy/F");
   t->Branch("bsz",&jets_.bsz,"bsz/F");
-
   t->Branch("bswx",&jets_.bswx,"bswx/F");
   t->Branch("bswy",&jets_.bswy,"bswy/F");
 
@@ -298,7 +297,7 @@ PFJetAnalyzer::beginJob() {
   t->Branch("tracksumecal",jets_.tracksumecal,"tracksumecal[ntrack]/F");
   t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
   t->Branch("trackqual",jets_.trackqual,"trackqual[ntrack]/I");
-  t->Branch("chi2",jets_.trackchi2,"chi2[ntrack]/I");
+  t->Branch("chi2",jets_.trackchi2,"chi2[ntrack]/F");
   
   t->Branch("ptErr",jets_.trackptErr,"ptErr[ntrack]/F");
 
