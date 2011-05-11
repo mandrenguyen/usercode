@@ -291,6 +291,9 @@ PFJetAnalyzer::beginJob() {
   t->Branch("tracksumecal",jets_.tracksumecal,"tracksumecal[ntrack]/F");
   t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
   t->Branch("trackqual",jets_.trackqual,"trackqual[ntrack]/I");
+  t->Branch("chi2",jets_.trackchi2,"chi2[ntrack]/I");
+  
+  t->Branch("ptErr",jets_.trackptErr,"ptErr[ntrack]/F");
 
   t->Branch("d0Err",jets_.trackd0Err,"d0Err[ntrack]/F");
   t->Branch("dzErr",jets_.trackdzErr,"dzErr[ntrack]/F");
@@ -1110,6 +1113,9 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      jets_.trackpt[jets_.ntrack] = track.pt();
      jets_.tracketa[jets_.ntrack] = track.eta();
      jets_.trackphi[jets_.ntrack] = track.phi();
+
+     jets_.trackptErr[jets_.ntrack] = track.ptError();
+     jets_.trackchi2[jets_.ntrack] = track.chi2();
 
      jets_.tracksumecal[jets_.ntrack] = 0.;
      jets_.tracksumhcal[jets_.ntrack] = 0.;

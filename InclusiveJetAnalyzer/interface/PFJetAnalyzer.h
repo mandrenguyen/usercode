@@ -213,6 +213,9 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     int trackd0[MAXTRACKS];
     int trackdz[MAXTRACKS];
 
+    float trackptErr[MAXTRACKS];
+    float trackchi2[MAXTRACKS];
+
     int ngenp;
     int genppdgId[MAXGENPS];
     float genppt[MAXGENPS];
