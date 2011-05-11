@@ -212,6 +212,9 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     int trackfake[MAXTRACKS];
     int trackqual[MAXTRACKS];
 
+    int trackNlayer[MAXTRACKS];
+    int trackNlayer3D[MAXTRACKS];
+
     float trackd0Err[MAXTRACKS];
     float trackdzErr[MAXTRACKS];
     float trackd0[MAXTRACKS];
@@ -219,6 +222,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
     float trackptErr[MAXTRACKS];
     float trackchi2[MAXTRACKS];
+    float trackchi2hit1D[MAXTRACKS];
 
     float trackd0ErrBS[MAXTRACKS];
     float trackdzErrBS[MAXTRACKS];
