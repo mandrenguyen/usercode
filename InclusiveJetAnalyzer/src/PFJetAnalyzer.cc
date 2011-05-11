@@ -1133,6 +1133,21 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    for(unsigned int it=0; it<tracks->size(); ++it){
      const reco::Track & track = (*tracks)[it];
 
+     int count1dhits = 0;
+     double chi2n_hit1D = 0;
+     for (trackingRecHit_iterator ith = track.recHitsBegin(), trackingRecHit_iterator edh = track.recHitsEnd(); ith != edh; ++ith) {
+       const TrackingRecHit * hit = ith->get();
+       DetId detid = hit->geographicalId();
+       if (hit->isValid()) {
+	 if (typeid(*hit) == typeid(SiStripRecHit1D)) ++count1dhits;
+       }
+     }
+     if (count1dhits > 0) {
+       double chi2 = tk.chi2();
+       double ndof = tk.ndof();
+       chi2n_hit1D = (chi2+count1dhits)/double(ndof+count1dhits);
+     }
+
      // Could makes some track selection here
      jets_.tracknhits[jets_.ntrack] = track.numberOfValidHits();
      jets_.trackpt[jets_.ntrack] = track.pt();
@@ -1141,7 +1156,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      jets_.trackptErr[jets_.ntrack] = track.ptError();
      jets_.trackchi2[jets_.ntrack] = track.normalizedChi2();
-     jets_.trackchi2hit1D[jets_.ntrack] = track.normalizedChi2();
+     jets_.trackchi2hit1D[jets_.ntrack] = chi2n_hit1D;
 
      jets_.tracksumecal[jets_.ntrack] = 0.;
      jets_.tracksumhcal[jets_.ntrack] = 0.;
