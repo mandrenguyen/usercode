@@ -298,6 +298,7 @@ PFJetAnalyzer::beginJob() {
   t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
   t->Branch("trackqual",jets_.trackqual,"trackqual[ntrack]/I");
   t->Branch("chi2",jets_.trackchi2,"chi2[ntrack]/F");
+  t->Branch("chi2hit1D",jets_.trackchi2hit1D,"chi2hit1D[ntrack]/F");
   
   t->Branch("ptErr",jets_.trackptErr,"ptErr[ntrack]/F");
 
@@ -315,6 +316,10 @@ PFJetAnalyzer::beginJob() {
   
   t->Branch("d0BS",jets_.trackd0BS,"d0BS[ntrack]/F");
   t->Branch("dzBS",jets_.trackdzBS,"dzBS[ntrack]/F");
+
+  t->Branch("nlayer",jets_.trackNlayer,"nlayer[ntrack]/I");
+  t->Branch("nlayer3D",jets_.trackNlayer3D,"nlayer3D[ntrack]/I");
+
 
   if(isMC_){
     t->Branch("pthat",&jets_.pthat,"pthat/F");    
@@ -1136,6 +1141,7 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      jets_.trackptErr[jets_.ntrack] = track.ptError();
      jets_.trackchi2[jets_.ntrack] = track.normalizedChi2();
+     jets_.trackchi2hit1D[jets_.ntrack] = track.normalizedChi2();
 
      jets_.tracksumecal[jets_.ntrack] = 0.;
      jets_.tracksumhcal[jets_.ntrack] = 0.;
@@ -1166,6 +1172,9 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
      jets_.trackd0ErrTrk[jets_.ntrack] = track.d0Error();
      jets_.trackdzErrTrk[jets_.ntrack] = track.dzError();
+
+     jets_.trackNlayer[jets_.ntrack] = track.hitPattern().trackerLayersWithMeasurement();
+     jets_.trackNlayer3D[jets_.ntrack] = track.hitPattern().pixelLayersWithMeasurement() + track.hitPattern().numberOfValidStripLayersWithMonoAndStereo();
 
      if(hasSimInfo_)
        if(recSimColl.find(edm::RefToBase<reco::Track>(trackRef)) == recSimColl.end())
