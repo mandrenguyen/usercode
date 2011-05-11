@@ -47,6 +47,9 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+
+
 using namespace std;
 using namespace edm;
 using namespace reco;
@@ -131,9 +134,17 @@ PFJetAnalyzer::beginJob() {
   t->Branch("evt",&jets_.evt,"evt/I");
   t->Branch("lumi",&jets_.lumi,"lumi/I");
   t->Branch("b",&jets_.b,"b/F");
+
   t->Branch("vx",&jets_.vx,"vx/F");
   t->Branch("vy",&jets_.vy,"vy/F");
   t->Branch("vz",&jets_.vz,"vz/F");
+
+  t->Branch("hasVtx",&jets_.hasVtx,"hasVtx/O");
+
+  t->Branch("vxErr",&jets_.vxErr,"vxErr/F");
+  t->Branch("vyErr",&jets_.vyErr,"vyErr/F");
+  t->Branch("vzErr",&jets_.vzErr,"vzErr/F");
+
   t->Branch("hf",&jets_.hf,"hf/F");
   t->Branch("bin",&jets_.bin,"bin/I");
 
@@ -270,6 +281,8 @@ PFJetAnalyzer::beginJob() {
   //t->Branch("candy",jets_.candy,"candy[nPFcand]/F");
   t->Branch("candphi",jets_.candphi,"candphi[nPFcand]/F");
 
+
+
   t->Branch("ntrack",&jets_.ntrack,"ntrack/I");
   t->Branch("tracknhits",jets_.tracknhits,"tracknhits[ntrack]/I");
   t->Branch("trackpt",jets_.trackpt,"trackpt[ntrack]/F");
@@ -278,6 +291,13 @@ PFJetAnalyzer::beginJob() {
   t->Branch("tracksumecal",jets_.tracksumecal,"tracksumecal[ntrack]/F");
   t->Branch("tracksumhcal",jets_.tracksumhcal,"tracksumhcal[ntrack]/F");
   t->Branch("trackqual",jets_.trackqual,"trackqual[ntrack]/I");
+
+  t->Branch("d0Err",jets_.trackd0Err,"d0Err[ntrack]/F");
+  t->Branch("dzErr",jets_.trackdzErr,"dzErr[ntrack]/F");
+  
+  t->Branch("d0",jets_.trackd0,"d0[ntrack]/F");
+  t->Branch("dz",jets_.trackdz,"dz[ntrack]/F");
+  
 
   if(isMC_){
     t->Branch("pthat",&jets_.pthat,"pthat/F");    
@@ -324,15 +344,33 @@ PFJetAnalyzer::analyze(const Event& iEvent,
 
   LogDebug("PFJetAnalyzer")<<"START event: "<<event<<" in run "<<run<<endl;
   
+  bool hasVertex = 0;
+  edm::Handle<reco::BeamSpot> beamSpotH;
+  iEvent.getByLabel(edm::InputTag("offlineBeamSpot"), beamSpotH);
 
   edm::Handle<vector<reco::Vertex> >vertex;
   iEvent.getByLabel(edm::InputTag("hiSelectedVertex"), vertex);  
- 
-  if(vertex->size()>0) {
+  
+  if(vertex->size()>0 || vertex->begin()->isFake()) {
+    hasVertex = 1;
     jets_.vx=vertex->begin()->x();
     jets_.vy=vertex->begin()->x();
     jets_.vz=vertex->begin()->z();
+    
+    jets_.vxErr = vertex->begin()->xError();
+    jets_.vyErr = vertex->begin()->yError();
+    jets_.vzErr = vertex->begin()->zError();
+  }else{
+    jets_.vx=beamSpotH->position().x();
+    jets_.vy=beamSpotH->position().y();
+    jets_.vz= 0;
+    
+    jets_.vxErr = beamSpotH->BeamWidthX();
+    jets_.vyErr = beamSpotH->BeamWidthY();
+    jets_.vzErr = 0;
   }
+
+  jets_.hasVtx = hasVertex;
 
  int bin = -1;
   double hf = 0.;
@@ -1082,6 +1120,22 @@ PFJetAnalyzer::analyze(const Event& iEvent,
      jets_.trackfake[jets_.ntrack]=0;
 
      reco::TrackRef trackRef=reco::TrackRef(tracks,it);
+
+     if(hasVertex){
+       jets_.trackd0[jets_.ntrack] = track.dxy(vertex->begin()->position());
+       jets_.trackdz[jets_.ntrack] = track.dz(vertex->begin()->position());
+       jets_.trackd0Err[jets_.ntrack] = sqrt ( (track.d0Error()*track.d0Error()) + (vertex->begin()->xError()*vertex->begin()->yError()) );
+       jets_.trackdzErr[jets_.ntrack] = sqrt ( (track.dzError()*track.dzError()) + (vertex->begin()->zError()*vertex->begin()->zError()) );
+     }else{
+       jets_.trackd0[jets_.ntrack] = track.dxy(beamSpotH->position());
+       jets_.trackdz[jets_.ntrack] = 0;
+       jets_.trackd0Err[jets_.ntrack] = sqrt ( (track.d0Error()*track.d0Error()) +  (beamSpotH->BeamWidthX()*beamSpotH->BeamWidthY()) );
+       jets_.trackdzErr[jets_.ntrack] = 0;
+     }
+
+
+
+
 
 
      if(hasSimInfo_)

@@ -96,6 +96,8 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     int bin;
     float b;
     float vx, vy, vz;
+    float vxErr, vyErr, vzErr;
+    bool hasVtx;
     float hf;
 
     float rawpt_j1[MAXJETS];
@@ -206,6 +208,10 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float tracksumhcal[MAXTRACKS];
     int trackfake[MAXTRACKS];
     int trackqual[MAXTRACKS];
+    int trackd0Err[MAXTRACKS];
+    int trackdzErr[MAXTRACKS];
+    int trackd0[MAXTRACKS];
+    int trackdz[MAXTRACKS];
 
     int ngenp;
     int genppdgId[MAXGENPS];
