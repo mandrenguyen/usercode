@@ -311,15 +311,13 @@ PFJetAnalyzer::beginJob() {
   t->Branch("d0",jets_.trackd0,"d0[ntrack]/F");
   t->Branch("dz",jets_.trackdz,"dz[ntrack]/F");
   
-  t->Branch("d0ErrBS",jets_.trackd0ErrBS,"d0ErrBS[ntrack]/F");
-  t->Branch("dzErrBS",jets_.trackdzErrBS,"dzErrBS[ntrack]/F");
-  
-  t->Branch("d0BS",jets_.trackd0BS,"d0BS[ntrack]/F");
-  t->Branch("dzBS",jets_.trackdzBS,"dzBS[ntrack]/F");
+  //  t->Branch("d0ErrBS",jets_.trackd0ErrBS,"d0ErrBS[ntrack]/F");
+  //  t->Branch("dzErrBS",jets_.trackdzErrBS,"dzErrBS[ntrack]/F");
+  //  t->Branch("d0BS",jets_.trackd0BS,"d0BS[ntrack]/F");
+  //  t->Branch("dzBS",jets_.trackdzBS,"dzBS[ntrack]/F");
 
   t->Branch("nlayer",jets_.trackNlayer,"nlayer[ntrack]/I");
   t->Branch("nlayer3D",jets_.trackNlayer3D,"nlayer3D[ntrack]/I");
-
 
   if(isMC_){
     t->Branch("pthat",&jets_.pthat,"pthat/F");    
