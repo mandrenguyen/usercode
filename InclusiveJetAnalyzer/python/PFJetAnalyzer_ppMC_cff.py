@@ -15,14 +15,21 @@ PFJetAnalyzer = cms.EDAnalyzer("PFJetAnalyzer",
                                genJetTag4 = cms.InputTag("ak3HiGenJets"),
                                pfCandidatesTag  = cms.InputTag("particleFlow",""),
                                trackTag  = cms.InputTag("hiGoodTracks"),
+                               vertexTag = cms.InputTag("hiSelectedVertex"),
                                isMC = cms.untracked.bool(True), 
                                genParticleThresh = cms.double(0.5),
                                genParticleTag = cms.InputTag("hiGenParticles"),
                                eventInfoTag = cms.InputTag("generator"),
                                useCentrality = cms.untracked.bool(False),
                                hasSimInfo = cms.untracked.bool(False),
-                               SimTracks = cms.InputTag("mergedtruth","MergedTrackTruth")
-                                       )
+                               SimTracks = cms.InputTag("mergedtruth","MergedTrackTruth"),
+                               L1gtReadout = cms.InputTag("gtDigis"),
+                               hltTrgResults = cms.untracked.string("TriggerResults::HLT"),
+                               hltTrgNames  = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core',
+                                                                    'HLT_Jet20_v1',
+                                                                    'HLT_Jet40_v1',
+                                                                    'HLT_Jet60_v1')
+                               )
 
 
 

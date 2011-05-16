@@ -54,14 +54,26 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
 
   void getPartons( const edm::Event & iEvent, const edm::EventSetup & iEs );
 
+  void fillL1Bits(const edm::Event &iEvent);
+
+  void fillHLTBits(const edm::Event &iEvent);
+
+  template <typename TYPE>
+    void                          getProduct(const std::string name, edm::Handle<TYPE> &prod,
+					     const edm::Event &event) const;    
+  template <typename TYPE>
+    bool                          getProductSafe(const std::string name, edm::Handle<TYPE> &prod,
+						 const edm::Event &event) const;
+
  private:
   
 
 
-  edm::InputTag  pfCandidatesTag_, trackTag_, simTracksTag_, genParticleTag_, eventInfoTag_;
+  edm::InputTag  pfCandidatesTag_, trackTag_, vertexTag_, simTracksTag_, genParticleTag_, eventInfoTag_;
   edm::InputTag jetTag1_, jetTag2_, jetTag3_, jetTag4_;
   edm::InputTag recoJetTag1_, recoJetTag2_, recoJetTag3_, recoJetTag4_;
   edm::InputTag genJetTag1_, genJetTag2_, genJetTag3_, genJetTag4_;
+  edm::InputTag L1gtReadout_; 
 
   /// verbose ?
   bool   verbose_;
@@ -71,6 +83,17 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   double genParticleThresh_;
 
   bool hasSimInfo_;
+
+
+  std::string                   hltResName_;         //HLT trigger results name
+  std::vector<std::string>      hltProcNames_;       //HLT process name(s)
+  std::vector<std::string>      hltTrgNames_;        //HLT trigger name(s)
+
+  std::vector<int>              hltTrgBits_;         //HLT trigger bit(s)
+  std::vector<bool>             hltTrgDeci_;         //HLT trigger descision(s)
+  std::vector<std::string>      hltTrgUsedNames_;    //HLT used trigger name(s)
+  std::string                   hltUsedResName_;     //used HLT trigger results name
+
 
   TTree *t;
   edm::Service<TFileService> fs2;
@@ -82,7 +105,7 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
   static const int MAXPFCANDS = 25000;
   static const int MAXTRACKS = 25000;
   static const int MAXGENPS = 25000;
-  
+  static const int MAXHLTBITS = 500000;
 
   struct JRA{
     
@@ -246,6 +269,16 @@ class PFJetAnalyzer : public edm::EDAnalyzer {
     float parton1_phi, parton2_phi;
     float parton1_eta, parton2_eta;
     float parton1_y, parton2_y;
+
+    // hlt
+    int nHLTBit;
+    bool hltBit[MAXHLTBITS];
+
+    // l1
+    int nL1TBit;
+    bool l1TBit[MAXHLTBITS];
+    int nL1ABit;
+    bool l1ABit[MAXHLTBITS];
   };
 
   JRA jets_;

@@ -47,6 +47,15 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMap.h"
+#include "L1Trigger/GlobalTrigger/interface/L1GlobalTrigger.h"
+
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 
@@ -75,6 +84,7 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
 
   pfCandidatesTag_ = iConfig.getParameter<InputTag>("pfCandidatesTag");
   trackTag_ = iConfig.getParameter<edm::InputTag>("trackTag");
+  vertexTag_ = iConfig.getParameter<edm::InputTag>("vertexTag");
 
   verbose_ = iConfig.getUntrackedParameter<bool>("verbose",false);
 
@@ -87,6 +97,23 @@ PFJetAnalyzer::PFJetAnalyzer(const edm::ParameterSet& iConfig) {
 
   hasSimInfo_ = iConfig.getUntrackedParameter<bool>("hasSimInfo");
   simTracksTag_ = iConfig.getParameter<InputTag>("SimTracks");
+
+  if(!isMC_){
+    L1gtReadout_ = iConfig.getParameter<edm::InputTag>("L1gtReadout");
+    hltResName_ = iConfig.getUntrackedParameter<string>("hltTrgResults","TriggerResults::HLT");
+    
+    
+    if (iConfig.exists("hltTrgNames"))
+      hltTrgNames_ = iConfig.getUntrackedParameter<vector<string> >("hltTrgNames");
+    
+    if (iConfig.exists("hltProcNames"))
+      hltProcNames_ = iConfig.getUntrackedParameter<vector<string> >("hltProcNames");
+    else {
+      hltProcNames_.push_back("FU");
+      hltProcNames_.push_back("HLT");
+    }
+  }
+
 
   cout<<" tracks : "<<trackTag_<<endl;
   cout<<" jet collection 1: "<<jetTag1_<<endl;
@@ -340,7 +367,18 @@ PFJetAnalyzer::beginJob() {
     t->Branch("genpeta",jets_.genpeta,"genpeta[ngenp]/F");
     t->Branch("genpphi",jets_.genpphi,"genpphi[ngenp]/F");
   }
-  
+  if(!isMC_){
+    t->Branch("nL1TBit",&jets_.nL1TBit,"nL1TBit/I");
+    t->Branch("l1TBit",jets_.l1TBit,"l1TBit[nL1TBit]/O");
+    
+    t->Branch("nL1ABit",&jets_.nL1ABit,"nL1ABit/I");
+    t->Branch("l1ABit",jets_.l1ABit,"l1ABit[nL1ABit]/O");
+
+    t->Branch("nHLTBit",&jets_.nHLTBit,"nHLTBit/I");
+    t->Branch("hltBit",jets_.hltBit,"hltBit[nHLTBit]/O");
+    
+  }
+
 
   TH1D::SetDefaultSumw2();
   
@@ -369,7 +407,9 @@ PFJetAnalyzer::analyze(const Event& iEvent,
   iEvent.getByLabel(edm::InputTag("offlineBeamSpot"), beamSpotH);
 
   edm::Handle<vector<reco::Vertex> >vertex;
-  iEvent.getByLabel(edm::InputTag("hiSelectedVertex"), vertex);  
+  iEvent.getByLabel(vertexTag_, vertex);  
+ 
+
   
   if(vertex->size()>0 || vertex->begin()->isFake()) {
     hasVertex = 1;
@@ -444,6 +484,10 @@ PFJetAnalyzer::analyze(const Event& iEvent,
    jets_.bin = bin;
    jets_.hf = hf;
    
+   if(!isMC_){
+     fillL1Bits(iEvent);
+     fillHLTBits(iEvent);
+   }
 
    edm::Handle<pat::JetCollection> jets1;
    iEvent.getByLabel(jetTag1_, jets1);
@@ -1349,6 +1393,99 @@ void PFJetAnalyzer::getPartons( const Event& iEvent, const EventSetup& iEs )
 
 }
 
+
+//--------------------------------------------------------------------------------------------------
+void PFJetAnalyzer::fillL1Bits(const edm::Event &iEvent)
+{
+  edm::Handle< L1GlobalTriggerReadoutRecord >  L1GlobalTrigger;
+
+  iEvent.getByLabel(L1gtReadout_, L1GlobalTrigger); 
+  const TechnicalTriggerWord&  technicalTriggerWordBeforeMask = L1GlobalTrigger->technicalTriggerWord();
+
+  for (int i=0; i<64;i++)
+    {
+      jets_.l1TBit[i] = technicalTriggerWordBeforeMask.at(i);
+    }
+  jets_.nL1TBit = 64;
+
+  int ntrigs = L1GlobalTrigger->decisionWord().size();
+  jets_.nL1ABit = ntrigs;
+
+  for (int i=0; i != ntrigs; i++) {
+    bool accept = L1GlobalTrigger->decisionWord()[i];
+    //jets_.l1ABit[i] = (accept == true)? 1:0;
+    if(accept== true){
+      jets_.l1ABit[i] = 1;
+    }
+    else{
+      jets_.l1ABit[i] = 0;
+    }
+    
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+void PFJetAnalyzer::fillHLTBits(const edm::Event &iEvent)
+{
+  // Fill HLT trigger bits.
+  Handle<TriggerResults> triggerResultsHLT;
+  getProduct(hltResName_, triggerResultsHLT, iEvent);
+
+  const TriggerResults *hltResults = triggerResultsHLT.product();
+  const TriggerNames & triggerNames = iEvent.triggerNames(*hltResults);
+
+  jets_.nHLTBit = triggerNames.size();
+
+  for(size_t i=0;i<hltTrgNames_.size();i++){
+   
+    for(size_t j=0;j<triggerNames.size();++j) {
+      
+      if(triggerNames.triggerName(j) == hltTrgNames_[i]){
+	
+	//cout <<"hltTrgNames_(i) "<<hltTrgNames_[i]<<endl;
+	//cout <<"triggerName(j) "<<triggerNames.triggerName(j)<<endl;
+	//cout<<" result "<<triggerResultsHLT->accept(j)<<endl;
+	jets_.hltBit[i] = triggerResultsHLT->accept(j);
+      }
+      
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+template <typename TYPE>
+inline void PFJetAnalyzer::getProduct(const std::string name, edm::Handle<TYPE> &prod,
+					 const edm::Event &event) const
+{
+  // Try to access data collection from EDM file. We check if we really get just one
+  // product with the given name. If not we throw an exception.
+
+  event.getByLabel(edm::InputTag(name),prod);
+  if (!prod.isValid()) 
+    throw edm::Exception(edm::errors::Configuration, "PFJetAnalyzer::GetProduct()\n")
+      << "Collection with label '" << name << "' is not valid" <<  std::endl;
+}
+
+//--------------------------------------------------------------------------------------------------
+template <typename TYPE>
+inline bool PFJetAnalyzer::getProductSafe(const std::string name, edm::Handle<TYPE> &prod,
+					     const edm::Event &event) const
+{
+  // Try to safely access data collection from EDM file. We check if we really get just one
+  // product with the given name. If not, we return false.
+
+  if (name.size()==0)
+    return false;
+
+  try {
+    event.getByLabel(edm::InputTag(name),prod);
+    if (!prod.isValid()) 
+      return false;
+  } catch (...) {
+    return false;
+  }
+  return true;
+}
 
 
 
