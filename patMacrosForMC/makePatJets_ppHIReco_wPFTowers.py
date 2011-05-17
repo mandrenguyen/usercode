@@ -56,7 +56,41 @@ overrideCentrality(process)
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
 
 
-if useHighPtTrackCollection:
+
+if useGoodTightCollection:
+
+    
+    process.jec = cms.ESSource("PoolDBESSource",
+                               DBParameters = cms.PSet(
+                    messageLevel = cms.untracked.int32(0)
+                    ),
+                               timetype = cms.string('runnumber'),
+                               toGet = cms.VPSet(
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_hiGoodTightTracks_D6T_399_IC5Calo"),
+                 label = cms.untracked.string("IC5Calo")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_399_AK3PF"),
+                 label = cms.untracked.string("AK3PF")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_399_AK4PF"),
+                 label = cms.untracked.string("AK4PF")
+                 ),
+        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+         tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_399_AK5PF"),
+                 label = cms.untracked.string("AK5PF")
+                 ),
+        ),
+                               connect = cms.string("sqlite_file:JEC_HI_PFTowers_hiGoodTightTracks_D6T_399.db"),
+                               
+)
+    
+
+
+elif useHighPtTrackCollection:
 
     process.jec = cms.ESSource("PoolDBESSource",
                                DBParameters = cms.PSet(
@@ -188,8 +222,8 @@ else:
 
 # Muon Reco
 from RecoHI.HiMuonAlgos.HiRecoMuon_cff import * 
-#muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJets")
-muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeCone5CaloJets")
+muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeConePu5CaloJets")
+#muons.JetExtractorPSet.JetCollectionLabel = cms.InputTag("iterativeCone5CaloJets")
 
 if useGoodTightCollection:
     process.globalMuons.TrackerCollectionLabel = cms.InputTag("hiGoodTightTracksDirect")
@@ -215,6 +249,18 @@ process.load("RecoHI.Configuration.Reconstruction_hiPF_cff")
 
 # good track selection
 process.load("edwenger.HiTrkEffAnalyzer.TrackSelections_cff")
+
+#***********************************
+#  for Efficiency analyzer need goodTight with Keep All off
+# Dpt/pt = 0.05
+process.hiGoodTightTracksDontKeepAll = process.hiGoodTightTracks.clone(keepAllTracks=False)
+# Dpt/pt = 0.06
+process.hiGoodTightTracksDirectDontKeepAll = process.hiGoodTightTracksDirect.clone(keepAllTracks=False)
+
+process.hiGoodTightTracksSelection *= process.hiGoodTightTracksDontKeepAll
+process.hiGoodTightTracksDirectSelection *= process.hiGoodTightTracksDirectDontKeepAll
+
+
 process.hiGoodTracksKeepAll = process.hiGoodTracks.clone()
 process.hiGoodTracksKeepAll.keepAllTracks = True
 process.hiGoodTracksSelection += process.hiGoodTracksKeepAll
@@ -262,6 +308,10 @@ process.load('RecoHI.HiJetAlgos.HiGenJets_cff')
 process.heavyIon
 
 #process.hiGenParticles.srcVector = cms.vstring('hiSignal')
+
+# needed for HERWIG
+process.hiGenParticles.abortOnUnknownPDGCode = cms.untracked.bool(False)
+process.hiGenParticlesForJets.abortOnUnknownPDGCode = cms.untracked.bool(False)
 
 #ignore neutrinos
 process.hiGenParticlesForJets.ignoreParticleIDs += cms.vuint32(12,14,16)
@@ -435,14 +485,18 @@ from Saved.QM11Ana.Analyzers_cff import hipixtrkEffAnalyzer_akpu3pf_j1
 from Saved.QM11Ana.Analyzers_cff import hipixtrkEffAnalyzer_akpu3pf_j2
 from Saved.QM11Ana.Analyzers_cff import hipixtrkEffAnalyzer_akpu3pf
 
+hitrkEffAnalyzer_akpu3pf_j1.useQaulityStr = False
+hitrkEffAnalyzer_akpu3pf_j2.useQaulityStr = False
+hitrkEffAnalyzer_akpu3pf.useQaulityStr = False
+
 if useGoodTightCollection:
-    trkAnalyzer.trackSrc = 'hiGoodTightTracksDirect'
-    hitrkEffAnalyzer_akpu3pf_j1.tracks = 'hiGoodTightTracksDirect'
-    hitrkEffAnalyzer_akpu3pf_j2.tracks = 'hiGoodTightTracksDirect'
-    hitrkEffAnalyzer_akpu3pf.tracks = 'hiGoodTightTracksDirect'
-    hipixtrkEffAnalyzer_akpu3pf_j1.tracks = 'hiGoodTightTracksDirect'
-    hipixtrkEffAnalyzer_akpu3pf_j2.tracks = 'hiGoodTightTracksDirect'
-    hipixtrkEffAnalyzer_akpu3pf.tracks = 'hiGoodTightTracksDirect'
+    trkAnalyzer.trackSrc = 'hiGoodTightTracksDirectDontKeepAll'
+    hitrkEffAnalyzer_akpu3pf_j1.tracks = 'hiGoodTightTracksDirectDontKeepAll'
+    hitrkEffAnalyzer_akpu3pf_j2.tracks = 'hiGoodTightTracksDirectDontKeepAll'
+    hitrkEffAnalyzer_akpu3pf.tracks = 'hiGoodTightTracksDirectDontKeepAll'
+    hipixtrkEffAnalyzer_akpu3pf_j1.tracks = 'hiGoodTightTracksDirectDontKeepAll'
+    hipixtrkEffAnalyzer_akpu3pf_j2.tracks = 'hiGoodTightTracksDirectDontKeepAll'
+    hipixtrkEffAnalyzer_akpu3pf.tracks = 'hiGoodTightTracksDirectDontKeepAll'
 elif useHighPtTrackCollection:
     trkAnalyzer.trackSrc = 'hiHighPtTracks'
     hitrkEffAnalyzer_akpu3pf_j1.tracks = 'hiHighPtTracks'
@@ -459,6 +513,29 @@ else:
     hipixtrkEffAnalyzer_akpu3pf_j1.tracks = 'hiGoodTracks'
     hipixtrkEffAnalyzer_akpu3pf_j2.tracks = 'hiGoodTracks'
     hipixtrkEffAnalyzer_akpu3pf.tracks = 'hiGoodTracks'
+
+
+
+process.hiGoodTightTrkEffAnalyzer_j1 = hitrkEffAnalyzer_akpu3pf_j1.clone(tracks = 'hiGoodTightTracksDontKeepAll')
+process.hiGoodTightTrkEffAnalyzer_j2 = hitrkEffAnalyzer_akpu3pf_j2.clone(tracks = 'hiGoodTightTracksDontKeepAll')
+process.hiGoodTightTrkEffAnalyzer = hitrkEffAnalyzer_akpu3pf.clone(tracks = 'hiGoodTightTracksDontKeepAll')
+process.hiHighPtTrkEffAnalyzer_j1 = hitrkEffAnalyzer_akpu3pf_j1.clone(tracks = 'hiHighPtTracksDirect')
+process.hiHighPtTrkEffAnalyzer_j2 = hitrkEffAnalyzer_akpu3pf_j2.clone(tracks = 'hiHighPtTracksDirect')
+process.hiHighPtTrkEffAnalyzer = hitrkEffAnalyzer_akpu3pf.clone(tracks = 'hiHighPtTracksDirect')
+
+
+process.hiGoodTightTrkEffAna = cms.Sequence(
+    process.hiGoodTightTrkEffAnalyzer_j1*
+    process.hiGoodTightTrkEffAnalyzer_j2*
+    process.hiGoodTightTrkEffAnalyzer
+    )
+
+process.hiHighPtTrkEffAna = cms.Sequence(
+    process.hiHighPtTrkEffAnalyzer_j1*
+    process.hiHighPtTrkEffAnalyzer_j2*
+    process.hiHighPtTrkEffAnalyzer
+    )
+
 
 process.trkAnalyzer = trkAnalyzer
 process.cutsTPForFak = cutsTPForFak
@@ -489,8 +566,8 @@ process.hitrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFak*process.cutsTPFo
 process.hipixtrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFakPxl*process.cutsTPForEffPxl*process.hipixtrkEffAnalyzer_akpu3pf*process.hipixtrkEffAnalyzer_akpu3pf_j1*process.hipixtrkEffAnalyzer_akpu3pf_j2)
 
 
-process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_akpu3pf*process.hipixtrkEffAna_akpu3pf*process.genpAnalyzer)
-
+#process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_akpu3pf*process.hipixtrkEffAna_akpu3pf*process.genpAnalyzer)
+process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_akpu3pf*process.hiGoodTightTrkEffAna*process.hiHighPtTrkEffAna*process.genpAnalyzer)
 
 process.load("PbPbTrackingTools.HiTrackValidator.hitrackvalidator_cfi")
 if useHighPtTrackCollection:
@@ -547,7 +624,9 @@ process.TFileService = cms.Service("TFileService",
 if useGoodTightCollection:
     process.trackRecoAndSelection = cms.Path(
         process.hiTrackReco*
+         process.hiPostGlobalPrimTracks*
         process.hiGoodTracksSelection*
+        process.hiGoodTightTracksSelection*
         process.hiGoodTightTracksDirectSelection*
         process.hiHighPtTrackDirectSelection*
         process.muonRecoPbPb 
