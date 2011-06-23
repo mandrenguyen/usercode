@@ -53,6 +53,7 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
   
 
   jetTag_ = iConfig.getParameter<InputTag>("jetTag");
+	vtxTag_ = iConfig.getUntrackedParameter<edm::InputTag>("vtxTag",edm::InputTag("hiSelectedVertex"));
 
   isMC_ = iConfig.getUntrackedParameter<bool>("isMC",false);
 
@@ -230,7 +231,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    
 
    edm::Handle<vector<reco::Vertex> >vertex;
-   iEvent.getByLabel(edm::InputTag("hiSelectedVertex"), vertex);
+   iEvent.getByLabel(vtxTag_, vertex);
 
    if(vertex->size()>0) {
      jets_.vx=vertex->begin()->x();
