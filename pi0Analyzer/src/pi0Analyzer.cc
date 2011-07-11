@@ -205,8 +205,12 @@ pi0Analyzer::analyze(const Event& iEvent,
 
 
        pi0s_.openAng[pi0s_.npi0s] = acos( gam1.Vect().Unit().Dot( gam2.Vect().Unit() ) );
-       pi0s_.invMass[pi0s_.npi0s] = pi0.M();
        
+       float pi0Mass = pi0.M();
+       if(pi0Mass>0.3) continue;
+
+       pi0s_.invMass[pi0s_.npi0s] = pi0Mass;
+              
        pi0s_.pi0_pt[pi0s_.npi0s] = pi0.Pt();
        pi0s_.pi0_px[pi0s_.npi0s] = pi0.Px();
        pi0s_.pi0_py[pi0s_.npi0s] = pi0.Py();
@@ -220,8 +224,8 @@ pi0Analyzer::analyze(const Event& iEvent,
        pi0s_.gam1_pz[pi0s_.npi0s] = gam1.Pz();
        pi0s_.gam1_E[pi0s_.npi0s] = gam1.E();
        pi0s_.gam1_eta[pi0s_.npi0s] = gam1.Eta();
-       //pi0s_.gam1_merged[pi0s_.npi0s] = (int) isMerged(cand1);
-       pi0s_.gam1_merged[pi0s_.npi0s] = 1;
+       pi0s_.gam1_merged[pi0s_.npi0s] = (int) isMerged(cand1);
+       //pi0s_.gam1_merged[pi0s_.npi0s] = 1;
 
 
        pi0s_.gam2_pt[pi0s_.npi0s] = gam2.Pt();
@@ -230,8 +234,8 @@ pi0Analyzer::analyze(const Event& iEvent,
        pi0s_.gam2_pz[pi0s_.npi0s] = gam2.Pz();
        pi0s_.gam2_E[pi0s_.npi0s] = gam2.E();
        pi0s_.gam2_eta[pi0s_.npi0s] = gam2.Eta();
-       //pi0s_.gam2_merged[pi0s_.npi0s] = (int) isMerged(cand2);
-       pi0s_.gam2_merged[pi0s_.npi0s] = 1;
+       pi0s_.gam2_merged[pi0s_.npi0s] = (int) isMerged(cand2);
+       //pi0s_.gam2_merged[pi0s_.npi0s] = 1;
        
 
        pi0s_.npi0s++;
