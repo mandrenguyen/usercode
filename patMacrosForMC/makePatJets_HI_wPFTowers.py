@@ -21,6 +21,7 @@ process.maxEvents = cms.untracked.PSet(
 isMinBias = False
 useHighPtTrackCollection = False
 useGoodTightCollection = True
+useBeamSpotConstraint = False
 
 #load some general stuff
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -32,9 +33,55 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 
+process.load("CommonTools.UtilAlgos.TFileService_cfi")
+
+ # openHLT stuff for reaction plane
+ 
+process.load("HLTrigger.HLTanalyzers.HI_HLTAnalyser_cff")
+process.hltanalysis.l1GtReadoutRecord = cms.InputTag("gtDigis")
+process.hltanalysis.RunParameters = cms.PSet(
+        HistogramFile  = cms.untracked.string("dummy"),
+            UseTFileService  = cms.untracked.bool(True),
+            Monte                = cms.bool(False),
+            Debug                = cms.bool(False),
+
+            ### added in 2010 ###
+            DoHeavyIon           = cms.untracked.bool(True),
+            DoMC           = cms.untracked.bool(False),
+            DoAlCa           = cms.untracked.bool(False),
+            DoTracks           = cms.untracked.bool(False),
+            DoVertex           = cms.untracked.bool(True),
+            DoJets           = cms.untracked.bool(True),
+
+            ### MCTruth
+            DoParticles          = cms.untracked.bool(False),
+            DoRapidity           = cms.untracked.bool(False),
+            DoVerticesByParticle = cms.untracked.bool(False),
+
+            ### Egamma
+            DoPhotons            = cms.untracked.bool(True),
+            DoElectrons          = cms.untracked.bool(False),
+            DoSuperClusters      = cms.untracked.bool(True),
+            ### Muon
+            DoMuons            = cms.untracked.bool(True),
+            DoL1Muons            = cms.untracked.bool(False),
+            DoL2Muons            = cms.untracked.bool(False),
+            DoL3Muons            = cms.untracked.bool(False),
+            DoOfflineMuons       = cms.untracked.bool(False),
+            DoQuarkonia          = cms.untracked.bool(False)
+        )
+# rec objects
+process.hltanalysis.recjets  = "iterativeConePu5CaloJets"
+process.hltanalysis.BarrelPhoton = "correctedIslandBarrelSuperClusters"
+process.hltanalysis.EndcapPhoton = "correctedIslandEndcapSuperClusters"
+
+process.load("RecoHI.HiEvtPlaneAlgos.HiEvtPlane_cfi")
+process.load("RecoHI.HiEvtPlaneAlgos.hievtplaneflatproducer_cfi")
+
+process.hltanalysis.EvtPlane = cms.InputTag("hiEvtPlaneFlat","recoLevel")
 # load centrality
 
-process.load("CommonTools.UtilAlgos.TFileService_cfi")
+
 
 process.HeavyIonGlobalParameters = cms.PSet(
            centralityVariable = cms.string("HFhits"),
@@ -46,6 +93,20 @@ from CmsHi.Analysis2010.CommonFunctions_cff import *
 overrideCentrality(process)
 
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
+
+process.rxn = cms.ESSource("PoolDBESSource",
+                           DBParameters = cms.PSet(
+    messageLevel = cms.untracked.int32(0)
+    ),
+                           timetype = cms.string('runnumber'),
+                           toGet = cms.VPSet(
+    cms.PSet(record = cms.string("RPFlatParamsRcd"),
+             tag = cms.string("flatParamtest"),
+             label = cms.untracked.string("")
+             )     
+    ),
+                           connect = cms.string("sqlite_file:flatparms.db")
+                           )
 
 
 if useGoodTightCollection:
@@ -68,21 +129,31 @@ if useGoodTightCollection:
         cms.PSet(record = cms.string("JetCorrectionsRecord"),
                  tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_399_AK4PF"),
                  label = cms.untracked.string("AK4PF")
-                 ),
-        
+                 ),        
         cms.PSet(record = cms.string("JetCorrectionsRecord"),
-         tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_399_AK5PF"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_399_AK5PF"),
                  label = cms.untracked.string("AK5PF")
                  ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_hiGoodTightTracks_D6T_399_AK3Calo"),
+                 label = cms.untracked.string("AK3Calo")
+                 ),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_hiGoodTightTracks_D6T_399_AK4Calo"),
+                 label = cms.untracked.string("AK4Calo")
+                 ),        
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+                 tag = cms.string("JetCorrectorParametersCollection_HI_hiGoodTightTracks_D6T_399_AK5Calo"),
+                 label = cms.untracked.string("AK5Calo")
+                 ),
         ),
-                               connect = cms.string("sqlite_file:JEC_HI_PFTowers_hiGoodTightTracks_D6T_399.db"),
+                               connect = cms.string("sqlite_file:JEC_HI_PFTowers_hiGoodTightTracks_D6T_399_v3.db"),
                                
 )
     
 
 
 elif useHighPtTrackCollection:
-                                                                                                          
 
     process.jec = cms.ESSource("PoolDBESSource",
                                DBParameters = cms.PSet(
@@ -188,9 +259,15 @@ process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")
 
 # keep all the tracks for muon reco, then hack flags such that 'tight' tracks are input into final track selection and final tracks are set to 'highPurity'  (Need a cleaner way to do this)
 
+if useBeamSpotConstraint:
+    process.hiPixelAdaptiveVertex.useBeamConstraint = cms.bool(True)
+    print "using beam spot constraint"
+else:
+    process.hiPixelAdaptiveVertex.useBeamConstraint = cms.bool(False)
+    print "not using beam spot constraint"
+
 if useGoodTightCollection:
     print "Using hiGoodTight track collection"
-    process.hiPixelAdaptiveVertex.useBeamConstraint = cms.bool(False)
 
 elif useHighPtTrackCollection:
     print "Using hiHighPtTracks collection"
@@ -339,11 +416,22 @@ process.ak3PFJets.rParam       = cms.double(0.3)
 process.ak4PFJets = process.ak5PFJets.clone()
 process.ak4PFJets.rParam       = cms.double(0.4)
 
+
+process.ak3CaloJets = process.akPu5CaloJets.clone()
+process.ak3CaloJets.rParam       = cms.double(0.3)
+
+
+process.ak4CaloJets = process.akPu5CaloJets.clone()
+process.ak4CaloJets.rParam       = cms.double(0.4)
+
     
 process.iterativeConePu5CaloJets.puPtMin = cms.double(10.0)
 process.ak5PFJets.puPtMin = cms.double(25.0)
 process.ak4PFJets.puPtMin = cms.double(20.0)
 process.ak3PFJets.puPtMin = cms.double(15.0)
+process.ak5CaloJets.puPtMin = cms.double(20.0)
+process.ak4CaloJets.puPtMin = cms.double(15.0)
+process.ak3CaloJets.puPtMin = cms.double(10.0)
 
 
 # PF using a grid of pseudo-towers to emulate Russian-style subtraction
@@ -440,6 +528,70 @@ process.akPu3PFpatSequence = cms.Sequence(process.akPu3PFJets*process.akPu3PFcor
 
 
 
+
+### AKPU5, PF  ###
+process.akPu5Jets = process.ak5CaloJets.clone()
+process.akPu5Jets.doPUOffsetCorr = cms.bool(True)
+process.akPu5Jets.sumRecHits = cms.bool(False)
+
+process.akPu5corr = process.patJetCorrFactors.clone(src = cms.InputTag("akPu5Jets"),
+                                                    levels = cms.vstring('L2Relative','L3Absolute'),
+                                                    payload = cms.string('AK5Calo')
+)
+process.akPu5clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('ak5HiGenJets'))
+process.akPu5match = process.patJetGenJetMatch.clone(src = cms.InputTag("akPu5Jets"),
+                                                     matched = cms.InputTag("akPu5clean"))
+process.akPu5parton = process.patJetPartonMatch.clone(src = cms.InputTag("akPu5Jets"))
+process.akPu5patJets = process.patJets.clone(jetSource  = cms.InputTag("akPu5Jets"),
+                                             genJetMatch = cms.InputTag("akPu5match"),
+                                             genPartonMatch= cms.InputTag("akPu5parton"),
+                                             jetCorrFactorsSource = cms.VInputTag(cms.InputTag("akPu5corr")))
+process.akPu5patSequence = cms.Sequence(process.akPu5Jets*process.akPu5corr*process.akPu5clean*process.akPu5match*process.akPu5parton*process.akPu5patJets)
+
+
+
+### AKPU4,   ###
+process.akPu4Jets = process.ak4CaloJets.clone()
+process.akPu4Jets.doPUOffsetCorr = cms.bool(True)
+process.akPu4Jets.sumRecHits = cms.bool(False)
+
+process.akPu4corr = process.patJetCorrFactors.clone(src = cms.InputTag("akPu4Jets"),
+                                                    levels = cms.vstring('L2Relative','L3Absolute'),
+                                                    payload = cms.string('AK4Calo')
+)
+process.akPu4clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('ak4HiGenJets'))
+process.akPu4match = process.patJetGenJetMatch.clone(src = cms.InputTag("akPu4Jets"),
+                                                     matched = cms.InputTag("akPu4clean"))
+process.akPu4parton = process.patJetPartonMatch.clone(src = cms.InputTag("akPu4Jets"))
+process.akPu4patJets = process.patJets.clone(jetSource  = cms.InputTag("akPu4Jets"),
+                                             genJetMatch = cms.InputTag("akPu4match"),
+                                             genPartonMatch= cms.InputTag("akPu4parton"),
+                                             jetCorrFactorsSource = cms.VInputTag(cms.InputTag("akPu4corr")))
+process.akPu4patSequence = cms.Sequence(process.akPu4Jets*process.akPu4corr*process.akPu4clean*process.akPu4match*process.akPu4parton*process.akPu4patJets)
+
+
+
+### AKPU3,   ###
+process.akPu3Jets = process.ak3CaloJets.clone()
+process.akPu3Jets.doPUOffsetCorr = cms.bool(True)
+process.akPu3Jets.sumRecHits = cms.bool(False)
+
+process.akPu3corr = process.patJetCorrFactors.clone(src = cms.InputTag("akPu3Jets"),
+                                                    levels = cms.vstring('L2Relative','L3Absolute'),
+                                                    payload = cms.string('AK3Calo')
+)
+process.akPu3clean = process.heavyIonCleanedGenJets.clone(src = cms.InputTag('ak3HiGenJets'))
+process.akPu3match = process.patJetGenJetMatch.clone(src = cms.InputTag("akPu3Jets"),
+                                                     matched = cms.InputTag("akPu3clean"))
+process.akPu3parton = process.patJetPartonMatch.clone(src = cms.InputTag("akPu3Jets"))
+process.akPu3patJets = process.patJets.clone(jetSource  = cms.InputTag("akPu3Jets"),
+                                             genJetMatch = cms.InputTag("akPu3match"),
+                                             genPartonMatch= cms.InputTag("akPu3parton"),
+                                             jetCorrFactorsSource = cms.VInputTag(cms.InputTag("akPu3corr")))
+process.akPu3patSequence = cms.Sequence(process.akPu3Jets*process.akPu3corr*process.akPu3clean*process.akPu3match*process.akPu3parton*process.akPu3patJets)
+
+
+
 # JPT
 
 
@@ -487,6 +639,9 @@ process.runAllJets = cms.Sequence(
     process.akPu5PFpatSequence +
     process.akPu4PFpatSequence +
     process.akPu3PFpatSequence +
+    process.akPu5patSequence +
+    process.akPu4patSequence +
+    process.akPu3patSequence +
     process.icPu5JPTpatSequence 
 )
 
@@ -506,16 +661,28 @@ process.akPu4PFJetAnalyzer.genjetTag = 'ak4HiGenJets'
 process.akPu3PFJetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.akPu3PFJetAnalyzer.jetTag = 'akPu3PFpatJets'
 process.akPu3PFJetAnalyzer.genjetTag = 'ak3HiGenJets'
+process.akPu5JetAnalyzer = process.inclusiveJetAnalyzer.clone()
+process.akPu5JetAnalyzer.jetTag = 'akPu5patJets'
+process.akPu5JetAnalyzer.genjetTag = 'ak5HiGenJets'
+process.akPu4JetAnalyzer = process.inclusiveJetAnalyzer.clone()
+process.akPu4JetAnalyzer.jetTag = 'akPu4patJets'
+process.akPu4JetAnalyzer.genjetTag = 'ak4HiGenJets'
+process.akPu3JetAnalyzer = process.inclusiveJetAnalyzer.clone()
+process.akPu3JetAnalyzer.jetTag = 'akPu3patJets'
+process.akPu3JetAnalyzer.genjetTag = 'ak3HiGenJets'
 process.icPu5JPTJetAnalyzer = process.inclusiveJetAnalyzer.clone()
 process.icPu5JPTJetAnalyzer.jetTag = 'jpticPu5patJets'
 
 
 process.inclusiveJetAnalyzerSequence = cms.Sequence(
-    #process.icPu5JetAnalyzer
-    #*process.akPu5PFJetAnalyzer
-    #*process.akPu4PFJetAnalyzer
-    #*process.akPu3PFJetAnalyzer
-    process.icPu5JPTJetAnalyzer
+    process.icPu5JetAnalyzer
+    *process.akPu5PFJetAnalyzer
+    *process.akPu4PFJetAnalyzer
+    *process.akPu3PFJetAnalyzer
+    *process.akPu5JetAnalyzer
+    *process.akPu4JetAnalyzer
+    *process.akPu3JetAnalyzer
+    *process.icPu5JPTJetAnalyzer
     )
 
 process.load("SimTracker.TrackAssociation.TrackAssociatorByHits_cfi")
@@ -659,18 +826,36 @@ process.hipixtrkEffAna_akpu3pf = cms.Sequence(process.cutsTPForFakPxl*process.cu
 process.franksAnalyzers = cms.Sequence(process.trkAnalyzer*process.hitrkEffAna_akpu3pf*process.hiGoodTightTrkEffAna*process.hiHighPtTrkEffAna*process.genpAnalyzer)
 
 #Yetkin's analyzer
-from CmsHi.JetAnalysis.ak3PFTowerJetsAna_cff import *
-process.yetkinsAna = akPu3PFtowerJetsAna.clone()
-process.RandomNumberGeneratorService.yetkinsAna = process.RandomNumberGeneratorService.generator.clone(initialSeed = 1)
+from CmsHi.JetAnalysis.towerJetsAna_cff import *
+process.akPu3PFtowerJetsAna = akPu3PFtowerJetsAna.clone()
+process.RandomNumberGeneratorService.akPu3PFtowerJetsAna = process.RandomNumberGeneratorService.generator.clone(initialSeed = 1)
+
+process.icPu5CalotowerJetsAna = icPu5CalotowerJetsAna.clone()
+process.RandomNumberGeneratorService.icPu5CalotowerJetsAna = process.RandomNumberGeneratorService.generator.clone(initialSeed = 1)
+
+process.yetkinsAna = cms.Sequence(
+    process.icPu5CalotowerJetsAna*
+    process.akPu3PFtowerJetsAna
+    )
+
+process.load("MNguyen.pi0Analyzer.pi0Analyzer_cff")
+
 
 #for tree output
 process.TFileService = cms.Service("TFileService",
                                    #fileName=cms.string("JetAnalysisTTrees_hiGoodMergedTracks_seedGoodTracks_v1.root"))
                                    fileName=cms.string("JetAnalysisTTrees_hiGoodTightTracks_v1.root"))
 
-
-
 # put it all together
+
+process.rxnPlaneOpenHLT = cms.Path(                        process. hiEvtPlane *
+                                 process.hiEvtPlaneFlat *
+                                 process.centralityBin *
+                                 process.hltanalysis
+                                 )
+
+
+
 if useGoodTightCollection:
     process.trackRecoAndSelection = cms.Path(
         process.hiTrackReco*
@@ -704,12 +889,13 @@ process.jetReco = cms.Path(
 process.jetAna = cms.Path(
     process.franksAnalyzers*
     process.hiValidatorSequence*
-    #process.inclusiveJetAnalyzerSequence*
-    process.PFJetAnalyzerSequence
+    process.inclusiveJetAnalyzerSequence
+    #process.PFJetAnalyzerSequence
     *process.yetkinsAna
+    *process.pi0Analyzer
     )
 
-process.schedule = cms.Schedule(process.trackRecoAndSelection, process.jetReco, process.jetAna)
+process.schedule = cms.Schedule(process.rxnPlaneOpenHLT, process.trackRecoAndSelection, process.jetReco, process.jetAna)
 
 
 
