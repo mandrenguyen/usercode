@@ -145,14 +145,8 @@ process.hitrkvalidator.neededCentBins = [0,1,3,11,19,35]
 process.hiGoodTightTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiGoodTightTracks"))
 process.hiGlobalPrimTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiGlobalPrimTracks"))
 process.hiScndGoodTightTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiScndGoodTightTracks"))
-process.hiScndMergedGlobalTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiScndMergedGlobalTracks"))
-process.hiScndMergedGoodTightTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiScndMergedGoodTightTracks"))
-process.hiScndMergedppTracksTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiScndMergedppTracks"))
-
 process.hiThrdGoodTightTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiThrdGoodTightTracks"))
-process.hiThrdMergedGlobalTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiThrdMergedGlobalTracks"))
-process.hiThrdMergedGoodTightTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiThrdMergedGoodTightTracks"))
-process.hiThrdMergedppTracksTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiThrdMergedppTracks"))
+process.hiGeneralTrkVal = process.hitrkvalidator.clone(trklabel=cms.untracked.InputTag("hiGeneralTracks"))
 
 
 process.hiCentrality.produceHFhits = cms.bool(True)
@@ -171,13 +165,8 @@ process.hiValidatorSequence = cms.Sequence(
     process.hiGoodTightTrkVal*
     process.hiGlobalPrimTrkVal*
     process.hiScndGoodTightTrkVal*
-    process.hiScndMergedGlobalTrkVal*
-    process.hiScndMergedGoodTightTrkVal*
-    process.hiScndMergedppTracksTrkVal*
     process.hiThrdGoodTightTrkVal*
-    process.hiThrdMergedGlobalTrkVal*
-    process.hiThrdMergedGoodTightTrkVal*
-    process.hiThrdMergedppTracksTrkVal
+    process.hiGeneralTrkVal
 )
 
 #process.load('edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff')
@@ -195,16 +184,8 @@ process.hitrkEffAnalyzer_hiGoodTight.useQaulityStr = cms.untracked.bool(False)
 
 
 process.hitrkEffAnalyzer_hiGlobalPrim = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiGlobalPrimTracks')
-#process.hitrkEffAnalyzer_hiScndGlobal = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiScndGlobalPrimTracks')
 process.hitrkEffAnalyzer_hiScndGoodTight = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiScndGoodTightTracks')
-#process.hitrkEffAnalyzer_hiScndMergedGlobal = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiScndMergedGlobalTracks')
-#process.hitrkEffAnalyzer_hiScndMergedGoodTight = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiScndMergedGoodTightTracks')
-#process.hitrkEffAnalyzer_hiScndMergedppTracks = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiScndMergedppTracks')
-#process.hitrkEffAnalyzer_hiThrdGlobal = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiThrdGlobalPrimTracks')
 process.hitrkEffAnalyzer_hiThrdGoodTight = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiThrdGoodTightTracks')
-#process.hitrkEffAnalyzer_hiThrdMergedGlobal = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiThrdMergedGlobalTracks')
-#process.hitrkEffAnalyzer_hiThrdMergedGoodTight = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiThrdMergedGoodTightTracks')
-#process.hitrkEffAnalyzer_hiThrdMergedppTracks = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiThrdMergedppTracks')
 process.hitrkEffAnalyzer_hiGeneralTracks = process.hitrkEffAnalyzer_hiGoodTight.clone(tracks = 'hiGeneralTracks')
 
 process.cutsTPForFak = cutsTPForFak
@@ -213,16 +194,8 @@ process.cutsTPForEff = cutsTPForEff
 process.hitrkEffAna = cms.Sequence(process.cutsTPForFak*process.cutsTPForEff*
                                    process.hitrkEffAnalyzer_hiGlobalPrim*
                                    process.hitrkEffAnalyzer_hiGoodTight*
-                                   #process.hitrkEffAnalyzer_hiScndGlobal*
                                    process.hitrkEffAnalyzer_hiScndGoodTight*
-                                   #process.hitrkEffAnalyzer_hiScndMergedGlobal*
-                                   #process.hitrkEffAnalyzer_hiScndMergedGoodTight*
-                                   #process.hitrkEffAnalyzer_hiScndMergedppTracks*
-                                   #process.hitrkEffAnalyzer_hiThrdGlobal*
                                    process.hitrkEffAnalyzer_hiThrdGoodTight*
-                                   #process.hitrkEffAnalyzer_hiThrdMergedGlobal*
-                                   #process.hitrkEffAnalyzer_hiThrdMergedGoodTight*
-                                   #process.hitrkEffAnalyzer_hiThrdMergedppTracks
                                    process.hitrkEffAnalyzer_hiGeneralTracks
                                    )
 
