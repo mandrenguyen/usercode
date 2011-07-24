@@ -3,8 +3,10 @@ import FWCore.ParameterSet.Config as cms
 #################################
 # Filter on quality tracks
 firstStepFilter = cms.EDProducer("QualityFilter",
-                                     TrackQuality = cms.string('highPurity'),
-                                     recTracks = cms.InputTag("hiGoodTightTracks")
+                                 TrackQuality = cms.string('highPurity'),
+                                 #TrackQuality = cms.string(''),
+                                 recTracks = cms.InputTag("hiGoodTightTracks")
+                                 #recTracks = cms.InputTag("hiGlobalPrimTracks")
                                  )
 
 # Remaining clusters
@@ -43,17 +45,15 @@ hiScndPixelLayerTriplets.BPix.HitProducer = 'hiScndPixelRecHits'
 hiScndPixelLayerTriplets.FPix.HitProducer = 'hiScndPixelRecHits'
 
 
-# Pixel Pair Seeding
+# Pixel Triplet Seeding
 from RecoTracker.TkSeedGenerator.GlobalSeedsFromTriplets_cff import *
 hiScndSeedFromTriplets = RecoTracker.TkSeedGenerator.GlobalSeedsFromTriplets_cff.globalSeedsFromTriplets.clone()
 hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.ptMin = 4.0
-# Ed's original second step value, which seems small.  hipixel tracking and most others use 0.2
+# Ed's original second step value, which keeps the timing down, but throws out secondaries
 hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.originRadius = 0.005
-#hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.originRadius = 2.0
-#hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.originRadius = 0.05
 # This one doesn't exist?
 #hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.fixedError=0.005
-#putting this one
+# another parameter that could be played with
 #hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.originHalfLength=1.0
 hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.VertexCollection=cms.InputTag("hiSelectedVertex")
 hiScndSeedFromTriplets.OrderedHitsFactoryPSet.SeedingLayers = cms.string('hiScndPixelLayerTriplets')
@@ -116,7 +116,8 @@ hiScndGlobalPrimTracks.AlgorithmName = 'iter1'
 #selection, can add a new hiGoodTight type selection here
 from MNguyen.iterTracking.TrackSelections_cff import *
 hiScndGoodTightTracks = hiGoodTightTracks.clone(
-    src = "hiScndGlobalPrimTracks"
+    src = "hiScndGlobalPrimTracks",
+    min_nhits = cms.uint32(14)
     )
 
 #traditional pp track selection

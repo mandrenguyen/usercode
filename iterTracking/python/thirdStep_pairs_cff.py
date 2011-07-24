@@ -4,9 +4,10 @@ import FWCore.ParameterSet.Config as cms
 #################################
 # Filter on quality tracks
 secondStepFilter = cms.EDProducer("QualityFilter",
-                                  TrackQuality = cms.string('highPurity'),
+                                  #TrackQuality = cms.string('highPurity'),
+                                  TrackQuality = cms.string(''),
                                   recTracks = cms.InputTag("hiScndGoodTightTracks")
-                                  #recTracks = cms.InputTag("hiScndMergedGoodTightTracks")
+                                  #recTracks = cms.InputTag("hiScndGlobalPrimTracks")
                                   )
 
 # Remaining clusters
@@ -52,11 +53,11 @@ hiThrdPixelLayerPairs.FPix.HitProducer = 'hiThrdPixelRecHits'
 from RecoTracker.TkSeedGenerator.GlobalSeedsFromPairsWithVertices_cff import *
 hiThrdSeedFromPairs = RecoTracker.TkSeedGenerator.GlobalSeedsFromPairsWithVertices_cff.globalSeedsFromPairsWithVertices.clone()
 hiThrdSeedFromPairs.RegionFactoryPSet.RegionPSet.ptMin = 4.0
-# Ed's original second step value, which seems small.  hipixel tracking and most others use 0.2
+# Ed's original second step value, which keeps the timing down, but throws out secondaries
 hiThrdSeedFromPairs.RegionFactoryPSet.RegionPSet.originRadius = 0.005
-# Thrds one doesn't exist?
+# This one doesn't exist?
 #hiThrdSeedFromPairs.RegionFactoryPSet.RegionPSet.fixedError=0.005
-#putting this one
+# another parameter that could be played with
 #hiThrdSeedFromPairs.RegionFactoryPSet.RegionPSet.originHalfLength=1.0
 hiThrdSeedFromPairs.RegionFactoryPSet.RegionPSet.VertexCollection=cms.InputTag("hiSelectedVertex")
 hiThrdSeedFromPairs.OrderedHitsFactoryPSet.SeedingLayers = cms.string('hiThrdPixelLayerPairs')
@@ -121,7 +122,8 @@ hiThrdGlobalPrimTracks.AlgorithmName = 'iter2'
 #selection, can add a new hiGoodTight type selection here
 from MNguyen.iterTracking.TrackSelections_cff import *
 hiThrdGoodTightTracks = hiGoodTightTracks.clone(
-    src = "hiThrdGlobalPrimTracks"
+    src = "hiThrdGlobalPrimTracks",
+    min_nhits = cms.uint32(14)
     )
 
 #traditional pp track selection
