@@ -64,6 +64,8 @@ InclusiveJetAnalyzer::InclusiveJetAnalyzer(const edm::ParameterSet& iConfig) {
   verbose_ = iConfig.getUntrackedParameter<bool>("verbose",false);
 
   useCentrality_ = iConfig.getUntrackedParameter<bool>("useCentrality",false);
+  useVtx_ = iConfig.getUntrackedParameter<bool>("useVtx",true);
+  useJEC_ = iConfig.getUntrackedParameter<bool>("useJEC",true);
 
   if(!isMC_){
     L1gtReadout_ = iConfig.getParameter<edm::InputTag>("L1gtReadout");
@@ -230,14 +232,16 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
    jets_.hf = hf;
    
 
-   edm::Handle<vector<reco::Vertex> >vertex;
-   iEvent.getByLabel(vtxTag_, vertex);
+	 if (useVtx_) {
+      edm::Handle<vector<reco::Vertex> >vertex;
+      iEvent.getByLabel(vtxTag_, vertex);
 
-   if(vertex->size()>0) {
-     jets_.vx=vertex->begin()->x();
-     jets_.vy=vertex->begin()->y();
-     jets_.vz=vertex->begin()->z();
-   }
+      if(vertex->size()>0) {
+        jets_.vx=vertex->begin()->x();
+        jets_.vy=vertex->begin()->y();
+        jets_.vz=vertex->begin()->z();
+      }
+	 }
    
 
 
@@ -260,7 +264,7 @@ InclusiveJetAnalyzer::analyze(const Event& iEvent,
      
      //cout<<" jet pt "<<jet.pt()<<endl;
      //if(jet.pt() < jetPtMin) continue;
-     jets_.rawpt[jets_.nref]=jet.correctedJet("Uncorrected").pt();
+     if (useJEC_) jets_.rawpt[jets_.nref]=jet.correctedJet("Uncorrected").pt();
      jets_.jtpt[jets_.nref] = jet.pt();                            
      jets_.jteta[jets_.nref] = jet.eta();
      jets_.jtphi[jets_.nref] = jet.phi();

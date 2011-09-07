@@ -71,6 +71,8 @@ class InclusiveJetAnalyzer : public edm::EDAnalyzer {
   bool   verbose_;
 
   bool useCentrality_;
+  bool useVtx_;
+  bool useJEC_;
   bool isMC_;
 
 
