@@ -405,7 +405,7 @@ void InclusiveJetAnalyzer::fillHLTBits(const edm::Event &iEvent)
   const TriggerResults *hltResults = triggerResultsHLT.product();
   const TriggerNames & triggerNames = iEvent.triggerNames(*hltResults);
 
-  jets_.nHLTBit = triggerNames.size();
+  jets_.nHLTBit = hltTrgNames_.size();
 
   for(size_t i=0;i<hltTrgNames_.size();i++){
    
