@@ -3,26 +3,9 @@
 # Revision: 1.232.2.6.2.2 
 # Source: /cvs/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
 # with command line options: test -n 2 -s RAW2DIGI,RECO,DQM,ALCA:HcalCalMinBias,REPACK:DigiToSplitRawRepack --eventcontent RECO,REPACKRAW,DQM --datatier RECO,RAW,DQM --data --scenario HeavyIons --no_exec --conditions GR_R_39X_V6B::All
-
-import FWCore.ParameterSet.VarParsing as VarParsing
-
-ivars = VarParsing.VarParsing('standard')
-ivars.files = 'dcache:/pnfs/cmsaf.mit.edu/t2bat/cms/store/user/yetkin/mixedSimPionRD_Cent_0_2p5_RAW///Mix_1.root'
-
-ivars.output = 'bambu.root'
-ivars.maxEvents = -1
-
-ivars.register ('randomNumber',
-                mult=ivars.multiplicity.singleton,
-                info="for testing")
-
-ivars.randomNumber=5
-ivars.parseArguments()
-
-
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process('RECO')
+process = cms.Process('RERECO')
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -30,7 +13,7 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.StandardSequences.GeometryDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-process.load('Configuration.StandardSequences.RawToDigi_cff')
+process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.load('Configuration.StandardSequences.ReconstructionHeavyIons_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -47,22 +30,21 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-                            fileNames= cms.untracked.vstring(ivars.files)   
-                            #  fileNames = cms.untracked.vstring('file:~/MattMix/Mix_9.root'
-                            #                                   #'file:ivan_95_1_VOF.root'
-                            #                                   )
-                            )
+    fileNames = cms.untracked.vstring('file:ROOTFiles/FE9995AE-D8FF-DF11-AB4D-003048F024DE_Core_RAW.root'
+                                      #'file:ivan_95_1_VOF.root'
+                                      )
+)
 
 process.options = cms.untracked.PSet(
-    
-    )
+
+)
 
 # Output definition
 
 process.RECOoutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
-    outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
-                                      fileName = cms.untracked.string(ivars.output),
+    outputCommands =process.FEVTDEBUGHLTEventContent.outputCommands,
+    fileName = cms.untracked.string('JetSkim_OldZS_RECO.root'),
     dataset = cms.untracked.PSet(
         filterName = cms.untracked.string(''),
         dataTier = cms.untracked.string('RECO')
@@ -73,8 +55,8 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 
 
 # Other statements
-#process.GlobalTag.globaltag = 'GR_R_39X_V6B::All'
-process.GlobalTag.globaltag = 'START42_V13::All'
+process.GlobalTag.globaltag = 'GR_R_39X_V6B::All'
+#process.GlobalTag.globaltag = 'STARTHI42_V8::All'
 #process.GlobalTag.globaltag = 'GR_R_42_V18::All'
 
 # Path and EndPath definitions
@@ -87,16 +69,6 @@ process.RECOoutput_step = cms.EndPath(process.RECOoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)
-
-
-def customiseBeamSpot(process):
-    process.GlobalTag.toGet = cms.VPSet(
-        cms.PSet(record = cms.string("BeamSpotObjectsRcd"),
-                 tag = cms.string("Realistic2.76ATeVCollisions_STARTUP_v0_mc"),
-                 connect = cms.untracked.string("frontier://FrontierProd/CMS_COND_31X_BEAMSPOT")
-                 )
-        )
-    return process
 
 def customiseSiStripConditions(process):
     process.stripConditions = cms.ESSource("PoolDBESSource",
@@ -157,24 +129,3 @@ def customiseSiStripConditions(process):
     
     process.es_prefer_strips = cms.ESPrefer("PoolDBESSource","stripConditions")
     return process
-
-
-
-def customiseDummyVtx(process):
-    # Dummy GEN -> RECO vertex
-    process.hiSelectedVertex = cms.EDProducer("GenToRecoVtxProducer",
-                                              signalLabel=cms.InputTag("generator"),                                            
-                                              dummyVtxError=cms.vdouble(0.0,0.0,0.0),
-                                              useBkgdVtxError=cms.bool(True),
-                                              bkgdVtxLabel=cms.InputTag("hiSelectedVertex"),
-                                              smearVtx=cms.bool(True)
-                                              )
-    return process
-
-def customiseBeamRaw(process):
-    customiseBeamSpot(process)
-    customiseSiStripConditions(process)
-    customiseDummyVtx(process)
-    return process
-
-process = customiseBeamRaw(process)
