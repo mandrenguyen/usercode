@@ -36,7 +36,8 @@ process.maxEvents = cms.untracked.PSet(
 
 #load some general stuff
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START42_V13::All'
+#process.GlobalTag.globaltag = 'START42_V13::All'
+process.GlobalTag.globaltag = 'GR_R_39X_V6B::All'
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.GeometryExtended_cff')
@@ -121,8 +122,8 @@ process.trackSel = cms.Path(
 )
 
 process.trackAna = cms.Path(
-    process.cutsTPForFak*
-    process.cutsTPForEff*    
+    #process.cutsTPForFak*
+    #process.cutsTPForEff*    
     process.hiValidatorSequence*
     process.hitrkEffAnalyzer*
     process.anaTrack*
