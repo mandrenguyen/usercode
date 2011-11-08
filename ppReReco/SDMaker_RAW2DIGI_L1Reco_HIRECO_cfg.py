@@ -36,7 +36,7 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.341 $'),
+    version = cms.untracked.string('$Revision: 1.1 $'),
     annotation = cms.untracked.string('step3 nevts:100'),
     name = cms.untracked.string('PyReleaseValidation')
 )
@@ -148,7 +148,7 @@ process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstructionHeavyIons_withPF)
 process.endjob_step = cms.EndPath(process.endOfProcess)
-process.RECOoutput_step = cms.EndPath(process.RECOoutput)
+#process.RECOoutput_step = cms.EndPath(process.RECOoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.filterSdJetHI,process.filterSdMuHI,process.filterSdPhotonHI,process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)
