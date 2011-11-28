@@ -58,7 +58,7 @@ hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.originRadius = 0.005
 hiScndSeedFromTriplets.RegionFactoryPSet.RegionPSet.VertexCollection=cms.InputTag("hiSelectedVertex")
 hiScndSeedFromTriplets.OrderedHitsFactoryPSet.SeedingLayers = cms.string('hiScndPixelLayerTriplets')
 hiScndSeedFromTriplets.ClusterCheckPSet.doClusterCheck=False
-hiScndSeedFromTriplets.OrderedHitsFactoryPSet.maxElement = 5000000
+#hiScndSeedFromTriplets.OrderedHitsFactoryPSet.maxElement = 5000000
 hiScndSeedFromTriplets.OrderedHitsFactoryPSet.GeneratorPSet.maxElement = 5000000
 hiScndSeedFromTriplets.ClusterCheckPSet.MaxNumberOfPixelClusters = 5000000
 
