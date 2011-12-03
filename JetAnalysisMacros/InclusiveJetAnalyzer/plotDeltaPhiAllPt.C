@@ -19,6 +19,7 @@
 
 #endif
 
+static const bool central = 0;
 
 //---------------------------------------------------------------------
 void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns, 
@@ -48,28 +49,21 @@ void drawText(const char *text, float xp, float yp);
 void drawPatch(float x1, float y1, float x2, float y2); 
 //---------------------------------------------------------------------
 
-void plotDeltaPhiAllCent(){
+void plotDeltaPhiAllPt(){
 
    TCanvas *c1 = new TCanvas("c1","",1050,700);
    makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.15,0.02);
 
+   TString label;
+
    c1->cd(1);
-   //   plotDeltaPhi(-1,"data.root","pythia.root","mix.root",true,false,false);
-   plotPPDPhiAll();  
- gPad->SetLogy();
-   drawText("(a)",0.22,0.9);
-   //drawText(" 0-100%",0.28,0.55);
-   //  drawPatch(0.976,0.0972,1.1,0.141);                                                                                                               
-   // gPad->SetBottomMargin(0.18);                                                                                                                      
-   //  gPad->SetLeftMargin(0.24);                                                                                                                       
-
-   c1->cd(2);
-   plotDeltaPhi(4,"data.root","pythia.root","mix.root",true,false,true);
+   label = plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,true);
    gPad->SetLogy();
-   drawText("50-100%",0.6,0.85);
-   drawText("(b)",0.02,0.9);
+   drawText(label.Data(),0.29,0.36);
+   //   drawText("(a)",0.02,0.9);
 
-  TLatex *lumi = new TLatex(0.55,0.15,"#intL dt = 40 #mub^{-1}");
+   //  TLatex *lumi = new TLatex(0.55,0.15,"#intL dt = 40 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.55,1,"#intL dt = 40 #mub^{-1}");
    lumi->SetTextFont(63);
    lumi->SetTextSize(15);
    lumi->Draw(); 
@@ -81,11 +75,11 @@ void plotDeltaPhiAllCent(){
   jetf->SetTextSize(15);
   jetf->Draw();
 
-   c1->cd(3);
-   plotDeltaPhi(3,"data.root","pythia.root","mix.root",true,false,false);
+  c1->cd(2);
+  label = plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText("30-50%",0.6,0.85);
-   drawText("(c)",0.02,0.9);
+   drawText(label.Data(),0.19,0.36);
+   //   drawText("(b)",0.02,0.9);
 
    TLatex tsel;
    tsel.SetNDC();
@@ -94,39 +88,57 @@ void plotDeltaPhiAllCent(){
    tsel.DrawLatex(0.15,0.78,"p_{T,1} > 120 GeV/c");
    tsel.DrawLatex(0.15,0.68,"p_{T,2} > 50 GeV/c");
    
- 
-   c1->cd(4);
-   plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false);
+   c1->cd(3);
+   label = plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText("20-30%",0.7,0.85);
-   drawText("(d)",0.22,0.93);
+   drawText(label.Data(),0.19,0.36);
+   //   drawText("(c)",0.22,0.93);
+   if(central){
+     drawText("0-20%",0.44,0.6);
+   }else{
+     drawText("30-100%",0.44,0.6);
+   }
+
    //drawPatch(0.976,0.0972,1.1,0.141);
-   c1->cd(5);
-   plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,true,false);
+   c1->cd(4);
+   label = plotDeltaPhi(3,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText("10-20%",0.6,0.85);
-   drawText("(e)",0.02,0.93);
+   drawText(label.Data(),0.29,0.46);
+   //   drawText("(d)",0.02,0.93);
    //   drawPatch(-0.00007,0.0972,0.0518,0.141);
    //drawPatch(0.976,0.0972,1.1,0.141);
-   //  gPad->SetBottomMargin(0.22);                                                                                                                     
+   //  gPad->SetBottomMargin(0.22);
 
-   c1->cd(6);
-   plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,false);
+   c1->cd(5);
+   label = plotDeltaPhi(4,"data.root","pythia.root","mix.root",true,true,false);
    gPad->SetLogy();
-   drawText("0-10%",0.6,0.85);
-   drawText("(f)",0.02,0.93);
+   drawText(label.Data(),0.19,0.46);
+   //   drawText("(e)",0.02,0.93);
    //   drawPatch(-0.00007,0.0972,0.0518,0.141);
    //  gPad->SetBottomMargin(0.22);                                 
 
-  c1->Print("./fig/dijet_dphi_all_cent_20101126_v0.gif");
-  c1->Print("./fig/dijet_dphi_all_cent_20101126_v0.eps");
-  c1->Print("./fig/dijet_dphi_all_cent_20101126_v0.pdf");
+   c1->cd(6);
+   label = plotDeltaPhi(5,"data.root","pythia.root","mix.root",true,false,false);
+   gPad->SetLogy();
+   drawText(label.Data(),0.19,0.46);
+   //   drawText("(f)",0.02,0.93);
+
+   if(central){
+     c1->Print("./fig/dijet_dphi_all_pt_20101126_0to20_v0.gif");
+     c1->Print("./fig/dijet_dphi_all_pt_20101126_0to20_v0.eps");
+     c1->Print("./fig/dijet_dphi_all_pt_20101126_0to20_v0.pdf");
+   }else{
+     c1->Print("./fig/dijet_dphi_all_pt_20101126_30to100_v0.gif");
+     c1->Print("./fig/dijet_dphi_all_pt_20101126_30to100_v0.eps");
+     c1->Print("./fig/dijet_dphi_all_pt_20101126_30to100_v0.pdf");
+   }
+
 
 }
 
 
 
-void plotDeltaPhi(int cbin,
+TString plotDeltaPhi(int cbin,
 		  TString infname,
 		  TString pythia,
 		  TString mix,
@@ -137,32 +149,37 @@ void plotDeltaPhi(int cbin,
 
   useWeight = 0;
 
-  TString cut="pt1>120 && pt2>50 && abs(eta1) < 2 && abs(eta2) < 2";
-  TString cutpp="pt1>120 && pt2>50 && abs(eta1) < 2 && abs(eta2) < 2";
+  TString cut="pt1>120 && pt2>50 && abs(eta1) < 2 && abs(eta2) < 2 && bin < 8";
+  TString cutpp="pt1>120 && pt2>50 && abs(eta1) < 2 && abs(eta2) < 2 && bin < 8";
+  if(!central){
+    cut="pt1>120 && pt2>50 && abs(eta1) < 2 && abs(eta2) < 2 && bin >= 12 && bin < 40";
+  }
  
   TString cstring = "";
+
   if(cbin==-1) {
-     cstring = "0-100%";
-     cut+=" && bin>=0 && bin<40";
-  }
-  else if(cbin==0) {
-     cstring = "0-10%";
-     cut+=" && bin>=0 && bin<4";
+    cstring = "p_{T} > 120";
+    cut+=" && pt1>120";
+  } else if(cbin==0) {
+    cstring = "120 < p_{T} < 140";
+    cut+=" && pt1>=120 && pt1<140";
   } else if (cbin==1) {
-     cstring = "10-20%";
-     cut+=" && bin>=4 && bin<8";
+    cstring = "140 < p_{T} < 160";
+    cut+=" && pt1>=140 && pt1<160";
   } else if (cbin==2) {
-     cstring = "20-30%";
-     cut+=" && bin>=8 && bin<12";
+    cstring = "160 < p_{T} < 180";
+    cut+=" && pt1>=160 && pt1<180";
   } else if (cbin==3) {
-     cstring = "30-50%";
-     cut+=" && bin>=12 && bin<20";
+    cstring = "180 < p_{T} < 210";
+    cut+=" && pt1>=180 && pt1<210";
+  } else if (cbin==4) {
+    cstring = "210 < p_{T} < 270";
+    cut+=" && pt1>=210 && pt1<270";
+  } else if (cbin==5) {
+    cstring = "270 < p_{T} < 360";
+    cut+=" && pt1>=270 && pt1<360";
   }
-  else {
-     cstring = "50-100%";
-     cut+=" && bin>=20";
-  }
-  
+
   
 
   // open the data file
@@ -185,8 +202,8 @@ void plotDeltaPhi(int cbin,
   ntPythia->SetAlias("pt2","et2");
 
   nt->SetAlias("adphi","acos(cos(phi1-phi2))");
-  ntMix->SetAlias("adphi","dphi");
-  ntPythia->SetAlias("adphi","dphi");
+  ntMix->SetAlias("adphi","acos(cos(phi1-phi2))");
+  ntPythia->SetAlias("adphi","acos(cos(phi1-phi2))");
 
 
   // projection histogram
@@ -264,12 +281,15 @@ void plotDeltaPhi(int cbin,
 
 
 
+  hDataMix->SetMaximum(4);
+  hDataMix->SetMinimum(0.0001);
+
   hDataMix->Draw("hist");
   //hPythia->Draw("same");
   h->Draw("same");
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.15,0.53,0.69,0.73);
+    TLegend *t3=new TLegend(0.25,0.53,0.79,0.73);
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //    t3->AddEntry(h,"2011","p");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
@@ -282,6 +302,8 @@ void plotDeltaPhi(int cbin,
     t3->SetTextSize(15);
     t3->Draw();
   }
+
+  return cstring;
 
 }
 
@@ -441,9 +463,7 @@ void plotPPDPhiAll(){
 
   //hDum->Draw("hist");
 
-  hDijetBal_mc->SetAxisRange(5e-4,0.6,"Y");
-
-
+  hDijetBal_mc->SetAxisRange(5e-4,6,"Y");
 
   hDijetBal_mc->Draw("hist");
   hDijetBal_data->Draw("pzsame");

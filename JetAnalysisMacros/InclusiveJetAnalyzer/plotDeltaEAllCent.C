@@ -19,6 +19,9 @@
 #include "TGraphAsymmErrors.h"
 #include "TF1.h"
 
+static const bool doFit = 0;
+static const int type = 3;
+
 
 //---------------------------------------------------------------------
 void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns, 
@@ -55,13 +58,22 @@ void drawDum(float min, float max, double drawXLabel);
 void drawPatch(float x1, float y1, float x2, float y2); 
 //---------------------------------------------------------------------
 
-TGraphAsymmErrors *calcEff(TH1* h1, TH1* h2)
+TGraphAsymmErrors *calcEff(TH1* h1, TH1* h2, int shift = 0)
 {
    h1->Sumw2();
    h2->Sumw2();
    h2->Divide(h1);
    TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors(h2);
-   
+
+   double x,y; 
+   if(shift !=0){
+     for(int i = 0; i < gEfficiency->GetN(); ++i){
+       gEfficiency->GetPoint(i,x,y);
+       gEfficiency->SetPoint(i,x-2*shift,y);
+     }
+
+   }
+  
    return gEfficiency;
 }
 
@@ -100,6 +112,8 @@ void plotDeltaEAllCent(){
   drawPatch(-0.0007,0.0972,0.0518,0.141);
   drawPatch(0.93,0.0972,1.1,0.141);
   drawText("(c)",0.02,0.9);
+
+
 /*
   TLatex *cms = new TLatex(0.35,0.1825,"CMS");
   cms->SetTextFont(63);
@@ -111,10 +125,11 @@ void plotDeltaEAllCent(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 */
-  c1->Print("./fig/deltaPtOverPt1_all_cent_20101219_v1.gif");
-  c1->Print("./fig/deltaPtOverPt1_all_cent_20101219_v1.eps");
-  c1->Print("./fig/deltaPtOverPt1_all_cent_20101219_v1.pdf");
-  c1->Print("./fig/deltaPtOverPt1_all_cent_20101219_v1.C");
+  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.gif",type,doFit ? "_fit" : ""));
+  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.eps",type,doFit ? "_fit" : ""));
+  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.pdf",type,doFit ? "_fit" : ""));
+  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.C",type,doFit ? "_fit" : ""));
+
 
 }
 
@@ -127,18 +142,18 @@ void plotDE(  int cbin,
 		 bool drawLeg)
 {		
   gStyle->SetErrorX(0); 
-  TString cut="et1>120&&et2>50&&dphi>3.14159265359*2/3";
-  TString cutpp="et1>120&&et2>50&&dphi>3.14159265359*2/3";
+  TString cut="pt1>120&&pt2>50&&abs(dphi)>3.14159265359*2/3&& abs(eta1) < 2 && abs(eta2) < 2";
+  TString cutpp="pt1>120&&pt2>50&&abs(dphi)>3.14159265359*2/3&& abs(eta1) < 2 && abs(eta2) < 2";
   TString trigcut = "";
   TString cstring = "";
   TString divide = "";
-  int type = 1;
-
+  useWeight = 0;
   
-  if (type==1) divide = "/et1";
-  if (type==2) divide = "/et2";
+  if (type==0) divide = "/1";
+  if (type==1) divide = "/pt1";
+  if (type==2) divide = "/pt2";
+  if (type==3) divide = "/(pt1+pt2)";
   
-
   if(cbin==0) {
     cstring = "0-10%";
     cut+=" && bin>=0 && bin<4";
@@ -152,7 +167,6 @@ void plotDE(  int cbin,
     cstring = "0-100%";
   }
 
-
   // open the data file
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
@@ -165,34 +179,55 @@ void plotDE(  int cbin,
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
 
-  const int nBin = 4;
-//  double m[nBin+1] = {100,110,120,130,140,170,240};
-//  double m[nBin+1] = {120,130,140,170,240};
-    double m[nBin+1] = {120,140,160,180,240};
-  
-  
+  /*
+  ntMix->SetAlias("pt1","et1");
+  ntMix->SetAlias("pt2","et2");
+  ntPythia->SetAlias("pt1","et1");
+  ntPythia->SetAlias("pt2","et2");
+  */
 
+  nt->SetAlias("adphi","acos(cos(phi1-phi2))");
+  ntMix->SetAlias("adphi","abs(dphi)");
+  ntPythia->SetAlias("adphi","abs(dphi)");
+
+  const int nBin = 6;
+  //  double m[nBin+1] = {100,110,120,130,140,170,240};
+  //  double m[nBin+1] = {120,130,140,170,240};
+  double m[nBin+1] = {120,140,160,180,210,270,360};
+  
   TH1D *hTmp = new TH1D("hTmp","",100,m[0],m[nBin]);
   TH1D *h = new TH1D("h","",nBin,m);
   TH1D *h2 = new TH1D("h2","",nBin,m);
 
+  h->Reset();
+  h2->Reset();
   
-  nt->Draw("et1>>h",Form("(et1-et2)%s*(%s)",divide.Data(),cut.Data()));
-  nt->Draw("et1>>h2",Form("%s",cut.Data()));
+  nt->Draw("pt1>>h",Form("(pt1-pt2)%s*(%s)",divide.Data(),cut.Data()));
+  nt->Draw("pt1>>h2",Form("%s",cut.Data()));
   TGraphAsymmErrors *g = calcEff(h2,h);
+  h->Reset();
+  h2->Reset();
 
-  ntPythia->Draw("et1>>h",Form("(et1-et2)%s*(%s)",divide.Data(),cutpp.Data()));
-  ntPythia->Draw("et1>>h2",Form("%s",cutpp.Data()));
-  TGraphAsymmErrors *gPythia = calcEff(h2,h);
+  ntPythia->Draw("pt1>>h",Form("(pt1-pt2)%s*(%s)",divide.Data(),cutpp.Data()));
+  ntPythia->Draw("pt1>>h2",Form("%s",cutpp.Data()));
+  TGraphAsymmErrors *gPythia = calcEff(h2,h,-1);
+  h->Reset();
+  h2->Reset();
   
-  ntMix->Draw("et1>>h",Form("(et1-et2)%s*(%s)",divide.Data(),cut.Data()));
-  ntMix->Draw("et1>>h2",Form("%s",cut.Data()));
-  TGraphAsymmErrors *gMix = calcEff(h2,h);
+  ntMix->Draw("pt1>>h",Form("(pt1-pt2)%s*(%s)",divide.Data(),cut.Data()));
+  ntMix->Draw("pt1>>h2",Form("%s",cut.Data()));
+  TGraphAsymmErrors *gMix = calcEff(h2,h,1);
 
-  //  hTmp->SetMaximum(g->GetY()[0]*2.2);
   hTmp->SetMaximum(0.6);
-  if (type==0) hTmp->SetMaximum(100);
+  if(type == 1) hTmp->SetMaximum(0.5);
+  if(type == 3) hTmp->SetMaximum(1.2);
   hTmp->SetMinimum(0.1);
+
+  if (type==0) hTmp->SetMaximum(150);
+  if (type==3){ 
+    hTmp->SetMaximum(0.35);
+    hTmp->SetMinimum(0.05);
+  }
 
   if (drawXLabel) {
      hTmp->SetXTitle("Leading Jet p_{T} (GeV/c)");
@@ -204,6 +239,8 @@ void plotDE(  int cbin,
 
   hTmp->SetYTitle(Form("<(p_{T,1}-p_{T,2})/p_{T,1}>"));
   if (type==0) hTmp->SetYTitle(Form("<(p_{T}^{1}-p_{T}^{2})> (GeV/c)"));
+  if (type==3) hTmp->SetYTitle(Form("<A_{J}>"));
+
   hTmp->GetYaxis()->CenterTitle();
   hTmp->GetYaxis()->SetTitleOffset(1.5);
   hTmp->GetXaxis()->SetLabelSize(22);
@@ -211,76 +248,111 @@ void plotDE(  int cbin,
 
   hTmp->Draw();
 
-  TGraphAsymmErrors *gFitPythia = (TGraphAsymmErrors*) gMix->Clone();  
+  TGraphAsymmErrors *gFitPythia = (TGraphAsymmErrors*) gPythia->Clone();  
   TGraphAsymmErrors *gFit = (TGraphAsymmErrors*) g->Clone();  
 
   TF1 *f;
-  if (type==1) f = new TF1("f","[0]+[1]*x+[2]*x*x+[3]",100,220);
-  else         f = new TF1("f","[0]+[1]*x+[2]*x*x+[3]*x",100,220);
+  if (type==1) f = new TF1("f","[0]+[1]*x+[2]*x*x+[3]",100,250);
+  else         f = new TF1("f","[0]+[1]*x+[2]*x*x+[3]*x",100,250);
   f->SetLineColor(2);
   f->SetLineStyle(2);
   f->SetLineWidth(1);
   f->FixParameter(3,0);
-//  gFitPythia->Fit("f");
-//  gFitPythia->Fit("f");
-//  gFitPythia->Fit("f");
   f->SetLineColor(1);
-  
+
+  //  gFitPythia->Fit(f,"MR");
+
+  if(type == 1){
+  f->SetParameter(0,0.120068);
+  f->SetParameter(1,0.00187116);
+  f->SetParameter(2,-5.50113e-06);
+  }else{
+    f->SetParameter(0,-40.0787);
+    f->SetParameter(1,0.786485);
+    f->SetParameter(2,-0.00162406);
+  }
+
   f->FixParameter(0,f->GetParameter(0));
   f->FixParameter(1,f->GetParameter(1));
   f->FixParameter(2,f->GetParameter(2));
   f->ReleaseParameter(3);
 
-  //gFit->Fit("f");
+  if(doFit) gFit->Fit(f,"MR");
+  if(doFit) gFit->Fit(f,"MR");
+  if(doFit) gFit->Fit(f,"MR");
 
   TF1 *f2;
-  if (type==1) f2 = new TF1("f2","[0]+[1]*x+[2]*x*x+[3]/x",100,220);
-  else         f2 = new TF1("f2","[0]+[1]*x+[2]*x*x+[3]",100,220);
+  if (type==1) f2 = new TF1("f2","[0]+[1]*x+[2]*x*x+[3]/x",100,250);
+  else         f2 = new TF1("f2","[0]+[1]*x+[2]*x*x+[3]",100,250);
   f2->SetLineColor(4);
   f2->SetLineWidth(1);
   f2->FixParameter(3,0);
-//  gFitPythia->Fit("f2");
-//  gFitPythia->Fit("f2");
-//  gFitPythia->Fit("f2");
   f2->SetLineColor(1);
+
+  //  gFitPythia->Fit(f,"MR");
+  if(type == 1){
+    f->SetParameter(0,0.120068);
+    f->SetParameter(1,0.00187116);
+    f->SetParameter(2,-5.50113e-06);
+  }else{
+    f->SetParameter(0,-40.0787);
+    f->SetParameter(1,0.786485);
+    f->SetParameter(2,-0.00162406);
+  }
+
   
-  f2->FixParameter(0,f2->GetParameter(0));
-  f2->FixParameter(1,f2->GetParameter(1));
-  f2->FixParameter(2,f2->GetParameter(2));
+  f2->FixParameter(0,f->GetParameter(0));
+  f2->FixParameter(1,f->GetParameter(1));
+  f2->FixParameter(2,f->GetParameter(2));
   f2->ReleaseParameter(3);
 
-
-
-  //gFit->Fit("f2");
+  if(doFit){
+  gFit->Fit(f2,"MR");
+  gFit->Fit(f2,"MR");
+  gFit->Fit(f2,"MR");
+  }
 
   double tickSize;
-  if (type==1) tickSize=0.012;
-  else tickSize=0.6;
+
+  tickSize=0.6;
+
+  if(type == 3) tickSize=0.003;
+  if (type==1 || type==2) tickSize=0.012;
+
   
   double erroDEar = 0.02;
   for(int i = 0; i < g->GetN(); ++i){
     double *x = g->GetX();
     double *y = g->GetY();
-    DrawTick(y[i],0.082*y[i],0.082*y[i],x[i],tickSize,4,1);
+    DrawTick(y[i],0.082*y[i],0.082*y[i],x[i],tickSize,4,2);
   }
   g->Draw("p same");
   g->SetMarkerSize(1.25);
+  g->SetMarkerColor(2);
+  g->SetLineColor(2);
+
   gPythia->SetMarkerSize(1.7);
   gPythia->SetMarkerColor(4);
   gPythia->SetMarkerStyle(29);
   gPythia->SetLineColor(4);
-  gMix->SetMarkerColor(2);
-  gMix->SetMarkerStyle(21);
+  gMix->SetMarkerColor(4);
+  gMix->SetMarkerStyle(25);
   gMix->SetMarkerSize(1.25);
-  gMix->SetLineColor(2);
+  gMix->SetLineColor(4);
+
+  gMix->SetLineStyle(1);
+
+
   g->SetName("g");
   gPythia->SetName("gPythia");
   gMix->SetName("gMix");
   gMix->Draw("p same");
   gPythia->Draw("p same");
+  if(doFit){
   f->Draw("same");
   f2->Draw("same");
-  
+  }
+
   TLine* pline = new TLine(m[0],gPythia->GetY()[0],m[nBin],gPythia->GetY()[0]);
   pline->SetLineColor(4);
   pline->SetLineStyle(4);
@@ -288,23 +360,34 @@ void plotDE(  int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.43,0.76,0.93,0.93); 
-    t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    //    t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    if(0){
+        t3->AddEntry(g,"2011","p");
+        t3->AddEntry(gMix,"2010","p");
+    }else{
+      t3->AddEntry(g,"Pb+Pb 2011","p");
+      t3->AddEntry(gMix,"embedded PYTHIA","p");
+    }
+
     t3->AddEntry(gPythia,"PYTHIA","p");  
-    t3->AddEntry(gMix,"embedded PYTHIA","p");
-    //t3->AddEntry(f,"Constant Ratio","l");
-    //t3->AddEntry(f2,"Constant Difference","l");
+
+    if(doFit){
+    t3->AddEntry(f,"Constant Ratio","l");
+    t3->AddEntry(f2,"Constant Difference","l");
+    }
+
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
     t3->SetTextFont(63);
     t3->SetTextSize(15);
     t3->Draw();
-  TLatex *cms = new TLatex(0.15,0.88,"CMS");
+  TLatex *cms = new TLatex(0.11,0.88,"CMS Preliminary");
   cms->SetNDC();
   cms->SetTextFont(63);
   cms->SetTextSize(18);
   cms->Draw();                                                                                                                                        
-  TLatex *lumi = new TLatex(0.15,0.81,"#intL dt = 6.7 #mub^{-1}");
+  TLatex *lumi = new TLatex(0.11,0.81,"#intL dt = 40 #mub^{-1}");
   lumi->SetNDC();
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
@@ -323,8 +406,11 @@ void plotBalanceRatio(int cbin,
 		 bool drawXLabel,
 		 bool drawLeg)
 {
-  TString cut="et1>120 && et2>50 && dphi>2.5";
-  TString cutpp="et1>120 && et2>50 && dphi>2.5";
+
+  useWeight = 0;
+
+  TString cut="pt1>120 && pt2>50 && abs(dphi)>2.5";
+  TString cutpp="pt1>120 && pt2>50 && abs(dphi)>2.5";
   TString cstring = "";
   if(cbin==0) {
     cstring = "0-10%";
@@ -354,16 +440,18 @@ void plotBalanceRatio(int cbin,
   TH1D *h = new TH1D("h","",20,0,1);
   TH1D *hPythia = new TH1D("hPythia","",20,0,1);
   TH1D *hDataMix = new TH1D("hDataMix","",20,0,1);
-  nt->Draw("(et1-et2)/(et1+et2)>>h",Form("(%s)",cut.Data())); 
+  nt->Draw("(pt1-pt2)/(pt1+pt2)>>h",Form("(%s)",cut.Data())); 
+
+  useWeight = 0;
   
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntMix->Draw("(et1-et2)/(et1+et2)>>hDataMix",Form("(%s)*weight",cut.Data())); 
+    ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMix",Form("(%s)*weight",cut.Data())); 
   } else {
     // ignore centrality reweighting
-    ntMix->Draw("(et1-et2)/(et1+et2)>>hDataMix",Form("(%s)",cut.Data()));  
+    ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMix",Form("(%s)",cut.Data()));  
   }
-  ntPythia->Draw("(et1-et2)/(et1+et2)>>hPythia",Form("(%s)",cutpp.Data()));
+  ntPythia->Draw("(pt1-pt2)/(pt1+pt2)>>hPythia",Form("(%s)",cutpp.Data()));
 
   // calculate the statistical error and normalize
   h->Sumw2();
@@ -413,9 +501,12 @@ void plotBalanceRatio(int cbin,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.31,0.675,0.85,0.88); 
-    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
-    t3->AddEntry(hPythia,"PYTHIA","lf");  
-    t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
+    //    t3->AddEntry(h,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    //    t3->AddEntry(hPythia,"PYTHIA","lf");  
+    //    t3->AddEntry(hDataMix,"embedded PYTHIA","lf");
+
+    t3->AddEntry(h,"2011","p");
+    t3->AddEntry(hPythia,"2010","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);

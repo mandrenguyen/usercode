@@ -51,8 +51,8 @@ void plotRJ(  double ajCut=0.24,
 		 bool drawLeg = true)
 {		
   gStyle->SetErrorX(0); 
-  TString cut="et1>120 && et2>50 && dphi>2.5";
-  TString cutpp="et1>120 && et2>50 && dphi>2.5";
+  TString cut="et1>120 && et2>50 && abs(dphi)>2.5 && abs(eta1) < 2 && abs(eta2) < 2";
+  TString cutpp="et1>120 && et2>50 && abs(dphi)>2.5 && abs(eta1) < 2 && abs(eta2) < 2";
   TString trigcut = "";
   TString cstring = "";
 
@@ -67,6 +67,15 @@ void plotRJ(  double ajCut=0.24,
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
+
+  nt->SetAlias("et1","pt1");
+  nt->SetAlias("et2","pt2");
+
+  ntPythia->SetAlias("pt1","et1");
+  ntPythia->SetAlias("pt2","et2");
+
+  ntMix->SetAlias("pt1","et1");
+  ntMix->SetAlias("pt2","et2");
 
   // open output
   TFile *outfile = new TFile("output.root","recreate");
@@ -171,9 +180,15 @@ void plotRJ(  double ajCut=0.24,
 
   if(drawLeg){
     TLegend *t3=new TLegend(0.5,0.77,0.9,0.93); 
-    t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
-    t3->AddEntry(gPythia,"PYTHIA","pl");  
-    t3->AddEntry(gMix,"embedded PYTHIA","pl");
+
+    //    t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","pl");
+    //    t3->AddEntry(gPythia,"PYTHIA","pl");  
+    //    t3->AddEntry(gMix,"embedded PYTHIA","pl");
+
+    t3->AddEntry(g,"2011","pl");
+    t3->AddEntry(gMix,"2010","pl");
+    t3->AddEntry(gPythia,"PYTHIA","pl");
+
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
