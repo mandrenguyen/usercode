@@ -90,12 +90,14 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
 
 
   static const int MAXELES = 500;
+  static const int MAXGENS = 500;
   static const int MAXHLTBITS = 5000;
 
 
   struct ELE{
     
     int nref;
+    int ngen;
     int run;
     int evt;
     int lumi;
@@ -150,6 +152,38 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
     double MC_closest_DR_phi[MAXELES];
     double MC_closest_DR_eta[MAXELES];
     double MC_closest_DR_e[MAXELES];
+
+
+
+    
+    double gen_ee[MAXGENS];
+    double gen_ept[MAXGENS];
+    double gen_eeta[MAXGENS];
+    double gen_ephi[MAXGENS];
+
+    int    isMatched[MAXGENS];
+    double mee[MAXGENS];
+    double mep[MAXGENS];
+    double mept[MAXGENS];
+    double meeta[MAXGENS];
+    double mephi[MAXGENS];
+    int    mecharge[MAXGENS];
+    double mhOe[MAXGENS];
+    double msigmaietaieta[MAXGENS];
+    double meseedOpout[MAXGENS];
+    double meOp[MAXGENS];
+    double meseedOp[MAXGENS];
+    double meeleOpout[MAXGENS];
+    double mdeltaetain[MAXGENS];
+    double mdeltaphiin[MAXGENS];
+    double msigmaetaeta[MAXGENS];
+    double me15[MAXGENS];
+    double me25max[MAXGENS];
+    double me55[MAXGENS];
+    double mfbrem[MAXGENS];
+    double mmva[MAXGENS];
+    int    misbarrel[MAXGENS];
+    int    misendcap[MAXGENS];
 
 
     // hlt

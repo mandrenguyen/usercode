@@ -118,6 +118,7 @@ ElectronAnalyzer::beginJob() {
   t->Branch("hf",&ele_.hf,"hf/D");
   t->Branch("nref",&ele_.nref,"nref/I");
   t->Branch("bin",&ele_.bin,"bin/I");
+  t->Branch("ngen",&ele_.ngen,"ngen/I");
 
   // reconstructed electrons 
   t->Branch("ee",ele_.ee,"ee[nref]/D");
@@ -168,7 +169,35 @@ ElectronAnalyzer::beginJob() {
     t->Branch("MC_closest_DR_eta",ele_.MC_closest_DR_eta,"MC_closest_DR_eta[nref]/D");
     t->Branch("MC_closest_DR_e",ele_.MC_closest_DR_e,"MC_closest_DR_e[nref]/D");
 
-    
+    t->Branch("isMatched",ele_.isMatched,"isMatched[ngen]/I");
+    t->Branch("gen_ee",ele_.gen_ee,"gen_ee[ngen]/D");
+    t->Branch("gen_ept",ele_.gen_ept,"gen_ept[ngen]/D");
+    t->Branch("gen_ephi",ele_.gen_ephi,"gen_ephi[ngen]/D");
+    t->Branch("gen_eeta",ele_.gen_eeta,"gen_eeta[ngen]/D");
+
+    // reconstructed electrons matched to gen
+    t->Branch("mee",ele_.mee,"mee[ngen]/D");
+    t->Branch("mep",ele_.mep,"mep[ngen]/D");
+    t->Branch("mept",ele_.mept,"mept[ngen]/D");
+    t->Branch("mephi",ele_.mephi,"mephi[ngen]/D");
+    t->Branch("meeta",ele_.meeta,"meeta[ngen]/D");
+    t->Branch("mecharge",ele_.mecharge,"mecharge[ngen]/I");
+    t->Branch("mhOe",ele_.mhOe,"mhOe[ngen]/D");
+    t->Branch("msigmaietaieta",ele_.msigmaietaieta,"msigmaietaieta[ngen]/D");
+    t->Branch("meseedpout",ele_.meseedOpout,"meseedpout[ngen]/D");
+    t->Branch("meOp",ele_.meOp,"meOp[ngen]/D");
+    t->Branch("meseedOp",ele_.meseedOp,"meseedOp[ngen]/D");  
+    t->Branch("meeleOpout",ele_.meeleOpout,"meeleOpout[ngen]/D");
+    t->Branch("mdeltaetain",ele_.mdeltaetain,"mdeltaetain[ngen]/D");
+    t->Branch("mdeltaphiin",ele_.mdeltaphiin,"mdeltaphiin[ngen]/D");
+    t->Branch("msigmaetaeta",ele_.msigmaetaeta,"msigmaetaeta[ngen]/D");
+    t->Branch("me15",ele_.me15,"me15[ngen]/D");
+    t->Branch("me25max",ele_.me25max,"me25max[ngen]/D");
+    t->Branch("me55",ele_.me55,"me55[ngen]/D");
+    t->Branch("mfbrem",ele_.mfbrem,"mfbrem[ngen]/D");
+    t->Branch("mmva",ele_.mmva,"mmva[ngen]/D");
+    t->Branch("misbarrel",ele_.misbarrel,"misbarrel[ngen]/I");
+    t->Branch("misendcap",ele_.misendcap,"misendcap[ngen]/I");
   }
   
   if(!isMC_){
@@ -279,8 +308,8 @@ ElectronAnalyzer::analyze(const Event& iEvent,
      ele_.ep[ele_.nref] = (*EleHandle)[i].p();
      ele_.ee[ele_.nref] = (*EleHandle)[i].energy();
      ele_.ept[ele_.nref] = (*EleHandle)[i].pt();
-     ele_.ephi[ele_.nref] = (*EleHandle)[i].eta();
-     ele_.eeta[ele_.nref] = (*EleHandle)[i].phi();
+     ele_.ephi[ele_.nref] = (*EleHandle)[i].phi();
+     ele_.eeta[ele_.nref] = (*EleHandle)[i].eta();
      ele_.echarge[ele_.nref] = (*EleHandle)[i].charge(); 
      ele_.hOe[ele_.nref]      = (*EleHandle)[i].hadronicOverEm() ;	
      ele_.eseedOpout[ele_.nref] = (*EleHandle)[i].eSeedClusterOverPout();
@@ -469,8 +498,103 @@ ElectronAnalyzer::analyze(const Event& iEvent,
      
    } // loop over electrons
          
+
+   if(isMC_){
+
+     // loop over the generated electrons and match them to the closest reconstructed one
+     edm::Handle<GenParticleCollection> genCandidatesCollection;
+     //iEvent.getByLabel("genParticles", genCandidatesCollection);
+     iEvent.getByLabel("hiGenParticles", genCandidatesCollection);
+     
+     ele_.ngen = 0;
+     
+     // ----------------------------
+     //      Loop on particles
+     // ----------------------------
+     for( GenParticleCollection::const_iterator p = genCandidatesCollection->begin();p != genCandidatesCollection->end(); ++ p ) {
+       
+       if (abs(p->pdgId()) != 11||p->status()!=1) continue;
+	   
+	   double genPtMin = 2.;
+	   if(p->pt() < genPtMin) continue;
+	   
+	   ele_.gen_ee[ele_.ngen]=p->energy();
+	   ele_.gen_ept[ele_.ngen]=p->pt();
+	   ele_.gen_ephi[ele_.ngen]=p->phi();
+	   ele_.gen_eeta[ele_.ngen]=p->eta();
+
+	   ele_.isMatched[ele_.ngen]=0;
+
+	   float bestPtGen2Rec = 999;
+	   int bestMatchIndex=-1;
+
+	   // see if there's a matched electron
+	   for(unsigned i=0; i< EleHandle->size(); i++){
+	     
+	     edm::Ref<reco::GsfElectronCollection> electronEdmRef(EleHandle,i);
+	     
+	     float eta = (*EleHandle)[i].eta();
+	     float phi = (*EleHandle)[i].phi();
+
+	     //matching conditions
+	     double dphi = phi-p->phi();
+	     if (fabs(dphi)>CLHEP::pi)
+	       dphi = dphi < 0? (CLHEP::twopi) + dphi : dphi - CLHEP::twopi;
+	     double deta = eta - p->eta();
+	     float deltaR = sqrt(pow(deta,2) + pow(dphi,2));
+	     
+	     if(deltaR<0.15)
+	       {
+		 float pt = (*EleHandle)[i].pt();
+		 if(pt>0){
+		   double  ptGen2Rec = abs(p->pt()/pt-1.);
+		   if(ptGen2Rec<0.3&& ptGen2Rec < bestPtGen2Rec){
+		     bestPtGen2Rec = ptGen2Rec;
+		     bestMatchIndex=i;
+		   }
+		   
+		 }
+	       }	     
+	     
+	   }
+
+	   if(bestMatchIndex>=0){
+	     ele_.isMatched[ele_.ngen] = 1;
+	     ele_.mep[ele_.ngen] = (*EleHandle)[bestMatchIndex].p();
+	     ele_.mee[ele_.ngen] = (*EleHandle)[bestMatchIndex].energy();
+	     ele_.mept[ele_.ngen] = (*EleHandle)[bestMatchIndex].pt();
+	     ele_.mephi[ele_.ngen] = (*EleHandle)[bestMatchIndex].phi();
+	     ele_.meeta[ele_.ngen] = (*EleHandle)[bestMatchIndex].eta();
+	     ele_.mecharge[ele_.ngen] = (*EleHandle)[bestMatchIndex].charge(); 
+	     ele_.mhOe[ele_.ngen]      = (*EleHandle)[bestMatchIndex].hadronicOverEm() ;	
+	     ele_.meseedOpout[ele_.ngen] = (*EleHandle)[bestMatchIndex].eSeedClusterOverPout();
+	     ele_.meOp[ele_.ngen]        = (*EleHandle)[bestMatchIndex].eSuperClusterOverP() ;        
+	     ele_.meseedOp[ele_.ngen]    = (*EleHandle)[bestMatchIndex].eSeedClusterOverP() ;         
+	     ele_.meeleOpout[ele_.ngen]  = (*EleHandle)[bestMatchIndex].eEleClusterOverPout() ;      
+	     ele_.mdeltaetain[ele_.ngen]   = (*EleHandle)[bestMatchIndex].deltaEtaSuperClusterTrackAtVtx();
+	     ele_.mdeltaphiin[ele_.ngen]   = (*EleHandle)[bestMatchIndex].deltaPhiSuperClusterTrackAtVtx();   
+	     ele_.msigmaietaieta[ele_.ngen] = (*EleHandle)[bestMatchIndex].sigmaIetaIeta() ; 	
+	     ele_.me15[ele_.ngen]           = (*EleHandle)[bestMatchIndex].e1x5() ;
+	     ele_.me25max[ele_.ngen]        = (*EleHandle)[bestMatchIndex].e2x5Max() ;
+	     ele_.me55[ele_.ngen]           = (*EleHandle)[bestMatchIndex].e5x5() ;
+	     ele_.msigmaetaeta[ele_.ngen]   = (*EleHandle)[bestMatchIndex].sigmaEtaEta() ;
+	     ele_.mfbrem[ele_.ngen] = (*EleHandle)[bestMatchIndex].fbrem() ;
+	     ele_.mmva[ele_.ngen]   = (*EleHandle)[bestMatchIndex].mva() ;
+	   }
+
+
+	   ele_.ngen++;
+	   
+     } // for loop on gen particles
+   } // is MC
+
+
+   
    t->Fill();
+   memset(&ele_,0, sizeof ele_);
+
 }
+
 
 
   
