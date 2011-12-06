@@ -111,14 +111,19 @@ ElectronAnalyzer::beginJob() {
   t->Branch("run",&ele_.run,"run/I");
   t->Branch("evt",&ele_.evt,"evt/I");
   t->Branch("lumi",&ele_.lumi,"lumi/I");
-  t->Branch("b",&ele_.b,"b/D");
-  t->Branch("vx",&ele_.vx,"vx/D");
-  t->Branch("vy",&ele_.vy,"vy/D");
-  t->Branch("vz",&ele_.vz,"vz/D");
-  t->Branch("hf",&ele_.hf,"hf/D");
   t->Branch("nref",&ele_.nref,"nref/I");
-  t->Branch("bin",&ele_.bin,"bin/I");
   t->Branch("ngen",&ele_.ngen,"ngen/I");
+
+  if(useCentrality_){
+    t->Branch("b",&ele_.b,"b/D");
+    t->Branch("bin",&ele_.bin,"bin/I");
+    t->Branch("hf",&ele_.hf,"hf/D");
+  }
+  if(useVtx_){
+    t->Branch("vx",&ele_.vx,"vx/D");
+    t->Branch("vy",&ele_.vy,"vy/D");
+    t->Branch("vz",&ele_.vz,"vz/D");
+  }
 
   // reconstructed electrons 
   t->Branch("ee",ele_.ee,"ee[nref]/D");
@@ -420,8 +425,12 @@ ElectronAnalyzer::analyze(const Event& iEvent,
 	 
 	 double ptMC = sqrt(pxMC*pxMC+pyMC*pyMC);
 	 double pMC = sqrt(pxMC*pxMC+pyMC*pyMC+pzMC+pzMC);
-	 double thetaMC = atan2(ptMC,pMC);
-	 double etaMC = -1.*log(tan(thetaMC/2.));
+	 double thetaMC = -99.;
+	 double etaMC = -99.;
+	 if(pMC>0){
+	   thetaMC = atan2(ptMC,pMC);	 
+	   etaMC = -1.*log(tan(thetaMC/2.));
+	 }
 	 double phiMC = atan2(pyMC,pxMC);
 
 	 ele_.isMCEle[ele_.nref] = 1;   
