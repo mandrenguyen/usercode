@@ -54,5 +54,15 @@ hiGoodTightTracks = hiGoodTracks.clone(src = cms.InputTag("hiGlobalPrimTracks"),
                                        cutOnTightQuality = cms.bool(False)
                                        )
 
+# this selection is used for calo-compatible tracks 
+hiLooseTracks = hiGoodTracks.clone(src = cms.InputTag("hiGlobalPrimTracks"),
+                                   qualityBit = cms.string('loose'),
+                                   min_relpterr = cms.double(0.10),
+                                   min_nhits = cms.uint32(10),
+                                   chi2n_par = cms.double(0.15),
+                                   d0_par2 = cms.vdouble(8.0, 0.0),
+                                   dz_par2 = cms.vdouble(8.0, 0.0)
+                                   )
+
 hiGoodTracksSelection = cms.Sequence(hiGoodTracks)
 hiGoodTightTracksSelection = cms.Sequence(hiGoodTightTracks)
