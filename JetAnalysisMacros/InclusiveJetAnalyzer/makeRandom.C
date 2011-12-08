@@ -13,7 +13,7 @@
 void makeRandom(int N = 1000000){
 
   TFile* outf = new TFile("random.root","recreate");
-  TNtuple* nt = new TNtuple("ntRandom","","unc1:unc2");
+  TNtuple* nt = new TNtuple("ntRandom","","r1:r2");
 
   TRandom* gen = new TRandom();
 
