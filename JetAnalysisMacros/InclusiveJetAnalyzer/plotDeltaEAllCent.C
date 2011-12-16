@@ -19,8 +19,10 @@
 #include "TGraphAsymmErrors.h"
 #include "TF1.h"
 
-static const bool doFit = 0;
-static const int type = 3;
+#include "weightMix.C"
+
+static const bool doFit = 1;
+static const int type = 1;
 
 
 //---------------------------------------------------------------------
@@ -58,7 +60,7 @@ void drawDum(float min, float max, double drawXLabel);
 void drawPatch(float x1, float y1, float x2, float y2); 
 //---------------------------------------------------------------------
 
-TGraphAsymmErrors *calcEff(TH1* h1, TH1* h2, int shift = 0)
+TGraphAsymmErrors *calcEff(TH1* h1, TH1* h2, int shift = 0, double* bincenters = 0)
 {
    h1->Sumw2();
    h2->Sumw2();
@@ -66,10 +68,11 @@ TGraphAsymmErrors *calcEff(TH1* h1, TH1* h2, int shift = 0)
    TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors(h2);
 
    double x,y; 
-   if(shift !=0){
+   if(1){
      for(int i = 0; i < gEfficiency->GetN(); ++i){
        gEfficiency->GetPoint(i,x,y);
-       gEfficiency->SetPoint(i,x-2*shift,y);
+       x = bincenters[i];
+       gEfficiency->SetPoint(i,x,y);
      }
 
    }
@@ -79,19 +82,32 @@ TGraphAsymmErrors *calcEff(TH1* h1, TH1* h2, int shift = 0)
 
 void plotDeltaEAllCent(){
 
+  weightMix();
   TCanvas *c1 = new TCanvas("c1","",1250,530);
 
   makeMultiPanelCanvas(c1,3,1,0.0,0.0,0.2,0.15,0.02);
 
   c1->cd(1);
-  plotDE(2,"data.root","pythia.root","mix.root",true,false,false);
+  plotDE(2,"data.root","data_pp.root","mix.root",true,false,false);
   drawText("30-100%",0.76,0.24);
   drawPatch(0.94,0.0972,1.1,0.141);
   drawText("(a)",0.22,0.9);
 
+  TLatex *cms = new TLatex(0.31,0.92,"CMS Preliminary");
+  cms->SetNDC();
+  cms->SetTextFont(63);
+  cms->SetTextSize(18);
+  cms->Draw();  
+
+  TLatex *lumi = new TLatex(0.31,0.85,Form("%s #mub^{-1}",LUM));
+  lumi->SetNDC();
+  lumi->SetTextFont(63);
+  lumi->SetTextSize(15);
+  lumi->Draw();
+
 
   c1->cd(2);
-  plotDE(1,"data.root","pythia.root","mix.root",true,true,false);
+  plotDE(1,"data.root","data_pp.root","mix.root",true,true,false);
   drawText("10-30%",0.75,0.24);
   drawPatch(-0.0007,0.0972,0.0518,0.141);
   drawPatch(0.94,0.0972,1.1,0.141);
@@ -101,13 +117,12 @@ void plotDeltaEAllCent(){
   tsel.SetNDC();
   tsel.SetTextFont(63);
   tsel.SetTextSize(15);
-  tsel.DrawLatex(0.55,0.9,"p_{T,1} > 120 GeV/c");
-  tsel.DrawLatex(0.55,0.825,"p_{T,2} > 50 GeV/c");
-  tsel.DrawLatex(0.55,0.75,"#Delta#phi_{12} > #frac{2}{3}#pi");
-
+  tsel.DrawLatex(0.25,0.9,Form("p_{T,1} > %d GeV/c",leadCut));
+  tsel.DrawLatex(0.25,0.825,Form("p_{T,2} > %d GeV/c",subleadCut));
+  tsel.DrawLatex(0.25,0.75,"#Delta#phi_{12} > #frac{2}{3}#pi");
 
   c1->cd(3);
-  plotDE(0,"data.root","pythia.root","mix.root",true,false,true);
+  plotDE(0,"data.root","data_pp.root","mix.root",true,false,true);
   drawText("0-10%",0.75,0.24);
   drawPatch(-0.0007,0.0972,0.0518,0.141);
   drawPatch(0.93,0.0972,1.1,0.141);
@@ -125,10 +140,10 @@ void plotDeltaEAllCent(){
   lumi->SetTextSize(15);
   lumi->Draw(); 
 */
-  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.gif",type,doFit ? "_fit" : ""));
-  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.eps",type,doFit ? "_fit" : ""));
-  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.pdf",type,doFit ? "_fit" : ""));
-  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_v2.C",type,doFit ? "_fit" : ""));
+  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_lead%d_sub%d_v2.gif",type,doFit ? "_fit" : "",leadCut,subleadCut));
+  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_lead%d_sub%d_v2.eps",type,doFit ? "_fit" : "",leadCut,subleadCut));
+  c1->Print(Form("./fig/deltaPtOverPt%d_all_cent_20111124%s_lead%d_sub%d_v2.pdf",type,doFit ? "_fit" : "",leadCut,subleadCut));
+
 
 
 }
@@ -142,18 +157,19 @@ void plotDE(  int cbin,
 		 bool drawLeg)
 {		
   gStyle->SetErrorX(0); 
-  TString cut="pt1>120&&pt2>50&&abs(dphi)>3.14159265359*2/3&& abs(eta1) < 2 && abs(eta2) < 2";
-  TString cutpp="pt1>120&&pt2>50&&abs(dphi)>3.14159265359*2/3&& abs(eta1) < 2 && abs(eta2) < 2";
+  TString cut="pt1>120&&pt2>30&&abs(dphi)>3.14159265359*2/3&& abs(eta1) < 2 && abs(eta2) < 2";
+  TString cutpp="pt1>120&&pt2>30&&abs(dphi)>3.14159265359*2/3&& abs(eta1) < 2 && abs(eta2) < 2";
   TString trigcut = "";
   TString cstring = "";
   TString divide = "";
-  useWeight = 0;
+  //  useWeight = 0;
   
   if (type==0) divide = "/1";
   if (type==1) divide = "/pt1";
   if (type==2) divide = "/pt2";
   if (type==3) divide = "/(pt1+pt2)";
   
+
   if(cbin==0) {
     cstring = "0-10%";
     cut+=" && bin>=0 && bin<4";
@@ -166,6 +182,7 @@ void plotDE(  int cbin,
   } else if (cbin==3) {
     cstring = "0-100%";
   }
+
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
@@ -189,44 +206,79 @@ void plotDE(  int cbin,
   nt->SetAlias("adphi","acos(cos(phi1-phi2))");
   ntMix->SetAlias("adphi","abs(dphi)");
   ntPythia->SetAlias("adphi","abs(dphi)");
+  ntMix->SetAlias("weight",weightString.Data());
 
   const int nBin = 6;
   //  double m[nBin+1] = {100,110,120,130,140,170,240};
   //  double m[nBin+1] = {120,130,140,170,240};
-  double m[nBin+1] = {120,140,160,180,210,270,360};
+  double m[nBin+1] = {120,140,160,180,200,230,500};
+
+  double cm0[nBin+1] = {0,0,0,0,0,0,0};
+  double cm1[nBin+1] = {0,0,0,0,0,0,0};
+  double cm2[nBin+1] = {0,0,0,0,0,0,0};
+  double cme0[nBin+1] = {0,0,0,0,0,0,0};
+  double cme1[nBin+1] = {0,0,0,0,0,0,0};
+  double cme2[nBin+1] = {0,0,0,0,0,0,0};
+
+  TH1D* hDum = new TH1D("hDum","",1000,0,1000);
+  for(int i = 0; i < nBin; ++i){
+    nt->Draw("pt1>>hDum",Form("%s && pt1 >= %f && pt1 < %f",cut.Data(),m[i],m[i+1]));
+    cm0[i] = hDum->GetMean();
+    cme0[i] = hDum->GetMeanError();
+    ntMix->Draw("pt1>>hDum",Form("%s*(%s && pt1 >= %f && pt1 < %f && bin < %d)",cut.Data(),weightString.Data(),m[i],m[i+1]));
+    cm1[i] = hDum->GetMean();
+    cme1[i] = hDum->GetMeanError();
+    ntPythia->Draw("pt1>>hDum",Form("abs(eta1) < 2 && abs(eta2) < 2 && abs(dphi) > 2.0944&& pt1 >= %f && pt1 < %f",m[i],m[i+1]));
+    cm2[i] = hDum->GetMean();
+    cme2[i] = hDum->GetMeanError();
+  }
   
-  TH1D *hTmp = new TH1D("hTmp","",100,m[0],m[nBin]);
+  TH1D *hTmp = new TH1D("hTmp","",100,m[0],330);
   TH1D *h = new TH1D("h","",nBin,m);
   TH1D *h2 = new TH1D("h2","",nBin,m);
 
   h->Reset();
   h2->Reset();
   
-  nt->Draw("pt1>>h",Form("(pt1-pt2)%s*(%s)",divide.Data(),cut.Data()));
+  nt->Draw("pt1>>h",Form("((pt1-pt2)%s)*(%s)",divide.Data(),cut.Data()));
   nt->Draw("pt1>>h2",Form("%s",cut.Data()));
-  TGraphAsymmErrors *g = calcEff(h2,h);
+  TGraphAsymmErrors *g = calcEff(h2,h,0,cm0);
   h->Reset();
   h2->Reset();
 
-  ntPythia->Draw("pt1>>h",Form("(pt1-pt2)%s*(%s)",divide.Data(),cutpp.Data()));
+  ntPythia->Draw("pt1>>h",Form("((pt1-pt2)%s)*(%s)",divide.Data(),cutpp.Data()));
   ntPythia->Draw("pt1>>h2",Form("%s",cutpp.Data()));
-  TGraphAsymmErrors *gPythia = calcEff(h2,h,-1);
+  TGraphAsymmErrors *gPythia = calcEff(h2,h,0,cm2);
   h->Reset();
   h2->Reset();
-  
-  ntMix->Draw("pt1>>h",Form("(pt1-pt2)%s*(%s)",divide.Data(),cut.Data()));
-  ntMix->Draw("pt1>>h2",Form("%s",cut.Data()));
-  TGraphAsymmErrors *gMix = calcEff(h2,h,1);
+
+  if(useWeight){  
+    ntMix->Draw("pt1>>h",Form("(((pt1-pt2)%s)*(%s))*weight",divide.Data(),cut.Data()));
+    ntMix->Draw("pt1>>h2",Form("(%s)*weight",cut.Data()));
+
+    //    ntMix->Draw("pt1>>h",Form("((pt1-pt2)%s)*(%s*%s)",divide.Data(),cut.Data(),weightString.Data()));
+    //    ntMix->Draw("pt1>>h2",Form("(%s)*%s",cut.Data(),weightString.Data()));
+    //    cout<<weightString.Data()<<endl;
+
+  }else{
+    ntMix->Draw("pt1>>h",Form("((pt1-pt2)%s)*(%s)",divide.Data(),cut.Data()));
+    ntMix->Draw("pt1>>h2",Form("%s",cut.Data()));
+  }
+  TGraphAsymmErrors *gMix = calcEff(h2,h,0,cm1);
 
   hTmp->SetMaximum(0.6);
-  if(type == 1) hTmp->SetMaximum(0.5);
+  //  if(type == 1) hTmp->SetMaximum(0.5);
   if(type == 3) hTmp->SetMaximum(1.2);
   hTmp->SetMinimum(0.1);
 
-  if (type==0) hTmp->SetMaximum(150);
+  if (type==0){ 
+    hTmp->SetMaximum(150);
+    hTmp->SetMinimum(0.);
+  }
+
   if (type==3){ 
-    hTmp->SetMaximum(0.35);
-    hTmp->SetMinimum(0.05);
+    hTmp->SetMaximum(0.5);
+    hTmp->SetMinimum(0);
   }
 
   if (drawXLabel) {
@@ -324,21 +376,21 @@ void plotDE(  int cbin,
   for(int i = 0; i < g->GetN(); ++i){
     double *x = g->GetX();
     double *y = g->GetY();
-    DrawTick(y[i],0.082*y[i],0.082*y[i],x[i],tickSize,4,2);
+    DrawTick(y[i],0.082*y[i],0.082*y[i],x[i],tickSize,4,dataColor);
   }
   g->Draw("p same");
   g->SetMarkerSize(1.25);
-  g->SetMarkerColor(2);
-  g->SetLineColor(2);
+  g->SetMarkerColor(dataColor);
+  g->SetLineColor(dataColor);
 
   gPythia->SetMarkerSize(1.7);
   gPythia->SetMarkerColor(4);
   gPythia->SetMarkerStyle(29);
   gPythia->SetLineColor(4);
-  gMix->SetMarkerColor(4);
+  gMix->SetMarkerColor(mixColor);
   gMix->SetMarkerStyle(25);
   gMix->SetMarkerSize(1.25);
-  gMix->SetLineColor(4);
+  gMix->SetLineColor(mixColor);
 
   gMix->SetLineStyle(1);
 
@@ -359,17 +411,17 @@ void plotDE(  int cbin,
   pline->Draw();
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.43,0.76,0.93,0.93); 
+    TLegend *t3=new TLegend(0.13,0.76,0.53,0.93); 
     //    t3->AddEntry(g,"Pb+Pb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     if(0){
         t3->AddEntry(g,"2011","p");
         t3->AddEntry(gMix,"2010","p");
     }else{
       t3->AddEntry(g,"Pb+Pb 2011","p");
-      t3->AddEntry(gMix,"embedded PYTHIA","p");
+      t3->AddEntry(gMix,"PYTHIA+HYDJET 1.6","p");
     }
 
-    t3->AddEntry(gPythia,"PYTHIA","p");  
+    t3->AddEntry(gPythia,"pp #sqrt{s}=2.76 TeV","p");  
 
     if(doFit){
     t3->AddEntry(f,"Constant Ratio","l");
@@ -382,16 +434,7 @@ void plotDE(  int cbin,
     t3->SetTextFont(63);
     t3->SetTextSize(15);
     t3->Draw();
-  TLatex *cms = new TLatex(0.11,0.88,"CMS Preliminary");
-  cms->SetNDC();
-  cms->SetTextFont(63);
-  cms->SetTextSize(18);
-  cms->Draw();                                                                                                                                        
-  TLatex *lumi = new TLatex(0.11,0.81,"#intL dt = 40 #mub^{-1}");
-  lumi->SetNDC();
-  lumi->SetTextFont(63);
-  lumi->SetTextSize(15);
-  lumi->Draw(); 
+
   }
 //  drawText(cstring.Data(),0.76,0.64);
 
@@ -407,7 +450,7 @@ void plotBalanceRatio(int cbin,
 		 bool drawLeg)
 {
 
-  useWeight = 0;
+  //  useWeight = 0;
 
   TString cut="pt1>120 && pt2>50 && abs(dphi)>2.5";
   TString cutpp="pt1>120 && pt2>50 && abs(dphi)>2.5";

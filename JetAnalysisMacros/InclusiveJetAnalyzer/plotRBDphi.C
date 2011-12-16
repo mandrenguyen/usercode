@@ -18,6 +18,7 @@
 #include "TStyle.h"
 #include "TLine.h"
 #include "DrawTick.C"
+#include "weightMix.C"
 
 using namespace std;
 TGraphAsymmErrors *divideGraph(TGraphAsymmErrors *a,TGraphAsymmErrors *b)
@@ -76,7 +77,9 @@ TGraphAsymmErrors *calcEffpythia(TH1* h1, TH1* hCut,double *npart)
 }
 
 
-void plotRBDphi(  double dphiCut=3.026,
+void plotRBDphi( 
+		double dphiCut=3.026,
+		// double dphiCut=2.094,
 	      double dphiCut2 = 3.026,
 		 TString infname = "data.root",
 		 TString pythia = "pythia.root",
@@ -252,7 +255,7 @@ void plotRBDphi(  double dphiCut=3.026,
 
   TCanvas *c = new TCanvas("c","",500,500);
   //  hTmp->SetMaximum(g->GetY()[0]*2.2);
-  hTmp->SetMaximum(0.7);
+  hTmp->SetMaximum(0.85);
   hTmp->SetMinimum(0.);
 
   hTmp->SetXTitle("N_{part}");
@@ -281,7 +284,7 @@ void plotRBDphi(  double dphiCut=3.026,
     cout <<err/y[i]<<" "<<1.5*(0.0001129*x[i])/y[i]<<" "<<0.012/y[i]<<endl;
     double tickSize = 0.012;
     if (err<tickSize) tickSize=err;
-    DrawTick(y[i],err,err,x[i],tickSize,8.1,2);
+    DrawTick(y[i],err,err,x[i],tickSize,8.1,dataColor);
   }
   gPythia->SetMarkerColor(4);
   gPythia->SetLineColor(4);
@@ -290,11 +293,11 @@ void plotRBDphi(  double dphiCut=3.026,
   gMix->SetMarkerColor(4);
   gMix->SetLineColor(4);
   gMix->SetMarkerStyle(25);
-  gMix->Draw("p same");
+  //  gMix->Draw("p same");
   gPythia->Draw("p same");
 
-  g2->SetLineColor(2);
-  g2->SetMarkerColor(2);
+  g2->SetLineColor(dataColor);
+  g2->SetMarkerColor(dataColor);
 
   g2->Draw("p same");
 
@@ -307,11 +310,11 @@ void plotRBDphi(  double dphiCut=3.026,
     TLegend *t3=new TLegend(0.5,0.77,0.9,0.93); 
     t3->AddEntry(g2,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //    t3->AddEntry(gPythia,"PYTHIA","p");  
-    t3->AddEntry(gMix,"PYTHIA+DATA","p");
+    //    t3->AddEntry(gMix,"PYTHIA+DATA","p");
 
     //    t3->AddEntry(g,"2011","p");
     //    t3->AddEntry(gMix,"2010","p");
-    t3->AddEntry(gPythia,"PYTHIA","p");
+    t3->AddEntry(gPythia,"pp #sqrt{s}=2.76 TeV","p");
 
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
@@ -332,7 +335,7 @@ void plotRBDphi(  double dphiCut=3.026,
   tsel.SetTextFont(63);
   tsel.SetTextSize(15);
   tsel.DrawLatex(0.25,0.35,"p_{T,1} > 120 GeV/c");
-  tsel.DrawLatex(0.25,0.275,"p_{T,2} > 50 GeV/c");
+  tsel.DrawLatex(0.25,0.275,"p_{T,2} > 30 GeV/c");
 //  tsel.DrawLatex(0.25,0.20,"#Delta#phi_{12} > #frac{2}{3}#pi rad");
 
   TLatex *lumi = new TLatex(0.20,0.81,"#intL dt = 6.7 #mub^{-1}");
@@ -351,9 +354,11 @@ void plotRBDphi(  double dphiCut=3.026,
   gRatio->Fit("pol1");
   //gRatio->Fit("pol0");
   
-  c->Print(Form("fig/RB_dphi_%f_vs_Npart.eps",dphiCut));
-  c->Print(Form("fig/RB_dphi_%f_vs_Npart.C",dphiCut));
-  c->Print(Form("fig/RB_dphi_%f_vs_Npart.gif",dphiCut));
+  c->Print(Form("fig/RB_dphi_%d_vs_Npart.eps",(int)(1000*dphiCut)));
+  c->Print(Form("fig/RB_dphi_%d_vs_Npart.C",(int)(1000*dphiCut)));
+  c->Print(Form("fig/RB_dphi_%d_vs_Npart.gif",(int)(1000*dphiCut)));
+  c->Print(Form("fig/RB_dphi_%d_vs_Npart.pdf",(int)(1000*dphiCut)));
+
 
 }
 

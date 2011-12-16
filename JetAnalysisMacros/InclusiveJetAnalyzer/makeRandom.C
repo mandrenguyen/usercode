@@ -28,7 +28,7 @@ void makeRandom(int N = 1000000){
   nt->Draw("r2","","same");
 
   nt->Write();
-  outf->Close();
+  outf->Write();
 
 }
 

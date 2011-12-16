@@ -20,6 +20,7 @@
 #include "TROOT.h"
 
 #endif
+#include "weightMix.C"
 
 
 //---------------------------------------------------------------------
@@ -53,6 +54,8 @@ void plotLeadingJetAll();
 
 void plotLeadingJetAllCent(){
 
+  TH1::SetDefaultSumw2();
+  weightMix();
 
   TCanvas *c1 = new TCanvas("c1","",1050,700);
 
@@ -63,38 +66,41 @@ void plotLeadingJetAllCent(){
   gROOT->ForceStyle(1);
   c1->cd(1);
   //plotLeadingJet(-1,"data.root","pythia.root","mix.root",true,false,false);
-  plotLeadingJetAll();
+  //  plotLeadingJetAll();
+
+  plotLeadingJet(5,"data.root","pythia.root","mix.root",true,false,true);
   gPad->SetLogy();
-  //c1->GetPad(1)->SetTicks(0);
-  //gPad->SetTicky(0);
+  drawText("70-100%",0.75,0.89);
+  gPad->SetLogy();
   drawText("(a)",0.12,0.9);
-  //drawText(" 0-100%",0.28,0.8);
-  //  drawPatch(0.976,0.0972,1.1,0.141);
-  //gPad->SetBottomMargin(0.18);
-  // gPad->SetLeftMargin(0.24);
+
+  TLatex *cms = new TLatex(200,1.2,"CMS Preliminary");
+  cms->SetTextFont(63);
+  cms->SetTextSize(17);
+  cms->Draw();
+
 
   c1->cd(2);
-  plotLeadingJet(4,"data.root","pythia.root","mix.root",true,false,true);
+  plotLeadingJet(4,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("50-100%",0.15,0.89);
+  drawText("50-70%",0.75,0.89);
   drawText("(b)",0.02,0.9);
 
-  TLatex *lumi = new TLatex(220,1.,"#intL dt = 6.7 #mub^{-1}");
+  TLatex *lumi = new TLatex(210,1.1,Form("#intL dt = %s #mub^{-1}",LUM));
   lumi->SetTextFont(63);
   lumi->SetTextSize(15);
   lumi->Draw();
 
   TLatex *jetf;
-  jetf = new TLatex(215,0.05,"Iterative Cone, R=0.5");
+  jetf = new TLatex(320,0.15,"Anti-k_{T}(PFlow), R=0.3");
   jetf->SetTextFont(63);
   jetf->SetTextSize(15);
   jetf->Draw();
 
-
   c1->cd(3);
   plotLeadingJet(3,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("30-50%",0.15,0.89);
+  drawText("30-50%",0.75,0.89);
   drawText("(c)",0.02,0.9);
 
 
@@ -102,8 +108,8 @@ void plotLeadingJetAllCent(){
   tsel.SetNDC();
   tsel.SetTextFont(63);
   tsel.SetTextSize(15);
-  tsel.DrawLatex(0.55,0.78,"p_{T,1} > 120 GeV/c");
-  tsel.DrawLatex(0.55,0.68,"p_{T,2} > 50 GeV/c");
+  tsel.DrawLatex(0.55,0.78,Form("p_{T,1} > %d GeV/c",leadCut));
+  tsel.DrawLatex(0.55,0.68,Form("p_{T,2} > %d GeV/c",subleadCut));
   tsel.DrawLatex(0.55,0.58,"#Delta#phi_{12} > #frac{2}{3}#pi");
   /*
   drawText("p_{T,1} > 120 GeV/c",0.55,0.78);
@@ -116,7 +122,7 @@ void plotLeadingJetAllCent(){
   c1->cd(4);
    plotLeadingJet(2,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("20-30%",0.25,0.925);
+  drawText("20-30%",0.75,0.925);
   drawText("(d)",0.12,0.93);
   //drawPatch(0.976,0.0972,1.1,0.141);
   //gPad->SetLeftMargin(0.24);
@@ -125,7 +131,7 @@ void plotLeadingJetAllCent(){
   c1->cd(5);
   plotLeadingJet(1,"data.root","pythia.root","mix.root",true,true,false);
   gPad->SetLogy();
-  drawText("10-20%",0.15,0.925);
+  drawText("10-20%",0.75,0.925);
   drawText("(e)",0.02,0.93);
  //drawPatch(-0.00007,0.0972,0.0518,0.141);
   //drawPatch(0.976,0.0972,1.1,0.141);
@@ -134,7 +140,7 @@ void plotLeadingJetAllCent(){
   c1->cd(6);
   plotLeadingJet(0,"data.root","pythia.root","mix.root",true,false,false);
   gPad->SetLogy();
-  drawText("0-10%",0.15,0.925);
+  drawText("0-10%",0.75,0.925);
   drawText("(f)",0.02,0.93);
   //drawPatch(-0.00007,0.0972,0.0518,0.141);
   //  gPad->SetBottomMargin(0.22);
@@ -151,9 +157,9 @@ void plotLeadingJetAllCent(){
   ytitle->Draw();
 
 
-  c1->Print("./fig/dijet_leadingjet_all_cent_20101126_v0.gif");
-  c1->Print("./fig/dijet_leadingjet_all_cent_20101126_v0.eps");
-  c1->Print("./fig/dijet_leadingjet_all_cent_20101126_v0.pdf");
+  c1->Print("./fig/dijet_leadingjet_all_cent_20111202_v0.gif");
+  c1->Print("./fig/dijet_leadingjet_all_cent_20111202_v0.eps");
+  c1->Print("./fig/dijet_leadingjet_all_cent_20111202_v0.pdf");
 
 }
 
@@ -169,36 +175,54 @@ void plotLeadingJet(int cbin,
 		    )
 {
 
-  TString cut="et1>120 && et2>50 && dphi>2.5";
-  TString cutpp="et1>120 && et2>50 && dphi>2.5";
+  //  useWeight = 0;
 
+  TString cut=Form("pt1>100 && pt2>40 && abs(dphi)>2.0944 && abs(eta1) < 2 && abs(eta2) < 2");
+  TString cutpp=Form("pt1>100 && pt2>40 && abs(dphi)>2.0944 && abs(eta1) < 2 && abs(eta2) < 2");
+  TString cutNorm=Form("pt1>%d && abs(eta1) < 2",leadCut);
 
   TString cstring = "";
   if(cbin==-1) {  
      cstring = "0-100%";
      cut+=" && bin>=0 && bin<40";
-  }
-  else if(cbin==0) {
-     cstring = "0-10%";
-     cut+=" && bin>=0 && bin<4";
+     cutNorm+=" && bin>=0 && bin<40";
+  } else if(cbin==0) {
+    cstring = "0-10%";
+    cut+=" && bin>=0 && bin<4";
+    cutNorm+=" && bin>=0 && bin<4";
   } else if (cbin==1) {
-     cstring = "10-20%";
-     cut+=" && bin>=4 && bin<8";
+    cstring = "10-20%";
+    cut+=" && bin>=4 && bin<8";
+    cutNorm+=" && bin>=4 && bin<8";
   } else if (cbin==2) {
-     cstring = "20-30%";
-     cut+=" && bin>=8 && bin<12";
+    cstring = "20-30%";
+    cut+=" && bin>=8 && bin<12";
+    cutNorm+=" && bin>=8 && bin<12";
   } else if (cbin==3) {
-     cstring = "30-50%";
-     cut+=" && bin>=12 && bin<20";
-  }
-  else {
-     cstring = "50-100%";
-     cut+=" && bin>=20";
+    cstring = "30-50%";
+    cut+=" && bin>=12 && bin<20";
+    cutNorm+=" && bin>=12 && bin<20";
+  }else if (cbin==4) {
+    cstring = "50-70%";
+    cut+=" && bin>=20 && bin<28";
+    cutNorm+=" && bin>=20 && bin<28";
+  }else if (cbin==5) {
+    cstring = "70-100%";
+    cut+=" && bin>=28";
+    cutNorm+=" && bin>=28";
   }
 
+
+
+
+
   // open the data file
-  TFile *inf = new TFile(infname.Data());
-  TTree *nt =(TTree*)inf->FindObjectAny("nt");
+  //  TFile *inf = new TFile(infname.Data());
+  //  TTree *nt =(TTree*)inf->FindObjectAny("nt");
+
+  TChain* nt = new TChain("nt");
+  nt->Add("/Users/yetkinyilmaz/analysis/data2011/dijet20111215/Hi*.root");
+
 
   // open the hydjet (MC) file
   TFile *infHydjet = new TFile(hydjet.Data());
@@ -208,43 +232,49 @@ void plotLeadingJet(int cbin,
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
 
+  nt->SetAlias("adphi","acos(cos(phi1-phi2))");
+  ntMix->SetAlias("adphi","abs(dphi)");
+  ntMix->SetAlias("weight",weightString.Data());
+
 
   // projection histogram
 
-   float binlim[9]={120,140,160,180,200,220,240,280,320};
-   TH1D *h = new TH1D("h","h",8,binlim);
-   TH1D *hPythia = new TH1D("hPythia","hPythia",8,binlim);
-   TH1D *hDataMix = new TH1D("hDataMix","hDataMix",8,binlim);
+  float binlim[]={120,140,160,180,200,220,240,280,320,360,400,440,480,520,560};
+   TH1D *h = new TH1D("h","h",14,binlim);
+   TH1D *hPythia = new TH1D("hPythia","",14,binlim);
+   TH1D *hDataMix = new TH1D("hDataMix","",14,binlim);
 
-  //TH1D *h = new TH1D("h","",10,120,319.99999);
-  //TH1D *hPythia = new TH1D("hPythia","",10,120,319.99999);
-  //TH1D *hDataMix;
-  //if(cbin==2) hDataMix = new TH1D("hDataMix","",10,120,319.99999);
-  //else hDataMix = new TH1D("hDataMix","",10,120.00001,319.99999);
+   TH1D* hNorm = new TH1D("hNorm","",1000,0,1000);
+   TH1D* hNormPythia = new TH1D("hNormPythia","",1000,0,1000);
+   TH1D* hNormDataMix = new TH1D("hNormDataMix","",1000,0,1000);
 
-  nt->Draw("et1>>h",Form("(%s)",cut.Data())); 
-   
+   nt->Draw("pt1>>h",Form("(%s) && noise < 0",cut.Data())); 
+   nt->Draw("pt1>>hNorm",Form("(%s) && noise < 0",cutNorm.Data()));
+
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntHydjet->Draw("et1>>hPythia",Form("(%s)",cutpp.Data())); 
-    ntMix->Draw("et1>>hDataMix",Form("(%s)*weight",cut.Data())); 
+    ntHydjet->Draw("pt1>>hPythia",Form("(%s)",cutpp.Data())); 
+    ntMix->Draw("pt1>>hDataMix",Form("(%s)*weight",cut.Data())); 
+    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)",weightString.Data(),cutNorm.Data()));
   } else {
     // ignore centrality reweighting
-    ntHydjet->Draw("et1>>hPythia",Form("(%s)",cutpp.Data()));
-    ntMix->Draw("et1>>hDataMix",Form("(%s)",cut.Data()));  
+    ntHydjet->Draw("pt1>>hPythia",Form("(%s)",cutpp.Data()));
+    ntMix->Draw("pt1>>hDataMix",Form("(%s)",cut.Data()));  
+    ntMix->Draw("pt1>>hNormDataMix",Form("%s",cutNorm.Data()));
   }
 
   // calculate the statistical error and normalize
   h->Sumw2();
 
-
   for(int ibin=0;ibin<h->GetNbinsX();ibin++){
     h->SetBinContent(ibin+1, h->GetBinContent(ibin+1)/h->GetBinWidth(ibin+1));
     h->SetBinError(ibin+1, h->GetBinError(ibin+1)/h->GetBinWidth(ibin+1));    
   }
-
-  h->Scale(1./h->Integral(1,h->GetNbinsX()));
-
+  if(normLead){
+    h->Scale(1./hNorm->Integral());
+  }else{
+    h->Scale(1./h->Integral());
+  }
   h->SetMarkerStyle(20);
 
 
@@ -252,7 +282,7 @@ void plotLeadingJet(int cbin,
     hPythia->SetBinContent(ibin+1, hPythia->GetBinContent(ibin+1)/hPythia->GetBinWidth(ibin+1));
     hPythia->SetBinError(ibin+1, hPythia->GetBinError(ibin+1)/hPythia->GetBinWidth(ibin+1));    
   }
-  hPythia->Scale(1./hPythia->Integral(1,hPythia->GetNbinsX()));
+  hPythia->Scale(1./hNormPythia->Integral());
 
   hPythia->SetLineColor(kBlue);
   hPythia->SetFillColor(kAzure-8);
@@ -263,15 +293,25 @@ void plotLeadingJet(int cbin,
     hDataMix->SetBinContent(ibin+1, hDataMix->GetBinContent(ibin+1)/hDataMix->GetBinWidth(ibin+1));
     hDataMix->SetBinError(ibin+1, hDataMix->GetBinError(ibin+1)/hDataMix->GetBinWidth(ibin+1));    
   }
-  hDataMix->Scale(1./hDataMix->Integral(0,hDataMix->GetNbinsX()));
-
-  hDataMix->SetLineColor(kRed);
-  hDataMix->SetFillColor(kRed-9);
+  if(normLead){
+  hDataMix->Scale(1./hNormDataMix->Integral());
+  }else{
+    hDataMix->Scale(1./hDataMix->Integral());
+  }
+  hDataMix->SetLineColor(mixColor);
+  hDataMix->SetFillColor(mixColor);
   hDataMix->SetFillStyle(3004);
 
+  hDataMix->SetMarkerColor(mixColor);
+  hDataMix->SetMarkerSize(0);
+
+  h->SetMarkerColor(dataColor);
+  h->SetLineColor(dataColor);
    
   hDataMix->SetStats(0);
   if(drawXLabel) hDataMix->SetXTitle("Leading Jet p_{T} (GeV/c)");
+
+  hDataMix->GetXaxis()->SetTitleSize(0);
 
   hDataMix->GetXaxis()->SetLabelSize(22);
   hDataMix->GetXaxis()->SetLabelFont(43);
@@ -281,12 +321,7 @@ void plotLeadingJet(int cbin,
   hDataMix->GetXaxis()->CenterTitle();
 
   //hDataMix->GetXaxis()->SetNdivisions(904,true);
-hDataMix->GetXaxis()->SetNdivisions(505,true);
-
-//hDataMix->SetYTitle("dN_{jet}/dp_{T} (GeV/c)^{-1}, Arb. Norm.");
-
-
-//hDataMix->SetYTitle("dN_{jet}/dp_{T} (GeV/c)^{-1}");
+  hDataMix->GetXaxis()->SetNdivisions(505,true);
 
   hDataMix->GetYaxis()->SetLabelSize(22);
   hDataMix->GetYaxis()->SetLabelFont(43);
@@ -295,15 +330,13 @@ hDataMix->GetXaxis()->SetNdivisions(505,true);
   hDataMix->GetYaxis()->SetTitleOffset(2.4);
   hDataMix->GetYaxis()->CenterTitle();
 
-  hPythia->SetAxisRange(2E-4,3,"Y");
-  hDataMix->SetAxisRange(2E-4,3,"Y");
-  h->SetAxisRange(2E-4,3,"Y");
-
-
+  hPythia->SetAxisRange(2E-6,5,"Y");
+  hDataMix->SetAxisRange(2E-6,5,"Y");
+  h->SetAxisRange(2E-4,5,"Y");
 
   hDataMix->SetTitleOffset(1.9,"X");
   hDataMix->Draw("hist");
-  //hPythia->Draw("same");
+  hDataMix->Draw("same");
   h->Draw("same");
 
 
@@ -311,7 +344,7 @@ hDataMix->GetXaxis()->SetNdivisions(505,true);
     TLegend *t3=new TLegend(0.44,0.63,0.95,0.83);
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
-    t3->AddEntry(hDataMix,"PYTHIA+DATA","lf");
+    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.6","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);
@@ -497,9 +530,9 @@ void plotLeadingJetAll(){
   hLeadingJetPt_data->Rebin(2);
   hLeadingJetPt_mc->Rebin(2);
 
-  float binlim[9]={120,140,160,180,200,220,240,280,320};
-  TH1D *hLeadingJetPt_data_Rebin = new TH1D("hLeadingJetPt_data_Rebin","hLeadingJetPt_data_Rebin",8,binlim);
-  TH1D *hLeadingJetPt_mc_Rebin = new TH1D("hLeadingJetPt_mc_Rebin","hLeadingJetPt_mc_Rebin",8,binlim);
+  float binlim[]={120,140,160,180,200,220,240,280,320,360,400,440,480,520,560};
+  TH1D *hLeadingJetPt_data_Rebin = new TH1D("hLeadingJetPt_data_Rebin","hLeadingJetPt_data_Rebin",14,binlim);
+  TH1D *hLeadingJetPt_mc_Rebin = new TH1D("hLeadingJetPt_mc_Rebin","hLeadingJetPt_mc_Rebin",14,binlim);
 
   for(int ibin=0;ibin<7;ibin++){
     hLeadingJetPt_data_Rebin->SetBinContent(ibin+1,hLeadingJetPt_data->GetBinContent(ibin+1));
