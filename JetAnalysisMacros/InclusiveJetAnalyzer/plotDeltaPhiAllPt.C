@@ -23,6 +23,7 @@
 #include "weightMix.C"
 
 static const bool central = 1;
+static const bool jetID = 0;
 
 //---------------------------------------------------------------------
 void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns, 
@@ -54,25 +55,26 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotDeltaPhiAllPt(){
 
-  weightMix();
+  TH1::SetDefaultSumw2();
+
    TCanvas *c1 = new TCanvas("c1","",1050,700);
-   makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.15,0.02);
+   makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.2,0.02);
 
    TString label("");
 
    c1->cd(1);
-   label += plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,true);
+   label = plotDeltaPhi(0,"data.root","pythia.root","mix.root",true,false,true);
    gPad->SetLogy();
-   drawText(label.Data(),0.29,0.46);
+   drawText(label.Data(),0.25,0.51);
    //   drawText("(a)",0.02,0.9);
 
-   TLatex *cms = new TLatex(0.5,1.3,"CMS Preliminary");
+   TLatex *cms = new TLatex(0.5,1,"CMS Preliminary");
    cms->SetTextFont(63);
    cms->SetTextSize(17);
    cms->Draw();
 
 
-   TLatex *lumi = new TLatex(2.,1,Form("#intL dt = %s #mub^{-1}",LUM));
+   TLatex *lumi = new TLatex(2,1,Form("#intL dt = %s #mub^{-1}",LUM));
    lumi->SetTextFont(63);
    lumi->SetTextSize(15);
    lumi->Draw(); 
@@ -80,11 +82,11 @@ void plotDeltaPhiAllPt(){
   c1->cd(2);
   label = plotDeltaPhi(1,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText(label.Data(),0.19,0.46);
+   drawText(label.Data(),0.09,0.51);
    //   drawText("(b)",0.02,0.9);
 
    TLatex *jetf;
-   jetf = new TLatex(0.5,0.05,"Anti-k_{T} (PFlow), R=0.3");
+   jetf = new TLatex(0.5,0.1,"Anti-k_{T} (PFlow), R=0.3");
    jetf->SetTextFont(63);
    jetf->SetTextSize(15);
    jetf->Draw();
@@ -95,16 +97,16 @@ void plotDeltaPhiAllPt(){
    tsel.SetNDC();
    tsel.SetTextFont(63);
    tsel.SetTextSize(15);
-   tsel.DrawLatex(0.15,0.78,Form("p_{T,1} > %d GeV/c",leadCut));
-   tsel.DrawLatex(0.15,0.68,Form("p_{T,2} > %d GeV/c",subleadCut));
+   tsel.DrawLatex(0.15,0.83,Form("p_{T,1} > %d GeV/c",leadCut));
+   tsel.DrawLatex(0.15,0.75,Form("p_{T,2} > %d GeV/c",subleadCut));
    
    c1->cd(3);
    label = plotDeltaPhi(2,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText(label.Data(),0.19,0.46);
+   drawText(label.Data(),0.09,0.51);
    //   drawText("(c)",0.22,0.93);
    if(central){
-     drawText("0-20%",0.44,0.6);
+     drawText("0-20%",0.44,0.8);
    }else{
      drawText("30-100%",0.44,0.6);
    }
@@ -113,7 +115,7 @@ void plotDeltaPhiAllPt(){
    c1->cd(4);
    label = plotDeltaPhi(3,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText(label.Data(),0.29,0.56);
+   drawText(label.Data(),0.25,0.85);
    //   drawText("(d)",0.02,0.93);
    //   drawPatch(-0.00007,0.0972,0.0518,0.141);
    //drawPatch(0.976,0.0972,1.1,0.141);
@@ -122,7 +124,7 @@ void plotDeltaPhiAllPt(){
    c1->cd(5);
    label = plotDeltaPhi(4,"data.root","pythia.root","mix.root",true,true,false);
    gPad->SetLogy();
-   drawText(label.Data(),0.19,0.56);
+   drawText(label.Data(),0.09,0.85);
    //   drawText("(e)",0.02,0.93);
    //   drawPatch(-0.00007,0.0972,0.0518,0.141);
    //  gPad->SetBottomMargin(0.22);                                 
@@ -130,13 +132,14 @@ void plotDeltaPhiAllPt(){
    c1->cd(6);
    label = plotDeltaPhi(5,"data.root","pythia.root","mix.root",true,false,false);
    gPad->SetLogy();
-   drawText(label.Data(),0.19,0.56);
+   drawText(label.Data(),0.09,0.85);
    //   drawText("(f)",0.02,0.93);
 
    if(central){
-     c1->Print("./fig/dijet_dphi_all_pt_20101126_0to20_v0.gif");
-     c1->Print("./fig/dijet_dphi_all_pt_20101126_0to20_v0.eps");
-     c1->Print("./fig/dijet_dphi_all_pt_20101126_0to20_v0.pdf");
+     c1->Print(Form("./fig/dijet_dphi_all_pt_0to20_20120104%s.gif",jetID?"_jetid":""));
+     c1->Print(Form("./fig/dijet_dphi_all_pt_0to20_20120104%s.eps",jetID?"_jetid":""));
+     c1->Print(Form("./fig/dijet_dphi_all_pt_0to20_20120104%s.pdf",jetID?"_jetid":""));
+
    }else{
      c1->Print("./fig/dijet_dphi_all_pt_20101126_30to100_v0.gif");
      c1->Print("./fig/dijet_dphi_all_pt_20101126_30to100_v0.eps");
@@ -164,50 +167,57 @@ TString plotDeltaPhi(int cbin,
 
   TString cutpp=cut;
   if(!central){
-    cut=Form("pt1>%f && pt2>%d && abs(eta1) < 2 && abs(eta2) < 2 && bin >= %d",leadCut,subleadCut,centralBin);
+    cut=Form("pt1>%d && pt2>%d && abs(eta1) < 2 && abs(eta2) < 2 && bin >= %d",leadCut,subleadCut,centralBin);
     cutNorm=Form("pt1>%d && abs(eta1) < 2  && bin >= %d",leadCut,centralBin);
 
   }
 
+  if(jetID){
+    cut+="&& trk1+trk2>0";
+  }
  
   TString cstring = "";
+
+  double m[] =   {120,150,180,230,260,300,1500};
 
   int ptMin = 0;
   int ptMax = 0;
   if(cbin==-1) {
-    ptMin = 120;
+    ptMin = m[0];
     ptMax = 999;
   } else if (cbin==0) {
-    ptMin = 120;
-    ptMax = 140;
+    ptMin = m[0];
+    ptMax = m[1];
   } else if (cbin==1) {
-    ptMin = 140;
-    ptMax = 160;
+    ptMin = m[1];
+    ptMax = m[2];
   } else if (cbin==2) {
-    ptMin = 160;
-    ptMax = 180;
+    ptMin = m[2];
+    ptMax = m[3];
   } else if (cbin==3) {
-    ptMin = 180;
-    ptMax = 200;
+    ptMin = m[3];
+    ptMax = m[4];
   } else if (cbin==4) {
-    ptMin = 200;
-    ptMax = 230;
+    ptMin = m[4];
+    ptMax = m[5];
   } else if (cbin==5) {
-    ptMin = 230;
+    ptMin = m[5];
     ptMax = 999;
   }
 
-  cstring = Form("%d < p_{T} < %d",ptMin,ptMax);
+  cstring = Form("%d < p_{T} < %d GeV/c",ptMin,ptMax);
   cut+=Form(" && pt1>=%d && pt1<%d",ptMin,ptMax);
   cutNorm+=Form(" && pt1>=%d && pt1<%d",ptMin,ptMax);
 
   if (cbin==5) {
-    cstring = "230 < p_{T}";
+    cstring = Form("p_{T} > %d GeV/c",ptMin);
   }  
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
+  //  TChain* nt = new TChain("nt");
+  //  nt->Add("/Users/yetkinyilmaz/analysis/data2011/dijet20111215/Hi*.root");
 
   // open the pythia (MC) file
   TFile *infPythia = new TFile(pythia.Data());
@@ -216,7 +226,9 @@ TString plotDeltaPhi(int cbin,
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
-
+  TFile *infW = new TFile("weights.root");
+  TTree *ntw =(TTree*)infW->FindObjectAny("ntw");
+  ntMix->AddFriend(ntw);
 
   //  ntMix->SetAlias("pt1","et1");
   //  ntMix->SetAlias("pt2","et2");
@@ -231,9 +243,9 @@ TString plotDeltaPhi(int cbin,
   //  ntMix->SetAlias("weight",weightString.Data());
 
   // projection histogram
-  TH1D *h = new TH1D("h","",30,0,3.14159);
-  TH1D *hPythia = new TH1D("hPythia","",30,0,3.14159);
-  TH1D *hDataMix= new TH1D("hDataMix","",30,0,3.14159);
+  TH1D *h = new TH1D("h","",300,0,3.14159);
+  TH1D *hPythia = new TH1D("hPythia","",300,0,3.14159);
+  TH1D *hDataMix= new TH1D("hDataMix","",300,0,3.14159);
 
   TH1D* hNorm = new TH1D("hNorm","",1000,0,1000);
   TH1D* hNormPythia = new TH1D("hNormPythia","",1000,0,1000);
@@ -245,9 +257,9 @@ TString plotDeltaPhi(int cbin,
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
     ntPythia->Draw("abs(dphi)>>hPythia",Form("(%s)",cutpp.Data())); 
-    ntMix->Draw("abs(dphi)>>hDataMix",Form("(%s)*(%s)",weightString.Data(),cut.Data())); 
+    ntMix->Draw("abs(dphi)>>hDataMix",Form("(%s)*(%s)","weight",cut.Data())); 
     cout<<"WEEIIGHGTEDD"<<endl;
-    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)",weightString.Data(),cutNorm.Data()));
+    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)","weight",cutNorm.Data()));
     ntPythia->Draw("pt1>>hNormPythia",Form("(%s)",cutNorm.Data()));
   } else {
     // ignore centrality reweighting
@@ -297,9 +309,9 @@ TString plotDeltaPhi(int cbin,
 
   hDataMix->GetXaxis()->SetLabelSize(22);
   hDataMix->GetXaxis()->SetLabelFont(43);
-  hDataMix->GetXaxis()->SetTitleSize(24);
+  hDataMix->GetXaxis()->SetTitleSize(28);
   hDataMix->GetXaxis()->SetTitleFont(43);
-  hDataMix->GetXaxis()->SetTitleOffset(1.7);
+  hDataMix->GetXaxis()->SetTitleOffset(2.2);
   hDataMix->GetXaxis()->CenterTitle();
 
   //hDataMix->GetXaxis()->SetNdivisions(705,true);
@@ -308,17 +320,12 @@ TString plotDeltaPhi(int cbin,
 
   hDataMix->GetYaxis()->SetLabelSize(22);
   hDataMix->GetYaxis()->SetLabelFont(43);
-  hDataMix->GetYaxis()->SetTitleSize(22);
+  hDataMix->GetYaxis()->SetTitleSize(28);
   hDataMix->GetYaxis()->SetTitleFont(43);
-  hDataMix->GetYaxis()->SetTitleOffset(2.4);
+  hDataMix->GetYaxis()->SetTitleOffset(2.2);
   hDataMix->GetYaxis()->CenterTitle();
 
-  if(cbin==2){
-  hDataMix->SetAxisRange(2e-4,50.6,"Y");
-  }
-  else{
-  hDataMix->SetAxisRange(2e-4,50.6,"Y");
-  }
+
   if(cbin==2){
     hDataMix->GetXaxis()->SetRangeUser(0.,acos(-1.));
   }
@@ -328,11 +335,11 @@ TString plotDeltaPhi(int cbin,
 
 
   hDataMix->SetMaximum(4);
-  //  hDataMix->SetMaximum(40);
-  hDataMix->SetMinimum(0.0001);
+  hDataMix->SetMinimum(2e-4);
 
+  hDataMix->SetMarkerSize(0);
   hDataMix->Draw("hist");
-  //hPythia->Draw("same");
+  hDataMix->Draw("same");
   h->Draw("same");
 
   if(drawLeg){
@@ -340,7 +347,7 @@ TString plotDeltaPhi(int cbin,
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //    t3->AddEntry(h,"2011","p");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
-    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.6","lf");
+    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.8","lf");
     //    t3->AddEntry(hDataMix,"2010","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);

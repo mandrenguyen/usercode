@@ -41,18 +41,25 @@ TGraphAsymmErrors *divideGraph(TGraphAsymmErrors *a,TGraphAsymmErrors *b)
 }
 TGraphAsymmErrors *calcEff(TH1* h1, TH1* hCut,double *npart)
 {
-   TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors();
-   gEfficiency->BayesDivide(hCut,h1);
+  TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors(hCut->GetNbinsX());
+   //   gEfficiency->BayesDivide(hCut,h1);
    cout <<gEfficiency->GetN()<<endl;
+
+   hCut->Divide(hCut,h1,1,1,"B");
    for (int i=0;i<gEfficiency->GetN();i++)
    {
       double x,y;
-      gEfficiency->GetPoint(i,x,y);
-      double errYL = gEfficiency->GetErrorYlow(i);
-      double errYH = gEfficiency->GetErrorYhigh(i);
+      //      gEfficiency->GetPoint(i,x,y);
+      //      double errYL = gEfficiency->GetErrorYlow(i);
+      //      double errYH = gEfficiency->GetErrorYhigh(i);
+
+      x = hCut->GetBinCenter(i+1);
+      y = hCut->GetBinContent(i+1);
+      double errYL = hCut->GetBinError(i+1);
+      double errYH = errYL;
       gEfficiency->SetPointError(i,0,0,errYL,errYH);
-      gEfficiency->SetPoint(i,npart[h1->FindBin(x)-1],y);
-      cout <<x<<" "<<h1->FindBin(x)<<" "<<npart[h1->FindBin(x)-1]<<endl;
+      gEfficiency->SetPoint(i,npart[i],y);
+      cout <<x<<" "<<h1->FindBin(x)<<" "<<npart[i]<<endl;
    }
    return gEfficiency;
 }
@@ -244,8 +251,8 @@ void plotRBDphi(
   gPythia->SetMarkerSize(1.7);
   
   if(useWeight){
-  ntMix->Draw("bin>>h",Form("weight*(abs(dphi)>%f&&%s)",dphiCut2,cut2.Data()));
-  ntMix->Draw("bin>>hCut",Form("weight*(%s)",cut2.Data()));
+    ntMix->Draw("bin>>h",Form("weight*(abs(dphi)>%f&&%s)",dphiCut2,cut2.Data()));
+    ntMix->Draw("bin>>hCut",Form("weight*(%s)",cut2.Data()));
   }else{
     ntMix->Draw("bin>>h",Form("(abs(dphi)>%f&&%s)",dphiCut2,cut2.Data()));
     ntMix->Draw("bin>>hCut",Form("(%s)",cut2.Data()));

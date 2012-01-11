@@ -10,7 +10,7 @@ void makeMultiPanelCanvas(TCanvas*& canv,
                           const Float_t bottomMargin,
                           const Float_t edge) {
    if (canv==0) {
-      Error("makeMultiPanelCanvas","Got null canvas.");
+      //      Error("makeMultiPanelCanvas","Got null canvas.");
       return;
    }
    canv->Clear();

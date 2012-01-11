@@ -52,7 +52,6 @@ void drawPatch(float x1, float y1, float x2, float y2);
 void plotBalanceAllCent(){
 
 	TH1::SetDefaultSumw2();
-        weightMix();
 	
    TCanvas *c1 = new TCanvas("c1","",1050,700);
    makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.2,0.02);
@@ -80,7 +79,6 @@ void plotBalanceAllCent(){
   jetf_PbPb->SetTextFont(63);
   jetf_PbPb->SetTextSize(15);
   jetf_PbPb->Draw();
-
 
   c1->cd(3);
   plotBalance(3,"data.root","pythia.root","mix.root",true,false,false);
@@ -114,6 +112,10 @@ void plotBalanceAllCent(){
   //drawPatch(0.9,0.0972,1.12,0.191);
   //drawPatch(0.976,0.0972,1.1,0.141);
   //  gPad->SetBottomMargin(0.22);                                                                                                                     
+  if(sideCorrect == 0){
+    jetf_PbPb = new TLatex(0.05,0.21,"Mismatched background not subtracted");
+    jetf_PbPb->Draw();
+  }
 
   c1->cd(6);
   plotBalance(0,"data.root","pythia.root","mix.root",true,false,false);
@@ -131,9 +133,9 @@ void plotBalanceAllCent(){
 
   if(!plotSubtraction){
     if(sideCorrect > 0){
-      c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_cent_20101126_v0_subt.gif",leadCut,subleadCut));
-      c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_all_cent_20101126_v0_subt.eps",leadCut,subleadCut));
-      c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_all_cent_20101126_v0_subt.pdf",leadCut,subleadCut));
+      c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_all_cent_20120103_subt.gif",leadCut,subleadCut));
+      c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_all_cent_20120103_subt.eps",leadCut,subleadCut));
+      c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_all_cent_20120103_subt.pdf",leadCut,subleadCut));
     }else{
       c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_cent_20101126_v0.gif",leadCut,subleadCut));
       c1->Print(Form("./fig/dijet_imbalance_lead%d_sub%d_all_cent_20101126_v0.eps",leadCut,subleadCut));
@@ -215,6 +217,9 @@ void plotBalance(int cbin,
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
 
+  //  TChain* nt = new TChain("nt");
+  //  nt->Add("/Users/yetkinyilmaz/analysis/data2011/dijet20111215/Hi*.root");
+
   // open the pythia (MC) file
   TFile *infPythia = new TFile(pythia.Data());
   TTree *ntPythia = (TTree*) infPythia->FindObjectAny("nt");
@@ -222,6 +227,9 @@ void plotBalance(int cbin,
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
+  TFile *infW = new TFile("weights.root");
+  TTree *ntw =(TTree*)infW->FindObjectAny("ntw");
+  ntMix->AddFriend(ntw);
 
   int Nbin = 25;
 
@@ -260,8 +268,6 @@ void plotBalance(int cbin,
   ntMix->SetAlias("adphi","abs(dphi)");
   ntPythia->SetAlias("adphi","abs(dphi)");
 
-  ntMix->SetAlias("weight",weightString.Data());
-
   nt->Draw("(pt1-pt2)/(pt1+pt2)>>hFull",Form("%s && noise < 0",cut.Data())); 
   nt->Draw("(pt1-pt2)/(pt1+pt2)>>hB",Form("%s && noise < 0",side.Data()));
   nt->Draw("pt1>>hNorm",Form("%s && noise < 0",cutNorm.Data()));
@@ -270,7 +276,7 @@ void plotBalance(int cbin,
     // use the weight value caluculated by Matt's analysis macro
     ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMixFull",Form("(%s)*weight",cut.Data())); 
     ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMixB",Form("(%s)*weight",side.Data()));
-    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)",weightString.Data(),cutNorm.Data()));
+    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)","weight",cutNorm.Data()));
   } else {
     // ignore centrality reweighting
     ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMixFull",Form("(%s)",cut.Data()));  
@@ -291,6 +297,8 @@ void plotBalance(int cbin,
   hDataMix->Add(hDataMixB,-1);
   h->Add(hB,-1);
   hPythia->Add(hPythiaB,-1);
+  hB->SetFillStyle(3005);
+  hB->SetFillColor(15);
 
   if(plotSubtraction){
     TCanvas* c1 = new TCanvas("cc1","",500,500);
@@ -305,8 +313,7 @@ void plotBalance(int cbin,
     hFull->GetYaxis()->CenterTitle();
     
     hFull->Draw("hist");
-    hB->SetFillStyle(3005);
-    hB->SetFillColor(16);
+
     hB->Draw("hist same");
     TH1D* hPlot = ((TH1D*)h->Clone(Form("%s_plot",h->GetName())));
     hPlot->SetMarkerStyle(24);
@@ -366,7 +373,13 @@ void plotBalance(int cbin,
   h->SetLineColor(dataColor);
   h->SetMarkerColor(dataColor);
   h->Sumw2();
-  h->Scale(1./hNorm->Integral());
+  if(normLead){
+    h->Scale(1./hNorm->Integral());
+    hB->Scale(1./hNorm->Integral());
+  }else{
+    hB->Scale(1./h->Integral());
+    h->Scale(1./h->Integral());
+  }
   h->SetMarkerStyle(20);
 
   hPythia->Scale(1./hNormPythia->Integral());
@@ -374,7 +387,13 @@ void plotBalance(int cbin,
   hPythia->SetFillColor(kAzure-8);
   hPythia->SetFillStyle(3005);
 
-  hDataMix->Scale(1./hNormDataMix->Integral());
+  if(normLead){
+    hDataMixB->Scale(1./hNormDataMix->Integral());
+    hDataMix->Scale(1./hNormDataMix->Integral());
+  }else{
+    hDataMixB->Scale(1./hDataMix->Integral());
+    hDataMix->Scale(1./hDataMix->Integral());
+  }
   hDataMix->SetLineColor(mixColor);
   hDataMix->SetFillColor(mixColor);
   hDataMix->SetFillStyle(3004);
@@ -384,17 +403,17 @@ void plotBalance(int cbin,
 
   hDataMix->GetXaxis()->SetLabelSize(22);
   hDataMix->GetXaxis()->SetLabelFont(43);
-  hDataMix->GetXaxis()->SetTitleSize(24);
+  hDataMix->GetXaxis()->SetTitleSize(28);
   hDataMix->GetXaxis()->SetTitleFont(43);
-  hDataMix->GetXaxis()->SetTitleOffset(2.4);
+  hDataMix->GetXaxis()->SetTitleOffset(2.2);
   hDataMix->GetXaxis()->CenterTitle();
   
   
   hDataMix->GetYaxis()->SetLabelSize(22);
   hDataMix->GetYaxis()->SetLabelFont(43);
-  hDataMix->GetYaxis()->SetTitleSize(22);
+  hDataMix->GetYaxis()->SetTitleSize(28);
   hDataMix->GetYaxis()->SetTitleFont(43);
-  hDataMix->GetYaxis()->SetTitleOffset(3);
+  hDataMix->GetYaxis()->SetTitleOffset(2.2);
   hDataMix->GetYaxis()->CenterTitle();
   
   if(drawXLabel) hDataMix->SetXTitle("A_{J} = (p_{T,1}-p_{T,2})/(p_{T,1}+p_{T,2})");  
@@ -414,19 +433,22 @@ void plotBalance(int cbin,
 	//hPythia->Draw("hist");  
 
 	h->SetLineWidth(1);
-h->Draw("same");
+	h->Draw("same");
 	h->SetLineWidth(2);
 	h->Draw("same");
+	//	hDataMixB->Draw("same hist");
+	//        hB->Draw("same hist");
 
   cout<<" mean value of data "<<h->GetMean()<<endl;
 
   if(drawLeg){
-    TLegend *t3=new TLegend(0.44,0.6,0.89,0.95); 
-    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    TLegend *t3=new TLegend(0.34,0.6,0.83,0.95); 
+
     t3->AddEntry(h,Form("%s #mub^{-1}",LUM),"");
-    //t3->AddEntry(hPythia,"PYTHIA","lf");  
-    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.6","lf");
-    //    t3->AddEntry(hDataMix,"2010 #intL dt = 6.7 #mub^{-1}","lf");
+    t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
+    //    t3->AddEntry(hB,"Estimated Background","l");
+    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.8","lf");
+
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);

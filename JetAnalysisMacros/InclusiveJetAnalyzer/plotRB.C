@@ -43,19 +43,30 @@ TGraphAsymmErrors *divideGraph(TGraphAsymmErrors *a,TGraphAsymmErrors *b)
 
 TGraphAsymmErrors *calcEff(TH1* h1, TH1* hCut,double *npart)
 {
-   TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors();
-   gEfficiency->BayesDivide(hCut,h1);
-   cout <<gEfficiency->GetN()<<endl;
-   for (int i=0;i<gEfficiency->GetN();i++)
+
+  TGraphAsymmErrors *gEfficiency = new TGraphAsymmErrors(h1->GetNbinsX());
+  gEfficiency->SetName(Form("g_%s_%s",h1->GetName(),hCut->GetName()));
+  cout<<"I will divide "<<h1->GetName()<<" with "<<hCut->GetName()<<" now!"<<endl; 
+
+  //  gEfficiency->BayesDivide(hCut,h1,"");
+  //  cout <<gEfficiency->GetN()<<endl;
+
+   hCut->Divide(hCut,h1,1,1,"B");
+   for (int i=0;i<h1->GetNbinsX();i++)
    {
       double x,y;
-      gEfficiency->GetPoint(i,x,y);
-      double errYL = gEfficiency->GetErrorYlow(i);
-      double errYH = gEfficiency->GetErrorYhigh(i);
+      //     gEfficiency->GetPoint(i,x,y);
+      //      double errYL = gEfficiency->GetErrorYlow(i);
+      //      double errYH = gEfficiency->GetErrorYhigh(i);
+      double errYL = hCut->GetBinError(i+1);
+      double errYH = errYL;
+      y = hCut->GetBinContent(i+1);
+      x = h1->GetBinCenter(i+1);
       gEfficiency->SetPointError(i,0,0,errYL,errYH);
-      gEfficiency->SetPoint(i,npart[h1->FindBin(x)-1],y);
-      cout <<x<<" "<<h1->FindBin(x)<<" "<<npart[h1->FindBin(x)-1]<<endl;
+      gEfficiency->SetPoint(i,npart[i],y);
+      cout <<x<<" "<<h1->FindBin(x)<<" "<<npart[i]<<endl;
    }
+   gEfficiency->Write();
    return gEfficiency;
 }
 
@@ -79,26 +90,24 @@ TGraphAsymmErrors *calcEffpythia(TH1* h1, TH1* hCut,double *npart)
 
 
 
-
 void plotRB(  double ajCut=0.24,
 	      double ajCut2 = 0.15,
 		 TString infname = "data.root",
 		 TString pythia = "data_pp.root",
 		 TString mix = "mix.root",
-		 TString titleForComparison = "PYTHIA+HYDJET 1.6",
+		 TString titleForComparison = "",
 		 TString titleForFile = "Result",
 		 bool useWeight = false,
 		 bool drawXLabel = false,
 		 bool drawLeg = true)
 {		
+  TH1::SetDefaultSumw2();
 
-
-  weightMix();
   int threshold1 = 100;
   int threshold2 = 120;
   gStyle->SetErrorX(0); 
-  TString cut1=Form("pt1>%d",threshold1);
-  TString cut2=Form("pt1>%d",threshold2);
+  TString cut1=Form("pt1>%d && abs(eta1) < 2",threshold1);
+  TString cut2=Form("pt1>%d && abs(eta1) < 2",threshold2);
 
   cut1=cut2;
   cout <<cut1.Data()<<endl;
@@ -118,6 +127,9 @@ void plotRB(  double ajCut=0.24,
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
+  TFile *infW = new TFile("weights.root");
+  TTree *ntw =(TTree*)infW->FindObjectAny("ntw");
+  ntMix->AddFriend(ntw);
 
   // open output
   TFile *outfile = new TFile("output.root","recreate");
@@ -192,36 +204,23 @@ void plotRB(  double ajCut=0.24,
   g->SetMarkerSize(1.25);
 
   cout <<cut2.Data()<<endl;
-  nt->Draw("bin>>h2",Form("(pt1-pt2)/(pt1+pt2)<%f&&dphi>3.14159*2/3&&%s",ajCut2,cut2.Data()));
+  nt->Draw("bin>>h2",Form("(pt1-pt2)/(pt1+pt2)<%f&&abs(dphi)>3.14159*2/3&&abs(eta2)<2&&%s",ajCut2,cut2.Data()));
   nt->Draw("bin>>h2Cut",Form("%s",cut2.Data()));
   TGraphAsymmErrors *g2 = calcEff(h2Cut,h2,npart2);
   g2->SetMarkerSize(1.25);
 
-  ntPythia->Draw("bin>>h",Form("(pt1-pt2)/(pt1+pt2)<%f&&dphi>3.14159*2/3&&%s",ajCut2,cut2.Data()));
+  ntPythia->Draw("bin>>h",Form("(pt1-pt2)/(pt1+pt2)<%f&&abs(dphi)>3.14159*2/3&&abs(eta2)<2&&%s",ajCut2,cut2.Data()));
   ntPythia->Draw("bin>>hCut",Form("%s",cut2.Data()));
   cout<<" pythia "<<endl;
   TGraphAsymmErrors *gPythia = calcEffpythia(hCut,h,npart);
   gPythia->SetMarkerSize(1.7);
 
-
-  //  ntMix->SetAlias("weight",weightString.Data());
   new TCanvas("ccc3","",300,300);  
 
-  ntMix->Draw("bin>>hMix",Form("((pt1-pt2)/(pt1+pt2)<%f&&dphi>3.14159*2/3&&%s)",ajCut2,cut2.Data()));
-
-  //  ntMix->Draw("bin>>hMix",Form("weight*((pt1-pt2)/(pt1+pt2)<%f&&dphi>3.14159*2/3&&%s)",ajCut2,cut2.Data()));
-  //  ntMix->Draw("bin>>h",Form("((pt1-pt2)/(pt1+pt2)<%f&&dphi>3.14159*2/3&&%s) * %s",ajCut2,cut2.Data(),weightString.Data()));
-
-  //  ntMix->Draw("bin>>hMix",Form("( ( ( (pt1-pt2) / (pt1+pt2) ) < %f ) *(dphi>(3.14159*2/3))*%s)*%s",ajCut2,cut2.Data(),weightString.Data()));
+  ntMix->Draw("bin>>hMix",Form("weight*((pt1-pt2)/(pt1+pt2)<%f&&abs(dphi)>3.14159*2/3&&%s)",ajCut2,cut2.Data()));
   new TCanvas("ccc4","",300,300);
 
-  //  ntMix->Draw("bin>>hCutMix",Form("weight*(%s)",cut2.Data()));
-  //  ntMix->Draw("bin>>hCutMix",Form("%s*(%s)",weightString.Data(),cut2.Data()));
-
-  ntMix->Draw("bin>>hWeightMix",Form("%s",weightString.Data()));
-  ntMix->Draw("bin>>hCutMix",Form("%s",cut2.Data()));
-
-  //  hCutMix->Multiply(hWeightMix);
+  ntMix->Draw("bin>>hCutMix",Form("weight*(%s)",cut2.Data()));
 
   new TCanvas("ccc5","",300,300);
 
@@ -269,7 +268,7 @@ void plotRB(  double ajCut=0.24,
   gPythia->SetMarkerStyle(29);
   gMix->SetMarkerColor(2);
   gMix->SetLineColor(2);
-  //  gMix->Draw("p same");
+  gMix->Draw("p same");
   gMix->SetMarkerStyle(21);
   gPythia->Draw("p same");
   g2->Draw("p same");

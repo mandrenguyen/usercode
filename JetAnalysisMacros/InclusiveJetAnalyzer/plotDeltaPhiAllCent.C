@@ -53,9 +53,10 @@ void drawPatch(float x1, float y1, float x2, float y2);
 
 void plotDeltaPhiAllCent(){
 
+  TH1::SetDefaultSumw2();
+
    TCanvas *c1 = new TCanvas("c1","",1050,700);
    makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.15,0.02);
-   weightMix();
 
    c1->cd(1);
    //   plotDeltaPhi(-1,"data.root","pythia.root","mix.root",true,false,false);
@@ -183,6 +184,9 @@ void plotDeltaPhi(int cbin,
   // open the data file
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
+  //  TChain* nt = new TChain("nt");
+  //  nt->Add("/Users/yetkinyilmaz/analysis/data2011/dijet20111215/Hi*.root");
+
 
   // open the pythia (MC) file
   TFile *infPythia = new TFile(pythia.Data());
@@ -191,6 +195,9 @@ void plotDeltaPhi(int cbin,
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
+  TFile *infW = new TFile("weights.root");
+  TTree *ntw =(TTree*)infW->FindObjectAny("ntw");
+  ntMix->AddFriend(ntw);
 
   //  ntMix->SetAlias("pt1","et1");
   //  ntMix->SetAlias("pt2","et2");
@@ -202,12 +209,11 @@ void plotDeltaPhi(int cbin,
   ntMix->SetAlias("adphi","abs(dphi)");
   ntPythia->SetAlias("adphi","abs(dphi)");
 
-  ntMix->SetAlias("weight",weightString.Data());
 
   // projection histogram
-  TH1D *h = new TH1D("h","",30,0,3.14159);
-  TH1D *hPythia = new TH1D("hPythia","",30,0,3.14159);
-  TH1D *hDataMix = new TH1D("hDataMix","",30,0,3.14159);
+  TH1D *h = new TH1D("h","",900,0,3.14159);
+  TH1D *hPythia = new TH1D("hPythia","",900,0,3.14159);
+  TH1D *hDataMix = new TH1D("hDataMix","",900,0,3.14159);
 
   TH1D* hNorm = new TH1D("hNorm","",1000,0,1000);
   TH1D* hNormPythia = new TH1D("hNormPythia","",1000,0,1000);
@@ -219,8 +225,8 @@ void plotDeltaPhi(int cbin,
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
     ntPythia->Draw("abs(dphi)>>hPythia",Form("(%s)",cutpp.Data())); 
-    ntMix->Draw("abs(dphi)>>hDataMix",Form("(%s)*(%s)",weightString.Data(),cut.Data())); 
-    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)",weightString.Data(),cutNorm.Data()));
+    ntMix->Draw("abs(dphi)>>hDataMix",Form("(%s)*(%s)","weight",cut.Data())); 
+    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)","weight",cutNorm.Data()));
     ntPythia->Draw("pt1>>hNormPythia",Form("%s",cutNorm.Data()));
 
   } else {
@@ -301,8 +307,9 @@ void plotDeltaPhi(int cbin,
   hDataMix->SetMaximum(4);
   hDataMix->SetMinimum(0.0001);
 
+  hDataMix->SetMarkerSize(0);
   hDataMix->Draw("hist");
-  //hPythia->Draw("same");
+  hDataMix->Draw("same");
   h->Draw("same");
 
   if(drawLeg){
@@ -310,7 +317,7 @@ void plotDeltaPhi(int cbin,
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //    t3->AddEntry(h,"2011","p");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
-    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.6","lf");
+    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.8","lf");
     //    t3->AddEntry(hDataMix,"2010","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);

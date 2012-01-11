@@ -23,6 +23,8 @@
 #include "weightMix.C"
 
 
+static const bool doFit = 0;
+
 //---------------------------------------------------------------------
 void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns, 
 			  const Int_t rows, const Float_t leftOffset=0.,
@@ -55,7 +57,7 @@ void plotLeadingJetAll();
 void plotLeadingJetAllCent(){
 
   TH1::SetDefaultSumw2();
-  weightMix();
+  //  weightMix();
 
   TCanvas *c1 = new TCanvas("c1","",1050,700);
 
@@ -148,7 +150,7 @@ void plotLeadingJetAllCent(){
   c1->cd(0);
   TLatex *ytitle = new TLatex(0.025,0.2,"1/N_{jet} dN/dp_{T} (GeV/c)^{-1}, Arbitrary Normalization");
   ytitle->SetTextAngle(90);
-  ytitle->SetTextFont(63);
+  ytitle->SetTextFont(43);
   ytitle->SetTextSize(22);
   //ytitle->SetTextSize(0.05);
   ytitle->SetTextColor(kBlack);
@@ -157,9 +159,10 @@ void plotLeadingJetAllCent(){
   ytitle->Draw();
 
 
-  c1->Print("./fig/dijet_leadingjet_all_cent_20111202_v0.gif");
-  c1->Print("./fig/dijet_leadingjet_all_cent_20111202_v0.eps");
-  c1->Print("./fig/dijet_leadingjet_all_cent_20111202_v0.pdf");
+  c1->Print(Form("./fig/dijet_leadingjet_all_cent_20111202_v0%s.gif",doFit?"_fit":""));
+  c1->Print(Form("./fig/dijet_leadingjet_all_cent_20111202_v0%s.eps",doFit?"_fit":""));
+  c1->Print(Form("./fig/dijet_leadingjet_all_cent_20111202_v0%s.pdf",doFit?"_fit":""));
+
 
 }
 
@@ -217,11 +220,11 @@ void plotLeadingJet(int cbin,
 
 
   // open the data file
-  //  TFile *inf = new TFile(infname.Data());
-  //  TTree *nt =(TTree*)inf->FindObjectAny("nt");
+  TFile *inf = new TFile(infname.Data());
+  TTree *nt =(TTree*)inf->FindObjectAny("nt");
 
-  TChain* nt = new TChain("nt");
-  nt->Add("/Users/yetkinyilmaz/analysis/data2011/dijet20111215/Hi*.root");
+  //  TChain* nt = new TChain("nt");
+  //  nt->Add("/Users/yetkinyilmaz/analysis/data2011/dijet20111215/Hi*.root");
 
 
   // open the hydjet (MC) file
@@ -232,17 +235,20 @@ void plotLeadingJet(int cbin,
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
 
+  TFile *infW = new TFile("weights.root");
+  TTree *ntw =(TTree*)infW->FindObjectAny("ntw");
+  ntMix->AddFriend(ntw);
+
   nt->SetAlias("adphi","acos(cos(phi1-phi2))");
   ntMix->SetAlias("adphi","abs(dphi)");
-  ntMix->SetAlias("weight",weightString.Data());
-
 
   // projection histogram
 
-  float binlim[]={120,140,160,180,200,220,240,280,320,360,400,440,480,520,560};
-   TH1D *h = new TH1D("h","h",14,binlim);
-   TH1D *hPythia = new TH1D("hPythia","",14,binlim);
-   TH1D *hDataMix = new TH1D("hDataMix","",14,binlim);
+  float binlim[]={120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560};
+  //  float binlim[]={120,140,160,180,200,220,240,280,320,360,400,440,480,520,560};
+   TH1D *h = new TH1D("h","h",22,binlim);
+   TH1D *hPythia = new TH1D("hPythia","",22,binlim);
+   TH1D *hDataMix = new TH1D("hDataMix","",22,binlim);
 
    TH1D* hNorm = new TH1D("hNorm","",1000,0,1000);
    TH1D* hNormPythia = new TH1D("hNormPythia","",1000,0,1000);
@@ -255,7 +261,7 @@ void plotLeadingJet(int cbin,
     // use the weight value caluculated by Matt's analysis macro
     ntHydjet->Draw("pt1>>hPythia",Form("(%s)",cutpp.Data())); 
     ntMix->Draw("pt1>>hDataMix",Form("(%s)*weight",cut.Data())); 
-    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)",weightString.Data(),cutNorm.Data()));
+    ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*(%s)","weight",cutNorm.Data()));
   } else {
     // ignore centrality reweighting
     ntHydjet->Draw("pt1>>hPythia",Form("(%s)",cutpp.Data()));
@@ -287,7 +293,6 @@ void plotLeadingJet(int cbin,
   hPythia->SetLineColor(kBlue);
   hPythia->SetFillColor(kAzure-8);
   hPythia->SetFillStyle(3005);
-
 
   for(int ibin=0;ibin<hDataMix->GetNbinsX();ibin++){
     hDataMix->SetBinContent(ibin+1, hDataMix->GetBinContent(ibin+1)/hDataMix->GetBinWidth(ibin+1));
@@ -333,18 +338,34 @@ void plotLeadingJet(int cbin,
   hPythia->SetAxisRange(2E-6,5,"Y");
   hDataMix->SetAxisRange(2E-6,5,"Y");
   h->SetAxisRange(2E-4,5,"Y");
+//  TF1 *f = new TF1("f","[0]*pow(x,[1])",120,500);
+//	TF1 *f = new TF1("f","[2]*exp([0]*x+[1]*sqrt([2]*x))",120,500);
 
+	TF1 *f = new TF1("f","[0]*exp([1]*x+[2]*sqrt(x))");
+	f->SetParameters(5e8,0.008,-1.19);
+
+//	f->SetParameters(-1.,1.,1,1,1);	
+//  f->SetParameters(1000,-6.8);
+
+	if(doFit) h->Fit(f,"");
+	if(doFit) h->Fit(f,"");
+	if(doFit) h->Fit(f,"");
+	if(1){
+  if(doFit) h->Fit(f,"LL M");
+  if(doFit) h->Fit(f,"LL M");
+  if(doFit) h->Fit(f,"LL M");
+	}
+	
   hDataMix->SetTitleOffset(1.9,"X");
   hDataMix->Draw("hist");
   hDataMix->Draw("same");
   h->Draw("same");
 
-
   if(drawLeg){
     TLegend *t3=new TLegend(0.44,0.63,0.95,0.83);
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
     //t3->AddEntry(hPythia,"PYTHIA","lf");
-    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.6","lf");
+    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.8","lf");
     t3->SetFillColor(0);
     t3->SetBorderSize(0);
     t3->SetFillStyle(0);

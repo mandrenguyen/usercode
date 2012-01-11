@@ -21,6 +21,9 @@
 
 #include "weightMix.C"
 
+int type = 3;
+
+bool central = 1;
 
 //---------------------------------------------------------------------
 void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns, 
@@ -55,9 +58,8 @@ void drawPatch(float x1, float y1, float x2, float y2);
 void plotBalanceAllPt(){
 
 	TH1::SetDefaultSumw2();
-	weightMix();
 
-	TFile* outf = new TFile("hists.root","recreate");
+	TFile* outf = new TFile("hists_AJ.root","recreate");
 	
    TCanvas *c1 = new TCanvas("c1","",1050,700);
    makeMultiPanelCanvas(c1,3,2,0.0,0.0,0.2,0.2,0.02);
@@ -65,7 +67,7 @@ void plotBalanceAllPt(){
    TString label;
   c1->cd(1);
   label = plotBalance(0,"data.root","pythia.root","mix.root",true,false,true,outf);
-  drawText(label.Data(),0.6,0.4);
+  drawText(label.Data(),0.4,0.42);
 
 
   TLatex *jetf_PbPb;
@@ -75,7 +77,6 @@ void plotBalanceAllPt(){
   jetf_PbPb->SetTextSize(15);
   jetf_PbPb->Draw();
 
-
   TLatex *lumi_PbPb = new TLatex(0.50,0.23,"84 #mub^{-1}");
   lumi_PbPb->SetTextFont(63);
   lumi_PbPb->SetTextSize(15);
@@ -83,7 +84,12 @@ void plotBalanceAllPt(){
 
   c1->cd(2);
   label = plotBalance(1,"data.root","pythia.root","mix.root",true,false,false,outf);
-  drawText(label.Data(),0.54,0.4);
+  drawText(label.Data(),0.3,0.42);
+
+  if(sideCorrect == 0){
+    jetf_PbPb = new TLatex(0.12,0.29,"Mismatched background not subtracted");
+    jetf_PbPb->Draw();
+  }
 
   TLatex tsel;
   tsel.SetNDC();
@@ -96,28 +102,27 @@ void plotBalanceAllPt(){
 
   c1->cd(3);
   label = plotBalance(2,"data.root","pythia.root","mix.root",true,false,false,outf);
-  drawText(label.Data(),0.54,0.4);
+  drawText(label.Data(),0.3,0.42);
   drawText(Form("0-%d%s",(int)(2.5*centralBin),"%"),0.64,0.6);
 
   c1->cd(4);
   label = plotBalance(3,"data.root","pythia.root","mix.root",true,false,false,outf);
-  drawText(label.Data(),0.6,0.9);
+  drawText(label.Data(),0.4,0.9);
   //  drawText("(e)",0.05,0.92);
   //drawPatch(-0.00007,0.0972,0.128,0.195);
   //drawPatch(0.9,0.0972,1.12,0.191);
   //drawPatch(0.976,0.0972,1.1,0.141);
   //  gPad->SetBottomMargin(0.22);                                                                                                                     
-
   c1->cd(5);
   label = plotBalance(4,"data.root","pythia.root","mix.root",true,true,false,outf);
-  drawText(label.Data(),0.54,0.9);
+  drawText(label.Data(),0.3,0.9);
   //  drawText("(f)",0.05,0.92);
   //drawPatch(-0.00007,0.0972,0.0518,0.141);
   //drawPatch(-0.00007,0.0972,0.128,0.195);
         
   c1->cd(6);
   label = plotBalance(5,"data.root","pythia.root","mix.root",true,false,false,outf);
-  drawText(label.Data(),0.54,0.9);
+  drawText(label.Data(),0.3,0.9);
   //  drawText("(f)",0.05,0.92);
 
   c1->cd(3);
@@ -130,16 +135,10 @@ void plotBalanceAllPt(){
   outf->Write();
 
   if(!plotSubtraction){
-
-    if(sideCorrect > 0){
-      c1->Print(Form("./fig/dijet_imbalance_0to%d_pt_20111126_v0_subt.gif",(int)(2.5*centralBin)));
-      c1->Print(Form("./fig/dijet_imbalance_0to%d_pt_20111126_v0_subt.eps",(int)(2.5*centralBin)));
-      c1->Print(Form("./fig/dijet_imbalance_0to%d_pt_20111126_v0_subt.pdf",(int)(2.5*centralBin)));
-    }else{
-      c1->Print(Form("./fig/dijet_imbalance_0to%d_pt_20111126_v0.gif",(int)(2.5*centralBin)));
-      c1->Print(Form("./fig/dijet_imbalance_0to%d_pt_20111126_v0.eps",(int)(2.5*centralBin)));
-      c1->Print(Form("./fig/dijet_imbalance_0to%d_pt_20111126_v0.pdf",(int)(2.5*centralBin)));
-    }
+    c1->Print(Form("./fig/dijet_imbalance%d_0to%d_pt_20120103%s%s.pdf",type,(int)(2.5*centralBin),sideCorrect > 0?"_subt":"",central?"":"_peripheral"));
+    c1->Print(Form("./fig/dijet_imbalance%d_0to%d_pt_20120103%s%s.eps",type,(int)(2.5*centralBin),sideCorrect > 0?"_subt":"",central?"":"_peripheral"));
+    c1->Print(Form("./fig/dijet_imbalance%d_0to%d_pt_20120103%s%s.gif",type,(int)(2.5*centralBin),sideCorrect > 0?"_subt":"",central?"":"_peripheral"));
+    
   }
 
 }
@@ -156,57 +155,66 @@ TString plotBalance(int cbin,
 
   //  useWeight = 0;// forced!
 
-  TString cut=Form("pt1>%d && pt2>%d && abs(dphi)>2.0944 && abs(eta1) < 2 && abs(eta2) < 2",leadCut,subleadCut);
-  TString side=Form("pt1>%d && pt2>%d && abs(dphi)>%f && abs(dphi)<%f && abs(eta1) < 2 && abs(eta2) < 2",leadCut,subleadCut, sideMin, sideMax);
+  TString cut=Form("pt1>%d && pt2>%d && abs(dphi)>2.0944 && abs(eta1) < 1.5 && abs(eta2) < 1.5",leadCut,subleadCut);
+  TString side=Form("pt1>%d && pt2>%d && abs(dphi)>%f && abs(dphi)<%f && abs(eta1) < 1.5 && abs(eta2) < 1.5",leadCut,subleadCut, sideMin, sideMax);
 
-  TString cutNorm=Form("pt1>%d && abs(eta1) < 2",leadCut);
+  TString cutNorm=Form("pt1>%d && abs(eta1) < 1.5",leadCut);
 
   double sideScale = sideCorrect*(3.1415926536-2.0944)/(sideMax-sideMin);
 
   TString cutpp=cut;
-
   TString cstring = "";
-  cut+=Form(" && bin>=0 && bin<%d",centralBin);
-  cutNorm+=Form(" && bin>=0 && bin<%d",centralBin);
+  if(central){
+    cut+=Form(" && bin>=0 && bin<%d",centralBin);
+    cutNorm+=Form(" && bin>=0 && bin<%d",centralBin);
+  }else{
+    cut+=Form(" && bin>=%d",centralBin);
+    cutNorm+=Form(" && bin>=%d",centralBin);
+  }
+
+  double m[] =   {120,150,180,230,260,300,1500};
 
   int ptMin = 0;
   int ptMax = 0;
   if(cbin==-1) {
-    ptMin = 120;
+    ptMin = m[0];
     ptMax = 999;
   } else if (cbin==0) {
-    ptMin = 120;
-    ptMax = 140;
+    ptMin = m[0];
+    ptMax = m[1];
   } else if (cbin==1) {
-    ptMin = 140;
-    ptMax = 160;
+    ptMin = m[1];
+    ptMax = m[2];
   } else if (cbin==2) {
-    ptMin = 160;
-    ptMax = 180;
+    ptMin = m[2];
+    ptMax = m[3];
   } else if (cbin==3) {
-    ptMin = 180;
-    ptMax = 200; 
+    ptMin = m[3];
+    ptMax = m[4]; 
   } else if (cbin==4) {
-    ptMin = 200;
-    ptMax = 230;
+    ptMin = m[4];
+    ptMax = m[5];
   } else if (cbin==5) {
-    ptMin = 230;
+    ptMin = m[5];
     ptMax = 999;
   }
 
-  cstring = Form("%d < p_{T} < %d",ptMin,ptMax);
+  cstring = Form("%d < p_{T} < %d GeV/c",ptMin,ptMax);
   cut+=Form(" && pt1>=%d && pt1<%d",ptMin,ptMax);
   side+=Form(" && pt1>=%d && pt1<%d",ptMin,ptMax);
   cutNorm+=Form(" && pt1>=%d && pt1<%d",ptMin,ptMax);
 
   if (cbin==5) {
-    cstring = "230 < p_{T}";
+    cstring = Form("p_{T} > %d GeV/c",ptMin);
   }
 
 
   // open the data file
   TFile *inf = new TFile(infname.Data());
   TTree *nt =(TTree*)inf->FindObjectAny("nt");
+
+  //  TChain* nt = new TChain("nt");
+  //  nt->Add("/Users/yetkinyilmaz/analysis/data2011/dijet20111215/Hi*.root");
 
   // open the pythia (MC) file
   TFile *infPythia = new TFile(pythia.Data());
@@ -215,20 +223,27 @@ TString plotBalance(int cbin,
   // open the datamix file
   TFile *infMix = new TFile(mix.Data());
   TTree *ntMix =(TTree*)infMix->FindObjectAny("nt");
+  TFile *infW = new TFile("weights.root");
+  TTree *ntw =(TTree*)infW->FindObjectAny("ntw");
+  ntMix->AddFriend(ntw);
 
   int Nbin = 25;
+
+  double max = 1.5;
+  if(type == 0) max = 300;
+
   // projection histogram
-  TH1D *h = new TH1D(Form("h",cbin),"",Nbin,0,1.5);
-  TH1D *hPythia = new TH1D(Form("hPythia",cbin),"",Nbin,0,1.5);
-  TH1D *hDataMix = new TH1D(Form("hDataMix",cbin),"",Nbin,0,1.5);
+  TH1D *h = new TH1D(Form("h",cbin),"",Nbin,0,max);
+  TH1D *hPythia = new TH1D(Form("hPythia",cbin),"",Nbin,0,max);
+  TH1D *hDataMix = new TH1D(Form("hDataMix",cbin),"",Nbin,0,max);
 
-  TH1D *hB = new TH1D(Form("hB",cbin),"",Nbin,0,1.5);
-  TH1D *hPythiaB = new TH1D(Form("hPythiaB",cbin),"",Nbin,0,1.5);
-  TH1D *hDataMixB = new TH1D(Form("hDataMixB",cbin),"",Nbin,0,1.5);
+  TH1D *hB = new TH1D(Form("hB",cbin),"",Nbin,0,max);
+  TH1D *hPythiaB = new TH1D(Form("hPythiaB",cbin),"",Nbin,0,max);
+  TH1D *hDataMixB = new TH1D(Form("hDataMixB",cbin),"",Nbin,0,max);
 
-  TH1D *hFull = new TH1D("hFull","",25,0,1.5);
-  TH1D *hPythiaFull = new TH1D("hPythiaFull","",25,0,1.5);
-  TH1D *hDataMixFull = new TH1D("hDataMixFull","",25,0,1.5);
+  TH1D *hFull = new TH1D("hFull","",25,0,max);
+  TH1D *hPythiaFull = new TH1D("hPythiaFull","",25,0,max);
+  TH1D *hDataMixFull = new TH1D("hDataMixFull","",25,0,max);
 
   TH1D* hNorm = new TH1D("hNorm","",1000,0,1000);
   TH1D* hNormPythia = new TH1D("hNormPythia","",1000,0,1000);
@@ -246,27 +261,49 @@ TString plotBalance(int cbin,
   ntMix->SetAlias("adphi","dphi");
   ntPythia->SetAlias("adphi","dphi");
 
-  ntMix->SetAlias("weight",weightString.Data()); 
+  if(type == 0){
+    nt->SetAlias("var","pt1-pt2");
+    ntPythia->SetAlias("var","pt1-pt2");
+    ntMix->SetAlias("var","pt1-pt2");
+  }
+  if(type == 1){
+    nt->SetAlias("var","(pt1-pt2)/pt1");
+    ntPythia->SetAlias("var","(pt1-pt2)/pt1");
+    ntMix->SetAlias("var","(pt1-pt2)/pt1");
+  }
+  if(type == 3){
+    nt->SetAlias("var","(pt1-pt2)/(pt1+pt2)");
+    ntPythia->SetAlias("var","(pt1-pt2)/(pt1+pt2)");
+    ntMix->SetAlias("var","(pt1-pt2)/(pt1+pt2)");
+  }
+  if(type == 5){
+    nt->SetAlias("var","pt2/pt1");
+    ntPythia->SetAlias("var","pt2/pt1");
+    ntMix->SetAlias("var","pt2/pt1");
+  }
 
-  nt->Draw("(pt1-pt2)/(pt1+pt2)>>hFull",Form("%s && noise < 0",cut.Data()));
-  nt->Draw("(pt1-pt2)/(pt1+pt2)>>hB",Form("%s && noise < 0",side.Data()));
+
+  nt->Draw("var>>hFull",Form("%s && noise < 0",cut.Data()));
+  nt->Draw("var>>hB",Form("%s && noise < 0",side.Data()));
+
+
   nt->Draw("pt1>>hNorm",Form("%s && noise < 0",cutNorm.Data()));
 
   if (useWeight) {
     // use the weight value caluculated by Matt's analysis macro
-    ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMixFull",Form("(%s)*weight",cut.Data())); 
-    ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMixB",Form("(%s)*weight",side.Data()));
+    ntMix->Draw("var>>hDataMixFull",Form("(%s)*weight",cut.Data())); 
+    ntMix->Draw("var>>hDataMixB",Form("(%s)*weight",side.Data()));
     ntMix->Draw("pt1>>hNormDataMix",Form("(%s)*weight",cutNorm.Data()));
 
   } else {
     // ignore centrality reweighting
-    ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMixFull",Form("(%s)",cut.Data()));  
-    ntMix->Draw("(pt1-pt2)/(pt1+pt2)>>hDataMixB",Form("(%s)",side.Data()));
+    ntMix->Draw("var>>hDataMixFull",Form("(%s)",cut.Data()));  
+    ntMix->Draw("var>>hDataMixB",Form("(%s)",side.Data()));
     ntMix->Draw("pt1>>hNormDataMix",Form("(%s)",cutNorm.Data()));
 
   }
-  ntPythia->Draw("(pt1-pt2)/(pt1+pt2)>>hPythiaFull",Form("(%s)",cutpp.Data()));
-  ntPythia->Draw("(pt1-pt2)/(pt1+pt2)>>hPythiaB",Form("(%s)",side.Data()));
+  ntPythia->Draw("var>>hPythiaFull",Form("(%s)",cutpp.Data()));
+  ntPythia->Draw("var>>hPythiaB",Form("(%s)",side.Data()));
   ntPythia->Draw("pt1>>hNormPythia",Form("(%s)",cutNorm.Data()));
 
   hDataMixB->Scale(sideScale);
@@ -318,7 +355,6 @@ TString plotBalance(int cbin,
   cout<<"hDataMix integral : "<<hDataMix->Integral()<<endl;
   cout<<"hNormDataMix integral : "<<hNormDataMix->Integral()<<endl;
 
-
   // calculate the statistical error and normalize
   h->SetLineColor(dataColor);
   h->SetMarkerColor(dataColor);
@@ -356,43 +392,55 @@ TString plotBalance(int cbin,
   hDataMix->SetMarkerSize(0);
   hDataMix->SetStats(0);
 
-  hDataMix->GetXaxis()->SetLabelSize(22);
-  hDataMix->GetXaxis()->SetLabelFont(43);
-  hDataMix->GetXaxis()->SetTitleSize(24);
-  hDataMix->GetXaxis()->SetTitleFont(43);
-  hDataMix->GetXaxis()->SetTitleOffset(2.4);
-  hDataMix->GetXaxis()->CenterTitle();
-  
-    hDataMix->GetYaxis()->SetLabelSize(22);
-  hDataMix->GetYaxis()->SetLabelFont(43);
-  hDataMix->GetYaxis()->SetTitleSize(22);
-  hDataMix->GetYaxis()->SetTitleFont(43);
-  hDataMix->GetYaxis()->SetTitleOffset(3);
-  hDataMix->GetYaxis()->CenterTitle();
-  
-  if(drawXLabel) hDataMix->SetXTitle("A_{J} = (p_{T,1}-p_{T,2})/(p_{T,1}+p_{T,2})");  
-  hDataMix->SetYTitle("Event Fraction");
+  TH2D* hPad;  
+  double maxX, minX, maxY, minY;
+  maxX = 0.95;
+  minX = -0.01;
+  maxY = 0.32;
+  minY = 0.;
+  if(cbin >= 3) maxY = 0.48;
+  if(type == 0){
+    maxX = 306;    
+    maxY = 0.26;
+  }
+  hPad = new TH2D("hPad","",500,minX,maxX,500,minY,maxY);
 
-  hDataMix->SetAxisRange(0.001,0.999,"X");
+  hPad->GetXaxis()->SetLabelSize(22);
+  hPad->GetXaxis()->SetLabelFont(43);
+  hPad->GetXaxis()->SetTitleSize(28);
+  hPad->GetXaxis()->SetTitleFont(43);
+  hPad->GetXaxis()->SetTitleOffset(2.2);
+  hPad->GetXaxis()->CenterTitle();
 
-  hDataMix->SetAxisRange(0.0001,0.32,"Y");
-  if(cbin >= 13)hDataMix->SetAxisRange(0,0.48,"Y");
+  hPad->GetYaxis()->SetLabelSize(22);
+  hPad->GetYaxis()->SetLabelFont(43);
+  hPad->GetYaxis()->SetTitleSize(28);
+  hPad->GetYaxis()->SetTitleFont(43);
+  hPad->GetYaxis()->SetTitleOffset(2.2);
+  hPad->GetYaxis()->CenterTitle();
 
-  //hDataMix->GetXaxis()->SetNdivisions(905,true);
-  hDataMix->GetYaxis()->SetNdivisions(505,true);
-   
-  hDataMix->Draw("hist");
-  //  hDataMix->Draw();//"hist");
+  if(drawXLabel){
+    if(type == 0)hPad->SetXTitle("p_{T,1}-p_{T,2} (GeV/c)");
+    if(type == 1)hPad->SetXTitle("(p_{T,1}-p_{T,2})/p_{T,1}");
+    if(type == 3)hPad->SetXTitle("A_{J} = (p_{T,1}-p_{T,2})/(p_{T,1}+p_{T,2})");  
+    if(type == 5)hPad->SetXTitle("p_{T,2}/p_{T,1}");
+  }
+
+  hPad->SetYTitle("Event Fraction");
+  hPad->GetYaxis()->SetNdivisions(505,true);
+  hPad->GetXaxis()->SetNdivisions(905,true);
+
+  hPad->Draw();
+  hDataMix->Draw("hist same");
   hDataMix->Draw("same");
-	//hPythia->Draw("hist");  
 
 	h->SetLineWidth(1);
 	h->Draw("same");
 	h->SetLineWidth(2);
 	h->Draw("same");
 
-	hDataMixB->Draw("same hist");
-        hB->Draw("same hist");
+	//	hDataMixB->Draw("same hist");
+	//        hB->Draw("same hist");
 
   cout<<" mean value of data "<<h->GetMean()<<endl;
 
@@ -401,11 +449,8 @@ TString plotBalance(int cbin,
 
     t3->AddEntry(h,Form("%s #mub^{-1}",LUM),"");
     t3->AddEntry(h,"PbPb  #sqrt{s}_{_{NN}}=2.76 TeV","p");
-    t3->AddEntry(hB,"Estimated Background","l");
-
-    //    t3->AddEntry(h,"2011 #intL dt = 40 #mub^{-1}","p");
-    //t3->AddEntry(hPythia,"PYTHIA","lf");  
-    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.6","lf");
+    //    t3->AddEntry(hB,"Estimated Background","l");
+    t3->AddEntry(hDataMix,"PYTHIA+HYDJET 1.8","lf");
 
 
     //    t3->AddEntry(hDataMix,"2010 #intL dt = 6.7 #mub^{-1}","lf");
