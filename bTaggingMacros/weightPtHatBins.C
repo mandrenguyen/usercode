@@ -40,68 +40,70 @@ void weightPtHatBins(){
     Int_t           bin;
     Int_t           nref;
     Float_t         vx,vy,vz;
-    Float_t         rawpt[1000];
-    Float_t         jtpt[1000];
-    Float_t         jteta[1000];
-    Float_t         jty[1000];
-    Float_t         jtphi[1000];
-    Float_t         jtpu[1000];
-    Float_t         discr_csvMva[1000];
-    Float_t         discr_csvSimple[1000];
-    Float_t         discr_muByIp3[1000];
-    Float_t         discr_muByPt[1000];
-    Float_t         discr_prob[1000];
-    Float_t         discr_probb[1000];
-    Float_t         discr_tcHighEff[1000];
-    Float_t         discr_tcHighPur[1000];
-    Int_t         nsvtx[1000];
-    Int_t         svtxntrk[1000];
-    Float_t         svtxdl[1000];
-    Float_t         svtxdls[1000];
-    Float_t         svtxm[1000];
-    Float_t         svtxpt[1000];
-    Int_t         nIPtrk[1000];
-    Int_t         nselIPtrk[1000];
+    Float_t         rawpt[30];
+    Float_t         jtpt[30];
+    Float_t         jteta[30];
+    Float_t         jty[30];
+    Float_t         jtphi[30];
+    Float_t         jtpu[30];
+    Float_t         discr_csvMva[30];
+    Float_t         discr_csvSimple[30];
+    Float_t         discr_muByIp3[30];
+    Float_t         discr_muByPt[30];
+    Float_t         discr_prob[30];
+    Float_t         discr_probb[30];
+    Float_t         discr_tcHighEff[30];
+    Float_t         discr_tcHighPur[30];
+    Int_t         nsvtx[30];
+    Int_t         svtxntrk[30];
+    Float_t         svtxdl[30];
+    Float_t         svtxdls[30];
+    Float_t         svtxm[30];
+    Float_t         svtxpt[30];
+    Int_t         nIPtrk[30];
+    Int_t         nselIPtrk[30];
     Int_t nIP;
-    Int_t ipJetIndex[1000];
-    Float_t ipPt[1000];
-    Float_t ipProb0[1000];
-    Float_t ipProb1[1000];
-    Float_t ip2d[1000];
-    Float_t ip2dSig[1000];
-    Float_t ip3d[1000];
-    Float_t ip3dSig[1000];
-    Float_t ipDist2Jet[1000];
-    Float_t ipDist2JetSig[1000];
-    Float_t ipClosest2Jet[1000];
+    Int_t ipJetIndex[400];
+    Float_t ipPt[400];
+    Float_t ipProb0[400];
+    Float_t ipProb1[400];
+    Float_t ip2d[400];
+    Float_t ip2dSig[400];
+    Float_t ip3d[400];
+    Float_t ip3dSig[400];
+    Float_t ipDist2Jet[400];
+    Float_t ipDist2JetSig[400];
+    Float_t ipClosest2Jet[400];
 
-    Float_t         mue[1000];
-    Float_t         mupt[1000];
-    Float_t         mueta[1000];
-    Float_t         muphi[1000];
-    Float_t         mudr[1000];
-    Float_t         muptrel[1000];
-    Int_t           muchg[1000];
+    Float_t         mue[30];
+    Float_t         mupt[30];
+    Float_t         mueta[30];
+    Float_t         muphi[30];
+    Float_t         mudr[30];
+    Float_t         muptrel[30];
+    Int_t           muchg[30];
     Float_t         pthat;
     Int_t         beamId1;
     Int_t         beamId2;
-    Float_t         refpt[1000];
-    Float_t         refeta[1000];
-    Float_t         refy[1000];
-    Float_t         refphi[1000];
-    Float_t         refdphijt[1000];
-    Float_t         refdrjt[1000];
-    Float_t         refparton_pt[1000];
-    Int_t           refparton_flavor[1000];
-    Int_t           refparton_flavorForB[1000];
+    Float_t         refpt[30];
+    Float_t         refeta[30];
+    Float_t         refy[30];
+    Float_t         refphi[30];
+    Float_t         refdphijt[30];
+    Float_t         refdrjt[30];
+    Float_t         refparton_pt[30];
+    Int_t           refparton_flavor[30];
+    Int_t           refparton_flavorForB[30];
+    /*
     Int_t           ngen;
-    Int_t           genmatchindex[1000];
-    Float_t         genpt[1000];
-    Float_t         geneta[1000];
-    Float_t         geny[1000];
-    Float_t         genphi[1000];
-    Float_t         gendphijt[1000];
-    Float_t         gendrjt[1000];
+    Int_t           genmatchindex[100];
+    Float_t         genpt[100];
+    Float_t         geneta[100];
+    Float_t         geny[100];
+    Float_t         genphi[100];
+    Float_t         gendphijt[100];
+    Float_t         gendrjt[100];
+    */
 
     Float_t fentries = (Float_t)tr_in[it]->GetEntries();
     Float_t weight = xSections[it]/(fentries/1000.);
@@ -169,6 +171,7 @@ void weightPtHatBins(){
     tr_in[it]->SetBranchAddress("refparton_pt",refparton_pt);
     tr_in[it]->SetBranchAddress("refparton_flavor",refparton_flavor);
     tr_in[it]->SetBranchAddress("refparton_flavorForB",refparton_flavorForB);
+    /*
     tr_in[it]->SetBranchAddress("ngen",&ngen);
     tr_in[it]->SetBranchAddress("genmatchindex",genmatchindex);
     tr_in[it]->SetBranchAddress("genpt",genpt);
@@ -177,13 +180,15 @@ void weightPtHatBins(){
     tr_in[it]->SetBranchAddress("genphi",genphi);
     tr_in[it]->SetBranchAddress("gendphijt",gendphijt);
     tr_in[it]->SetBranchAddress("gendrjt",gendrjt);
+    */
 
-    sprintf(name,"/data_CMS/cms/mnguyen/bTaggingOutput/pythia/weighted_bTagAnalyzers_ppReco_pythia%d.root",bounds[it]);
+    sprintf(name,"/data_CMS/cms/sregnard/weighted_bTagAnalyzers_ppReco_pythia%d.root",bounds[it]);
     fout[it] = new TFile(name,"RECREATE");
     fout[it]->mkdir("akPu3PFJetAnalyzer");
     fout[it]->cd("akPu3PFJetAnalyzer");
 
     tr_out[it] = new TTree("t","Jet Analyzer");
+    tr_out[it]->SetDirectory(0);
 
     // Set output branch addresses.
     tr_out[it]->Branch("evt",&evt,"evt/I");
@@ -247,6 +252,7 @@ void weightPtHatBins(){
     tr_out[it]->Branch("refparton_pt",refparton_pt,"refparton_pt[nref]/F");
     tr_out[it]->Branch("refparton_flavor",refparton_flavor,"refparton_flavor[nref]/I");
     tr_out[it]->Branch("refparton_flavorForB",refparton_flavorForB,"refparton_flavorForB[nref]/I");
+    /*
     tr_out[it]->Branch("ngen",&ngen,"ngen/I");
     tr_out[it]->Branch("genmatchindex",genmatchindex,"genmatchindex[nref]/I");
     tr_out[it]->Branch("genpt",genpt,"genpt[nref]/F");
@@ -255,7 +261,7 @@ void weightPtHatBins(){
     tr_out[it]->Branch("genphi",genphi,"genphi[nref]/F");
     tr_out[it]->Branch("gendphijt",gendphijt,"gendphijt[nref]/F");
     tr_out[it]->Branch("gendrjt",gendrjt,"gendrjt[nref]/F");
-
+    */
     tr_out[it]->Branch("weight",&weight,"weight/F");
 
 
@@ -263,6 +269,8 @@ void weightPtHatBins(){
     Long64_t nbytes = 0;
 
     for (Long64_t i=0; i<nentries;i++) {
+
+      if(i%100000==0) cout<<" i = "<<i<<" out of "<<nentries<<endl;
 
       nbytes += tr_in[it]->GetEntry(i);
 
@@ -277,8 +285,8 @@ void weightPtHatBins(){
     tr_out[it]->Write();
 
     fout[it]->Close();
-  }
 
+  }
 
 }
 
