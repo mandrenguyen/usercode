@@ -62,7 +62,7 @@ void weightPtHatBins(){
     Float_t         svtxpt[1000];
     Int_t         nIPtrk[1000];
     Int_t         nselIPtrk[1000];
-    Int_t nIP[1000];
+    Int_t nIP;
     Int_t ipJetIndex[1000];
     Float_t ipPt[1000];
     Float_t ipProb0[1000];
@@ -137,7 +137,7 @@ void weightPtHatBins(){
     tr_in[it]->SetBranchAddress("svtxm",svtxm);
     tr_in[it]->SetBranchAddress("svtxpt",svtxpt);
     tr_in[it]->SetBranchAddress("nIPtrk",nIPtrk);
-    tr_in[it]->SetBranchAddress("nIP",nIP);
+    tr_in[it]->SetBranchAddress("nIP",&nIP);
     tr_in[it]->SetBranchAddress("nselIPtrk",nselIPtrk);
     tr_in[it]->SetBranchAddress("ipJetIndex",ipJetIndex);
     tr_in[it]->SetBranchAddress("ipPt",ipPt);
@@ -178,7 +178,7 @@ void weightPtHatBins(){
     tr_in[it]->SetBranchAddress("gendphijt",gendphijt);
     tr_in[it]->SetBranchAddress("gendrjt",gendrjt);
 
-    sprintf(name,"weighted_bTagAnalyzers_ppReco_pythia%d.root",bounds[it]);
+    sprintf(name,"/data_CMS/cms/mnguyen/bTaggingOutput/pythia/weighted_bTagAnalyzers_ppReco_pythia%d.root",bounds[it]);
     fout[it] = new TFile(name,"RECREATE");
     fout[it]->mkdir("akPu3PFJetAnalyzer");
     fout[it]->cd("akPu3PFJetAnalyzer");
@@ -216,18 +216,18 @@ void weightPtHatBins(){
     tr_out[it]->Branch("svtxpt",svtxpt,"svtxpt[nref]/F");
     tr_out[it]->Branch("nIPtrk",nIPtrk,"nIPtrk[nref]/I");
     tr_out[it]->Branch("nselIPtrk",nselIPtrk,"nselIPtrk[nref]/I");
-    tr_out[it]->Branch("nIP",nIP,"nIP[nref]/I");
-    tr_out[it]->Branch("ipJetIndex",ipJetIndex,"ipJetIndexnIP/I");
-    tr_out[it]->Branch("ipPt",ipPt,"ipPtnIP/F");
-    tr_out[it]->Branch("ipProb0",ipProb0,"ipProb0nIP/F");
-    tr_out[it]->Branch("ipProb1",ipProb1,"ipProb1nIP/F");
-    tr_out[it]->Branch("ip2d",ip2d,"ip2dnIP/F");
-    tr_out[it]->Branch("ip2dSig",ip2dSig,"ip2dSignIP/F");
-    tr_out[it]->Branch("ip3d",ip3d,"ip3dnIP/F");
-    tr_out[it]->Branch("ip3dSig",ip3dSig,"ip3dSignIP/F");
-    tr_out[it]->Branch("ipDist2Jet",ipDist2Jet,"ipDist2JetnIP/F");
-    tr_out[it]->Branch("ipDist2JetSig",ipDist2JetSig,"ipDist2JetSignIP/F");
-    tr_out[it]->Branch("ipClosest2Jet",ipClosest2Jet,"ipClosest2JetnIP/F");    
+    tr_out[it]->Branch("nIP",&nIP,"nIP/I");
+    tr_out[it]->Branch("ipJetIndex",ipJetIndex,"ipJetIndex[nIP]/I");
+    tr_out[it]->Branch("ipPt",ipPt,"ipPt[nIP]/F");
+    tr_out[it]->Branch("ipProb0",ipProb0,"ipProb0[nIP]/F");
+    tr_out[it]->Branch("ipProb1",ipProb1,"ipProb1[nIP]/F");
+    tr_out[it]->Branch("ip2d",ip2d,"ip2d[nIP]/F");
+    tr_out[it]->Branch("ip2dSig",ip2dSig,"ip2dSig[nIP]/F");
+    tr_out[it]->Branch("ip3d",ip3d,"ip3d[nIP]/F");
+    tr_out[it]->Branch("ip3dSig",ip3dSig,"ip3dSig[nIP]/F");
+    tr_out[it]->Branch("ipDist2Jet",ipDist2Jet,"ipDist2Jet[nIP]/F");
+    tr_out[it]->Branch("ipDist2JetSig",ipDist2JetSig,"ipDist2JetSig[nIP]/F");
+    tr_out[it]->Branch("ipClosest2Jet",ipClosest2Jet,"ipClosest2Jet[nIP]/F");  
     tr_out[it]->Branch("mue",mue,"mue[nref]/F");
     tr_out[it]->Branch("mupt",mupt,"mupt[nref]/F");
     tr_out[it]->Branch("mueta",mueta,"mueta[nref]/F");
