@@ -8,18 +8,18 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 
 
   TFile *fin;
-  if(isMC)fin=new TFile("merged_weighted_bTagAnalyzers_ppReco_pythia.root");
-  else fin=new TFile("merged_jetTrackAnalyzers_ppData2760_ppRecoFromRaw.root");
+  if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_weighted_bTagAnalyzers_ppReco_pythia.root");
+  else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw/merged_jetTrackAnalyzers_ppData2760_ppRecoFromRaw.root");
 
   TTree *t=(TTree*) fin->Get("akPu3PFJetAnalyzer/t");
   TTree *tSkim;
   if(!isMC) tSkim = (TTree*)  fin->Get("skimanalysis/HltTree");
 
-  //Declaration of leaves types                                                                                                          
+  //Declaration of leaves types                  
   Int_t           evt;
-  Float_t         b;
-  Float_t         hf;
-  Int_t           bin;
+  //Float_t         b;
+  //Float_t         hf;
+  //Int_t           bin;
   Int_t           nref;
   Float_t         rawpt[1000];
   Float_t         jtpt[1000];
@@ -35,15 +35,16 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   Float_t         discr_probb[1000];
   Float_t         discr_tcHighEff[1000];
   Float_t         discr_tcHighPur[1000];
-  Int_t         nsvtx[1000];
-  Int_t         svtxntrk[1000];
+  Int_t           nsvtx[1000];
+  Int_t           svtxntrk[1000];
   Float_t         svtxdl[1000];
   Float_t         svtxdls[1000];
   Float_t         svtxm[1000];
   Float_t         svtxpt[1000];
-  Int_t         nIPtrk[1000];
-  Int_t         nselIPtrk[1000];
-  Int_t ipJetIndex[1000];
+  Int_t           nIPtrk[1000];
+  Int_t           nselIPtrk[1000];
+  Int_t   nIP;
+  Int_t   ipJetIndex[1000];
   Float_t ipPt[1000];
   Float_t ipProb0[1000];
   Float_t ipProb1[1000];
@@ -54,7 +55,6 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   Float_t ipDist2Jet[1000];
   Float_t ipDist2JetSig[1000];
   Float_t ipClosest2Jet[1000];
-
   Float_t         mue[1000];
   Float_t         mupt[1000];
   Float_t         mueta[1000];
@@ -63,8 +63,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   Float_t         muptrel[1000];
   Int_t           muchg[1000];
   Float_t         pthat;
-  Int_t         beamId1;
-  Int_t         beamId2;
+  Int_t           beamId1;
+  Int_t           beamId2;
   Float_t         refpt[1000];
   Float_t         refeta[1000];
   Float_t         refy[1000];
@@ -74,6 +74,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   Float_t         refparton_pt[1000];
   Int_t           refparton_flavor[1000];
   Int_t           refparton_flavorForB[1000];
+  /*
   Int_t           ngen;
   Int_t           genmatchindex[1000];
   Float_t         genpt[1000];
@@ -82,7 +83,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   Float_t         genphi[1000];
   Float_t         gendphijt[1000];
   Float_t         gendrjt[1000];
-
+  */
   Float_t         weight;
   
   Int_t pvSel;
@@ -92,8 +93,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
     
   t->SetBranchAddress("evt",&evt);
   //t->SetBranchAddress("b",&b);
-  //t->SetBranchAddress("hf",&hf);                                                                                               
-  //t->SetBranchAddress("bin",&bin);                                                                                             
+  //t->SetBranchAddress("hf",&hf);   
+  //t->SetBranchAddress("bin",&bin);           
   t->SetBranchAddress("nref",&nref);
   t->SetBranchAddress("rawpt",rawpt);
   t->SetBranchAddress("jtpt",jtpt);
@@ -116,7 +117,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   t->SetBranchAddress("svtxm",svtxm);
   t->SetBranchAddress("svtxpt",svtxpt);
   t->SetBranchAddress("nIPtrk",nIPtrk);
-  t->SetBranchAddress("nselIPtrk",nselIPtrk);
+  t->SetBranchAddress("nselIPtrk",nselIPtrk); 
+  t->SetBranchAddress("nIP",&nIP);
   t->SetBranchAddress("ipJetIndex",ipJetIndex);
   t->SetBranchAddress("ipPt",ipPt);
   t->SetBranchAddress("ipProb0",ipProb0);
@@ -148,6 +150,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
     t->SetBranchAddress("refparton_pt",refparton_pt);
     t->SetBranchAddress("refparton_flavor",refparton_flavor);
     t->SetBranchAddress("refparton_flavorForB",refparton_flavorForB);
+    /*
     t->SetBranchAddress("ngen",&ngen);
     t->SetBranchAddress("genmatchindex",genmatchindex);
     t->SetBranchAddress("genpt",genpt);
@@ -156,6 +159,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
     t->SetBranchAddress("genphi",genphi);
     t->SetBranchAddress("gendphijt",gendphijt);
     t->SetBranchAddress("gendrjt",gendrjt);
+    */
   }
   if(isMC&&useWeight)t->SetBranchAddress("weight",&weight);
 
@@ -227,9 +231,56 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   TH1F *hipPtC = new TH1F("hipPtC","hipPtC",40,0,40);
   TH1F *hipPtL = new TH1F("hipPtL","hipPtL",40,0,40);
   
+  TH1F *hipProb0 = new TH1F("hipProb0","hipProb0",40,-1,1);
+  TH1F *hipProb0B = new TH1F("hipProb0B","hipProb0B",40,-1,1);
+  TH1F *hipProb0C = new TH1F("hipProb0C","hipProb0C",40,-1,1);
+  TH1F *hipProb0L = new TH1F("hipProb0L","hipProb0L",40,-1,1);
+  
+  TH1F *hipProb1 = new TH1F("hipProb1","hipProb1",40,-1,1);
+  TH1F *hipProb1B = new TH1F("hipProb1B","hipProb1B",40,-1,1);
+  TH1F *hipProb1C = new TH1F("hipProb1C","hipProb1C",40,-1,1);
+  TH1F *hipProb1L = new TH1F("hipProb1L","hipProb1L",40,-1,1);
+  
+  TH1F *hip2d = new TH1F("hip2d","hip2d",40,0,0.2);
+  TH1F *hip2dB = new TH1F("hip2dB","hip2dB",40,0,0.2);
+  TH1F *hip2dC = new TH1F("hip2dC","hip2dC",40,0,0.2);
+  TH1F *hip2dL = new TH1F("hip2dL","hip2dL",40,0,0.2);
+  
+  TH1F *hip2dSig = new TH1F("hip2dSig","hip2dSig",40,0,40);
+  TH1F *hip2dSigB = new TH1F("hip2dSigB","hip2dSigB",40,0,40);
+  TH1F *hip2dSigC = new TH1F("hip2dSigC","hip2dSigC",40,0,40);
+  TH1F *hip2dSigL = new TH1F("hip2dSigL","hip2dSigL",40,0,40);
+  
+  TH1F *hip3d = new TH1F("hip3d","hip3d",40,0,0.4);
+  TH1F *hip3dB = new TH1F("hip3dB","hip3dB",40,0,0.4);
+  TH1F *hip3dC = new TH1F("hip3dC","hip3dC",40,0,0.4);
+  TH1F *hip3dL = new TH1F("hip3dL","hip3dL",40,0,0.4);
+  
+  TH1F *hip3dSig = new TH1F("hip3dSig","hip3dSig",40,0,40);
+  TH1F *hip3dSigB = new TH1F("hip3dSigB","hip3dSigB",40,0,40);
+  TH1F *hip3dSigC = new TH1F("hip3dSigC","hip3dSigC",40,0,40);
+  TH1F *hip3dSigL = new TH1F("hip3dSigL","hip3dSigL",40,0,40);
+  
+  TH1F *hipDist2Jet = new TH1F("hipDist2Jet","hipDist2Jet",40,-0.1,0);
+  TH1F *hipDist2JetB = new TH1F("hipDist2JetB","hipDist2JetB",40,-0.1,0);
+  TH1F *hipDist2JetC = new TH1F("hipDist2JetC","hipDist2JetC",40,-0.1,0);
+  TH1F *hipDist2JetL = new TH1F("hipDist2JetL","hipDist2JetL",40,-0.1,0);
+  
+  TH1F *hipDist2JetSig = new TH1F("hipDist2JetSig","hipDist2JetSig",40,-0.1,0.1);
+  TH1F *hipDist2JetSigB = new TH1F("hipDist2JetSigB","hipDist2JetSigB",40,-0.1,0.1);
+  TH1F *hipDist2JetSigC = new TH1F("hipDist2JetSigC","hipDist2JetSigC",40,-0.1,0.1);
+  TH1F *hipDist2JetSigL = new TH1F("hipDist2JetSigL","hipDist2JetSigL",40,-0.1,0.1);
+  
+  TH1F *hipClosest2Jet = new TH1F("hipClosest2Jet","hipClosest2Jet",40,0,1);
+  TH1F *hipClosest2JetB = new TH1F("hipClosest2JetB","hipClosest2JetB",40,0,1);
+  TH1F *hipClosest2JetC = new TH1F("hipClosest2JetC","hipClosest2JetC",40,0,1);
+  TH1F *hipClosest2JetL = new TH1F("hipClosest2JetL","hipClosest2JetL",40,0,1);
+  
   Long64_t nentries = t->GetEntries();
 
   for (Long64_t i=0; i<nentries;i++) {
+
+    if (i%100000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl; 
 
     t->GetEntry(i);
     if(isMC){
@@ -268,8 +319,6 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_prob[ij],w);    
 	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_prob[ij],w);    
 	}
-
-	
 	
 	hnsvtx->Fill(nsvtx[ij],w);    
 	if(isMC){
@@ -277,6 +326,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 	  else if(abs(refparton_flavorForB[ij])==4)hnsvtxC->Fill(nsvtx[ij],w);    
 	  else if(abs(refparton_flavorForB[ij])<99)hnsvtxL->Fill(nsvtx[ij],w);    
 	}
+
 	if(nsvtx[ij]>0){
 
 	  hsvtxntrk->Fill(svtxntrk[ij],w);    
@@ -302,6 +352,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 	      else if(abs(refparton_flavorForB[ij])==4)hsvtxdlsC->Fill(svtxdls[ij],w);    
 	      else if(abs(refparton_flavorForB[ij])<99)hsvtxdlsL->Fill(svtxdls[ij],w);    
 	    }
+
 	    hsvtxm->Fill(svtxm[ij],w);    
 	    if(isMC){
 	      if(abs(refparton_flavorForB[ij])==5)hsvtxmB->Fill(svtxm[ij],w);    
@@ -317,6 +368,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 	    }
 	  }
 	}
+
 	hnIPtrk->Fill(nIPtrk[ij],w);    
 	if(isMC){
 	  if(abs(refparton_flavorForB[ij])==5)hnIPtrkB->Fill(nIPtrk[ij],w);    
@@ -333,19 +385,86 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 
       }
     }
-    /*
-    for(int it=0;it<nselIPtrk;it++){
+   
+    for(int it=0;it<nIP;it++){
+
       int ijet = ipJetIndex[it];
-      if(jtpt[ijet]&&fabs(jteta[ijet])<2){
-	  hipPt->Fill(ipPt[it],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hipPtB->Fill(nIPtrk[it],w);    
-	    else if(abs(refparton_flavorForB[ijet])==4)hipPtC->Fill(nIPtrk[it],w);    
-	    else if(abs(refparton_flavorForB[ijet])<99)hipPtL->Fill(nIPtrk[it],w);    
-	  }
+
+      if(jtpt[ijet]>minJetPt && fabs(jteta[ijet])<2){
+	
+	hipPt->Fill(ipPt[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hipPtB->Fill(ipPt[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hipPtC->Fill(ipPt[it],w); 
+	  else if(abs(refparton_flavorForB[ijet])<99)hipPtL->Fill(ipPt[it],w); 
+	}
+	
+	hipProb0->Fill(ipProb0[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hipProb0B->Fill(ipProb0[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hipProb0C->Fill(ipProb0[it],w);
+	  else if(abs(refparton_flavorForB[ijet])<99)hipProb0L->Fill(ipProb0[it],w);
+	}
+	
+	hipProb1->Fill(ipProb1[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hipProb1B->Fill(ipProb1[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hipProb1C->Fill(ipProb1[it],w);
+	  else if(abs(refparton_flavorForB[ijet])<99)hipProb1L->Fill(ipProb1[it],w);
+	}
+	
+	hip2d->Fill(ip2d[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hip2dB->Fill(ip2d[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hip2dC->Fill(ip2d[it],w); 
+	  else if(abs(refparton_flavorForB[ijet])<99)hip2dL->Fill(ip2d[it],w); 
+	}
+	
+	hip2dSig->Fill(ip2dSig[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hip2dSigB->Fill(ip2dSig[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hip2dSigC->Fill(ip2dSig[it],w);
+	  else if(abs(refparton_flavorForB[ijet])<99)hip2dSigL->Fill(ip2dSig[it],w);
+	}
+	
+	hip3d->Fill(ip3d[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hip3dB->Fill(ip3d[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hip3dC->Fill(ip3d[it],w); 
+	  else if(abs(refparton_flavorForB[ijet])<99)hip3dL->Fill(ip3d[it],w); 
+	}
+	
+	hip3dSig->Fill(ip3dSig[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hip3dSigB->Fill(ip3dSig[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hip3dSigC->Fill(ip3dSig[it],w);
+	  else if(abs(refparton_flavorForB[ijet])<99)hip3dSigL->Fill(ip3dSig[it],w);
+	}
+
+	hipDist2Jet->Fill(ipDist2Jet[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hipDist2JetB->Fill(ipDist2Jet[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetC->Fill(ipDist2Jet[it],w);
+	  else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetL->Fill(ipDist2Jet[it],w);
+	}
+	
+	hipDist2JetSig->Fill(ipDist2JetSig[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hipDist2JetSigB->Fill(ipDist2JetSig[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetSigC->Fill(ipDist2JetSig[it],w);
+	  else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetSigL->Fill(ipDist2JetSig[it],w);
+	}
+	
+	hipClosest2Jet->Fill(ipClosest2Jet[it],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ijet])==5)hipClosest2JetB->Fill(ipClosest2Jet[it],w);
+	  else if(abs(refparton_flavorForB[ijet])==4)hipClosest2JetC->Fill(ipClosest2Jet[it],w);
+	  else if(abs(refparton_flavorForB[ijet])<99)hipClosest2JetL->Fill(ipClosest2Jet[it],w);
+	}
+
       }
+
     }
-    */
 
   }
 
@@ -388,6 +507,33 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 
   hipPt->Write();
   if(isMC) hipPtB->Write(); hipPtC->Write(); hipPtL->Write();
+
+  hipProb0->Write();
+  if(isMC) hipProb0B->Write(); hipProb0C->Write(); hipProb0L->Write();
+
+  hipProb1->Write();
+  if(isMC) hipProb1B->Write(); hipProb1C->Write(); hipProb1L->Write();
+
+  hip2d->Write();
+  if(isMC) hip2dB->Write(); hip2dC->Write(); hip2dL->Write();
+
+  hip2dSig->Write();
+  if(isMC) hip2dSigB->Write(); hip2dSigC->Write(); hip2dSigL->Write();
+
+  hip3d->Write();
+  if(isMC) hip3dB->Write(); hip3dC->Write(); hip3dL->Write();
+
+  hip3dSig->Write();
+  if(isMC) hip3dSigB->Write(); hip3dSigC->Write(); hip3dSigL->Write();
+
+  hipDist2Jet->Write();
+  if(isMC) hipDist2JetB->Write(); hipDist2JetC->Write(); hipDist2JetL->Write();
+
+  hipDist2JetSig->Write();
+  if(isMC) hipDist2JetSigB->Write(); hipDist2JetSigC->Write(); hipDist2JetSigL->Write();
+
+  hipClosest2Jet->Write();
+  if(isMC) hipClosest2JetB->Write(); hipClosest2JetC->Write(); hipClosest2JetL->Write();
 
   fout->Close();
 }

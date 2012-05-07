@@ -13,32 +13,27 @@ void setFillColor(TH1F *h[3])
 }
 
 void formatCanvas(TCanvas *c){
-
   c->Divide(1,2,0.01,0.01);
   c->cd(1);
   c->GetPad(1)->SetLogy();
   c->GetPad(1)->SetPad(0.,0.225,1.,1.);
-
   c->GetPad(2)->SetPad(0.,0.0,1.,0.3);
   c->GetPad(2)->SetBottomMargin(0.3);
   c->GetPad(2)->SetGridy(1);
 }
 
 void formatRatioHist(TH1F *h){
-
   h->GetYaxis()->SetRangeUser(0.4,1.6);
   h->GetYaxis()->SetNdivisions(505);
   h->SetYTitle("Data/MC");
   h->GetYaxis()->CenterTitle(1);
   h->GetYaxis()->SetLabelSize(14);
   h->GetYaxis()->SetLabelFont(43);
-
 }
 
 void stackHistos(TH1F *hArray[3]){
   hArray[1]->Add(hArray[0]);
   hArray[2]->Add(hArray[1]);
-
 }
 
 
@@ -59,8 +54,8 @@ void compareDataMC(){
   TFile *fdata = new TFile("histos/ppdata.root");
 
   // declare histos
-  TH1F *hjtpt, *hnsvtx, *hsvtxntrk, *hsvtxdl, *hsvtxdls, *hsvtxm, *hsvtxpt, *hnIPtrk, *hnselIPtrk, *hdiscr_csvSimple, *hdiscr_prob;
-  TH1F *hjtptMC[4], *hnsvtxMC[3], *hsvtxntrkMC[3], *hsvtxdlMC[3], *hsvtxdlsMC[3], *hsvtxmMC[3], *hsvtxptMC[3], *hnIPtrkMC[3], *hnselIPtrkMC[3], *hdiscr_csvSimpleMC[3], *hdiscr_probMC[3];
+  TH1F *hjtpt, *hnsvtx, *hsvtxntrk, *hsvtxdl, *hsvtxdls, *hsvtxm, *hsvtxpt, *hnIPtrk, *hnselIPtrk, *hdiscr_csvSimple, *hdiscr_prob, *hipPt, *hipProb0, *hipProb1, *hip2d, *hip2dSig, *hip3d, *hip3dSig, *hipDist2Jet, *hipDist2JetSig, *hipClosest2Jet;
+  TH1F *hjtptMC[4], *hnsvtxMC[3], *hsvtxntrkMC[3], *hsvtxdlMC[3], *hsvtxdlsMC[3], *hsvtxmMC[3], *hsvtxptMC[3], *hnIPtrkMC[3], *hnselIPtrkMC[3], *hdiscr_csvSimpleMC[3], *hdiscr_probMC[3], *hipPtMC[3], *hipProb0MC[3], *hipProb1MC[3], *hip2dMC[3], *hip2dSigMC[3], *hip3dMC[3], *hip3dSigMC[3], *hipDist2JetMC[3], *hipDist2JetSigMC[3], *hipClosest2JetMC[3];
 
   // grab histos
   string suffix[4]={"B","C","L","U"};
@@ -109,6 +104,47 @@ void compareDataMC(){
   hdiscr_prob = (TH1F*) fdata->Get(name.c_str());
   for(int i=0;i<3;i++) hdiscr_probMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
 
+  name="hipPt";
+  hipPt = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hipPtMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hipProb0";
+  hipProb0 = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hipProb0MC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hipProb1";
+  hipProb1 = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hipProb1MC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hip2d";
+  hip2d = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hip2dMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hip2dSig";
+  hip2dSig = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hip2dSigMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hip3d";
+  hip3d = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hip3dMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hip3dSig";
+  hip3dSig = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hip3dSigMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hipDist2Jet";
+  hipDist2Jet = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hipDist2JetMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hipDist2JetSig";
+  hipDist2JetSig = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hipDist2JetSigMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hipClosest2Jet";
+  hipClosest2Jet = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hipClosest2JetMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+
   // turn off heavy flavor for testing
   /*
 //  for(int i=0;i<2;i++) hjtptMC[i]->Scale(0.);
@@ -122,8 +158,8 @@ void compareDataMC(){
 //  for(int i=0;i<2;i++) hnselIPtrkMC[i]->Scale(0.);
 //  for(int i=0;i<2;i++) hdiscr_csvSimpleMC[i]->Scale(0.);
   */
-  // stack em
 
+  // stack em
   stackHistos(hjtptMC);
   stackHistos(hnsvtxMC);
   stackHistos(hsvtxntrkMC);
@@ -135,6 +171,16 @@ void compareDataMC(){
   stackHistos(hnselIPtrkMC);
   stackHistos(hdiscr_csvSimpleMC);
   stackHistos(hdiscr_probMC);
+  stackHistos(hipPtMC);
+  stackHistos(hipProb0MC);
+  stackHistos(hipProb1MC);
+  stackHistos(hip2dMC);
+  stackHistos(hip2dSigMC);
+  stackHistos(hip3dMC);
+  stackHistos(hip3dSigMC);
+  stackHistos(hipDist2JetMC);
+  stackHistos(hipDist2JetSigMC);
+  stackHistos(hipClosest2JetMC);
 
   // scale em
   double scale = hjtpt->Integral()/hjtptMC[2]->Integral();
@@ -150,6 +196,16 @@ void compareDataMC(){
   for(int i=0;i<3;i++) hnselIPtrkMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hdiscr_csvSimpleMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hdiscr_probMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hipPtMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hipProb0MC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hipProb1MC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hip2dMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hip2dSigMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hip3dMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hip3dSigMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hipDist2JetMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hipDist2JetSigMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hipClosest2JetMC[i]->Scale(scale);
 
   // style em
   setFillColor(hjtptMC);
@@ -163,6 +219,16 @@ void compareDataMC(){
   setFillColor(hnselIPtrkMC);
   setFillColor(hdiscr_csvSimpleMC);
   setFillColor(hdiscr_probMC);
+  setFillColor(hipPtMC);
+  setFillColor(hipProb0MC);
+  setFillColor(hipProb1MC);
+  setFillColor(hip2dMC);
+  setFillColor(hip2dSigMC);
+  setFillColor(hip3dMC);
+  setFillColor(hip3dSigMC);
+  setFillColor(hipDist2JetMC);
+  setFillColor(hipDist2JetSigMC);
+  setFillColor(hipClosest2JetMC);
 
   TLegend *leg = new TLegend(0.6,0.55,0.9,0.85);
   leg->SetBorderSize(0);
@@ -191,7 +257,7 @@ void compareDataMC(){
   hRjtpt->Divide(hjtptMC[2]);
   hRjtpt->Draw();
 
-  char *title = "# of secondary vertices";
+  title = "# of secondary vertices";
   TCanvas *c1=new TCanvas("c1",title,200,10,600,480);
   formatHisto(hnsvtx,title);
   formatCanvas(c1);
@@ -305,7 +371,7 @@ void compareDataMC(){
   hRnIPtrk->Divide(hnIPtrkMC[2]);
   hRnIPtrk->Draw();
 
-  title = "# of selectecd IP tracks";
+  title = "# of selected IP tracks";
   TCanvas *c8=new TCanvas("c8",title,200,10,600,480);
   formatHisto(hnselIPtrk,title);
   formatCanvas(c8);
@@ -352,5 +418,166 @@ void compareDataMC(){
   formatRatioHist(hRdiscr_prob);
   hRdiscr_prob->Divide(hdiscr_probMC[2]);
   hRdiscr_prob->Draw();
+
+  title = "hipPt";
+  TCanvas *c11=new TCanvas("c11",title,200,10,600,480);
+  formatHisto(hipPt,title);
+  formatCanvas(c11);
+  hipPt->Draw();
+  for(int i=2;i>-1;i--) hipPtMC[i]->Draw("same");
+  hipPt->Draw("same");
+  leg->Draw();
+  c11->GetPad(1)->RedrawAxis();
+
+  c11->cd(2);
+  TH1F *hRipPt = hipPt->Clone("hRipPt");
+  formatRatioHist(hRipPt);
+  hRipPt->Divide(hipPtMC[2]);
+  hRipPt->Draw();
+
+  title = "hipProb0";
+  TCanvas *c12=new TCanvas("c12",title,200,10,600,480);
+  formatHisto(hipProb0,title);
+  formatCanvas(c12);
+  hipProb0->Draw();
+  for(int i=2;i>-1;i--) hipProb0MC[i]->Draw("same");
+  hipProb0->Draw("same");
+  leg->Draw();
+  c12->GetPad(1)->RedrawAxis();
+
+  c12->cd(2);
+  TH1F *hRipProb0 = hipProb0->Clone("hRipProb0");
+  formatRatioHist(hRipProb0);
+  hRipProb0->Divide(hipProb0MC[2]);
+  hRipProb0->Draw();
+
+  title = "hipProb1";
+  TCanvas *c13=new TCanvas("c13",title,200,10,600,480);
+  formatHisto(hipProb1,title);
+  formatCanvas(c13);
+  hipProb1->Draw();
+  for(int i=2;i>-1;i--) hipProb1MC[i]->Draw("same");
+  hipProb1->Draw("same");
+  leg->Draw();
+  c13->GetPad(1)->RedrawAxis();
+
+  c13->cd(2);
+  TH1F *hRipProb1 = hipProb1->Clone("hRipProb1");
+  formatRatioHist(hRipProb1);
+  hRipProb1->Divide(hipProb1MC[2]);
+  hRipProb1->Draw();
+
+  title = "hip2d";
+  TCanvas *c14=new TCanvas("c14",title,200,10,600,480);
+  formatHisto(hip2d,title);
+  formatCanvas(c14);
+  hip2d->Draw();
+  for(int i=2;i>-1;i--) hip2dMC[i]->Draw("same");
+  hip2d->Draw("same");
+  leg->Draw();
+  c14->GetPad(1)->RedrawAxis();
+
+  c14->cd(2);
+  TH1F *hRip2d = hip2d->Clone("hRip2d");
+  formatRatioHist(hRip2d);
+  hRip2d->Divide(hip2dMC[2]);
+  hRip2d->Draw();
+
+  title = "hip2dSig";
+  TCanvas *c15=new TCanvas("c15",title,200,10,600,480);
+  formatHisto(hip2dSig,title);
+  formatCanvas(c15);
+  hip2dSig->Draw();
+  for(int i=2;i>-1;i--) hip2dSigMC[i]->Draw("same");
+  hip2dSig->Draw("same");
+  leg->Draw();
+  c15->GetPad(1)->RedrawAxis();
+
+  c15->cd(2);
+  TH1F *hRip2dSig = hip2dSig->Clone("hRip2dSig");
+  formatRatioHist(hRip2dSig);
+  hRip2dSig->Divide(hip2dSigMC[2]);
+  hRip2dSig->Draw();
+
+  title = "hip3d";
+  TCanvas *c16=new TCanvas("c16",title,200,10,600,480);
+  formatHisto(hip3d,title);
+  formatCanvas(c16);
+  hip3d->Draw();
+  for(int i=2;i>-1;i--) hip3dMC[i]->Draw("same");
+  hip3d->Draw("same");
+  leg->Draw();
+  c16->GetPad(1)->RedrawAxis();
+
+  c16->cd(2);
+  TH1F *hRip3d = hip3d->Clone("hRip3d");
+  formatRatioHist(hRip3d);
+  hRip3d->Divide(hip3dMC[2]);
+  hRip3d->Draw();
+
+  title = "hip3dSig";
+  TCanvas *c17=new TCanvas("c17",title,200,10,600,480);
+  formatHisto(hip3dSig,title);
+  formatCanvas(c17);
+  hip3dSig->Draw();
+  for(int i=2;i>-1;i--) hip3dSigMC[i]->Draw("same");
+  hip3dSig->Draw("same");
+  leg->Draw();
+  c17->GetPad(1)->RedrawAxis();
+
+  c17->cd(2);
+  TH1F *hRip3dSig = hip3dSig->Clone("hRip3dSig");
+  formatRatioHist(hRip3dSig);
+  hRip3dSig->Divide(hip3dSigMC[2]);
+  hRip3dSig->Draw();
+
+  title = "hipDist2Jet";
+  TCanvas *c18=new TCanvas("c18",title,200,10,600,480);
+  formatHisto(hipDist2Jet,title);
+  formatCanvas(c18);
+  hipDist2Jet->Draw();
+  for(int i=2;i>-1;i--) hipDist2JetMC[i]->Draw("same");
+  hipDist2Jet->Draw("same");
+  leg->Draw();
+  c18->GetPad(1)->RedrawAxis();
+
+  c18->cd(2);
+  TH1F *hRipDist2Jet = hipDist2Jet->Clone("hRipDist2Jet");
+  formatRatioHist(hRipDist2Jet);
+  hRipDist2Jet->Divide(hipDist2JetMC[2]);
+  hRipDist2Jet->Draw();
+
+  title = "hipDist2JetSig";
+  TCanvas *c19=new TCanvas("c19",title,200,10,600,480);
+  formatHisto(hipDist2JetSig,title);
+  formatCanvas(c19);
+  hipDist2JetSig->Draw();
+  for(int i=2;i>-1;i--) hipDist2JetSigMC[i]->Draw("same");
+  hipDist2JetSig->Draw("same");
+  leg->Draw();
+  c19->GetPad(1)->RedrawAxis();
+
+  c19->cd(2);
+  TH1F *hRipDist2JetSig = hipDist2JetSig->Clone("hRipDist2JetSig");
+  formatRatioHist(hRipDist2JetSig);
+  hRipDist2JetSig->Divide(hipDist2JetSigMC[2]);
+  hRipDist2JetSig->Draw();
+
+  title = "hipClosest2Jet";
+  TCanvas *c20=new TCanvas("c20",title,200,10,600,480);
+  formatHisto(hipClosest2Jet,title);
+  formatCanvas(c20);
+  hipClosest2Jet->Draw();
+  for(int i=2;i>-1;i--) hipClosest2JetMC[i]->Draw("same");
+  hipClosest2Jet->Draw("same");
+  leg->Draw();
+  c20->GetPad(1)->RedrawAxis();
+
+  c20->cd(2);
+  TH1F *hRipClosest2Jet = hipClosest2Jet->Clone("hRipClosest2Jet");
+  formatRatioHist(hRipClosest2Jet);
+  hRipClosest2Jet->Divide(hipClosest2JetMC[2]);
+  hRipClosest2Jet->Draw();
+
 
 }
