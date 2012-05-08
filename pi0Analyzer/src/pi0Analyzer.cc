@@ -59,7 +59,7 @@ pi0Analyzer::beginJob() {
   centrality_ = 0;
 
   string pi0TagTitle = "Pi0 Analysis Tree"; 
-  t = fs1->make<TTree>("t","Pi0 Ana Tree");
+  t = fs1->make<TTree>("pi0Tree","Pi0 Ana Tree");
 
 
   t->Branch("run",&pi0s_.run,"run/I");
@@ -177,7 +177,7 @@ pi0Analyzer::analyze(const Event& iEvent,
      
      if(pt1<0.4) continue;
 
-     if(fabs(cand1.eta())>1.44) continue;
+     if(fabs(cand1.eta())>2) continue;
 
      for( unsigned ic2=0; ic2<pfCandidates->size(); ic2++ ) {
        
@@ -194,7 +194,7 @@ pi0Analyzer::analyze(const Event& iEvent,
        
        if(pt2<0.4) continue;
 
-       if(fabs(cand2.eta())>1.44) continue;
+       if(fabs(cand2.eta())>2) continue;
 
        TLorentzVector gam1 (cand1.px(), cand1.py(), cand1.pz(), cand1.energy());
        TLorentzVector gam2 (cand2.px(), cand2.py(), cand2.pz(), cand2.energy());
