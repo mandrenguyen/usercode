@@ -406,6 +406,15 @@ else:
 #   Analyzers
 ########################
 
+
+process.TFileService = cms.Service("TFileService",
+                                   fileName=cms.string(
+    #'bTagAnalyzers.root'
+    ivars.output
+    )
+                                   )
+
+
 # Jet stuff
 
 process.load('CmsHi.JetAnalysis.JetAnalyzers_cff')
@@ -487,19 +496,10 @@ process.ana_step          = cms.Path(
     )
 
 
-# trigger requirment
-
+# trigger requirment, gets added in front of all patch w/ the superFilter
 process.load('CmsHi.JetAnalysis.EventSelection_cff')
-process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
-    
-process.hltJetHI.HLTPaths = ['HLT_Jet40_v1']
 
-process.superFilterSequence = cms.Sequence(
-    process.hltJetHI
-    )
 
-if isMC==False:    
-    process.superFilterPath = cms.Path(process.superFilterSequence) 
 
 
 if hiReco:
@@ -507,59 +507,26 @@ if hiReco:
 else:
     process.primaryVertexFilter.src = 'offlinePrimaryVertices'
     
-process.evtSel = cms.Sequence(
-    process.primaryVertexFilter*
-    process.HBHENoiseFilter*
-    process.hiEcalRecHitSpikeFilter
-    #*process.collisionEventSelection
-    #*process.hcalTimingFilter
-    )
+process.pvSel = cms.Path(process.primaryVertexFilter)
+process.hbheNoiseSel = cms.Path(process.HBHENoiseFilter)
+process.spikeSel = cms.Path(process.hiEcalRecHitSpikeFilter)
+process.collSell = cms.Path(process.collisionEventSelection)
+#process.hcalTimingSel = cms.Path(process.hcalTimingFilter)
 
 # include some event selection bits
-
 process.load('CmsHi.HiHLTAlgos.hltanalysis_cff')
-
 process.hltanalysis.hltresults = cms.InputTag("TriggerResults")
 process.hltAna = cms.Path(process.hltanalysis)
 process.pAna = cms.EndPath(process.skimanalysis)
 process.skimanalysis.hltresults = cms.InputTag("TriggerResults")
 
 
-process.TFileService = cms.Service("TFileService",
-                                   fileName=cms.string(
-    #'bTagAnalyzers.root'
-    ivars.output
-    )
-                                   )
-
-
-
-# Schedule definition
-if hiReco:
-    if isMC:
-        process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.reco_extra_jet,process.regionalTracking,process.higen_step,process.pat_step,process.ana_step,process.hltAna,process.pAna)
-    else:
-        process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.reco_extra_jet,process.regionalTracking,process.pat_step,process.ana_step,process.hltAna,process.pAna)
-else:
-    if isMC:
-        process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.reco_extra_jet,process.higen_step,process.pat_step,process.ana_step,process.hltAna,process.pAna)
-    else:
-        process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.reco_extra_jet,process.pat_step,process.ana_step,process.hltAna,process.pAna)
-
-                                
-
-# apply event selection after reco
-if isMC==False:
-    process.reco_extra_jet._seq = process.evtSel*process.reco_extra_jet._seq
-    process.pat_step._seq = process.evtSel*process.pat_step._seq
-    process.ana_step._seq = process.evtSel*process.ana_step._seq
-    process.hltAna._seq = process.evtSel*process.hltAna._seq
-    process.pAna._seq = process.evtSel*process.pAna._seq
-    if hiReco:
-        process.regionalTracking._seq = process.evtSel*process.regionalTracking._seq
-
-    # apply trigger selection to all paths
+if isMC == False:
+    process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
+    process.hltJetHI.HLTPaths = ['HLT_Jet40_v1']
+    process.superFilterSequence = cms.Sequence(process.hltJetHI)
+    process.superFilterPath = cms.Path(process.superFilterSequence) 
+    process.skimanalysis.superFilters = cms.vstring("superFilterPath")
     for path in process.paths:
-        print getattr(process,path)._seq
         getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
-
+    
