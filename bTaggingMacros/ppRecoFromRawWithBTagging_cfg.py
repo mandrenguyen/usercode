@@ -1,20 +1,20 @@
-import FWCore.ParameterSet.VarParsing as VarParsing
-
-ivars = VarParsing.VarParsing('standard')
-ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
-
-
-ivars.files='/store/mc/Spring11/QCD_Pt_30_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0006/805FCC09-D65A-E011-97C6-003048F5ADEE.root'
-ivars.output = 'test2.root'
-ivars.maxEvents = -1
-ivars.initialEvent = 1
-
-ivars.parseArguments()
+#import FWCore.ParameterSet.VarParsing as VarParsing
+#
+#ivars = VarParsing.VarParsing('standard')
+#ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
+#
+#
+#ivars.files='/store/mc/Spring11/QCD_Pt_30_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0006/805FCC09-D65A-E011-97C6-003048F5ADEE.root'
+#ivars.output = 'test2.root'
+#ivars.maxEvents = -1
+#ivars.initialEvent = 1
+#
+#ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = True
-hiReco = True
+isMC = False
+hiReco = False
 
 process = cms.Process('RECO')
 
@@ -44,7 +44,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(
-    ivars.maxEvents
+    #ivars.maxEvents
+    -1
     )
 )
 
@@ -52,8 +53,8 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    #'file:/hadoop/store/mc/Spring11/QCD_Pt_30_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0006/00D55E62-D75A-E011-B4AA-003048344C1A.root'
-    ivars.files
+    'file:/hadoop/store/mc/Spring11/QCD_Pt_30_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0006/00D55E62-D75A-E011-B4AA-003048344C1A.root'
+    #ivars.files
     ),
                             #eventsToProcess = cms.untracked.VEventRange('1:318939-1:318939'),
                             #eventsToProcess = cms.untracked.VEventRange('1:1408579-1:1408579'),
@@ -409,8 +410,8 @@ else:
 
 process.TFileService = cms.Service("TFileService",
                                    fileName=cms.string(
-    #'bTagAnalyzers.root'
-    ivars.output
+    'bTagAnalyzers.root'
+    #ivars.output
     )
                                    )
 
@@ -462,7 +463,7 @@ else:
 process.anaTrack.trackPtMin = 0
 process.anaTrack.useQuality = False
 process.anaTrack.doPFMatching = True
-process.anaTrack.doSimTrack = True
+process.anaTrack.doSimTrack = False
 process.anaTrack.useCentrality = False
 
 process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
@@ -489,8 +490,8 @@ process.ana_step          = cms.Path(
     process.hiCentrality *
     process.akPu3PFJetAnalyzer *
     process.ak5PFJetAnalyzer *
-    process.cutsTPForEff*
-    process.cutsTPForFak*
+    #process.cutsTPForEff*
+    #process.cutsTPForFak*
     process.trackAnalyzers*
     process.muonTree
     )
@@ -498,9 +499,6 @@ process.ana_step          = cms.Path(
 
 # trigger requirment, gets added in front of all patch w/ the superFilter
 process.load('CmsHi.JetAnalysis.EventSelection_cff')
-
-
-
 
 if hiReco:
     process.primaryVertexFilter.src = 'hiSelectedVertex'
