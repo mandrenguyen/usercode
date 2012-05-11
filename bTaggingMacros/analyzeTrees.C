@@ -3,13 +3,12 @@
 #include "TTree.h"
 #include "TFile.h"
 
-void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
+void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, float minJetPt=60)
 {
 
-
   TFile *fin;
-  if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_weighted_bTagAnalyzers_ppReco_pythia.root");
-  else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw/merged_jetTrackAnalyzers_ppData2760_ppRecoFromRaw.root");
+  if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bTagAnalyzers_ppReco_pythia30_ghostFix.root");
+  else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw_fixEvtSel/merged_bTagAnalyzers.root");
 
   TTree *t=(TTree*) fin->Get("akPu3PFJetAnalyzer/t");
   TTree *tSkim;
@@ -89,7 +88,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   Int_t pvSel;
   Int_t hbheNoiseSel;
   Int_t spikeSel;
-  Int_t collSel;
+  Int_t collSell;
     
   t->SetBranchAddress("evt",&evt);
   //t->SetBranchAddress("b",&b);
@@ -119,17 +118,19 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   t->SetBranchAddress("nIPtrk",nIPtrk);
   t->SetBranchAddress("nselIPtrk",nselIPtrk); 
   t->SetBranchAddress("nIP",&nIP);
-  t->SetBranchAddress("ipJetIndex",ipJetIndex);
-  t->SetBranchAddress("ipPt",ipPt);
-  t->SetBranchAddress("ipProb0",ipProb0);
-  t->SetBranchAddress("ipProb1",ipProb1);
-  t->SetBranchAddress("ip2d",ip2d);
-  t->SetBranchAddress("ip2dSig",ip2dSig);
-  t->SetBranchAddress("ip3d",ip3d);
-  t->SetBranchAddress("ip3dSig",ip3dSig);
-  t->SetBranchAddress("ipDist2Jet",ipDist2Jet);
-  t->SetBranchAddress("ipDist2JetSig",ipDist2JetSig);
-  t->SetBranchAddress("ipClosest2Jet",ipClosest2Jet);
+  if(doTracks){
+    t->SetBranchAddress("ipJetIndex",ipJetIndex);
+    t->SetBranchAddress("ipPt",ipPt);
+    t->SetBranchAddress("ipProb0",ipProb0);
+    t->SetBranchAddress("ipProb1",ipProb1);
+    t->SetBranchAddress("ip2d",ip2d);
+    t->SetBranchAddress("ip2dSig",ip2dSig);
+    t->SetBranchAddress("ip3d",ip3d);
+    t->SetBranchAddress("ip3dSig",ip3dSig);
+    t->SetBranchAddress("ipDist2Jet",ipDist2Jet);
+    t->SetBranchAddress("ipDist2JetSig",ipDist2JetSig);
+    t->SetBranchAddress("ipClosest2Jet",ipClosest2Jet);
+  }
   t->SetBranchAddress("mue",mue);
   t->SetBranchAddress("mupt",mupt);
   t->SetBranchAddress("mueta",mueta);
@@ -167,7 +168,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
     tSkim->SetBranchAddress("pvSel",&pvSel);
     tSkim->SetBranchAddress("hbheNoiseSel",&hbheNoiseSel);
     tSkim->SetBranchAddress("spikeSel",&spikeSel);
-    tSkim->SetBranchAddress("collSel",&collSel);
+    tSkim->SetBranchAddress("collSell",&collSell);
   }
 
   TH1F *hjtpt = new TH1F("hjtpt","hjtpt",40,50,250);
@@ -226,6 +227,11 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   TH1F *hnselIPtrkC = new TH1F("hnselIPtrkC","hnselIPtrkC",40,0,40);
   TH1F *hnselIPtrkL = new TH1F("hnselIPtrkL","hnselIPtrkL",40,0,40);
   
+  TH1F *hmuptrel = new TH1F("hmuptrel","hmuptrel",40,0,4);
+  TH1F *hmuptrelB = new TH1F("hmuptrelB","hmuptrelB",40,0,4);
+  TH1F *hmuptrelC = new TH1F("hmuptrelC","hmuptrelC",40,0,4);
+  TH1F *hmuptrelL = new TH1F("hmuptrelL","hmuptrelL",40,0,4);
+  
   TH1F *hipPt = new TH1F("hipPt","hipPt",40,0,40);
   TH1F *hipPtB = new TH1F("hipPtB","hipPtB",40,0,40);
   TH1F *hipPtC = new TH1F("hipPtC","hipPtC",40,0,40);
@@ -241,25 +247,25 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
   TH1F *hipProb1C = new TH1F("hipProb1C","hipProb1C",40,-1,1);
   TH1F *hipProb1L = new TH1F("hipProb1L","hipProb1L",40,-1,1);
   
-  TH1F *hip2d = new TH1F("hip2d","hip2d",40,0,0.2);
-  TH1F *hip2dB = new TH1F("hip2dB","hip2dB",40,0,0.2);
-  TH1F *hip2dC = new TH1F("hip2dC","hip2dC",40,0,0.2);
-  TH1F *hip2dL = new TH1F("hip2dL","hip2dL",40,0,0.2);
+  TH1F *hip2d = new TH1F("hip2d","hip2d",40,-0.2,0.2);
+  TH1F *hip2dB = new TH1F("hip2dB","hip2dB",40,-0.2,0.2);
+  TH1F *hip2dC = new TH1F("hip2dC","hip2dC",40,-0.2,0.2);
+  TH1F *hip2dL = new TH1F("hip2dL","hip2dL",40,-0.2,0.2);
   
-  TH1F *hip2dSig = new TH1F("hip2dSig","hip2dSig",40,0,40);
-  TH1F *hip2dSigB = new TH1F("hip2dSigB","hip2dSigB",40,0,40);
-  TH1F *hip2dSigC = new TH1F("hip2dSigC","hip2dSigC",40,0,40);
-  TH1F *hip2dSigL = new TH1F("hip2dSigL","hip2dSigL",40,0,40);
+  TH1F *hip2dSig = new TH1F("hip2dSig","hip2dSig",40,-100,100);
+  TH1F *hip2dSigB = new TH1F("hip2dSigB","hip2dSigB",40,-100,100);
+  TH1F *hip2dSigC = new TH1F("hip2dSigC","hip2dSigC",40,-100,100);
+  TH1F *hip2dSigL = new TH1F("hip2dSigL","hip2dSigL",40,-100,100);
   
-  TH1F *hip3d = new TH1F("hip3d","hip3d",40,0,0.4);
-  TH1F *hip3dB = new TH1F("hip3dB","hip3dB",40,0,0.4);
-  TH1F *hip3dC = new TH1F("hip3dC","hip3dC",40,0,0.4);
-  TH1F *hip3dL = new TH1F("hip3dL","hip3dL",40,0,0.4);
+  TH1F *hip3d = new TH1F("hip3d","hip3d",40,-0.2,0.2);
+  TH1F *hip3dB = new TH1F("hip3dB","hip3dB",40,-0.2,0.2);
+  TH1F *hip3dC = new TH1F("hip3dC","hip3dC",40,-0.2,0.2);
+  TH1F *hip3dL = new TH1F("hip3dL","hip3dL",40,-0.2,0.2);
   
-  TH1F *hip3dSig = new TH1F("hip3dSig","hip3dSig",40,0,40);
-  TH1F *hip3dSigB = new TH1F("hip3dSigB","hip3dSigB",40,0,40);
-  TH1F *hip3dSigC = new TH1F("hip3dSigC","hip3dSigC",40,0,40);
-  TH1F *hip3dSigL = new TH1F("hip3dSigL","hip3dSigL",40,0,40);
+  TH1F *hip3dSig = new TH1F("hip3dSig","hip3dSig",40,-100,100);
+  TH1F *hip3dSigB = new TH1F("hip3dSigB","hip3dSigB",40,-100,100);
+  TH1F *hip3dSigC = new TH1F("hip3dSigC","hip3dSigC",40,-100,100);
+  TH1F *hip3dSigL = new TH1F("hip3dSigL","hip3dSigL",40,-100,100);
   
   TH1F *hipDist2Jet = new TH1F("hipDist2Jet","hipDist2Jet",40,-0.1,0);
   TH1F *hipDist2JetB = new TH1F("hipDist2JetB","hipDist2JetB",40,-0.1,0);
@@ -280,192 +286,213 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 
   for (Long64_t i=0; i<nentries;i++) {
 
-    if (i%100000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl; 
+    if (i%10000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl; 
+
+    if(!isMC){
+      tSkim->GetEntry(i);
+      if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
+    }
 
     t->GetEntry(i);
     if(isMC){
       if(beamId1==2112 || beamId2==2112)  continue;
     }
-    else{
-      tSkim->GetEntry(i);
-      if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
-    }
 
     float w=1.;
     if(isMC&&useWeight) w=weight;
 
-    for(int ij=0;ij<nref;ij++){
+    if(doJets){
 
-      if(jtpt[ij]>minJetPt && fabs(jteta[ij])<2 ){
-		
-	hjtpt->Fill(jtpt[ij],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])==4)hjtptC->Fill(jtpt[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])<99)hjtptL->Fill(jtpt[ij],w);    
-	  else hjtptU->Fill(jtpt[ij],w);    
-	}
-
-	hdiscr_csvSimple->Fill(discr_csvSimple[ij],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ij])==5)hdiscr_csvSimpleB->Fill(discr_csvSimple[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_csvSimpleC->Fill(discr_csvSimple[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_csvSimpleL->Fill(discr_csvSimple[ij],w);    
-	}
-
-	hdiscr_prob->Fill(discr_prob[ij],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_prob[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_prob[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_prob[ij],w);    
-	}
+      for(int ij=0;ij<nref;ij++){
 	
-	hnsvtx->Fill(nsvtx[ij],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ij])==5)hnsvtxB->Fill(nsvtx[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])==4)hnsvtxC->Fill(nsvtx[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])<99)hnsvtxL->Fill(nsvtx[ij],w);    
-	}
-
-	if(nsvtx[ij]>0){
-
-	  hsvtxntrk->Fill(svtxntrk[ij],w);    
+	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<2 ){
+	  
+	  hjtpt->Fill(jtpt[ij],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hsvtxntrkB->Fill(svtxntrk[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hsvtxntrkC->Fill(svtxntrk[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hsvtxntrkL->Fill(svtxntrk[ij],w);    
+	    if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hjtptC->Fill(jtpt[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hjtptL->Fill(jtpt[ij],w);    
+	    else hjtptU->Fill(jtpt[ij],w);    
 	  }
-
-	  // require at least 1 tracks as in btagging @ 7 TeV note
-	  if(svtxntrk[ij]>1){	  
-
-	    hsvtxdl->Fill(svtxdl[ij],w);    
+	  
+	  hdiscr_csvSimple->Fill(discr_csvSimple[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hdiscr_csvSimpleB->Fill(discr_csvSimple[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_csvSimpleC->Fill(discr_csvSimple[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_csvSimpleL->Fill(discr_csvSimple[ij],w);    
+	  }
+	  
+	  hdiscr_prob->Fill(discr_prob[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_prob[ij],w); 
+	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_prob[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_prob[ij],w);    
+	  }
+	  
+	  hnsvtx->Fill(nsvtx[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hnsvtxB->Fill(nsvtx[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hnsvtxC->Fill(nsvtx[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hnsvtxL->Fill(nsvtx[ij],w); 
+	  }
+	  
+	  if(nsvtx[ij]>0){
+	    
+	    hsvtxntrk->Fill(svtxntrk[ij],w);    
 	    if(isMC){
-	      if(abs(refparton_flavorForB[ij])==5)hsvtxdlB->Fill(svtxdl[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])==4)hsvtxdlC->Fill(svtxdl[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])<99)hsvtxdlL->Fill(svtxdl[ij],w);    
+	      if(abs(refparton_flavorForB[ij])==5)hsvtxntrkB->Fill(svtxntrk[ij],w);    
+	      else if(abs(refparton_flavorForB[ij])==4)hsvtxntrkC->Fill(svtxntrk[ij],w);
+	      else if(abs(refparton_flavorForB[ij])<99)hsvtxntrkL->Fill(svtxntrk[ij],w);
 	    }
 	    
-	    hsvtxdls->Fill(svtxdls[ij],w);    
-	    if(isMC){
-	      if(abs(refparton_flavorForB[ij])==5)hsvtxdlsB->Fill(svtxdls[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])==4)hsvtxdlsC->Fill(svtxdls[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])<99)hsvtxdlsL->Fill(svtxdls[ij],w);    
-	    }
-
-	    hsvtxm->Fill(svtxm[ij],w);    
-	    if(isMC){
-	      if(abs(refparton_flavorForB[ij])==5)hsvtxmB->Fill(svtxm[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])==4)hsvtxmC->Fill(svtxm[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])<99)hsvtxmL->Fill(svtxm[ij],w);    
-	    }
-
-	    hsvtxpt->Fill(svtxpt[ij],w);    
-	    if(isMC){
-	      if(abs(refparton_flavorForB[ij])==5)hsvtxptB->Fill(svtxpt[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])==4)hsvtxptC->Fill(svtxpt[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])<99)hsvtxptL->Fill(svtxpt[ij],w);    
+	    // require at least 1 tracks as in btagging @ 7 TeV note
+	    if(svtxntrk[ij]>1){	  
+	      
+	      hsvtxdl->Fill(svtxdl[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hsvtxdlB->Fill(svtxdl[ij],w);    
+		else if(abs(refparton_flavorForB[ij])==4)hsvtxdlC->Fill(svtxdl[ij],w);
+		else if(abs(refparton_flavorForB[ij])<99)hsvtxdlL->Fill(svtxdl[ij],w);
+	      }
+	      
+	      hsvtxdls->Fill(svtxdls[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hsvtxdlsB->Fill(svtxdls[ij],w);    
+		else if(abs(refparton_flavorForB[ij])==4)hsvtxdlsC->Fill(svtxdls[ij],w); 
+		else if(abs(refparton_flavorForB[ij])<99)hsvtxdlsL->Fill(svtxdls[ij],w); 
+	      }
+	      
+	      hsvtxm->Fill(svtxm[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hsvtxmB->Fill(svtxm[ij],w);    
+		else if(abs(refparton_flavorForB[ij])==4)hsvtxmC->Fill(svtxm[ij],w);
+		else if(abs(refparton_flavorForB[ij])<99)hsvtxmL->Fill(svtxm[ij],w); 
+	      }
+	      
+	      hsvtxpt->Fill(svtxpt[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hsvtxptB->Fill(svtxpt[ij],w);    
+		else if(abs(refparton_flavorForB[ij])==4)hsvtxptC->Fill(svtxpt[ij],w);
+		else if(abs(refparton_flavorForB[ij])<99)hsvtxptL->Fill(svtxpt[ij],w);
+	      }
 	    }
 	  }
-	}
-
-	hnIPtrk->Fill(nIPtrk[ij],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ij])==5)hnIPtrkB->Fill(nIPtrk[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])==4)hnIPtrkC->Fill(nIPtrk[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])<99)hnIPtrkL->Fill(nIPtrk[ij],w);    
-	}
-
-	hnselIPtrk->Fill(nselIPtrk[ij],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ij])==5)hnselIPtrkB->Fill(nselIPtrk[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])==4)hnselIPtrkC->Fill(nselIPtrk[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])<99)hnselIPtrkL->Fill(nselIPtrk[ij],w);    
-	}
-
-      }
-    }
-   
-    for(int it=0;it<nIP;it++){
-
-      int ijet = ipJetIndex[it];
-
-      if(jtpt[ijet]>minJetPt && fabs(jteta[ijet])<2){
+	  
+	  hnIPtrk->Fill(nIPtrk[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hnIPtrkB->Fill(nIPtrk[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hnIPtrkC->Fill(nIPtrk[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hnIPtrkL->Fill(nIPtrk[ij],w);    
+	  }
+	  
+	  hnselIPtrk->Fill(nselIPtrk[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hnselIPtrkB->Fill(nselIPtrk[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hnselIPtrkC->Fill(nselIPtrk[ij],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hnselIPtrkL->Fill(nselIPtrk[ij],w);
+	  }
 	
-	hipPt->Fill(ipPt[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hipPtB->Fill(ipPt[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hipPtC->Fill(ipPt[it],w); 
-	  else if(abs(refparton_flavorForB[ijet])<99)hipPtL->Fill(ipPt[it],w); 
-	}
-	
-	hipProb0->Fill(ipProb0[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hipProb0B->Fill(ipProb0[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hipProb0C->Fill(ipProb0[it],w);
-	  else if(abs(refparton_flavorForB[ijet])<99)hipProb0L->Fill(ipProb0[it],w);
-	}
-	
-	hipProb1->Fill(ipProb1[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hipProb1B->Fill(ipProb1[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hipProb1C->Fill(ipProb1[it],w);
-	  else if(abs(refparton_flavorForB[ijet])<99)hipProb1L->Fill(ipProb1[it],w);
-	}
-	
-	hip2d->Fill(ip2d[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hip2dB->Fill(ip2d[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hip2dC->Fill(ip2d[it],w); 
-	  else if(abs(refparton_flavorForB[ijet])<99)hip2dL->Fill(ip2d[it],w); 
-	}
-	
-	hip2dSig->Fill(ip2dSig[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hip2dSigB->Fill(ip2dSig[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hip2dSigC->Fill(ip2dSig[it],w);
-	  else if(abs(refparton_flavorForB[ijet])<99)hip2dSigL->Fill(ip2dSig[it],w);
-	}
-	
-	hip3d->Fill(ip3d[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hip3dB->Fill(ip3d[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hip3dC->Fill(ip3d[it],w); 
-	  else if(abs(refparton_flavorForB[ijet])<99)hip3dL->Fill(ip3d[it],w); 
-	}
-	
-	hip3dSig->Fill(ip3dSig[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hip3dSigB->Fill(ip3dSig[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hip3dSigC->Fill(ip3dSig[it],w);
-	  else if(abs(refparton_flavorForB[ijet])<99)hip3dSigL->Fill(ip3dSig[it],w);
-	}
-
-	hipDist2Jet->Fill(ipDist2Jet[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hipDist2JetB->Fill(ipDist2Jet[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetC->Fill(ipDist2Jet[it],w);
-	  else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetL->Fill(ipDist2Jet[it],w);
-	}
-	
-	hipDist2JetSig->Fill(ipDist2JetSig[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hipDist2JetSigB->Fill(ipDist2JetSig[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetSigC->Fill(ipDist2JetSig[it],w);
-	  else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetSigL->Fill(ipDist2JetSig[it],w);
-	}
-	
-	hipClosest2Jet->Fill(ipClosest2Jet[it],w);    
-	if(isMC){
-	  if(abs(refparton_flavorForB[ijet])==5)hipClosest2JetB->Fill(ipClosest2Jet[it],w);
-	  else if(abs(refparton_flavorForB[ijet])==4)hipClosest2JetC->Fill(ipClosest2Jet[it],w);
-	  else if(abs(refparton_flavorForB[ijet])<99)hipClosest2JetL->Fill(ipClosest2Jet[it],w);
+	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>5) {
+	    
+	    hmuptrel->Fill(muptrel[ij],w);    
+	    if(isMC){
+	      if(abs(refparton_flavorForB[ij])==5)hmuptrelB->Fill(muptrel[ij],w);
+	      else if(abs(refparton_flavorForB[ij])==4)hmuptrelC->Fill(muptrel[ij],w);
+	      else if(abs(refparton_flavorForB[ij])<99)hmuptrelL->Fill(muptrel[ij],w);
+	    }
+	    
+	  }
+	  
 	}
 
       }
 
     }
+    //*
+    if(doTracks){
+      
+      for(int it=0;it<nIP;it++){
+	
+	int ijet = ipJetIndex[it];
+	
+	if(jtpt[ijet]>minJetPt && fabs(jteta[ijet])<2){
+	  
+	  hipPt->Fill(ipPt[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hipPtB->Fill(ipPt[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hipPtC->Fill(ipPt[it],w); 
+	    else if(abs(refparton_flavorForB[ijet])<99)hipPtL->Fill(ipPt[it],w); 
+	  }
+	  
+	  hipProb0->Fill(ipProb0[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hipProb0B->Fill(ipProb0[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hipProb0C->Fill(ipProb0[it],w);
+	    else if(abs(refparton_flavorForB[ijet])<99)hipProb0L->Fill(ipProb0[it],w);
+	  }
+	  
+	  hipProb1->Fill(ipProb1[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hipProb1B->Fill(ipProb1[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hipProb1C->Fill(ipProb1[it],w);
+	    else if(abs(refparton_flavorForB[ijet])<99)hipProb1L->Fill(ipProb1[it],w);
+	  }
 
+	  hip2d->Fill(ip2d[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hip2dB->Fill(ip2d[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hip2dC->Fill(ip2d[it],w); 
+	    else if(abs(refparton_flavorForB[ijet])<99)hip2dL->Fill(ip2d[it],w); 
+	  }
+
+	  hip2dSig->Fill(ip2dSig[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hip2dSigB->Fill(ip2dSig[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hip2dSigC->Fill(ip2dSig[it],w);
+	    else if(abs(refparton_flavorForB[ijet])<99)hip2dSigL->Fill(ip2dSig[it],w);
+	  }
+
+	  hip3d->Fill(ip3d[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hip3dB->Fill(ip3d[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hip3dC->Fill(ip3d[it],w); 
+	    else if(abs(refparton_flavorForB[ijet])<99)hip3dL->Fill(ip3d[it],w); 
+	  }
+
+	  hip3dSig->Fill(ip3dSig[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hip3dSigB->Fill(ip3dSig[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hip3dSigC->Fill(ip3dSig[it],w);
+	    else if(abs(refparton_flavorForB[ijet])<99)hip3dSigL->Fill(ip3dSig[it],w);
+	  }
+
+	  hipDist2Jet->Fill(ipDist2Jet[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hipDist2JetB->Fill(ipDist2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetC->Fill(ipDist2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetL->Fill(ipDist2Jet[it],w);
+	  }
+
+	  hipDist2JetSig->Fill(ipDist2JetSig[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hipDist2JetSigB->Fill(ipDist2JetSig[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetSigC->Fill(ipDist2JetSig[it],w);
+	    else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetSigL->Fill(ipDist2JetSig[it],w);
+	  }
+
+	  hipClosest2Jet->Fill(ipClosest2Jet[it],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ijet])==5)hipClosest2JetB->Fill(ipClosest2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ijet])==4)hipClosest2JetC->Fill(ipClosest2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ijet])<99)hipClosest2JetL->Fill(ipClosest2Jet[it],w);
+	  }
+
+	}
+	
+      }
+    
+    }
+    //*/
   }
 
   TFile *fout;
@@ -504,6 +531,9 @@ void analyzeTrees(int isMC=1, int useWeight=1, float minJetPt=60)
 
   hnselIPtrk->Write();
   if(isMC) hnselIPtrkB->Write(); hnselIPtrkC->Write(); hnselIPtrkL->Write();
+
+  hmuptrel->Write();
+  if(isMC) hmuptrelB->Write(); hmuptrelC->Write(); hmuptrelL->Write();
 
   hipPt->Write();
   if(isMC) hipPtB->Write(); hipPtC->Write(); hipPtL->Write();
