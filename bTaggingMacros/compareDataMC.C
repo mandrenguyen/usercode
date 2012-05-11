@@ -5,8 +5,7 @@ void formatHisto(TH1F *h, char *title){
   h->SetYTitle("Entries");
 }
 
-void setFillColor(TH1F *h[3])
-{
+void setFillColor(TH1F *h[3]){
   h[0]->SetFillColor(kred);
   h[1]->SetFillColor(kgreen);
   h[2]->SetFillColor(kblue);
@@ -54,8 +53,8 @@ void compareDataMC(){
   TFile *fdata = new TFile("histos/ppdata.root");
 
   // declare histos
-  TH1F *hjtpt, *hnsvtx, *hsvtxntrk, *hsvtxdl, *hsvtxdls, *hsvtxm, *hsvtxpt, *hnIPtrk, *hnselIPtrk, *hdiscr_csvSimple, *hdiscr_prob, *hipPt, *hipProb0, *hipProb1, *hip2d, *hip2dSig, *hip3d, *hip3dSig, *hipDist2Jet, *hipDist2JetSig, *hipClosest2Jet;
-  TH1F *hjtptMC[4], *hnsvtxMC[3], *hsvtxntrkMC[3], *hsvtxdlMC[3], *hsvtxdlsMC[3], *hsvtxmMC[3], *hsvtxptMC[3], *hnIPtrkMC[3], *hnselIPtrkMC[3], *hdiscr_csvSimpleMC[3], *hdiscr_probMC[3], *hipPtMC[3], *hipProb0MC[3], *hipProb1MC[3], *hip2dMC[3], *hip2dSigMC[3], *hip3dMC[3], *hip3dSigMC[3], *hipDist2JetMC[3], *hipDist2JetSigMC[3], *hipClosest2JetMC[3];
+  TH1F *hjtpt, *hnsvtx, *hsvtxntrk, *hsvtxdl, *hsvtxdls, *hsvtxm, *hsvtxpt, *hnIPtrk, *hnselIPtrk, *hdiscr_csvSimple, *hdiscr_prob, *hmuptrel, *hipPt, *hipProb0, *hipProb1, *hip2d, *hip2dSig, *hip3d, *hip3dSig, *hipDist2Jet, *hipDist2JetSig, *hipClosest2Jet;
+  TH1F *hjtptMC[4], *hnsvtxMC[3], *hsvtxntrkMC[3], *hsvtxdlMC[3], *hsvtxdlsMC[3], *hsvtxmMC[3], *hsvtxptMC[3], *hnIPtrkMC[3], *hnselIPtrkMC[3], *hdiscr_csvSimpleMC[3], *hdiscr_probMC[3], *hmuptrelMC[3], *hipPtMC[3], *hipProb0MC[3], *hipProb1MC[3], *hip2dMC[3], *hip2dSigMC[3], *hip3dMC[3], *hip3dSigMC[3], *hipDist2JetMC[3], *hipDist2JetSigMC[3], *hipClosest2JetMC[3];
 
   // grab histos
   string suffix[4]={"B","C","L","U"};
@@ -103,6 +102,10 @@ void compareDataMC(){
   name="hdiscr_prob";
   hdiscr_prob = (TH1F*) fdata->Get(name.c_str());
   for(int i=0;i<3;i++) hdiscr_probMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hmuptrel";
+  hmuptrel = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hmuptrelMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
 
   name="hipPt";
   hipPt = (TH1F*) fdata->Get(name.c_str());
@@ -171,6 +174,7 @@ void compareDataMC(){
   stackHistos(hnselIPtrkMC);
   stackHistos(hdiscr_csvSimpleMC);
   stackHistos(hdiscr_probMC);
+  stackHistos(hmuptrelMC);
   stackHistos(hipPtMC);
   stackHistos(hipProb0MC);
   stackHistos(hipProb1MC);
@@ -196,6 +200,7 @@ void compareDataMC(){
   for(int i=0;i<3;i++) hnselIPtrkMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hdiscr_csvSimpleMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hdiscr_probMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hmuptrelMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hipPtMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hipProb0MC[i]->Scale(scale);
   for(int i=0;i<3;i++) hipProb1MC[i]->Scale(scale);
@@ -219,6 +224,7 @@ void compareDataMC(){
   setFillColor(hnselIPtrkMC);
   setFillColor(hdiscr_csvSimpleMC);
   setFillColor(hdiscr_probMC);
+  setFillColor(hmuptrelMC);
   setFillColor(hipPtMC);
   setFillColor(hipProb0MC);
   setFillColor(hipProb1MC);
@@ -578,6 +584,22 @@ void compareDataMC(){
   formatRatioHist(hRipClosest2Jet);
   hRipClosest2Jet->Divide(hipClosest2JetMC[2]);
   hRipClosest2Jet->Draw();
+
+  title = "hmuptrel";
+  TCanvas *c21=new TCanvas("c21",title,200,10,600,480);
+  formatHisto(hmuptrel,title);
+  formatCanvas(c21);
+  hmuptrel->Draw();
+  for(int i=2;i>-1;i--) hmuptrelMC[i]->Draw("same");
+  hmuptrel->Draw("same");
+  leg->Draw();
+  c21->GetPad(1)->RedrawAxis();
+
+  c21->cd(2);
+  TH1F *hRmuptrel = hmuptrel->Clone("hmuptrel");
+  formatRatioHist(hRmuptrel);
+  hRmuptrel->Divide(hmuptrelMC[2]);
+  hRmuptrel->Draw();
 
 
 }
