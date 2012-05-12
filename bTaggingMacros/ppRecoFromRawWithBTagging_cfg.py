@@ -1,20 +1,20 @@
-#import FWCore.ParameterSet.VarParsing as VarParsing
-#
-#ivars = VarParsing.VarParsing('standard')
-#ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
-#
-#
-#ivars.files='/store/mc/Spring11/QCD_Pt_30_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0006/805FCC09-D65A-E011-97C6-003048F5ADEE.root'
-#ivars.output = 'test2.root'
-#ivars.maxEvents = -1
-#ivars.initialEvent = 1
-#
-#ivars.parseArguments()
+import FWCore.ParameterSet.VarParsing as VarParsing
+
+ivars = VarParsing.VarParsing('standard')
+ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
+
+
+ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+ivars.output = 'test2.root'
+ivars.maxEvents = -1
+ivars.initialEvent = 1
+
+ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = False
-hiReco = False
+isMC = True
+hiReco = True
 
 process = cms.Process('RECO')
 
@@ -44,8 +44,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(
-    #ivars.maxEvents
-    -1
+    ivars.maxEvents
+    #-1
     )
 )
 
@@ -53,8 +53,8 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    'file:/hadoop/store/mc/Spring11/QCD_Pt_30_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0006/00D55E62-D75A-E011-B4AA-003048344C1A.root'
-    #ivars.files
+    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+    ivars.files
     ),
                             #eventsToProcess = cms.untracked.VEventRange('1:318939-1:318939'),
                             #eventsToProcess = cms.untracked.VEventRange('1:1408579-1:1408579'),
@@ -331,9 +331,9 @@ process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 process.akPu3PFcorr.payload = cms.string('AK3PF')
 
 if hiReco:
-    process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiCaloMatchFilteredTracks")
-    #print "Using regit tracks, straight-up "
-    #process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiGeneralAndRegitTracks")
+    #process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiCaloMatchFilteredTracks")
+    print "Using regit tracks, straight-up "
+    process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiGeneralAndRegitCaloMatchedTracks")
     process.akPu3PFImpactParameterTagInfos.primaryVertex = "hiSelectedVertex"
 else:
     process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("generalTracks")
@@ -368,8 +368,10 @@ process.akPu5PFpatJets.jetSource            = "ak5PFJets"
 process.akPu5PFcorr.payload = cms.string('AK5PF')
 
 if hiReco:
-    process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiCaloMatchFilteredTracks")
+    #process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiCaloMatchFilteredTracks")
+    process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiGeneralAndRegitCaloMatchedTracks")
     process.akPu5PFImpactParameterTagInfos.primaryVertex = "hiSelectedVertex"
+
 else:
     process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("generalTracks")
     process.akPu5PFImpactParameterTagInfos.primaryVertex = "offlinePrimaryVertices"
@@ -410,8 +412,8 @@ else:
 
 process.TFileService = cms.Service("TFileService",
                                    fileName=cms.string(
-    'bTagAnalyzers.root'
-    #ivars.output
+    #'bTagAnalyzers.root'
+    ivars.output
     )
                                    )
 
@@ -426,8 +428,11 @@ process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults:
 process.akPu3PFJetAnalyzer.useVtx = cms.untracked.bool(True)
 if hiReco:
     process.akPu3PFJetAnalyzer.vtxTag = 'hiSelectedVertex'
+    process.akPu3PFJetAnalyzer.trackTag = "hiGeneralAndRegitCaloMatchedTracks"
 else:
     process.akPu3PFJetAnalyzer.vtxTag = 'offlinePrimaryVertices'
+    process.akPu3PFJetAnalyzer.trackTag = "generalTracks"
+
 process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(False) 
 process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core',
                                                                'HLT_Jet20_v1',
@@ -439,10 +444,15 @@ else:
     process.akPu3PFJetAnalyzer.isMC = False
         
 process.akPu3PFJetAnalyzer.doLifeTimeTagging = True
+process.akPu3PFJetAnalyzer.jetTag = "akPu3PFpatJets"
+process.akPu3PFJetAnalyzer.matchTag = "akPu5PFpatJets"
+
 
 process.ak5PFJetAnalyzer = process.akPu3PFJetAnalyzer.clone(
-    jetTag = cms.InputTag("akPu5PFpatJets"),
-    genjetTag = cms.InputTag("ak5HiGenJets")
+    jetTag = "akPu5PFpatJets",
+    genjetTag = "ak5HiGenJets",
+    matchTag = "akPu3PFpatJets",
+    rParam=0.5
     )
 
 
@@ -463,12 +473,84 @@ else:
 process.anaTrack.trackPtMin = 0
 process.anaTrack.useQuality = False
 process.anaTrack.doPFMatching = True
-process.anaTrack.doSimTrack = False
+process.anaTrack.doSimTrack = True
 process.anaTrack.useCentrality = False
+
+
+process.load("SimTracker.TrackHistory.TrackClassifier_cff")
+
+from SimTracker.TrackHistory.CategorySelectors_cff import *
+process.hiTrackingCategorySelector = TrackingParticleCategorySelector(
+    src = cms.InputTag('cutsTPForFak'),
+    cut = cms.string("is('Bottom')")
+)
+if hiReco:
+    process.hiTrackingCategorySelector.trackProducer = 'hiGeneralAndRegitCaloMatchedTracks'
+else:
+    process.hiTrackingCategorySelector.trackProducer = 'generalTracks'
+#process.hiTrackingCategorySelector.hepMC = cms.untracked.InputTag("hiSignal")
+process.hiTrackingCategorySelector.hepMC = cms.untracked.InputTag("generator")
+                            
+process.bWeakDecaySelector = process.hiTrackingCategorySelector.clone(
+    cut = cms.string("is('BWeakDecay')")
+    )
+process.cWeakDecaySelector = process.hiTrackingCategorySelector.clone(
+    cut = cms.string("is('CWeakDecay')")
+    )
+process.v0DecaySelector = process.hiTrackingCategorySelector.clone(
+    cut = cms.string("is('KsDecay') || is('LambdaDecay')")
+    )
+process.secondarySelector = process.hiTrackingCategorySelector.clone(
+    cut = cms.string("is('SecondaryVertex')")
+    )
+process.tertiarySelector = process.hiTrackingCategorySelector.clone(
+    cut = cms.string("is('TertiaryVertex')")
+    )
+
+
+process.bWeakDecayTracks = process.anaTrack.clone(
+    doTrack = False,
+    tpFakeSrc =  'bWeakDecaySelector',
+    tpEffSrc = 'bWeakDecaySelector'
+    )
+process.cWeakDecayTracks = process.anaTrack.clone(
+    doTrack = False,
+    tpFakeSrc =  'cWeakDecaySelector',
+    tpEffSrc = 'cWeakDecaySelector'
+    )
+process.v0DecayTracks = process.anaTrack.clone(
+    doTrack = False,
+    tpFakeSrc =  'v0DecaySelector',
+    tpEffSrc = 'v0DecaySelector'
+    )
+process.secondaryTracks = process.anaTrack.clone(
+    doTrack = False,
+    tpFakeSrc =  'secondarySelector',
+    tpEffSrc = 'secondarySelector'
+    )
+process.tertiaryTracks = process.anaTrack.clone(
+    doTrack = False,
+    tpFakeSrc =  'tertiarySelector',
+    tpEffSrc = 'tertiarySelector'
+    )
+
+process.moreTrackAna = cms.Sequence(
+    )
+
 
 process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
 #process.hitrkEffAnalyzer.tracks = 'generalTracks'
-                                                               
+                                                                                         
+process.trackAnalyzers = cms.Sequence(
+    process.anaTrack*
+    process.bWeakDecaySelector*process.bWeakDecayTracks*
+    process.cWeakDecaySelector*process.cWeakDecayTracks*
+    process.v0DecaySelector*process.v0DecayTracks*
+    process.secondarySelector*process.secondaryTracks*
+    process.tertiarySelector*process.tertiaryTracks
+    #*process.hitrkEffAnalyzer
+    )            
+
 # Muons
 process.load("HiMuonAlgos.HLTMuTree.hltMuTree_cfi")
 process.muonTree = process.hltMuTree.clone()
@@ -478,20 +560,12 @@ if hiReco:
 else:
     process.muonTree.vertices = 'offlinePrimaryVertices'
 
-
-                          
-process.trackAnalyzers = cms.Sequence(
-    process.anaTrack
-    #*process.hitrkEffAnalyzer
-    )            
-
-
 process.ana_step          = cms.Path(         
     process.hiCentrality *
     process.akPu3PFJetAnalyzer *
     process.ak5PFJetAnalyzer *
-    #process.cutsTPForEff*
-    #process.cutsTPForFak*
+    process.cutsTPForEff*
+    process.cutsTPForFak*
     process.trackAnalyzers*
     process.muonTree
     )
