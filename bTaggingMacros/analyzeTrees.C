@@ -7,7 +7,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 {
 
   TFile *fin;
-  if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bTagAnalyzers_ppReco_pythia30_ghostFix.root");
+  //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bTagAnalyzers_ppReco_pythia30_ghostFix.root");
+  if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_weighted_bTagAnalyzers_ppReco_pythia_ghostFix.root");
   else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw_fixEvtSel/merged_bTagAnalyzers.root");
 
   TTree *t=(TTree*) fin->Get("akPu3PFJetAnalyzer/t");
@@ -182,10 +183,10 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   TH1F *hdiscr_csvSimpleC = new TH1F("hdiscr_csvSimpleC","hdiscr_csvSimpleC",40,0,1);
   TH1F *hdiscr_csvSimpleL = new TH1F("hdiscr_csvSimpleL","hdiscr_csvSimpleL",40,0,1);
   
-  TH1F *hdiscr_prob = new TH1F("hdiscr_prob","hdiscr_prob",40,0,12);
-  TH1F *hdiscr_probB = new TH1F("hdiscr_probB","hdiscr_probB",40,0,12);
-  TH1F *hdiscr_probC = new TH1F("hdiscr_probC","hdiscr_probC",40,0,12);
-  TH1F *hdiscr_probL = new TH1F("hdiscr_probL","hdiscr_probL",40,0,12);
+  TH1F *hdiscr_prob = new TH1F("hdiscr_prob","hdiscr_prob",40,0,3);
+  TH1F *hdiscr_probB = new TH1F("hdiscr_probB","hdiscr_probB",40,0,3);
+  TH1F *hdiscr_probC = new TH1F("hdiscr_probC","hdiscr_probC",40,0,3);
+  TH1F *hdiscr_probL = new TH1F("hdiscr_probL","hdiscr_probL",40,0,3);
   
   TH1F *hnsvtx = new TH1F("hnsvtx","hnsvtx",6,-0.5,5.5);
   TH1F *hnsvtxB = new TH1F("hnsvtxB","hnsvtxB",6,-0.5,5.5);
@@ -322,11 +323,11 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_csvSimpleL->Fill(discr_csvSimple[ij],w);    
 	  }
 	  
-	  hdiscr_prob->Fill(discr_prob[ij],w);    
+	  hdiscr_prob->Fill(discr_probb[ij],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_prob[ij],w); 
-	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_prob[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_prob[ij],w);    
+	    if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_probb[ij],w); 
+	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_probb[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_probb[ij],w);    
 	  }
 	  
 	  hnsvtx->Fill(nsvtx[ij],w);    
