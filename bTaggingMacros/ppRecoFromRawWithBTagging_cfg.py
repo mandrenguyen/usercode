@@ -4,7 +4,7 @@ ivars = VarParsing.VarParsing('standard')
 ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
 
-ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+ivars.files='file:/net/hisrv0001/home/icali/hadoop/Pythia/Z2/ppDijet80/reco_v0/set2_random50000_HydjetDrum_99.root'
 ivars.output = 'test2.root'
 ivars.maxEvents = -1
 ivars.initialEvent = 1
@@ -13,10 +13,13 @@ ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = True
+isMC = False
 hiReco = True
+reReco = True
+genTag = "hiSignal"
+hasSimInfo = False
 
-process = cms.Process('RECO')
+process = cms.Process('BJET')
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -51,14 +54,15 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    secondaryFileNames = cms.untracked.vstring(),
+                            #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
     #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     ivars.files
     ),
-                            #eventsToProcess = cms.untracked.VEventRange('1:318939-1:318939'),
+                            duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
+                            #eventsToProcess = cms.untracked.VEventRange('161366:12073186-161366:12073186'),
                             #eventsToProcess = cms.untracked.VEventRange('1:1408579-1:1408579'),
-)
+                            )
 
 process.options = cms.untracked.PSet(
 
@@ -69,11 +73,15 @@ process.options = cms.untracked.PSet(
 # Other statements
 if isMC:
     if hiReco:
-        process.GlobalTag.globaltag = 'STARTHI44_V7::All'
+        #process.GlobalTag.globaltag = 'STARTHI44_V7::All'
+        print "Testing pp GT"
+        process.GlobalTag.globaltag = 'START44_V7::All'
     else:
         process.GlobalTag.globaltag = 'START44_V7::All'
 else:
     process.GlobalTag.globaltag = 'GR_R_44_V10::All'
+
+print "global Tag = ", process.GlobalTag.globaltag
 
 ######################
 # Hi specific reco
@@ -107,7 +115,7 @@ process.hiCentrality.produceBasicClusters = cms.bool(False)
 process.hiCentrality.produceHFhits = cms.bool(True)
 process.hiCentrality.produceTracks = cms.bool(False)
 
-'''
+
 if isMC==False:
     
     import PhysicsTools.PythonAnalysis.LumiList as LumiList
@@ -115,13 +123,29 @@ if isMC==False:
     myLumis = LumiList.LumiList(filename = 'json.txt').getCMSSWString().split(',')
     process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
     process.source.lumisToProcess.extend(myLumis)
-'''
 
 
-process.raw2digi_step = cms.Path(process.RawToDigi)
-process.L1Reco_step = cms.Path(process.L1Reco)
+if reReco == False:
+    process.raw2digi_step = cms.Path(process.RawToDigi)
+    process.L1Reco_step = cms.Path(process.L1Reco)
+
 if hiReco:
-    process.reconstruction_step = cms.Path(process.reconstructionHeavyIons_withPF)
+    if reReco == False:
+        process.reconstruction_step = cms.Path(process.reconstructionHeavyIons_withPF)
+    else:
+        process.rechits = cms.Sequence(process.siPixelRecHits * process.siStripMatchedRecHits)
+        process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
+
+        process.reconstruction_step =  cms.Path(
+            process.hiTrackReco
+            *process.muonRecoPbPb
+            *process.HiParticleFlowLocalReco
+            *process.HiParticleFlowReco
+            )
+        process.HiParticleFlowReco.remove(process.electronsWithPresel)
+        process.HiParticleFlowReco.remove(process.electronsCiCLoose)
+        
+
     #iterative tracking
     process.load("RecoHI.HiTracking.hiIterTracking_cff")
     process.heavyIonTracking *= process.hiIterTracking
@@ -133,6 +157,7 @@ if hiReco:
     process.pfTrack.TrackQuality = cms.string('highPurity')    
     process.pfTrack.TkColList = cms.VInputTag("hiGeneralTracks")
     process.pfTrack.GsfTracksInEvents = cms.bool(False)
+    process.particleFlowTmp.usePFElectrons = False
 
 else:
     process.reconstruction_step = cms.Path(process.reconstruction)
@@ -179,8 +204,8 @@ if hiReco:
 if isMC:
     process.load('CmsHi.JetAnalysis.ExtraGenReco_cff')
     process.HiGenParticleAna = cms.EDAnalyzer("HiGenAnalyzer")
-    process.HiGenParticleAna.src= cms.untracked.InputTag("generator")    
-    process.hiGenParticles.srcVector = cms.vstring('generator')
+    process.HiGenParticleAna.src= cms.untracked.InputTag(genTag)    
+    process.hiGenParticles.srcVector = cms.vstring(genTag)
 
     process.higen_step          = cms.Path(     
         process.hiGenParticles * process.hiGenParticlesForJets * process.genPartons * process.hiPartons * process.hiRecoGenJets #* process.HiGenParticleAna
@@ -198,27 +223,27 @@ if hiReco:
 
     process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 0.02
     process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 0.02
-    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 0.015
+    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 0.02
     process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 1.5
     process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originRadius = 1.0
     process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originRadius = 0.5
-
+    '''
     process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 0.02
     process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 0.02
-    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 0.015
+    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 0.02
     process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 1.5
     process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 1.0
     process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 0.5
-
-    # test opening up half length
     '''
+    # test opening up half length
+
     process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
     process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
     process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
     process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
     process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
     process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-    '''
+
     process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
     process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.deltaEtaRegion = 0.3
     process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
@@ -421,9 +446,8 @@ process.TFileService = cms.Service("TFileService",
 # Jet stuff
 
 process.load('CmsHi.JetAnalysis.JetAnalyzers_cff')
-#process.akPu3PFJetAnalyzer.eventInfoTag = 'hiSignal'
 process.akPu3PFJetAnalyzer.saveBfragments = True
-process.akPu3PFJetAnalyzer.eventInfoTag = 'generator'
+process.akPu3PFJetAnalyzer.eventInfoTag = genTag
 process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults::HLT')
 process.akPu3PFJetAnalyzer.useVtx = cms.untracked.bool(True)
 if hiReco:
@@ -473,7 +497,7 @@ else:
 process.anaTrack.trackPtMin = 0
 process.anaTrack.useQuality = False
 process.anaTrack.doPFMatching = True
-process.anaTrack.doSimTrack = True
+process.anaTrack.doSimTrack = hasSimInfo and isMC
 process.anaTrack.useCentrality = False
 
 
@@ -488,8 +512,7 @@ if hiReco:
     process.hiTrackingCategorySelector.trackProducer = 'hiGeneralAndRegitCaloMatchedTracks'
 else:
     process.hiTrackingCategorySelector.trackProducer = 'generalTracks'
-#process.hiTrackingCategorySelector.hepMC = cms.untracked.InputTag("hiSignal")
-process.hiTrackingCategorySelector.hepMC = cms.untracked.InputTag("generator")
+process.hiTrackingCategorySelector.hepMC = cms.untracked.InputTag(genTag)
                             
 process.bWeakDecaySelector = process.hiTrackingCategorySelector.clone(
     cut = cms.string("is('BWeakDecay')")
@@ -539,17 +562,22 @@ process.moreTrackAna = cms.Sequence(
 
 
 process.load("edwenger.HiTrkEffAnalyzer.hitrkEffAnalyzer_cff")
-#process.hitrkEffAnalyzer.tracks = 'generalTracks'
-                                                                                         
-process.trackAnalyzers = cms.Sequence(
-    process.anaTrack*
-    process.bWeakDecaySelector*process.bWeakDecayTracks*
-    process.cWeakDecaySelector*process.cWeakDecayTracks*
-    process.v0DecaySelector*process.v0DecayTracks*
-    process.secondarySelector*process.secondaryTracks*
-    process.tertiarySelector*process.tertiaryTracks
-    #*process.hitrkEffAnalyzer
-    )            
+
+if hasSimInfo and isMC:                                                                                         
+    process.trackAnalyzers = cms.Sequence(
+        process.cutsTPForEff*
+        process.cutsTPForFak*
+        process.anaTrack*
+        process.bWeakDecaySelector*process.bWeakDecayTracks*
+        process.cWeakDecaySelector*process.cWeakDecayTracks*
+        process.v0DecaySelector*process.v0DecayTracks*
+        process.secondarySelector*process.secondaryTracks*
+        process.tertiarySelector*process.tertiaryTracks
+        )            
+else:
+    process.trackAnalyzers = cms.Sequence(
+        process.anaTrack
+        )            
 
 # Muons
 process.load("HiMuonAlgos.HLTMuTree.hltMuTree_cfi")
@@ -564,8 +592,6 @@ process.ana_step          = cms.Path(
     process.hiCentrality *
     process.akPu3PFJetAnalyzer *
     process.ak5PFJetAnalyzer *
-    process.cutsTPForEff*
-    process.cutsTPForFak*
     process.trackAnalyzers*
     process.muonTree
     )
