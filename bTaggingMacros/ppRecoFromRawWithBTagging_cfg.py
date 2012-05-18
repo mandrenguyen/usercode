@@ -4,7 +4,8 @@ ivars = VarParsing.VarParsing('standard')
 ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
 
-ivars.files='file:/net/hisrv0001/home/icali/hadoop/Pythia/Z2/ppDijet80/reco_v0/set2_random50000_HydjetDrum_99.root'
+#ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
+ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG//d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_102_1_a9Z.root'
 ivars.output = 'test2.root'
 ivars.maxEvents = -1
 ivars.initialEvent = 1
@@ -13,11 +14,21 @@ ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = False
+isMC = True
 hiReco = True
-reReco = True
-genTag = "hiSignal"
-hasSimInfo = False
+reReco = False
+hasSimInfo = True
+genTag = "generator"
+
+if hiReco:
+    svTracks = "hiSecondaryVertexSelectedTracks"
+    pvProducer = "hiSelectedVertex"
+    #pvProducer = "offlinePrimaryVertices"
+else:
+    svTracks = "generalTracks"
+    pvProducer = "offlinePrimaryVertices"
+    
+print "Reco'ing SV's w/ ", svTracks, ", PV w/ ", pvProducer 
 
 process = cms.Process('BJET')
 
@@ -57,11 +68,15 @@ process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
     #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C27F8962-F059-E011-8678-003048339B04.root',
+    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C47A6827-F059-E011-95FF-003048F5975C.root',
+    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C6AE4607-ED59-E011-8EF2-003048341ADC.root',
+    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/CA0C5612-F359-E011-89BD-003048344A96.root',
+    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/CED72C3D-E159-E011-93D8-00304865C258.root',
     ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             #eventsToProcess = cms.untracked.VEventRange('161366:12073186-161366:12073186'),
-                            #eventsToProcess = cms.untracked.VEventRange('1:1408579-1:1408579'),
                             )
 
 process.options = cms.untracked.PSet(
@@ -73,8 +88,8 @@ process.options = cms.untracked.PSet(
 # Other statements
 if isMC:
     if hiReco:
+        # This depends on what GT was used to generate, not on the which reconstruction is used
         #process.GlobalTag.globaltag = 'STARTHI44_V7::All'
-        print "Testing pp GT"
         process.GlobalTag.globaltag = 'START44_V7::All'
     else:
         process.GlobalTag.globaltag = 'START44_V7::All'
@@ -110,7 +125,6 @@ process.hiCentrality.produceETmidRapidity = cms.bool(False)
 process.hiCentrality.producePixelhits = cms.bool(False)
 process.hiCentrality.produceEcalhits = cms.bool(False)
 process.hiCentrality.produceZDChits = cms.bool(False)
-#process.hiCentrality.srcVertex = cms.InputTag("hiSelectedVertex")
 process.hiCentrality.produceBasicClusters = cms.bool(False)
 process.hiCentrality.produceHFhits = cms.bool(True)
 process.hiCentrality.produceTracks = cms.bool(False)
@@ -148,7 +162,11 @@ if hiReco:
 
     #iterative tracking
     process.load("RecoHI.HiTracking.hiIterTracking_cff")
-    process.heavyIonTracking *= process.hiIterTracking
+    process.load("RecoVertex.PrimaryVertexProducer.OfflinePrimaryVertices_cfi")
+    process.offlinePrimaryVertices.TrackLabel = "hiGeneralTracks"
+    process.heavyIonTracking *= process.hiIterTracking 
+    #process.heavyIonTracking *= process.hiIterTracking * process.offlinePrimaryVertices
+    
     # PF configuration
     process.particleFlowTmp.postMuonCleaning = False
     process.particleFlowBlock.RecMuons = 'muons'
@@ -213,57 +231,23 @@ if isMC:
     
 ########  ADD EXTRA RECO WITH REGIT
 
+
 if hiReco:
+    print "Seeding around jets above 20 GeV/c inside |eta| < 2"
     process.akPu3PFSelectedJets = cms.EDFilter("CandViewSelector",
                                                src = cms.InputTag("akPu3PFJets"),
-                                               cut = cms.string("pt > 40. && eta > -2. && eta < 2")
+                                               cut = cms.string("pt > 20. && eta > -2. && eta < 2")
                                                )
 
     process.load("RecoHI.HiTracking.hiRegitTracking_cff")
-
-    process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 0.02
-    process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 0.02
-    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 0.02
-    process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originRadius = 1.5
-    process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originRadius = 1.0
-    process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originRadius = 0.5
-    '''
-    process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 0.02
-    process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 0.02
-    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 0.02
-    process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 1.5
-    process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 1.0
-    process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 0.5
-    '''
-    # test opening up half length
-
-    process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-    process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-    process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-    process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-    process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-
-    process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
-    process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.deltaEtaRegion = 0.3
-    process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
-    process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.deltaEtaRegion = 0.3
-    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
-    process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.deltaEtaRegion = 0.3
-    process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
-    process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.deltaEtaRegion = 0.3
-    process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
-    process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.deltaEtaRegion = 0.3
-    process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.deltaPhiRegion = 0.3
-    process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.deltaEtaRegion = 0.3
-
+    
     process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
-
+    
     process.load("RecoHI.HiTracking.MergeRegit_cff")
     
     process.regGlobalMuons = process.globalMuons.clone(
@@ -309,11 +293,12 @@ if hiReco:
         )
     
     
-    process.hiCaloMatchFilteredTracks = cms.EDFilter("TrackSelector",
-                                                     src = cms.InputTag("hiGeneralAndRegitCaloMatchedTracks"),
-                                                     cut = cms.string(
-        'quality("highPuritySetWithPV") && pt > 1')                                                                                            
-                                                     )
+    process.hiSecondaryVertexSelectedTracks = cms.EDFilter("TrackSelector",
+                                                           src = cms.InputTag("hiGeneralAndRegitCaloMatchedTracks"),
+                                                           cut = cms.string(
+        #'quality("highPuritySetWithPV") && pt > 1')   # require calo-compatibility
+        'quality("loose") && pt > 1')      
+                                                           )
     
     
     process.regionalTracking = cms.Path(
@@ -323,7 +308,7 @@ if hiReco:
         process.regMuonReco *
         process.hiRegPF *
         process.hiGeneralAndRegitCaloMatchedTracks *
-        process.hiCaloMatchFilteredTracks
+        process.hiSecondaryVertexSelectedTracks
         )
     
     
@@ -355,17 +340,11 @@ process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 
 process.akPu3PFcorr.payload = cms.string('AK3PF')
 
-if hiReco:
-    #process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiCaloMatchFilteredTracks")
-    print "Using regit tracks, straight-up "
-    process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiGeneralAndRegitCaloMatchedTracks")
-    process.akPu3PFImpactParameterTagInfos.primaryVertex = "hiSelectedVertex"
-else:
-    process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("generalTracks")
-    process.akPu3PFImpactParameterTagInfos.primaryVertex = "offlinePrimaryVertices"
+process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag(svTracks)
+process.akPu3PFImpactParameterTagInfos.primaryVertex = pvProducer
 
-process.akPu3PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'any'
-
+if hiReco: process.akPu3PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'loose'
+else: process.akPu3PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'highPurity'
 
 process.akPu3PFpatJets.addAssociatedTracks = True
 process.akPu3PFpatJets.addTagInfos = True
@@ -373,10 +352,8 @@ process.akPu3PFpatJets.addBTagInfo         = True
 process.akPu3PFpatJets.addDiscriminators   = True
 process.akPu3PFpatJets.getJetMCFlavour     = True
 
-
 process.akPu3PFpatJets.tagInfoSources = cms.VInputTag(
     cms.InputTag("akPu3PFImpactParameterTagInfos"),
-    #cms.InputTag("akPu3PFGhostTrackVertexTagInfos"),
     cms.InputTag("akPu3PFSecondaryVertexTagInfos"),
     cms.InputTag("akPu3PFSoftMuonTagInfos"),
     )
@@ -392,16 +369,13 @@ process.akPu5PFpatJets.jetSource            = "ak5PFJets"
                                                                      
 process.akPu5PFcorr.payload = cms.string('AK5PF')
 
+process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag(svTracks)
+process.akPu5PFImpactParameterTagInfos.primaryVertex = pvProducer
+
 if hiReco:
-    #process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiCaloMatchFilteredTracks")
-    process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("hiGeneralAndRegitCaloMatchedTracks")
-    process.akPu5PFImpactParameterTagInfos.primaryVertex = "hiSelectedVertex"
-
+    process.akPu5PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'loose'
 else:
-    process.akPu5PFJetTracksAssociatorAtVertex.tracks = cms.InputTag("generalTracks")
-    process.akPu5PFImpactParameterTagInfos.primaryVertex = "offlinePrimaryVertices"
-
-process.akPu5PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'any'
+    process.akPu5PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'highPurity'
 
 
 process.akPu5PFpatJets.addAssociatedTracks = True
@@ -413,7 +387,6 @@ process.akPu5PFpatJets.getJetMCFlavour     = True
 
 process.akPu5PFpatJets.tagInfoSources = cms.VInputTag(
     cms.InputTag("akPu5PFImpactParameterTagInfos"),
-    #cms.InputTag("akPu5PFGhostTrackVertexTagInfos"),
     cms.InputTag("akPu5PFSecondaryVertexTagInfos"),
     cms.InputTag("akPu5PFSoftMuonTagInfos"),
     )
@@ -449,19 +422,17 @@ process.load('CmsHi.JetAnalysis.JetAnalyzers_cff')
 process.akPu3PFJetAnalyzer.saveBfragments = True
 process.akPu3PFJetAnalyzer.eventInfoTag = genTag
 process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults::HLT')
+#process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults::RECO')
 process.akPu3PFJetAnalyzer.useVtx = cms.untracked.bool(True)
-if hiReco:
-    process.akPu3PFJetAnalyzer.vtxTag = 'hiSelectedVertex'
-    process.akPu3PFJetAnalyzer.trackTag = "hiGeneralAndRegitCaloMatchedTracks"
-else:
-    process.akPu3PFJetAnalyzer.vtxTag = 'offlinePrimaryVertices'
-    process.akPu3PFJetAnalyzer.trackTag = "generalTracks"
+process.akPu3PFJetAnalyzer.vtxTag = pvProducer
+process.akPu3PFJetAnalyzer.trackTag = svTracks
+process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(False)
+if isMC: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_Jet15U_v3','HLT_Jet30U_v3','HLT_Jet50U_v3','HLT_Jet70U_v3','HLT_L2Mu7_v1','HLT_Mu0_v2','HLT_Mu3_v2','HLT_Mu5','HLT_Mu7','HLT_Mu9','HLT_L1_BptxXOR_BscMinBiasOR')
+else:  process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core','HLT_Jet20_v1','HLT_Jet40_v1','HLT_Jet60_v1','HLT_L1SingleMuOpen_v1','HLT_Mu0_v3','HLT_Mu3_v3','HLT_Mu5_v3','HLT_L1BscMinBiasORBptxPlusANDMinus_v1')
 
-process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(False) 
-process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core',
-                                                               'HLT_Jet20_v1',
-                                                               'HLT_Jet40_v1',
-                                                               'HLT_Jet60_v1')
+
+
+
 if isMC:
     process.akPu3PFJetAnalyzer.isMC = True
 else:
@@ -484,22 +455,15 @@ process.ak5PFJetAnalyzer = process.akPu3PFJetAnalyzer.clone(
 
 process.load("MitHig.PixelTrackletAnalyzer.trackAnalyzer_cff")
 
-if hiReco:
-    #process.anaTrack.trackSrc = 'hiGeneralAndRegitTracks'
-    process.anaTrack.trackSrc = 'hiGeneralAndRegitCaloMatchedTracks'
-    process.anaTrack.vertexSrc = cms.vstring('hiSelectedVertex')
-    process.anaTrack.qualityString = "highPuritySetWithPV"
-else:
-    process.anaTrack.trackSrc = 'generalTracks'
-    process.anaTrack.vertexSrc = cms.vstring('offlinePrimaryVertices')
-    process.anaTrack.qualityString = "highPurity"
+process.anaTrack.trackSrc = svTracks
+process.anaTrack.vertexSrc = cms.vstring(pvProducer)
+process.anaTrack.qualityString = "highPurity"
 
 process.anaTrack.trackPtMin = 0
 process.anaTrack.useQuality = False
 process.anaTrack.doPFMatching = True
 process.anaTrack.doSimTrack = hasSimInfo and isMC
 process.anaTrack.useCentrality = False
-
 
 process.load("SimTracker.TrackHistory.TrackClassifier_cff")
 
@@ -508,10 +472,8 @@ process.hiTrackingCategorySelector = TrackingParticleCategorySelector(
     src = cms.InputTag('cutsTPForFak'),
     cut = cms.string("is('Bottom')")
 )
-if hiReco:
-    process.hiTrackingCategorySelector.trackProducer = 'hiGeneralAndRegitCaloMatchedTracks'
-else:
-    process.hiTrackingCategorySelector.trackProducer = 'generalTracks'
+
+process.hiTrackingCategorySelector.trackProducer = svTracks
 process.hiTrackingCategorySelector.hepMC = cms.untracked.InputTag(genTag)
                             
 process.bWeakDecaySelector = process.hiTrackingCategorySelector.clone(
@@ -583,10 +545,7 @@ else:
 process.load("HiMuonAlgos.HLTMuTree.hltMuTree_cfi")
 process.muonTree = process.hltMuTree.clone()
 process.muonTree.doGen = cms.untracked.bool(True)
-if hiReco:
-    process.muonTree.vertices = 'hiSelectedVertex'
-else:
-    process.muonTree.vertices = 'offlinePrimaryVertices'
+process.muonTree.vertices = pvProducer
 
 process.ana_step          = cms.Path(         
     process.hiCentrality *
@@ -599,11 +558,7 @@ process.ana_step          = cms.Path(
 
 # trigger requirment, gets added in front of all patch w/ the superFilter
 process.load('CmsHi.JetAnalysis.EventSelection_cff')
-
-if hiReco:
-    process.primaryVertexFilter.src = 'hiSelectedVertex'
-else:
-    process.primaryVertexFilter.src = 'offlinePrimaryVertices'
+process.primaryVertexFilter.src = pvProducer
     
 process.pvSel = cms.Path(process.primaryVertexFilter)
 process.hbheNoiseSel = cms.Path(process.HBHENoiseFilter)
@@ -618,13 +573,64 @@ process.hltAna = cms.Path(process.hltanalysis)
 process.pAna = cms.EndPath(process.skimanalysis)
 process.skimanalysis.hltresults = cms.InputTag("TriggerResults")
 
+'''
+process.load("SimTracker.VertexAssociation.VertexAssociatorByTracks_cfi")
 
-if isMC == False:
-    process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
-    process.hltJetHI.HLTPaths = ['HLT_Jet40_v1']
-    process.superFilterSequence = cms.Sequence(process.hltJetHI)
-    process.superFilterPath = cms.Path(process.superFilterSequence) 
-    process.skimanalysis.superFilters = cms.vstring("superFilterPath")
-    for path in process.paths:
-        getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
+process.VertexAssociatorByTracksESProducer.trackingParticleSelector.stableOnlyTP= cms.bool(False)
+if hiReco: process.VertexAssociatorByTracksESProducer.trackQuality = 'loose'  # already filtered on quality bit
+else: process.VertexAssociatorByTracksESProducer.trackQuality = 'highPurity'  
+    
+# not sure what playback is for, maybe when RAWDEBUG is not stored
+#process.load("SimTracker.TrackHistory.Playback_cff")
+process.load("SimTracker.TrackHistory.SecondaryVertexTagInfoProxy_cff")
+process.load("SimTracker.TrackHistory.VertexClassifier_cff")
+process.svTagInfoProxy.svTagInfoProducer = cms.untracked.InputTag("akPu3PFSecondaryVertexTagInfos")
+
+process.svTagInfoValidationAnalyzer = cms.EDAnalyzer("recoBSVTagInfoValidationAnalyzer",
+                                                     process.vertexClassifier,
+                                                     svTagInfoProducer = cms.untracked.InputTag('akPu3PFSecondaryVertexTagInfos'),
+                                                     )
+process.svTagInfoValidationAnalyzer.trackProducer = cms.untracked.InputTag(svTracks)
+process.svTagInfoValidationAnalyzer.enableSimToReco = cms.untracked.bool(True)
+process.svTagInfoValidationAnalyzer.enableRecoToSim = cms.untracked.bool(True)
+process.svTagInfoValidationAnalyzer.vertexProducer = cms.untracked.InputTag('svTagInfoProxy')
+
+process.svTagInfoSelector = SecondaryVertexTagInfoCategorySelector(
+                                                                       src = cms.InputTag('akPu3PFSecondaryVertexTagInfos'),
+                                                                       pxy = cms.InputTag('svTagInfoProxy'),
+                                                                       #cut = cms.string("is('BWeakDecay') && !is('CWeakDecay')")
+                                                                       cut = cms.string("is('Fake')")
+                                                                       )
+
+process.svTagInfoProxy2 = cms.EDProducer('SecondaryVertexTagInfoProxy',
+                                         svTagInfoProducer = cms.untracked.InputTag('svTagInfoSelector')
+                                         )
+
+process.vertexHistoryAnalyzer = cms.EDAnalyzer('VertexHistoryAnalyzer',
+                                               process.vertexClassifier
+                                               )
+process.vertexHistoryAnalyzer.vertexProducer = 'svTagInfoProxy2'
+
+process.svTagInfoSelector.trackProducer = cms.untracked.InputTag(svTracks)
+process.vertexHistoryAnalyzer.trackProducer = cms.untracked.InputTag(svTracks)
+
+process.p = cms.Path(#process.playback *
+    process.svTagInfoProxy *
+    process.svTagInfoValidationAnalyzer*
+    process.svTagInfoSelector * process.svTagInfoProxy2 * process.vertexHistoryAnalyzer
+    )
+'''
+
+#if isMC == False:
+process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
+#process.hltJetHI.HLTPaths = ['HLT_Jet40_v1']
+process.hltJetHI.HLTPaths = ['HLT_Mu3_v2']
+#process.hltJetHI.HLTPaths = ['HLT_HIL2Mu7_v1']
+#process.hltJetHI.TriggerResultsTag = cms.InputTag("TriggerResults","","RECO")
+process.hltJetHI.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+process.superFilterSequence = cms.Sequence(process.hltJetHI)
+process.superFilterPath = cms.Path(process.superFilterSequence) 
+process.skimanalysis.superFilters = cms.vstring("superFilterPath")
+for path in process.paths:
+    getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
     
