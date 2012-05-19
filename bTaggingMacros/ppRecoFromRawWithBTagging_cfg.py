@@ -1,16 +1,16 @@
-import FWCore.ParameterSet.VarParsing as VarParsing
-
-ivars = VarParsing.VarParsing('standard')
-ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
-
-
-#ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG//d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_102_1_a9Z.root'
-ivars.output = 'test2.root'
-ivars.maxEvents = -1
-ivars.initialEvent = 1
-
-ivars.parseArguments()
+#import FWCore.ParameterSet.VarParsing as VarParsing
+#
+#ivars = VarParsing.VarParsing('standard')
+#ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
+#
+#
+##ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
+#ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG//d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_102_1_a9Z.root'
+#ivars.output = 'test2.root'
+#ivars.maxEvents = -1
+#ivars.initialEvent = 1
+#
+#ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
@@ -58,8 +58,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(
-    ivars.maxEvents
-    #-1
+    #ivars.maxEvents
+    -1
     )
 )
 
@@ -67,13 +67,13 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+    '/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C27F8962-F059-E011-8678-003048339B04.root',
     #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C47A6827-F059-E011-95FF-003048F5975C.root',
     #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C6AE4607-ED59-E011-8EF2-003048341ADC.root',
     #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/CA0C5612-F359-E011-89BD-003048344A96.root',
     #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/CED72C3D-E159-E011-93D8-00304865C258.root',
-    ivars.files
+    #ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             #eventsToProcess = cms.untracked.VEventRange('161366:12073186-161366:12073186'),
@@ -166,7 +166,12 @@ if hiReco:
     process.offlinePrimaryVertices.TrackLabel = "hiGeneralTracks"
     process.heavyIonTracking *= process.hiIterTracking 
     #process.heavyIonTracking *= process.hiIterTracking * process.offlinePrimaryVertices
-    
+
+    # redo muons, seeding with global iterative tracks
+    process.globalMuons.TrackerCollectionLabel = "hiGeneralTracks"
+    process.muons.TrackExtractorPSet.inputTrackCollection = "hiGeneralTracks"
+    process.muons.inputCollectionLabels = ["hiGeneralTracks", "globalMuons", "standAloneMuons:UpdatedAtVtx", "tevMuons:firstHit", "tevMuons:picky", "tevMuons:dyt"]
+
     # PF configuration
     process.particleFlowTmp.postMuonCleaning = False
     process.particleFlowBlock.RecMuons = 'muons'
@@ -410,8 +415,8 @@ else:
 
 process.TFileService = cms.Service("TFileService",
                                    fileName=cms.string(
-    #'bTagAnalyzers.root'
-    ivars.output
+    'bTagAnalyzers.root'
+    #ivars.output
     )
                                    )
 
@@ -420,6 +425,7 @@ process.TFileService = cms.Service("TFileService",
 
 process.load('CmsHi.JetAnalysis.JetAnalyzers_cff')
 process.akPu3PFJetAnalyzer.saveBfragments = True
+process.akPu3PFJetAnalyzer.pfCandidateLabel = 'regParticleFlow'  #in order to get regit muons
 process.akPu3PFJetAnalyzer.eventInfoTag = genTag
 process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults::HLT')
 #process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults::RECO')
