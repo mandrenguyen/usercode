@@ -19,11 +19,15 @@ hiReco = True
 reReco = False
 hasSimInfo = True
 genTag = "generator"
+hltFilter = ""  
+trigResults = 'TriggerResults::HLT'
+
+# some important triggers:  HLT_Jet40_v1, HLT_HIL2Mu7_v1'
 
 if hiReco:
     svTracks = "hiSecondaryVertexSelectedTracks"
-    pvProducer = "hiSelectedVertex"
-    #pvProducer = "offlinePrimaryVertices"
+    #pvProducer = "hiSelectedVertex"
+    pvProducer = "offlinePrimaryVertices"
 else:
     svTracks = "generalTracks"
     pvProducer = "offlinePrimaryVertices"
@@ -67,16 +71,20 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    '/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
-    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C27F8962-F059-E011-8678-003048339B04.root',
-    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C47A6827-F059-E011-95FF-003048F5975C.root',
-    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/C6AE4607-ED59-E011-8EF2-003048341ADC.root',
-    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/CA0C5612-F359-E011-89BD-003048344A96.root',
-    #'/store/mc/Spring11/QCD_Pt_15_TuneZ2_2760GeV-pythia6/GEN-SIM-RAWDEBUG/START311_V2A-v1/0001/CED72C3D-E159-E011-93D8-00304865C258.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_0.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_1.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_2.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_3.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_4.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_6.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_8.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_10.root',
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
+    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     #ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            #eventsToProcess = cms.untracked.VEventRange('161366:12073186-161366:12073186'),
+                            #eventsToProcess = cms.untracked.VEventRange('1:9-1:9'),
                             )
 
 process.options = cms.untracked.PSet(
@@ -162,10 +170,7 @@ if hiReco:
 
     #iterative tracking
     process.load("RecoHI.HiTracking.hiIterTracking_cff")
-    process.load("RecoVertex.PrimaryVertexProducer.OfflinePrimaryVertices_cfi")
-    process.offlinePrimaryVertices.TrackLabel = "hiGeneralTracks"
     process.heavyIonTracking *= process.hiIterTracking 
-    #process.heavyIonTracking *= process.hiIterTracking * process.offlinePrimaryVertices
 
     # redo muons, seeding with global iterative tracks
     process.globalMuons.TrackerCollectionLabel = "hiGeneralTracks"
@@ -304,8 +309,11 @@ if hiReco:
         #'quality("highPuritySetWithPV") && pt > 1')   # require calo-compatibility
         'quality("loose") && pt > 1')      
                                                            )
-    
-    
+
+    # Need to re-reco PV with the same track collection as used for the SVs
+    process.load("RecoVertex.PrimaryVertexProducer.OfflinePrimaryVertices_cfi")
+    process.offlinePrimaryVertices.TrackLabel = "hiSecondaryVertexSelectedTracks"
+
     process.regionalTracking = cms.Path(
         process.akPu3PFSelectedJets *
         process.hiRegitTracking *
@@ -313,7 +321,8 @@ if hiReco:
         process.regMuonReco *
         process.hiRegPF *
         process.hiGeneralAndRegitCaloMatchedTracks *
-        process.hiSecondaryVertexSelectedTracks
+        process.hiSecondaryVertexSelectedTracks *
+        process.offlinePrimaryVertices
         )
     
     
@@ -425,10 +434,9 @@ process.TFileService = cms.Service("TFileService",
 
 process.load('CmsHi.JetAnalysis.JetAnalyzers_cff')
 process.akPu3PFJetAnalyzer.saveBfragments = True
-process.akPu3PFJetAnalyzer.pfCandidateLabel = 'regParticleFlow'  #in order to get regit muons
+if hiReco: process.akPu3PFJetAnalyzer.pfCandidateLabel = 'regParticleFlow'  #in order to get regit muons
 process.akPu3PFJetAnalyzer.eventInfoTag = genTag
-process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults::HLT')
-#process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string('TriggerResults::RECO')
+process.akPu3PFJetAnalyzer.hltTrgResults = cms.untracked.string(trigResults)
 process.akPu3PFJetAnalyzer.useVtx = cms.untracked.bool(True)
 process.akPu3PFJetAnalyzer.vtxTag = pvProducer
 process.akPu3PFJetAnalyzer.trackTag = svTracks
@@ -574,11 +582,13 @@ process.collSell = cms.Path(process.collisionEventSelection)
 
 # include some event selection bits
 process.load('CmsHi.HiHLTAlgos.hltanalysis_cff')
-process.hltanalysis.hltresults = cms.InputTag("TriggerResults")
+process.hltanalysis.hltresults = cms.InputTag(trigResults)
 process.hltAna = cms.Path(process.hltanalysis)
 process.pAna = cms.EndPath(process.skimanalysis)
-process.skimanalysis.hltresults = cms.InputTag("TriggerResults")
+process.skimanalysis.hltresults = cms.InputTag(trigResults)
 
+
+# Secondary vertex sim matching, only tested on RAW data
 '''
 process.load("SimTracker.VertexAssociation.VertexAssociatorByTracks_cfi")
 
@@ -605,7 +615,8 @@ process.svTagInfoSelector = SecondaryVertexTagInfoCategorySelector(
                                                                        src = cms.InputTag('akPu3PFSecondaryVertexTagInfos'),
                                                                        pxy = cms.InputTag('svTagInfoProxy'),
                                                                        #cut = cms.string("is('BWeakDecay') && !is('CWeakDecay')")
-                                                                       cut = cms.string("is('Fake')")
+                                                                       #cut = cms.string("is('Fake')")
+                                                                       cut = cms.string("is('SecondaryVertex')")
                                                                        )
 
 process.svTagInfoProxy2 = cms.EDProducer('SecondaryVertexTagInfoProxy',
@@ -620,23 +631,20 @@ process.vertexHistoryAnalyzer.vertexProducer = 'svTagInfoProxy2'
 process.svTagInfoSelector.trackProducer = cms.untracked.InputTag(svTracks)
 process.vertexHistoryAnalyzer.trackProducer = cms.untracked.InputTag(svTracks)
 
-process.p = cms.Path(#process.playback *
+process.svAna = cms.Path(#process.playback *
     process.svTagInfoProxy *
     process.svTagInfoValidationAnalyzer*
     process.svTagInfoSelector * process.svTagInfoProxy2 * process.vertexHistoryAnalyzer
     )
 '''
 
-#if isMC == False:
-process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
-#process.hltJetHI.HLTPaths = ['HLT_Jet40_v1']
-process.hltJetHI.HLTPaths = ['HLT_Mu3_v2']
-#process.hltJetHI.HLTPaths = ['HLT_HIL2Mu7_v1']
-#process.hltJetHI.TriggerResultsTag = cms.InputTag("TriggerResults","","RECO")
-process.hltJetHI.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-process.superFilterSequence = cms.Sequence(process.hltJetHI)
-process.superFilterPath = cms.Path(process.superFilterSequence) 
-process.skimanalysis.superFilters = cms.vstring("superFilterPath")
-for path in process.paths:
-    getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
-    
+if hltFilter:
+    process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
+    process.hltJetHI.HLTPaths = [hltFilter]
+    process.hltJetHI.TriggerResultsTag = cms.InputTag(trigResults)
+    process.superFilterSequence = cms.Sequence(process.hltJetHI)
+    process.superFilterPath = cms.Path(process.superFilterSequence) 
+    process.skimanalysis.superFilters = cms.vstring("superFilterPath")
+    for path in process.paths:
+        getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
+        
