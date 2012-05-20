@@ -19,6 +19,7 @@ hiReco = True
 reReco = False
 hasSimInfo = True
 genTag = "generator"
+#hltFilter = "HLT_Mu3_v2"
 hltFilter = ""  
 trigResults = 'TriggerResults::HLT'
 
@@ -71,16 +72,16 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_0.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_1.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_2.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_3.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_4.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_6.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_8.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_10.root',
-    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
-    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_0.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_1.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_2.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_3.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_4.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_6.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_8.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_10.root',
+    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
+    '/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     #ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -582,10 +583,10 @@ process.collSell = cms.Path(process.collisionEventSelection)
 
 # include some event selection bits
 process.load('CmsHi.HiHLTAlgos.hltanalysis_cff')
-process.hltanalysis.hltresults = cms.InputTag(trigResults)
+process.hltanalysis.hltresults = cms.InputTag("TriggerResults")
 process.hltAna = cms.Path(process.hltanalysis)
 process.pAna = cms.EndPath(process.skimanalysis)
-process.skimanalysis.hltresults = cms.InputTag(trigResults)
+process.skimanalysis.hltresults = cms.InputTag("TriggerResults")
 
 
 # Secondary vertex sim matching, only tested on RAW data
