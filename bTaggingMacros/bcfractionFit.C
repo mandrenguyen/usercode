@@ -52,7 +52,7 @@ RooRealVar bcfractionFit(char *var = "discr_csvSimple",double minX = 0,double ma
    fixEmpty(hOtherFlavor);
    
    // data sample   
-   TFile *infData = new TFile("histos/ppMC.root");
+   TFile *infData = new TFile("histos/ppdata.root");
    TTree *tData = (TTree*) infData->Get("nt");
    
    // --- Observable ---

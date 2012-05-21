@@ -8,10 +8,10 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 {
 
   TFile *fin;
-  if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_weighted_bTagAnalyzers_ppReco_pythia_ghostFix.root");
-  else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw_fixEvtSel/merged_bTagAnalyzers.root");
-//  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixEvtSel_pythia30.root");
-//  else fin=new TFile("../sample/merged_jetJetAnalyzers_ppData2760_ppRecoFromRaw_fixEvtSel.root");
+//  if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_weighted_bTagAnalyzers_ppReco_pythia_ghostFix.root");
+//  else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw_fixEvtSel/merged_bTagAnalyzers.root");
+  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixEvtSel_pythia30.root");
+  else fin=new TFile("../sample/merged_jetJetAnalyzers_ppData2760_ppRecoFromRaw_fixEvtSel.root");
 
 
 
@@ -293,7 +293,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   if(isMC)fout=new TFile("histos/ppMC.root","recreate");
   else fout=new TFile("histos/ppdata.root","recreate");
 
-  TNtuple *nt = new TNtuple("nt","","jtpt:discr_csvSimple:discr_prob:refparton_flavorForB");
+  TNtuple *nt = new TNtuple("nt","","jtpt:discr_csvSimple:discr_prob:svtxm:refparton_flavorForB");
 
   for (Long64_t i=0; i<nentries;i++) {
 
@@ -317,7 +317,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
       for(int ij=0;ij<nref;ij++){
 	
 	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<2  ){
-	  nt->Fill(jtpt[ij],discr_csvSimple[ij],discr_probb[ij],refparton_flavorForB[ij]);
+          // fill ntuple
+	  nt->Fill(jtpt[ij],discr_csvSimple[ij],discr_probb[ij],svtxm[ij],refparton_flavorForB[ij]);
 	  hjtpt->Fill(jtpt[ij],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    

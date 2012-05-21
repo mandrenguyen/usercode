@@ -52,7 +52,7 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    fixEmpty(hOtherFlavor);
    
    // data sample   
-   TFile *infData = new TFile("histos/ppMC.root");
+   TFile *infData = new TFile("histos/ppdata.root");
    TTree *tData = (TTree*) infData->Get("nt");
    
    // --- Observable ---
@@ -114,6 +114,7 @@ void ptDependence()
    {
       RooRealVar f1 = bfractionFit("discr_prob",0,3.5,ptBin[n],ptBin[n+1]);
       RooRealVar f2 = bfractionFit("discr_csvSimple",0,1,ptBin[n],ptBin[n+1]);
+      RooRealVar f3 = bfractionFit("discr_csvSimple",0,1,ptBin[n],ptBin[n+1]);
       hProb->SetBinContent(n+1,f1.getVal());    
       hProb->SetBinError(n+1,f1.getError());    
       hCSV->SetBinContent(n+1,f2.getVal());    
