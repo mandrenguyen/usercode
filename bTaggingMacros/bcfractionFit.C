@@ -23,7 +23,7 @@ void fixEmpty(TH1 *h)
    }
 }
 
-RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double maxX = 1,double ptMin = 60, double ptMax = 500)
+RooRealVar bcfractionFit(char *var = "discr_csvSimple",double minX = 0,double maxX = 1,double ptMin = 60, double ptMax = 500)
 {
    // Prepare a canvas
    TCanvas *c = new TCanvas("c","",600,600);
@@ -48,7 +48,7 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    // b-jet background shape
    TH1D *hOtherFlavor = new TH1D("hOtherFlavor","",50,minX,maxX);
    hOtherFlavor->Sumw2();
-   t->Draw(Form("%s>>hOtherFlavor",var),Form("abs(refparton_flavorForB)!=5&&jtpt>%f&&jtpt<%f",ptMin,ptMax));
+   t->Draw(Form("%s>>hOtherFlavor",var),Form("abs(refparton_flavorForB)!=5&&abs(refparton_flavorForB)!=4&&jtpt>%f&&jtpt<%f",ptMin,ptMax));
    fixEmpty(hOtherFlavor);
    
    // data sample   
@@ -63,7 +63,9 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
  
    // --- Build Histogram PDF ---
    RooDataHist xB("xB","xB",s,hB);
-   RooHistPdf signal("signal","signal PDF",s,xB);
+   RooDataHist xC("xB","xB",s,hC);
+   RooHistPdf signal("signal","signalB PDF",s,xB);
+   RooHistPdf signalC("signalC","signalC PDF",s,xC);
 
    RooDataHist xOtherFlavor("xOtherFlavor","xOtherFlavor",s,hOtherFlavor);
    RooHistPdf background("background","Background PDF",s,xOtherFlavor);
@@ -75,7 +77,9 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    //   RooRealVar nbkg("nbkg","#background events",1e5,0.,1e7) ;
    //   RooAddPdf model("model","g+a",RooArgList(signal,background),RooArgList(nsig,nbkg)) ;
    RooRealVar frac("frac","#background events",0.1,0.,1) ;
-   RooAddPdf model("model","g+a",signal,background,frac) ;
+   RooRealVar fracC("fracC","#background events",0.1,0.,1) ;
+   RooAddPdf modelB("modelB","g+a",signalC,background,fracC) ;
+   RooAddPdf model("model","g+a",signal,modelB,frac) ;
 
    // data sample
    //RooDataSet *data = new RooDataSet("data","data",RooArgSet(s),Import(*tData));
@@ -93,7 +97,8 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    cout <<"Min "<<sframe->GetMinimum()<<endl;
    data->plotOn(sframe,Binning(50)) ;
    sframe->SetTitle("");
-   model.plotOn(sframe,Components(background),LineStyle(kDashed),LineColor(kBlue)) ;   
+   model.plotOn(sframe,Components(background),LineStyle(kDashed),LineColor(kBlack)) ;   
+   model.plotOn(sframe,Components(modelB),LineStyle(kDashed),LineColor(kBlue)) ;   
    model.plotOn(sframe,Components(signal),LineStyle(kDashed),LineColor(kRed),FillColor(kRed),FillStyle(1)) ;   
    model.plotOn(sframe) ;
 
@@ -112,8 +117,8 @@ void ptDependence()
 
    for (int n=0; n<nBins;n++)
    {
-      RooRealVar f1 = bfractionFit("discr_prob",0,3.5,ptBin[n],ptBin[n+1]);
-      RooRealVar f2 = bfractionFit("discr_csvSimple",0,1,ptBin[n],ptBin[n+1]);
+      RooRealVar f1 = bcfractionFit("discr_prob",0,3.5,ptBin[n],ptBin[n+1]);
+      RooRealVar f2 = bcfractionFit("discr_csvSimple",0,1,ptBin[n],ptBin[n+1]);
       hProb->SetBinContent(n+1,f1.getVal());    
       hProb->SetBinError(n+1,f1.getError());    
       hCSV->SetBinContent(n+1,f2.getVal());    
