@@ -47,7 +47,7 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    fixEmpty(hOtherFlavor);
    
    // data sample   
-   TFile *infData = new TFile("histos/ppdata.root");
+   TFile *infData = new TFile("histos/ppMC.root");
    TTree *tData = (TTree*) infData->Get("nt");
    
    // --- Observable ---
@@ -82,7 +82,7 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    // --- Plot data and composite PDF overlaid ---
    RooPlot* sframe = s.frame() ;
    TH2D *htemp = new TH2D("htemp","",100,minX,maxX,100,0.5,1e5) ;
-   htemp->SetXTitle(var);
+   htemp->SetXTitle(Form("%s %.0f < p_{T} < %.0f GeV/c",var,ptMin,ptMax));
    htemp->SetYTitle("Entries");
    htemp->Draw();
    cout <<"Min "<<sframe->GetMinimum()<<endl;
@@ -115,9 +115,10 @@ void ptDependence()
       hCSV->SetBinError(n+1,f2.getError());    
    }
    TCanvas *c2 = new TCanvas("c2","",600,600);
-   hProb->SetAxisRange(0,0.1,"Y");
+   hProb->SetAxisRange(0,0.05,"Y");
    hProb->SetXTitle("Jet p_{T} (GeV/c)");
    hProb->SetYTitle("b-jet fraction");
+   hProb->SetTitleOffset(1.5,"Y");
    hProb->Draw();
    hCSV->SetLineColor(2);
    hCSV->SetMarkerColor(2);
