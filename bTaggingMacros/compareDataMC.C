@@ -6,9 +6,9 @@ void formatHisto(TH1F *h, char *title){
 }
 
 void setFillColor(TH1F *h[3]){
-  h[0]->SetFillColor(kred);
-  h[1]->SetFillColor(kgreen);
-  h[2]->SetFillColor(kblue);
+  h[0]->SetFillColor(kRed);
+  h[1]->SetFillColor(kGreen);
+  h[2]->SetFillColor(kBlue);
 }
 
 void formatCanvas(TCanvas *c){

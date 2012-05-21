@@ -2,14 +2,18 @@
 #include "TH1.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TNtuple.h"
 
 void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, float minJetPt=60)
 {
 
   TFile *fin;
-  //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bTagAnalyzers_ppReco_pythia30_ghostFix.root");
   if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_weighted_bTagAnalyzers_ppReco_pythia_ghostFix.root");
   else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw_fixEvtSel/merged_bTagAnalyzers.root");
+//  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixEvtSel_pythia30.root");
+//  else fin=new TFile("../sample/merged_jetJetAnalyzers_ppData2760_ppRecoFromRaw_fixEvtSel.root");
+
+
 
   TTree *t=(TTree*) fin->Get("akPu3PFJetAnalyzer/t");
   TTree *tSkim;
@@ -285,6 +289,12 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   
   Long64_t nentries = t->GetEntries();
 
+  TFile *fout;
+  if(isMC)fout=new TFile("histos/ppMC.root","recreate");
+  else fout=new TFile("histos/ppdata.root","recreate");
+
+  TNtuple *nt = new TNtuple("nt","","jtpt:discr_csvSimple:discr_prob:refparton_flavorForB");
+
   for (Long64_t i=0; i<nentries;i++) {
 
     if (i%10000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl; 
@@ -306,8 +316,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 
       for(int ij=0;ij<nref;ij++){
 	
-	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<2 ){
-	  
+	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<2  ){
+	  nt->Fill(jtpt[ij],discr_csvSimple[ij],discr_probb[ij],refparton_flavorForB[ij]);
 	  hjtpt->Fill(jtpt[ij],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    
@@ -496,9 +506,6 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
     //*/
   }
 
-  TFile *fout;
-  if(isMC)fout=new TFile("histos/ppMC.root","recreate");
-  else fout=new TFile("histos/ppdata.root","recreate");
 
   hjtpt->Write();
   if(isMC) hjtptB->Write(); hjtptC->Write(); hjtptL->Write(); hjtptU->Write();
@@ -566,5 +573,6 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   hipClosest2Jet->Write();
   if(isMC) hipClosest2JetB->Write(); hipClosest2JetC->Write(); hipClosest2JetL->Write();
 
+  nt->Write();
   fout->Close();
 }
