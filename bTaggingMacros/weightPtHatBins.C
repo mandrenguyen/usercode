@@ -25,7 +25,7 @@ void weightPtHatBins(){
 
   /* // uncomment for jet-triggered data
   Float_t xSections[7] = {
-    1.94e-01,
+    2.03e-01,
     1.079e-02,
     1.021e-03,
     9.913e-05,
@@ -37,7 +37,7 @@ void weightPtHatBins(){
 
   //* // uncomment for muon-triggered data
   Float_t xSections[7] = {
-    1.94e-01 * (eff[0]*1.94e-01 - eff[1]*1.079e-02) / (1.94e-01 - 1.079e-02),
+    2.03e-01 * (eff[0]*2.03e-01 - eff[1]*1.079e-02) / (2.03e-01 - 1.079e-02),
     1.079e-02 * (eff[1]*1.079e-02 - eff[2]*1.021e-03) / (1.079e-02 - 1.021e-03),
     1.021e-03 * (eff[2]*1.021e-03 - eff[3]*9.913e-05) / (1.021e-03 - 9.913e-05),
     9.913e-05 * eff[3],
