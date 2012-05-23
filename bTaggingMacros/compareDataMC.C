@@ -53,8 +53,8 @@ void compareDataMC(){
   TFile *fdata = new TFile("histos/ppdata.root");
 
   // declare histos
-  TH1F *hjtpt, *hnsvtx, *hsvtxntrk, *hsvtxdl, *hsvtxdls, *hsvtxm, *hsvtxpt, *hnIPtrk, *hnselIPtrk, *hdiscr_csvSimple, *hdiscr_prob, *hmuptrel, *hipPt, *hipProb0, *hipProb1, *hip2d, *hip2dSig, *hip3d, *hip3dSig, *hipDist2Jet, *hipDist2JetSig, *hipClosest2Jet;
-  TH1F *hjtptMC[4], *hnsvtxMC[3], *hsvtxntrkMC[3], *hsvtxdlMC[3], *hsvtxdlsMC[3], *hsvtxmMC[3], *hsvtxptMC[3], *hnIPtrkMC[3], *hnselIPtrkMC[3], *hdiscr_csvSimpleMC[3], *hdiscr_probMC[3], *hmuptrelMC[3], *hipPtMC[3], *hipProb0MC[3], *hipProb1MC[3], *hip2dMC[3], *hip2dSigMC[3], *hip3dMC[3], *hip3dSigMC[3], *hipDist2JetMC[3], *hipDist2JetSigMC[3], *hipClosest2JetMC[3];
+  TH1F *hjtpt, *hnsvtx, *hsvtxntrk, *hsvtxdl, *hsvtxdls, *hsvtxm, *hsvtxmSV3, *hsvtxpt, *hsvtxptSV3, *hnIPtrk, *hnselIPtrk, *hdiscr_csvSimple, *hdiscr_prob, *hdiscr_ssvHighEff, *hdiscr_ssvHighPur, *hmuptrel, *hmuptrelSV2, *hmuptrelSV3, *hipPt, *hipProb0, *hipProb1, *hip2d, *hip2dSig, *hip3d, *hip3dSig, *hipDist2Jet, *hipDist2JetSig, *hipClosest2Jet;
+  TH1F *hjtptMC[4], *hnsvtxMC[3], *hsvtxntrkMC[3], *hsvtxdlMC[3], *hsvtxdlsMC[3], *hsvtxmMC[3], *hsvtxmSV3MC[3], *hsvtxptMC[3], *hsvtxptSV3MC[3], *hnIPtrkMC[3], *hnselIPtrkMC[3], *hdiscr_csvSimpleMC[3], *hdiscr_probMC[3], *hdiscr_ssvHighEffMC[3], *hdiscr_ssvHighPurMC[3], *hmuptrelMC[3], *hmuptrelSV2MC[3], *hmuptrelSV3MC[3], *hipPtMC[3], *hipProb0MC[3], *hipProb1MC[3], *hip2dMC[3], *hip2dSigMC[3], *hip3dMC[3], *hip3dSigMC[3], *hipDist2JetMC[3], *hipDist2JetSigMC[3], *hipClosest2JetMC[3];
 
   // grab histos
   string suffix[4]={"B","C","L","U"};
@@ -83,9 +83,17 @@ void compareDataMC(){
   hsvtxm = (TH1F*) fdata->Get(name.c_str());
   for(int i=0;i<3;i++) hsvtxmMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
 
+  name="hsvtxmSV3";
+  hsvtxmSV3 = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hsvtxmSV3MC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
   name="hsvtxpt";
   hsvtxpt = (TH1F*) fdata->Get(name.c_str());
   for(int i=0;i<3;i++) hsvtxptMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hsvtxptSV3";
+  hsvtxptSV3 = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hsvtxptSV3MC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
 
   name="hnIPtrk";
   hnIPtrk = (TH1F*) fdata->Get(name.c_str());
@@ -103,9 +111,25 @@ void compareDataMC(){
   hdiscr_prob = (TH1F*) fdata->Get(name.c_str());
   for(int i=0;i<3;i++) hdiscr_probMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
 
+  name="hdiscr_ssvHighEff";
+  hdiscr_ssvHighEff = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hdiscr_ssvHighEffMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hdiscr_ssvHighPur";
+  hdiscr_ssvHighPur = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hdiscr_ssvHighPurMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
   name="hmuptrel";
   hmuptrel = (TH1F*) fdata->Get(name.c_str());
   for(int i=0;i<3;i++) hmuptrelMC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hmuptrelSV2";
+  hmuptrelSV2 = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hmuptrelSV2MC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
+
+  name="hmuptrelSV3";
+  hmuptrelSV3 = (TH1F*) fdata->Get(name.c_str());
+  for(int i=0;i<3;i++) hmuptrelSV3MC[i] = (TH1F*) fMC->Get((name+suffix[i]).c_str());
 
   name="hipPt";
   hipPt = (TH1F*) fdata->Get(name.c_str());
@@ -169,12 +193,18 @@ void compareDataMC(){
   stackHistos(hsvtxdlMC);
   stackHistos(hsvtxdlsMC);
   stackHistos(hsvtxmMC);
+  stackHistos(hsvtxmSV3MC);
   stackHistos(hsvtxptMC);
+  stackHistos(hsvtxptSV3MC);
   stackHistos(hnIPtrkMC);
   stackHistos(hnselIPtrkMC);
   stackHistos(hdiscr_csvSimpleMC);
   stackHistos(hdiscr_probMC);
+  stackHistos(hdiscr_ssvHighEffMC);
+  stackHistos(hdiscr_ssvHighPurMC);
   stackHistos(hmuptrelMC);
+  stackHistos(hmuptrelSV2MC);
+  stackHistos(hmuptrelSV3MC);
   stackHistos(hipPtMC);
   stackHistos(hipProb0MC);
   stackHistos(hipProb1MC);
@@ -195,12 +225,18 @@ void compareDataMC(){
   for(int i=0;i<3;i++) hsvtxdlMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hsvtxdlsMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hsvtxmMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hsvtxmSV3MC[i]->Scale(scale);
   for(int i=0;i<3;i++) hsvtxptMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hsvtxptSV3MC[i]->Scale(scale);
   for(int i=0;i<3;i++) hnIPtrkMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hnselIPtrkMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hdiscr_csvSimpleMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hdiscr_probMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hdiscr_ssvHighEffMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hdiscr_ssvHighPurMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hmuptrelMC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hmuptrelSV2MC[i]->Scale(scale);
+  for(int i=0;i<3;i++) hmuptrelSV3MC[i]->Scale(scale);
   for(int i=0;i<3;i++) hipPtMC[i]->Scale(scale);
   for(int i=0;i<3;i++) hipProb0MC[i]->Scale(scale);
   for(int i=0;i<3;i++) hipProb1MC[i]->Scale(scale);
@@ -219,12 +255,18 @@ void compareDataMC(){
   setFillColor(hsvtxdlMC);
   setFillColor(hsvtxdlsMC);
   setFillColor(hsvtxmMC);
+  setFillColor(hsvtxmSV3MC);
   setFillColor(hsvtxptMC);
+  setFillColor(hsvtxptSV3MC);
   setFillColor(hnIPtrkMC);
   setFillColor(hnselIPtrkMC);
   setFillColor(hdiscr_csvSimpleMC);
   setFillColor(hdiscr_probMC);
+  setFillColor(hdiscr_ssvHighEffMC);
+  setFillColor(hdiscr_ssvHighPurMC);
   setFillColor(hmuptrelMC);
+  setFillColor(hmuptrelSV2MC);
+  setFillColor(hmuptrelSV3MC);
   setFillColor(hipPtMC);
   setFillColor(hipProb0MC);
   setFillColor(hipProb1MC);
@@ -342,7 +384,22 @@ void compareDataMC(){
   formatRatioHist(hRsvtxm);
   hRsvtxm->Divide(hsvtxmMC[2]);
   hRsvtxm->Draw();
+ 
+  title = "secondary vertex mass (GeV/c^{2}) (requiring 3-track SV)";
+  TCanvas *c5b=new TCanvas("c5b",title,200,10,600,480);
+  formatHisto(hsvtxmSV3,title);
+  formatCanvas(c5b);
+  hsvtxmSV3->Draw();
+  for(int i=2;i>-1;i--) hsvtxmSV3MC[i]->Draw("same");
+  hsvtxmSV3->Draw("same");
+  leg->Draw();
+  c5b->GetPad(1)->RedrawAxis();
 
+  c5b->cd(2);
+  TH1F *hRsvtxmSV3 = hsvtxmSV3->Clone("hRsvtxmSV3");
+  formatRatioHist(hRsvtxmSV3);
+  hRsvtxmSV3->Divide(hsvtxmSV3MC[2]);
+  hRsvtxmSV3->Draw();
 
   title = "secondary vertex p_{T} (GeV/c)";
   TCanvas *c6=new TCanvas("c6",title,200,10,600,480);
@@ -360,6 +417,21 @@ void compareDataMC(){
   hRsvtxpt->Divide(hsvtxptMC[2]);
   hRsvtxpt->Draw();
 
+  title = "secondary vertex p_{T} (GeV/c) (requiring 3-track SV)";
+  TCanvas *c6b=new TCanvas("c6b",title,200,10,600,480);
+  formatHisto(hsvtxptSV3,title);
+  formatCanvas(c6b);
+  hsvtxptSV3->Draw();
+  for(int i=2;i>-1;i--) hsvtxptSV3MC[i]->Draw("same");
+  hsvtxptSV3->Draw("same");
+  leg->Draw();
+  c6b->GetPad(1)->RedrawAxis();
+
+  c6b->cd(2);
+  TH1F *hRsvtxptSV3 = hsvtxptSV3->Clone("hRsvtxptSV3");
+  formatRatioHist(hRsvtxptSV3);
+  hRsvtxptSV3->Divide(hsvtxptSV3MC[2]);
+  hRsvtxptSV3->Draw();
 
   title = "# of IP tracks";
   TCanvas *c7=new TCanvas("c7",title,200,10,600,480);
@@ -425,6 +497,39 @@ void compareDataMC(){
   hRdiscr_prob->Divide(hdiscr_probMC[2]);
   hRdiscr_prob->Draw();
 
+  title = "hdiscr_ssvHighEff";
+  TCanvas *c10a=new TCanvas("c10a",title,200,10,600,480);
+  formatHisto(hdiscr_ssvHighEff,title);
+  formatCanvas(c10a);
+  hdiscr_ssvHighEff->Draw();
+  for(int i=2;i>-1;i--) hdiscr_ssvHighEffMC[i]->Draw("same");
+  hdiscr_ssvHighEff->Draw("same");
+  leg->Draw();
+  c10a->GetPad(1)->RedrawAxis();
+
+  c10a->cd(2);
+  TH1F *hRdiscr_ssvHighEff = hdiscr_ssvHighEff->Clone("hRdiscr_ssvHighEff");
+  formatRatioHist(hRdiscr_ssvHighEff);
+  hRdiscr_ssvHighEff->Divide(hdiscr_ssvHighEffMC[2]);
+  hRdiscr_ssvHighEff->Draw();
+
+  title = "hdiscr_ssvHighPur";
+  TCanvas *c10b=new TCanvas("c10b",title,200,10,600,480);
+  formatHisto(hdiscr_ssvHighPur,title);
+  formatCanvas(c10b);
+  hdiscr_ssvHighPur->Draw();
+  for(int i=2;i>-1;i--) hdiscr_ssvHighPurMC[i]->Draw("same");
+  hdiscr_ssvHighPur->Draw("same");
+  leg->Draw();
+  c10b->GetPad(1)->RedrawAxis();
+
+  c10b->cd(2);
+  TH1F *hRdiscr_ssvHighPur = hdiscr_ssvHighPur->Clone("hRdiscr_ssvHighPur");
+  formatRatioHist(hRdiscr_ssvHighPur);
+  hRdiscr_ssvHighPur->Divide(hdiscr_ssvHighPurMC[2]);
+  hRdiscr_ssvHighPur->Draw();
+
+  /*
   title = "hipPt";
   TCanvas *c11=new TCanvas("c11",title,200,10,600,480);
   formatHisto(hipPt,title);
@@ -584,8 +689,9 @@ void compareDataMC(){
   formatRatioHist(hRipClosest2Jet);
   hRipClosest2Jet->Divide(hipClosest2JetMC[2]);
   hRipClosest2Jet->Draw();
+  //*/
 
-  title = "hmuptrel";
+  title = "muon pTrel";
   TCanvas *c21=new TCanvas("c21",title,200,10,600,480);
   formatHisto(hmuptrel,title);
   formatCanvas(c21);
@@ -601,5 +707,36 @@ void compareDataMC(){
   hRmuptrel->Divide(hmuptrelMC[2]);
   hRmuptrel->Draw();
 
+  title = "muon pTrel (requiring 2-track SV)";
+  TCanvas *c21a=new TCanvas("c21a",title,200,10,600,480);
+  formatHisto(hmuptrelSV2,title);
+  formatCanvas(c21a);
+  hmuptrelSV2->Draw();
+  for(int i=2;i>-1;i--) hmuptrelSV2MC[i]->Draw("same");
+  hmuptrelSV2->Draw("same");
+  leg->Draw();
+  c21a->GetPad(1)->RedrawAxis();
+
+  c21a->cd(2);
+  TH1F *hRmuptrelSV2 = hmuptrelSV2->Clone("hmuptrelSV2");
+  formatRatioHist(hRmuptrelSV2);
+  hRmuptrelSV2->Divide(hmuptrelSV2MC[2]);
+  hRmuptrelSV2->Draw();
+
+  title = "muon pTrel (requiring 3-track SV)";
+  TCanvas *c21b=new TCanvas("c21b",title,200,10,600,480);
+  formatHisto(hmuptrelSV3,title);
+  formatCanvas(c21b);
+  hmuptrelSV3->Draw();
+  for(int i=2;i>-1;i--) hmuptrelSV3MC[i]->Draw("same");
+  hmuptrelSV3->Draw("same");
+  leg->Draw();
+  c21b->GetPad(1)->RedrawAxis();
+
+  c21b->cd(2);
+  TH1F *hRmuptrelSV3 = hmuptrelSV3->Clone("hmuptrelSV3");
+  formatRatioHist(hRmuptrelSV3);
+  hRmuptrelSV3->Divide(hmuptrelSV3MC[2]);
+  hRmuptrelSV3->Draw();
 
 }
