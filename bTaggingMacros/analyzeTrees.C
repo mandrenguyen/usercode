@@ -4,20 +4,23 @@
 #include "TFile.h"
 #include "TNtuple.h"
 
-void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, float minJetPt=60)
+void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, float minJetPt=60, float maxJetEta=2, float minMuPt=5)
 {
 
   TFile *fin;
-//  if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_weighted_bTagAnalyzers_ppReco_pythia_ghostFix.root");
-//  else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingAnalyzers_ppDataJet40_ppRecoFromRaw_fixEvtSel/merged_bTagAnalyzers.root");
-  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixEvtSel_pythia30.root");
-  else fin=new TFile("../sample/merged_jetJetAnalyzers_ppData2760_ppRecoFromRaw_fixEvtSel.root");
 
+  if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_weighted.root");
+  else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
 
+  //if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR_weighted3.root");
+  //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
 
-  TTree *t=(TTree*) fin->Get("akPu3PFJetAnalyzer/t");
-  TTree *tSkim;
-  if(!isMC) tSkim = (TTree*)  fin->Get("skimanalysis/HltTree");
+  //if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixEvtSel_pythia30.root");
+  //else fin=new TFile("../sample/merged_jetJetAnalyzers_ppData2760_ppRecoFromRaw_fixEvtSel.root");
+
+  //TTree *t = (TTree*) fin->Get("akPu3PFJetAnalyzer/t");
+  TTree *t = (TTree*) fin->Get("ak5PFJetAnalyzer/t");
+  TTree *tSkim = (TTree*) fin->Get("skimanalysis/HltTree");
 
   //Declaration of leaves types                  
   Int_t           evt;
@@ -31,6 +34,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   Float_t         jty[1000];
   Float_t         jtphi[1000];
   Float_t         jtpu[1000];
+  Float_t         discr_ssvHighEff[1000];
+  Float_t         discr_ssvHighPur[1000];
   Float_t         discr_csvMva[1000];
   Float_t         discr_csvSimple[1000];
   Float_t         discr_muByIp3[1000];
@@ -96,7 +101,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   Int_t collSell;
     
   t->SetBranchAddress("evt",&evt);
-  //t->SetBranchAddress("b",&b);
+  //t->SetBranchAddress("b",&b);C
   //t->SetBranchAddress("hf",&hf);   
   //t->SetBranchAddress("bin",&bin);           
   t->SetBranchAddress("nref",&nref);
@@ -106,6 +111,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   t->SetBranchAddress("jty",jty);
   t->SetBranchAddress("jtphi",jtphi);
   t->SetBranchAddress("jtpu",jtpu);
+  t->SetBranchAddress("discr_ssvHighEff",discr_ssvHighEff);
+  t->SetBranchAddress("discr_ssvHighPur",discr_ssvHighPur);
   t->SetBranchAddress("discr_csvMva",discr_csvMva);
   t->SetBranchAddress("discr_csvSimple",discr_csvSimple);
   t->SetBranchAddress("discr_muByIp3",discr_muByIp3);
@@ -169,18 +176,16 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   }
   if(isMC&&useWeight)t->SetBranchAddress("weight",&weight);
 
-  if(!isMC){
-    tSkim->SetBranchAddress("pvSel",&pvSel);
-    tSkim->SetBranchAddress("hbheNoiseSel",&hbheNoiseSel);
-    tSkim->SetBranchAddress("spikeSel",&spikeSel);
-    tSkim->SetBranchAddress("collSell",&collSell);
-  }
+  tSkim->SetBranchAddress("pvSel",&pvSel);
+  tSkim->SetBranchAddress("hbheNoiseSel",&hbheNoiseSel);
+  tSkim->SetBranchAddress("spikeSel",&spikeSel);
+  tSkim->SetBranchAddress("collSell",&collSell);
 
-  TH1F *hjtpt = new TH1F("hjtpt","hjtpt",40,50,250);
-  TH1F *hjtptB = new TH1F("hjtptB","hjtptB",40,50,250);
-  TH1F *hjtptC = new TH1F("hjtptC","hjtptC",40,50,250);
-  TH1F *hjtptL = new TH1F("hjtptL","hjtptL",40,50,250);
-  TH1F *hjtptU = new TH1F("hjtptU","hjtptU",40,50,250);
+  TH1F *hjtpt = new TH1F("hjtpt","hjtpt",50,0,250);
+  TH1F *hjtptB = new TH1F("hjtptB","hjtptB",50,0,250);
+  TH1F *hjtptC = new TH1F("hjtptC","hjtptC",50,0,250);
+  TH1F *hjtptL = new TH1F("hjtptL","hjtptL",50,0,250);
+  TH1F *hjtptU = new TH1F("hjtptU","hjtptU",50,0,250);
 
   TH1F *hdiscr_csvSimple = new TH1F("hdiscr_csvSimple","hdiscr_csvSimple",40,0,1);
   TH1F *hdiscr_csvSimpleB = new TH1F("hdiscr_csvSimpleB","hdiscr_csvSimpleB",40,0,1);
@@ -192,6 +197,16 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   TH1F *hdiscr_probC = new TH1F("hdiscr_probC","hdiscr_probC",40,0,3);
   TH1F *hdiscr_probL = new TH1F("hdiscr_probL","hdiscr_probL",40,0,3);
   
+  TH1F *hdiscr_ssvHighEff = new TH1F("hdiscr_ssvHighEff","hdiscr_ssvHighEff",50,1,6);
+  TH1F *hdiscr_ssvHighEffB = new TH1F("hdiscr_ssvHighEffB","hdiscr_ssvHighEffB",50,1,6);
+  TH1F *hdiscr_ssvHighEffC = new TH1F("hdiscr_ssvHighEffC","hdiscr_ssvHighEffC",50,1,6);
+  TH1F *hdiscr_ssvHighEffL = new TH1F("hdiscr_ssvHighEffL","hdiscr_ssvHighEffL",50,1,6);
+  
+  TH1F *hdiscr_ssvHighPur = new TH1F("hdiscr_ssvHighPur","hdiscr_ssvHighPur",50,1,6);
+  TH1F *hdiscr_ssvHighPurB = new TH1F("hdiscr_ssvHighPurB","hdiscr_ssvHighPurB",50,1,6);
+  TH1F *hdiscr_ssvHighPurC = new TH1F("hdiscr_ssvHighPurC","hdiscr_ssvHighPurC",50,1,6);
+  TH1F *hdiscr_ssvHighPurL = new TH1F("hdiscr_ssvHighPurL","hdiscr_ssvHighPurL",50,1,6);
+  
   TH1F *hnsvtx = new TH1F("hnsvtx","hnsvtx",6,-0.5,5.5);
   TH1F *hnsvtxB = new TH1F("hnsvtxB","hnsvtxB",6,-0.5,5.5);
   TH1F *hnsvtxC = new TH1F("hnsvtxC","hnsvtxC",6,-0.5,5.5);
@@ -202,25 +217,35 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   TH1F *hsvtxntrkC = new TH1F("hsvtxntrkC","hsvtxntrkC",12,-0.5,11.5);
   TH1F *hsvtxntrkL = new TH1F("hsvtxntrkL","hsvtxntrkL",12,-0.5,11.5);
 
-  TH1F *hsvtxdl = new TH1F("hsvtxdl","hsvtxdl",10,0,10);
-  TH1F *hsvtxdlB = new TH1F("hsvtxdlB","hsvtxdlB",10,0,10);
-  TH1F *hsvtxdlC = new TH1F("hsvtxdlC","hsvtxdlC",10,0,10);
-  TH1F *hsvtxdlL = new TH1F("hsvtxdlL","hsvtxdlL",10,0,10);
+  TH1F *hsvtxdl = new TH1F("hsvtxdl","hsvtxdl",20,0,10);
+  TH1F *hsvtxdlB = new TH1F("hsvtxdlB","hsvtxdlB",20,0,10);
+  TH1F *hsvtxdlC = new TH1F("hsvtxdlC","hsvtxdlC",20,0,10);
+  TH1F *hsvtxdlL = new TH1F("hsvtxdlL","hsvtxdlL",20,0,10);
 
-  TH1F *hsvtxdls = new TH1F("hsvtxdls","hsvtxdls",20,0,80);
-  TH1F *hsvtxdlsB = new TH1F("hsvtxdlsB","hsvtxdlsB",20,0,80);
-  TH1F *hsvtxdlsC = new TH1F("hsvtxdlsC","hsvtxdlsC",20,0,80);
-  TH1F *hsvtxdlsL = new TH1F("hsvtxdlsL","hsvtxdlsL",20,0,80);
+  TH1F *hsvtxdls = new TH1F("hsvtxdls","hsvtxdls",40,0,80);
+  TH1F *hsvtxdlsB = new TH1F("hsvtxdlsB","hsvtxdlsB",40,0,80);
+  TH1F *hsvtxdlsC = new TH1F("hsvtxdlsC","hsvtxdlsC",40,0,80);
+  TH1F *hsvtxdlsL = new TH1F("hsvtxdlsL","hsvtxdlsL",40,0,80);
   
   TH1F *hsvtxm = new TH1F("hsvtxm","hsvtxm",32,0,8);
   TH1F *hsvtxmB = new TH1F("hsvtxmB","hsvtxmB",32,0,8);
   TH1F *hsvtxmC = new TH1F("hsvtxmC","hsvtxmC",32,0,8);
   TH1F *hsvtxmL = new TH1F("hsvtxmL","hsvtxmL",32,0,8);
   
+  TH1F *hsvtxmSV3 = new TH1F("hsvtxmSV3","hsvtxmSV3",32,0,8);
+  TH1F *hsvtxmSV3B = new TH1F("hsvtxmSV3B","hsvtxmSV3B",32,0,8);
+  TH1F *hsvtxmSV3C = new TH1F("hsvtxmSV3C","hsvtxmSV3C",32,0,8);
+  TH1F *hsvtxmSV3L = new TH1F("hsvtxmSV3L","hsvtxmSV3L",32,0,8);
+  
   TH1F *hsvtxpt = new TH1F("hsvtxpt","hsvtxpt",20,0,100);
   TH1F *hsvtxptB = new TH1F("hsvtxptB","hsvtxptB",20,0,100);
   TH1F *hsvtxptC = new TH1F("hsvtxptC","hsvtxptC",20,0,100);
   TH1F *hsvtxptL = new TH1F("hsvtxptL","hsvtxptL",20,0,100);
+  
+  TH1F *hsvtxptSV3 = new TH1F("hsvtxptSV3","hsvtxptSV3",20,0,100);
+  TH1F *hsvtxptSV3B = new TH1F("hsvtxptSV3B","hsvtxptSV3B",20,0,100);
+  TH1F *hsvtxptSV3C = new TH1F("hsvtxptSV3C","hsvtxptSV3C",20,0,100);
+  TH1F *hsvtxptSV3L = new TH1F("hsvtxptSV3L","hsvtxptSV3L",20,0,100);
   
   TH1F *hnIPtrk = new TH1F("hnIPtrk","hnIPtrk",40,0,40);
   TH1F *hnIPtrkB = new TH1F("hnIPtrkB","hnIPtrkB",40,0,40);
@@ -236,6 +261,16 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   TH1F *hmuptrelB = new TH1F("hmuptrelB","hmuptrelB",40,0,4);
   TH1F *hmuptrelC = new TH1F("hmuptrelC","hmuptrelC",40,0,4);
   TH1F *hmuptrelL = new TH1F("hmuptrelL","hmuptrelL",40,0,4);
+  
+  TH1F *hmuptrelSV2 = new TH1F("hmuptrelSV2","hmuptrelSV2",40,0,4);
+  TH1F *hmuptrelSV2B = new TH1F("hmuptrelSV2B","hmuptrelSV2B",40,0,4);
+  TH1F *hmuptrelSV2C = new TH1F("hmuptrelSV2C","hmuptrelSV2C",40,0,4);
+  TH1F *hmuptrelSV2L = new TH1F("hmuptrelSV2L","hmuptrelSV2L",40,0,4);
+  
+  TH1F *hmuptrelSV3 = new TH1F("hmuptrelSV3","hmuptrelSV3",40,0,4);
+  TH1F *hmuptrelSV3B = new TH1F("hmuptrelSV3B","hmuptrelSV3B",40,0,4);
+  TH1F *hmuptrelSV3C = new TH1F("hmuptrelSV3C","hmuptrelSV3C",40,0,4);
+  TH1F *hmuptrelSV3L = new TH1F("hmuptrelSV3L","hmuptrelSV3L",40,0,4);
   
   TH1F *hipPt = new TH1F("hipPt","hipPt",40,0,40);
   TH1F *hipPtB = new TH1F("hipPtB","hipPtB",40,0,40);
@@ -297,12 +332,10 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 
   for (Long64_t i=0; i<nentries;i++) {
 
-    if (i%10000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl; 
+    if (i%100000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl; 
 
-    if(!isMC){
-      tSkim->GetEntry(i);
-      if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
-    }
+    tSkim->GetEntry(i);
+    if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
 
     t->GetEntry(i);
     if(isMC){
@@ -316,9 +349,12 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 
       for(int ij=0;ij<nref;ij++){
 	
-	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<2  ){
-          // fill ntuple
+	//if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta && sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt){ // with muon requirement
+	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ // without muon requirement
+	  
+	  // fill ntuple
 	  nt->Fill(jtpt[ij],discr_csvSimple[ij],discr_probb[ij],svtxm[ij],refparton_flavorForB[ij]);
+	 
 	  hjtpt->Fill(jtpt[ij],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    
@@ -326,7 +362,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 	    else if(abs(refparton_flavorForB[ij])<99)hjtptL->Fill(jtpt[ij],w);    
 	    else hjtptU->Fill(jtpt[ij],w);    
 	  }
-	  
+	  //*
 	  hdiscr_csvSimple->Fill(discr_csvSimple[ij],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hdiscr_csvSimpleB->Fill(discr_csvSimple[ij],w);    
@@ -341,6 +377,20 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_probb[ij],w);    
 	  }
 	  
+	  hdiscr_ssvHighEff->Fill(discr_ssvHighEff[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighEffB->Fill(discr_ssvHighEff[ij],w); 
+	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_ssvHighEffC->Fill(discr_ssvHighEff[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_ssvHighEffL->Fill(discr_ssvHighEff[ij],w);    
+	  }
+	  
+	  hdiscr_ssvHighPur->Fill(discr_ssvHighPur[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighPurB->Fill(discr_ssvHighPur[ij],w); 
+	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_ssvHighPurC->Fill(discr_ssvHighPur[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_ssvHighPurL->Fill(discr_ssvHighPur[ij],w);    
+	  }
+	  //*
 	  hnsvtx->Fill(nsvtx[ij],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hnsvtxB->Fill(nsvtx[ij],w);    
@@ -380,12 +430,29 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 		else if(abs(refparton_flavorForB[ij])==4)hsvtxmC->Fill(svtxm[ij],w);
 		else if(abs(refparton_flavorForB[ij])<99)hsvtxmL->Fill(svtxm[ij],w); 
 	      }
-	      
+
 	      hsvtxpt->Fill(svtxpt[ij],w);    
 	      if(isMC){
 		if(abs(refparton_flavorForB[ij])==5)hsvtxptB->Fill(svtxpt[ij],w);    
 		else if(abs(refparton_flavorForB[ij])==4)hsvtxptC->Fill(svtxpt[ij],w);
 		else if(abs(refparton_flavorForB[ij])<99)hsvtxptL->Fill(svtxpt[ij],w);
+	      }
+	      
+	      if(svtxntrk[ij]>=3) {
+
+		hsvtxmSV3->Fill(svtxm[ij],w);    
+		if(isMC){
+		  if(abs(refparton_flavorForB[ij])==5)hsvtxmSV3B->Fill(svtxm[ij],w);    
+		  else if(abs(refparton_flavorForB[ij])==4)hsvtxmSV3C->Fill(svtxm[ij],w);
+		  else if(abs(refparton_flavorForB[ij])<99)hsvtxmSV3L->Fill(svtxm[ij],w); 
+		}
+
+		hsvtxptSV3->Fill(svtxpt[ij],w);    
+		if(isMC){
+		  if(abs(refparton_flavorForB[ij])==5)hsvtxptSV3B->Fill(svtxpt[ij],w);    
+		  else if(abs(refparton_flavorForB[ij])==4)hsvtxptSV3C->Fill(svtxpt[ij],w);
+		  else if(abs(refparton_flavorForB[ij])<99)hsvtxptSV3L->Fill(svtxpt[ij],w);
+		}
 	      }
 	    }
 	  }
@@ -403,18 +470,37 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 	    else if(abs(refparton_flavorForB[ij])==4)hnselIPtrkC->Fill(nselIPtrk[ij],w);
 	    else if(abs(refparton_flavorForB[ij])<99)hnselIPtrkL->Fill(nselIPtrk[ij],w);
 	  }
-	
-	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>5) {
-	    
+
+	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) {  
+
 	    hmuptrel->Fill(muptrel[ij],w);    
 	    if(isMC){
 	      if(abs(refparton_flavorForB[ij])==5)hmuptrelB->Fill(muptrel[ij],w);
 	      else if(abs(refparton_flavorForB[ij])==4)hmuptrelC->Fill(muptrel[ij],w);
 	      else if(abs(refparton_flavorForB[ij])<99)hmuptrelL->Fill(muptrel[ij],w);
 	    }
+
+	    if(svtxntrk[ij]>=2) {  
+	      hmuptrelSV2->Fill(muptrel[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hmuptrelSV2B->Fill(muptrel[ij],w);
+		else if(abs(refparton_flavorForB[ij])==4)hmuptrelSV2C->Fill(muptrel[ij],w);
+		else if(abs(refparton_flavorForB[ij])<99)hmuptrelSV2L->Fill(muptrel[ij],w);
+	      }
+	    }
+
+	    if(svtxntrk[ij]>=3) {  
+	      hmuptrelSV3->Fill(muptrel[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hmuptrelSV3B->Fill(muptrel[ij],w);
+		else if(abs(refparton_flavorForB[ij])==4)hmuptrelSV3C->Fill(muptrel[ij],w);
+		else if(abs(refparton_flavorForB[ij])<99)hmuptrelSV3L->Fill(muptrel[ij],w);
+	      }
+	    }
 	    
 	  }
-	  
+
+	  //*/
 	}
 
       }
@@ -427,7 +513,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 	
 	int ijet = ipJetIndex[it];
 	
-	if(jtpt[ijet]>minJetPt && fabs(jteta[ijet])<2){
+	if(jtpt[ijet]>minJetPt && fabs(jteta[ijet])<maxJetEta){
 	  
 	  hipPt->Fill(ipPt[it],w);    
 	  if(isMC){
@@ -507,7 +593,6 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
     //*/
   }
 
-
   hjtpt->Write();
   if(isMC) hjtptB->Write(); hjtptC->Write(); hjtptL->Write(); hjtptU->Write();
 
@@ -516,6 +601,12 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 
   hdiscr_prob->Write();
   if(isMC) hdiscr_probB->Write(); hdiscr_probC->Write(); hdiscr_probL->Write(); 
+
+  hdiscr_ssvHighEff->Write();
+  if(isMC) hdiscr_ssvHighEffB->Write(); hdiscr_ssvHighEffC->Write(); hdiscr_ssvHighEffL->Write(); 
+
+  hdiscr_ssvHighPur->Write();
+  if(isMC) hdiscr_ssvHighPurB->Write(); hdiscr_ssvHighPurC->Write(); hdiscr_ssvHighPurL->Write(); 
 
   hnsvtx->Write();
   if(isMC) hnsvtxB->Write(); hnsvtxC->Write(); hnsvtxL->Write();
@@ -532,8 +623,14 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   hsvtxm->Write();
   if(isMC) hsvtxmB->Write(); hsvtxmC->Write(); hsvtxmL->Write();
 
+  hsvtxmSV3->Write();
+  if(isMC) hsvtxmSV3B->Write(); hsvtxmSV3C->Write(); hsvtxmSV3L->Write();
+
   hsvtxpt->Write();
   if(isMC) hsvtxptB->Write(); hsvtxptC->Write(); hsvtxptL->Write();
+
+  hsvtxptSV3->Write();
+  if(isMC) hsvtxptSV3B->Write(); hsvtxptSV3C->Write(); hsvtxptSV3L->Write();
 
   hnIPtrk->Write();
   if(isMC) hnIPtrkB->Write(); hnIPtrkC->Write(); hnIPtrkL->Write();
@@ -543,6 +640,12 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
 
   hmuptrel->Write();
   if(isMC) hmuptrelB->Write(); hmuptrelC->Write(); hmuptrelL->Write();
+
+  hmuptrelSV2->Write();
+  if(isMC) hmuptrelSV2B->Write(); hmuptrelSV2C->Write(); hmuptrelSV2L->Write();
+
+  hmuptrelSV3->Write();
+  if(isMC) hmuptrelSV3B->Write(); hmuptrelSV3C->Write(); hmuptrelSV3L->Write();
 
   hipPt->Write();
   if(isMC) hipPtB->Write(); hipPtC->Write(); hipPtL->Write();
@@ -575,5 +678,7 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   if(isMC) hipClosest2JetB->Write(); hipClosest2JetC->Write(); hipClosest2JetL->Write();
 
   nt->Write();
+  
   fout->Close();
+
 }
