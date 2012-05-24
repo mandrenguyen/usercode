@@ -52,7 +52,7 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    fixEmpty(hOtherFlavor);
    
    // data sample   
-   TFile *infData = new TFile("histos/ppdata.root");
+   TFile *infData = new TFile("histos/ppMC.root");
    TTree *tData = (TTree*) infData->Get("nt");
    
    // --- Observable ---
@@ -86,7 +86,7 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
  
    // --- Plot data and composite PDF overlaid ---
    RooPlot* sframe = s.frame() ;
-   TH2D *htemp = new TH2D("htemp","",100,minX,maxX,100,0.5,1e5) ;
+   TH2D *htemp = new TH2D("htemp","",100,minX,maxX,100,0.1,1e5) ;
    htemp->SetXTitle(Form("%s %.0f < p_{T} < %.0f GeV/c",var,ptMin,ptMax));
    htemp->SetYTitle("Entries");
    htemp->Draw();
@@ -105,21 +105,29 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
 
 void ptDependence()
 {
+   TFile *inf = new TFile("histos/ppMC.root");
+   TTree *t = (TTree*) inf->Get("nt");
+
    const int nBins = 8;
    double ptBin[nBins+1] = {60,70,80,90,100,120,140,160,200};
    TH1D *hProb = new TH1D("hProb","",nBins,ptBin);
    TH1D *hCSV = new TH1D("hCSV","",nBins,ptBin);
-
+   TH1D *hSVTXM = new TH1D("hSVTXM","",nBins,ptBin);
+   TProfile *pGen = new TProfile("pGen","",nBins,ptBin);
+   
    for (int n=0; n<nBins;n++)
    {
       RooRealVar f1 = bfractionFit("discr_prob",0,3.5,ptBin[n],ptBin[n+1]);
       RooRealVar f2 = bfractionFit("discr_csvSimple",0,1,ptBin[n],ptBin[n+1]);
-      RooRealVar f3 = bfractionFit("discr_csvSimple",0,1,ptBin[n],ptBin[n+1]);
+      RooRealVar f3 = bfractionFit("svtxm",0,6,ptBin[n],ptBin[n+1]);
       hProb->SetBinContent(n+1,f1.getVal());    
       hProb->SetBinError(n+1,f1.getError());    
       hCSV->SetBinContent(n+1,f2.getVal());    
       hCSV->SetBinError(n+1,f2.getError());    
+      hSVTXM->SetBinContent(n+1,f3.getVal());    
+      hSVTXM->SetBinError(n+1,f3.getError());    
    }
+   
    TCanvas *c2 = new TCanvas("c2","",600,600);
    hProb->SetAxisRange(0,0.05,"Y");
    hProb->SetXTitle("Jet p_{T} (GeV/c)");
@@ -130,6 +138,11 @@ void ptDependence()
    hCSV->SetMarkerColor(2);
    hCSV->SetMarkerStyle(24);
    hCSV->Draw("same");
+   hSVTXM->SetLineColor(4);
+   hSVTXM->SetMarkerColor(4);
+   hSVTXM->SetMarkerStyle(24);
+   hSVTXM->Draw("same");
+   t->Draw("abs(refparton_flavorForB)==5:jtpt","","prof same");
    
    TLegend *leg = new TLegend(0.2,0.7,0.5,0.9);
    leg->SetBorderSize(0);
@@ -137,5 +150,6 @@ void ptDependence()
    leg->SetFillColor(0);
    leg->AddEntry(hProb,"Jet Probability","pl");
    leg->AddEntry(hCSV,"CSV","pl");
+   leg->AddEntry(hSVTXM,"SV mass","pl");
    leg->Draw();
 }

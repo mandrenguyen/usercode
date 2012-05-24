@@ -12,11 +12,8 @@ void analyzeTrees(int isMC=1, int useWeight=1, int doJets=1, int doTracks=1, flo
   if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_weighted.root");
   else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
 
-  //if(isMC)fin=new TFile("/data_CMS/cms/sregnard/merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR_weighted3.root");
-  //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
-
-  //if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixEvtSel_pythia30.root");
-  //else fin=new TFile("../sample/merged_jetJetAnalyzers_ppData2760_ppRecoFromRaw_fixEvtSel.root");
+//  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_pythia30.root");
+//  else fin=new TFile("../sample/merged_bTagAnalyzers_ppDataJet40_ppRecoFromRaw_fixTR.root");
 
   //TTree *t = (TTree*) fin->Get("akPu3PFJetAnalyzer/t");
   TTree *t = (TTree*) fin->Get("ak5PFJetAnalyzer/t");
