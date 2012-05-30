@@ -19,9 +19,10 @@ hiReco = True
 reReco = True
 hasSimInfo = True
 genTag = "generator"
-hltFilter = "HLT_Jet80_v1"
+hltFilter = "HLT_HIJet65_v1"
 trigResults = 'TriggerResults::HLT'
-gTag = 'STARTHI44_V7::All'
+#gTag = 'STARTHI44_V7::All'
+gTag = 'GR_R_44_V10::All'
 hiMode = True
 
 # some important triggers:  HLT_Jet40_v1, HLT_HIL2Mu7_v1'
@@ -37,6 +38,8 @@ else:
 print "Reco'ing SV's w/ ", svTracks, ", PV w/ ", pvProducer 
 
 process = cms.Process('BJET')
+
+#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck")
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -82,15 +85,19 @@ process.source = cms.Source("PoolSource",
     #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_8.root',
     #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_10.root',
     #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
-    '/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPtTrack-PromptSkim-v1/0000/62CDCFAB-9013-E111-9133-842B2B6F85FD.root'
+    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0000/88CA2FB9-5C2A-E111-8296-00A0D1E95364.root' # weird memory crash - 8004
+    '/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0000/425129A6-1121-E111-91AC-782BCB4FBD6F.root' # track list merger - 8012
+    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0001/3EBB24B7-682A-E111-97F6-003048F34288.root'
+    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     #ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            #eventsToProcess = cms.untracked.VEventRange('1:9-1:9'),
+                            #eventsToProcess = cms.untracked.VEventRange('182838:7396593-182838:7396593'),
                             )
 
 process.options = cms.untracked.PSet(
-
+    #wantSummary = cms.untracked.bool(True)
 )
 
 # Additional output definition
@@ -152,9 +159,13 @@ if hiReco:
         process.rechits = cms.Sequence(process.siPixelRecHits * process.siStripMatchedRecHits)
         process.hiTrackReco = cms.Sequence(process.rechits * process.heavyIonTracking)
 
+        process.load("RecoHI.HiEgammaAlgos.HiElectronSequence_cff")
+        process.load("RecoHI.HiEgammaAlgos.HiEgamma_cff")
         process.reconstruction_step =  cms.Path(
             process.hiTrackReco
             *process.muonRecoPbPb
+            *process.hiPhotonSequence
+            *process.electronGsfTrackingHi
             *process.HiParticleFlowLocalReco
             *process.HiParticleFlowReco
             )
@@ -179,7 +190,10 @@ if hiReco:
     process.pfTrack.TkColList = cms.VInputTag("hiGeneralTracks")
     process.pfTrack.GsfTracksInEvents = cms.bool(False)
     process.particleFlowTmp.usePFElectrons = False
-
+    process.particleFlowTmp.useEGammaElectrons = False
+    #process.particleFlowBlock.useEGPhotons = False
+    process.pfTrackElec.applyGsfTrackCleaning = cms.bool(False)
+    
 else:
     process.reconstruction_step = cms.Path(process.reconstruction)
 
@@ -205,8 +219,11 @@ else:
         rParam = 0.3
         )
 
-process.akPu3PFJets.doPUOffsetCorr = False
-process.ak5PFJets.doPUOffsetCorr = False
+if hiMode:
+    process.akPu3PFJets.doPUOffsetCorr = True
+else:
+    process.akPu3PFJets.doPUOffsetCorr = False
+    process.ak5PFJets.doPUOffsetCorr = False
 
 process.load('RecoHI.HiJetAlgos.ParticleTowerProducer_cff')
 
@@ -216,7 +233,7 @@ process.reco_extra_jet    = cms.Path(
     process.akPu3PFJets
     )
 
-if hiReco and hiMode:
+if hiMode == False:
     process.reco_extra_jet *= process.ak5PFJets
 
 
@@ -236,13 +253,18 @@ if isMC:
 
 
 if hiReco:
-    if hiMode: svJetSel = '60. && eta > -2. && eta < 2'
-    else: svJetSel = '10. && eta > -2. && eta < 2'
+    if hiMode: svJetSel = 'pt > 60. && eta > -2. && eta < 2'
+    else: svJetSel = 'pt > 10. && eta > -2. && eta < 2'
 
     print "Seeding around jets with, ",svJetSel
-    process.akPu3PFSelectedJets = cms.EDFilter("CandViewSelector",
+    process.ptEtaFilteredJets = cms.EDFilter("CandViewSelector",
                                                src = cms.InputTag("akPu3PFJets"),
                                                cut = cms.string(svJetSel)
+                                               )
+
+    process.akPu3PFSelectedJets = cms.EDFilter("LargestPtCandViewSelector",
+                                               src = cms.InputTag("ptEtaFilteredJets"),
+                                               maxNumber = cms.uint32(7)
                                                )
         
     process.load("RecoHI.HiTracking.hiRegitTracking_cff")
@@ -313,6 +335,7 @@ if hiReco:
     process.offlinePrimaryVertices.TrackLabel = "hiSecondaryVertexSelectedTracks"
 
     process.regionalTracking = cms.Path(
+        process.ptEtaFilteredJets *
         process.akPu3PFSelectedJets *
         process.hiRegitTracking *
         process.hiGeneralAndRegitTracks *
@@ -401,17 +424,12 @@ process.akPu5PFpatJets.tagInfoSources = cms.VInputTag(
     cms.InputTag("akPu5PFSoftMuonTagInfos"),
     )
 
-
-if isMC:
-    process.pat_step          = cms.Path(        
-        process.akPu3PFpatSequence_withBtagging
-        *process.akPu5PFpatSequence_withBtagging
-        )
+if hiMode:
+    if isMC: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging)
+    else: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging_data)    
 else:
-    process.pat_step          = cms.Path(        
-        process.akPu3PFpatSequence_withBtagging_data
-        *process.akPu5PFpatSequence_withBtagging_data
-        )
+    if isMC: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging * process.akPu5PFpatSequence_withBtagging)
+    else: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging_data * process.akPu5PFpatSequence_withBtagging_data)
 
 #######################
 #   Analyzers
@@ -438,9 +456,10 @@ process.akPu3PFJetAnalyzer.vtxTag = pvProducer
 process.akPu3PFJetAnalyzer.trackTag = svTracks
 if hiMode: process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(True)
 else: process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(False)
-if isMC: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_Jet15U_v3','HLT_Jet30U_v3','HLT_Jet50U_v3','HLT_Jet70U_v3','HLT_L2Mu7_v1','HLT_Mu0_v2','HLT_Mu3_v2','HLT_Mu5','HLT_Mu7','HLT_Mu9','HLT_L1_BptxXOR_BscMinBiasOR')
-else:  process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core','HLT_Jet20_v1','HLT_Jet40_v1','HLT_Jet60_v1','HLT_L1SingleMuOpen_v1','HLT_Mu0_v3','HLT_Mu3_v3','HLT_Mu5_v3','HLT_L1BscMinBiasORBptxPlusANDMinus_v1')
 
+if hiMode: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasBSC_OR_v1','HLT_HIMinBiasHF_v1','HLT_HIMinBiasHf_OR_v1','HLT_HIMinBiasHfOrBSC_v1','HLT_HIL2Mu3_v2','HLT_HIL2Mu3_NHitQ_v2','HLT_HIL2Mu7_v2','HLT_HIL2Mu15_v2','HLT_HIJet55_v1','HLT_HIJet65_v1','HLT_HIJet80_v1','HLT_HIJet95_v1')
+elif isMC: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_Jet15U_v3','HLT_Jet30U_v3','HLT_Jet50U_v3','HLT_Jet70U_v3','HLT_L2Mu7_v1','HLT_Mu0_v2','HLT_Mu3_v2','HLT_Mu5','HLT_Mu7','HLT_Mu9','HLT_L1_BptxXOR_BscMinBiasOR')
+else:  process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core','HLT_Jet20_v1','HLT_Jet40_v1','HLT_Jet60_v1','HLT_L1SingleMuOpen_v1','HLT_Mu0_v3','HLT_Mu3_v3','HLT_Mu5_v3','HLT_L1BscMinBiasORBptxPlusANDMinus_v1')
 
 
 
@@ -562,11 +581,11 @@ process.muonTree.vertices = pvProducer
 process.ana_step          = cms.Path(         
     process.hiCentrality *
     process.akPu3PFJetAnalyzer *
-    process.trackAnalyzers*
+    #process.trackAnalyzers*
     process.muonTree
     )
 
-if hiMode: process.ana_step *= process.ak5PFJetAnalyzer
+if hiMode==False: process.ana_step *= process.ak5PFJetAnalyzer
 
 
 # trigger requirment, gets added in front of all patch w/ the superFilter
