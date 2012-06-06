@@ -6,9 +6,9 @@ void formatHisto(TH1F *h, char *title){
 }
 
 void setFillColor(TH1F *h[3]){
-  h[0]->SetFillColor(kRed);
-  h[1]->SetFillColor(kGreen);
-  h[2]->SetFillColor(kBlue);
+  h[0]->SetFillColor(kred);
+  h[1]->SetFillColor(kgreen);
+  h[2]->SetFillColor(kblue);
 }
 
 void formatCanvas(TCanvas *c){
@@ -36,7 +36,7 @@ void stackHistos(TH1F *hArray[3]){
 }
 
 
-void compareDataMC(){
+void compareDataMC(int isRecopp=0, int isMuTrig=0){
 
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
@@ -49,8 +49,22 @@ void compareDataMC(){
   gStyle->SetTitleOffset(3.5,"x");
   
   gROOT->ForceStyle(1);
-  TFile *fMC = new TFile("histos/ppMC.root");
-  TFile *fdata = new TFile("histos/ppdata.root");
+
+  TFile *fMC, *fdata;
+
+  if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
+    fMC = new TFile("histos/ppMC_ppReco_muTrig.root");
+    fdata = new TFile("histos/ppdata_ppReco_muTrig.root");
+  } else if ( isRecopp&&!isMuTrig) { // pp reco, jet triggered
+    fMC = new TFile("histos/ppMC_ppReco_jetTrig.root");
+    fdata = new TFile("histos/ppdata_ppReco_jetTrig.root");
+  } else if (!isRecopp&& isMuTrig) { // hi reco, muon triggered
+    fMC = new TFile("histos/ppMC_hiReco_muTrig.root");
+    fdata = new TFile("histos/ppdata_hiReco_muTrig.root");
+  } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
+    fMC = new TFile("histos/ppMC_hiReco_jetTrig.root");
+    fdata = new TFile("histos/ppdata_hiReco_jetTrig.root");
+  }
 
   // declare histos
   TH1F *hjtpt, *hnsvtx, *hsvtxntrk, *hsvtxdl, *hsvtxdls, *hsvtxm, *hsvtxmSV3, *hsvtxpt, *hsvtxptSV3, *hnIPtrk, *hnselIPtrk, *hdiscr_csvSimple, *hdiscr_prob, *hdiscr_ssvHighEff, *hdiscr_ssvHighPur, *hmuptrel, *hmuptrelSV2, *hmuptrelSV3, *hipPt, *hipProb0, *hipProb1, *hip2d, *hip2dSig, *hip3d, *hip3dSig, *hipDist2Jet, *hipDist2JetSig, *hipClosest2Jet;
