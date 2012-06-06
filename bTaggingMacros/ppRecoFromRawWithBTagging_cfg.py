@@ -14,13 +14,13 @@
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = True
+isMC = False
 hiReco = True
 reReco = False
 hasSimInfo = True
 genTag = "generator"
-#hltFilter = "HLT_Mu3_v2"
-hltFilter = ""  
+#hltFilter = "HLT_Jet40_v1"  
+hltFilter = "HLT_Mu3_v3"
 trigResults = 'TriggerResults::HLT'
 
 # some important triggers:  HLT_Jet40_v1, HLT_HIL2Mu7_v1'
@@ -34,6 +34,7 @@ else:
     pvProducer = "offlinePrimaryVertices"
     
 print "Reco'ing SV's w/ ", svTracks, ", PV w/ ", pvProducer 
+
 
 process = cms.Process('BJET')
 
@@ -72,16 +73,8 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_0.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_1.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_2.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_3.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_4.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_6.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_8.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_10.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
-    '/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
+    'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
+    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     #ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -138,7 +131,7 @@ process.hiCentrality.produceBasicClusters = cms.bool(False)
 process.hiCentrality.produceHFhits = cms.bool(True)
 process.hiCentrality.produceTracks = cms.bool(False)
 
-
+'''
 if isMC==False:
     
     import PhysicsTools.PythonAnalysis.LumiList as LumiList
@@ -146,7 +139,7 @@ if isMC==False:
     myLumis = LumiList.LumiList(filename = 'json.txt').getCMSSWString().split(',')
     process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
     process.source.lumisToProcess.extend(myLumis)
-
+'''
 
 if reReco == False:
     process.raw2digi_step = cms.Path(process.RawToDigi)
@@ -244,14 +237,14 @@ if isMC:
 
 
 if hiReco:
-    print "Seeding around jets above 20 GeV/c inside |eta| < 2"
+    print "Seeding around jets above 10 GeV/c inside |eta| < 2"
     process.akPu3PFSelectedJets = cms.EDFilter("CandViewSelector",
                                                src = cms.InputTag("akPu3PFJets"),
-                                               cut = cms.string("pt > 20. && eta > -2. && eta < 2")
+                                               cut = cms.string("pt > 10. && eta > -2. && eta < 2")
                                                )
 
     process.load("RecoHI.HiTracking.hiRegitTracking_cff")
-    
+
     process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
@@ -282,12 +275,15 @@ if hiReco:
         )
         
     process.pfRegTrack = process.pfTrack.clone(TkColList = cms.VInputTag("hiGeneralAndRegitTracks"))
-    process.pfRegBlock = process.particleFlowBlock.clone()
-    process.regParticleFlow = process.particleFlowTmp.clone()
+    process.pfRegBlock = process.particleFlowBlock.clone(RecTracks = "pfRegTrack",useIterTracking=True)
+    process.regParticleFlow = process.particleFlowTmp.clone( blocks = "pfRegBlock")
     
-    
+    process.pfRegTrack.TrackQuality = "loose"
+
     process.pfRegTrack.GsfTracksInEvents = False
     process.regParticleFlow.usePFElectrons = False
+    process.pfRegTrack.MuColl = "regMuons"
+    process.pfRegBlock.RecMuons = "regMuons"
     process.regParticleFlow.muons = "regMuons"
     
     
@@ -444,10 +440,7 @@ process.akPu3PFJetAnalyzer.trackTag = svTracks
 process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(False)
 if isMC: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_Jet15U_v3','HLT_Jet30U_v3','HLT_Jet50U_v3','HLT_Jet70U_v3','HLT_L2Mu7_v1','HLT_Mu0_v2','HLT_Mu3_v2','HLT_Mu5','HLT_Mu7','HLT_Mu9','HLT_L1_BptxXOR_BscMinBiasOR')
 else:  process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core','HLT_Jet20_v1','HLT_Jet40_v1','HLT_Jet60_v1','HLT_L1SingleMuOpen_v1','HLT_Mu0_v3','HLT_Mu3_v3','HLT_Mu5_v3','HLT_L1BscMinBiasORBptxPlusANDMinus_v1')
-
-
-
-
+                                                               
 if isMC:
     process.akPu3PFJetAnalyzer.isMC = True
 else:
@@ -561,6 +554,7 @@ process.load("HiMuonAlgos.HLTMuTree.hltMuTree_cfi")
 process.muonTree = process.hltMuTree.clone()
 process.muonTree.doGen = cms.untracked.bool(True)
 process.muonTree.vertices = pvProducer
+process.muonTree.muons = 'regMuons'
 
 process.ana_step          = cms.Path(         
     process.hiCentrality *
@@ -649,3 +643,4 @@ if hltFilter:
     for path in process.paths:
         getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
         
+
