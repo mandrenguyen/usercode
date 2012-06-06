@@ -3,75 +3,106 @@
 #include "TFile.h"
 #include "TTree.h"
 
-void weightPtHatBins(){
+void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
     
   gROOT->Reset();
   
-  // number of bins
-  int N=4;
+  Int_t start=0;
+  if (!isMuTrig) start=1;
+  Int_t N=4;
 
   TFile *fin[7], *fout[7];
   TTree *tr_in[7], *tr_out[7];
+  TTree *tr_in_2[7], *tr_out_2[7];
   TTree *tr_in_skim[7], *tr_out_skim[7];
 
   Int_t bounds[7] = {15,30,50,80,120,170,200};
 
-  Float_t eff[4] ={
+  Double_t eff[4] = {
     37492./5430000.,
     5365./297000.,
     6037./200000.,
     9425./210000.
   };
 
-  /* // uncomment for jet-triggered data
-  Float_t xSections[7] = {
-    2.03e-01,
-    1.079e-02,
-    1.021e-03,
-    9.913e-05,
-    1.128e-05,
-    1.470e-06, 
-    5.310e-07
-  };
-  //*/
+  if (isMuTrig) {
+    Double_t xSections[7] = {
+      2.03e-01 * eff[0],
+      1.079e-02 * eff[1],
+      1.021e-03 * eff[2],
+      9.913e-05 * eff[3],
+      1.128e-05,
+      1.470e-06, 
+      5.310e-07
+    };
+    /*
+    Double_t xSections[7] = {
+      2.03e-01 * (eff[0]*2.03e-01 - eff[1]*1.079e-02) / (2.03e-01 - 1.079e-02),
+      1.079e-02 * (eff[1]*1.079e-02 - eff[2]*1.021e-03) / (1.079e-02 - 1.021e-03),
+      1.021e-03 * (eff[2]*1.021e-03 - eff[3]*9.913e-05) / (1.021e-03 - 9.913e-05),
+      9.913e-05 * eff[3],
+      1.128e-05,
+      1.470e-06, 
+      5.310e-07
+    };
+    */
+  } else {
+    Double_t xSections[7] = {
+      2.03e-01,
+      1.079e-02,
+      1.021e-03,
+      9.913e-05,
+      1.128e-05,
+      1.470e-06, 
+      5.310e-07
+    };
+  }
 
-  //* // uncomment for muon-triggered data
-  Float_t xSections[7] = {
-    2.03e-01 * (eff[0]*2.03e-01 - eff[1]*1.079e-02) / (2.03e-01 - 1.079e-02),
-    1.079e-02 * (eff[1]*1.079e-02 - eff[2]*1.021e-03) / (1.079e-02 - 1.021e-03),
-    1.021e-03 * (eff[2]*1.021e-03 - eff[3]*9.913e-05) / (1.021e-03 - 9.913e-05),
-    9.913e-05 * eff[3],
-    1.128e-05,
-    1.470e-06, 
-    5.310e-07
-  };
-  //*/
-
-  char name[100];
+  //char name[100];
   
-  for (Int_t it=0; it<N; it++) {
+  char* filename = "default";
+  if        ( isRecopp&& isMuTrig) {
+    filename = "merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR";
+  } else if ( isRecopp&&!isMuTrig) {
+    filename = "merged_bJetAnalyzers_ppRecoFromRaw_fixTR";
+  } else if (!isRecopp&& isMuTrig) {
+    filename = "merged_bTagAnalyzers_hiRecoFromRawV3_offPV_HLTMu3v2_fixTR";
+  } else if (!isRecopp&&!isMuTrig) {
+    filename = "merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR";
+  }
+  TString inputPath = "default";
+  TString outputPath = "default";
 
-    // specify input path
-    sprintf(name,"/data_CMS/cms/mnguyen/bTaggingOutput/pythia/pthat%d/merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR.root",bounds[it]);
-    fin[it] = new TFile(name);
+  for (Int_t it=start; it<N; it++) {
+    
+    inputPath = "/data_CMS/cms/mnguyen/bTaggingOutput/pythia/";
+    outputPath = "/data_CMS/cms/sregnard/";
+
+    inputPath.Append(Form("pthat%d/%s.root",bounds[it],filename));
+    fin[it] = new TFile(inputPath);
+    cout<<"   reading from "<<inputPath<<endl; 
 
     fin[it]->cd("/akPu3PFJetAnalyzer");
     tr_in[it] = (TTree*)gDirectory->Get("t");
+    fin[it]->cd("/ak5PFJetAnalyzer");
+    tr_in_2[it] = (TTree*)gDirectory->Get("t");
     fin[it]->cd("/skimanalysis");
     tr_in_skim[it] = (TTree*)gDirectory->Get("HltTree");
 
-    // specify output path
-    sprintf(name,"/data_CMS/cms/sregnard/merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR_weighted3_%d.root",bounds[it]);
-    fout[it] = new TFile(name,"RECREATE");
+    outputPath.Append(Form("%s_weighted_%d.root",filename,bounds[it]));
+    fout[it] = new TFile(outputPath,"RECREATE");
+    cout<<"   writing into "<<outputPath<<endl; 
 
     fout[it]->mkdir("akPu3PFJetAnalyzer");
+    fout[it]->mkdir("ak5PFJetAnalyzer");
     fout[it]->mkdir("skimanalysis");
 
     tr_out[it] = new TTree("t","Jet Analyzer");
+    tr_out_2[it] = new TTree("t","Jet Analyzer");
     tr_out_skim[it] = new TTree("HltTree","HltTree");
 
-    Float_t fentries = (Float_t)tr_in[it]->GetEntries();
-    Float_t weight = xSections[it]/(fentries/1000.);
+    Double_t fentries = (Double_t)tr_in[it]->GetEntries();
+    Double_t weight = xSections[it]/(fentries);
     cout<<"  weight ("<< bounds[it] <<") : "<< weight <<endl;
 
     //Declaration of leaves types
@@ -296,7 +327,231 @@ void weightPtHatBins(){
     tr_out[it]->Branch("gendphijt",gendphijt,"gendphijt[nref]/F");
     tr_out[it]->Branch("gendrjt",gendrjt,"gendrjt[nref]/F");
     */
-    tr_out[it]->Branch("weight",&weight,"weight/F");
+    tr_out[it]->Branch("weight",&weight,"weight/D");
+
+    //Declaration of leaves types
+    Int_t           evt_2;
+    Float_t         b_2;
+    Float_t         hf_2;
+    Int_t           bin_2;
+    Int_t           nref_2;
+    Float_t         vx_2,vy_2,vz_2;
+    Float_t         rawpt_2[30];
+    Float_t         jtpt_2[30];
+    Float_t         jteta_2[30];
+    Float_t         jty_2[30];
+    Float_t         jtphi_2[30];
+    Float_t         jtpu_2[30];
+    Float_t         discr_ssvHighEff_2[30];
+    Float_t         discr_ssvHighPur_2[30];
+    Float_t         discr_csvMva_2[30];
+    Float_t         discr_csvSimple_2[30];
+    Float_t         discr_muByIp3_2[30];
+    Float_t         discr_muByPt_2[30];
+    Float_t         discr_prob_2[30];
+    Float_t         discr_probb_2[30];
+    Float_t         discr_tcHighEff_2[30];
+    Float_t         discr_tcHighPur_2[30];
+    Int_t           nsvtx_2[30];
+    Int_t           svtxntrk_2[30];
+    Float_t         svtxdl_2[30];
+    Float_t         svtxdls_2[30];
+    Float_t         svtxm_2[30];
+    Float_t         svtxpt_2[30];
+    Int_t           nIPtrk_2[30];
+    Int_t           nselIPtrk_2[30];
+    Int_t   nIP_2;
+    Int_t   ipJetIndex_2[400];
+    Float_t ipPt_2[400];
+    Float_t ipProb0_2[400];
+    Float_t ipProb1_2[400];
+    Float_t ip2d_2[400];
+    Float_t ip2dSig_2[400];
+    Float_t ip3d_2[400];
+    Float_t ip3dSig_2[400];
+    Float_t ipDist2Jet_2[400];
+    Float_t ipDist2JetSig_2[400];
+    Float_t ipClosest2Jet_2[400];
+    Float_t         mue_2[30];
+    Float_t         mupt_2[30];
+    Float_t         mueta_2[30];
+    Float_t         muphi_2[30];
+    Float_t         mudr_2[30];
+    Float_t         muptrel_2[30];
+    Int_t           muchg_2[30];
+    Float_t         pthat_2;
+    Int_t           beamId1_2;
+    Int_t           beamId2_2;
+    Float_t         refpt_2[30];
+    Float_t         refeta_2[30];
+    Float_t         refy_2[30];
+    Float_t         refphi_2[30];
+    Float_t         refdphijt_2[30];
+    Float_t         refdrjt_2[30];
+    Float_t         refparton_pt_2[30];
+    Int_t           refparton_flavor_2[30];
+    Int_t           refparton_flavorForB_2[30];
+    /*
+    Int_t           ngen_2;
+    Int_t           genmatchindex_2[100];
+    Float_t         genpt_2[100];
+    Float_t         geneta_2[100];
+    Float_t         geny_2[100];
+    Float_t         genphi_2[100];
+    Float_t         gendphijt_2[100];
+    Float_t         gendrjt_2[100];
+    */
+
+    // Set branch addresses.
+    tr_in_2[it]->SetBranchAddress("evt",&evt_2);
+    tr_in_2[it]->SetBranchAddress("b",&b_2);
+    //tr_in_2[it]->SetBranchAddress("hf",&hf_2);
+    //tr_in_2[it]->SetBranchAddress("bin",&bin_2);
+    tr_in_2[it]->SetBranchAddress("vx",&vx_2);
+    tr_in_2[it]->SetBranchAddress("vy",&vy_2);
+    tr_in_2[it]->SetBranchAddress("vz",&vz_2);
+    tr_in_2[it]->SetBranchAddress("nref",&nref_2);
+    tr_in_2[it]->SetBranchAddress("rawpt",rawpt_2);
+    tr_in_2[it]->SetBranchAddress("jtpt",jtpt_2);
+    tr_in_2[it]->SetBranchAddress("jteta",jteta_2);
+    tr_in_2[it]->SetBranchAddress("jty",jty_2);
+    tr_in_2[it]->SetBranchAddress("jtphi",jtphi_2);
+    tr_in_2[it]->SetBranchAddress("jtpu",jtpu_2);
+    tr_in_2[it]->SetBranchAddress("discr_ssvHighEff",discr_ssvHighEff_2);
+    tr_in_2[it]->SetBranchAddress("discr_ssvHighPur",discr_ssvHighPur_2);
+    tr_in_2[it]->SetBranchAddress("discr_csvMva",discr_csvMva_2);
+    tr_in_2[it]->SetBranchAddress("discr_csvSimple",discr_csvSimple_2);
+    tr_in_2[it]->SetBranchAddress("discr_muByIp3",discr_muByIp3_2);
+    tr_in_2[it]->SetBranchAddress("discr_muByPt",discr_muByPt_2);
+    tr_in_2[it]->SetBranchAddress("discr_prob",discr_prob_2);
+    tr_in_2[it]->SetBranchAddress("discr_probb",discr_probb_2);
+    tr_in_2[it]->SetBranchAddress("discr_tcHighEff",discr_tcHighEff_2);
+    tr_in_2[it]->SetBranchAddress("discr_tcHighPur",discr_tcHighPur_2);
+    tr_in_2[it]->SetBranchAddress("nsvtx",nsvtx_2);
+    tr_in_2[it]->SetBranchAddress("svtxntrk",svtxntrk_2);
+    tr_in_2[it]->SetBranchAddress("svtxdl",svtxdl_2);
+    tr_in_2[it]->SetBranchAddress("svtxdls",svtxdls_2);
+    tr_in_2[it]->SetBranchAddress("svtxm",svtxm_2);
+    tr_in_2[it]->SetBranchAddress("svtxpt",svtxpt_2);
+    tr_in_2[it]->SetBranchAddress("nIPtrk",nIPtrk_2);
+    tr_in_2[it]->SetBranchAddress("nIP",&nIP_2);
+    tr_in_2[it]->SetBranchAddress("nselIPtrk",nselIPtrk_2);
+    tr_in_2[it]->SetBranchAddress("ipJetIndex",ipJetIndex_2);
+    tr_in_2[it]->SetBranchAddress("ipPt",ipPt_2);
+    tr_in_2[it]->SetBranchAddress("ipProb0",ipProb0_2);
+    tr_in_2[it]->SetBranchAddress("ipProb1",ipProb1_2);
+    tr_in_2[it]->SetBranchAddress("ip2d",ip2d_2);
+    tr_in_2[it]->SetBranchAddress("ip2dSig",ip2dSig_2);
+    tr_in_2[it]->SetBranchAddress("ip3d",ip3d_2);
+    tr_in_2[it]->SetBranchAddress("ip3dSig",ip3dSig_2);
+    tr_in_2[it]->SetBranchAddress("ipDist2Jet",ipDist2Jet_2);
+    tr_in_2[it]->SetBranchAddress("ipDist2JetSig",ipDist2JetSig_2);
+    tr_in_2[it]->SetBranchAddress("ipClosest2Jet",ipClosest2Jet_2);
+    tr_in_2[it]->SetBranchAddress("mue",mue_2);
+    tr_in_2[it]->SetBranchAddress("mupt",mupt_2);
+    tr_in_2[it]->SetBranchAddress("mueta",mueta_2);
+    tr_in_2[it]->SetBranchAddress("muphi",muphi_2);
+    tr_in_2[it]->SetBranchAddress("mudr",mudr_2);
+    tr_in_2[it]->SetBranchAddress("muptrel",muptrel_2);
+    tr_in_2[it]->SetBranchAddress("muchg",muchg_2);
+    tr_in_2[it]->SetBranchAddress("pthat",&pthat_2);
+    tr_in_2[it]->SetBranchAddress("beamId1",&beamId1_2);
+    tr_in_2[it]->SetBranchAddress("beamId2",&beamId2_2);
+    tr_in_2[it]->SetBranchAddress("refpt",refpt_2);
+    tr_in_2[it]->SetBranchAddress("refeta",refeta_2);
+    tr_in_2[it]->SetBranchAddress("refy",refy_2);
+    tr_in_2[it]->SetBranchAddress("refphi",refphi_2);
+    tr_in_2[it]->SetBranchAddress("refdphijt",refdphijt_2);
+    tr_in_2[it]->SetBranchAddress("refdrjt",refdrjt_2);
+    tr_in_2[it]->SetBranchAddress("refparton_pt",refparton_pt_2);
+    tr_in_2[it]->SetBranchAddress("refparton_flavor",refparton_flavor_2);
+    tr_in_2[it]->SetBranchAddress("refparton_flavorForB",refparton_flavorForB_2);
+    /*
+    tr_in_2[it]->SetBranchAddress("ngen",&ngen_2);
+    tr_in_2[it]->SetBranchAddress("genmatchindex",genmatchindex_2);
+    tr_in_2[it]->SetBranchAddress("genpt",genpt_2);
+    tr_in_2[it]->SetBranchAddress("geneta",geneta_2);
+    tr_in_2[it]->SetBranchAddress("geny",geny_2);
+    tr_in_2[it]->SetBranchAddress("genphi",genphi_2);
+    tr_in_2[it]->SetBranchAddress("gendphijt",gendphijt_2);
+    tr_in_2[it]->SetBranchAddress("gendrjt",gendrjt_2);
+    */
+ 
+    // Set output branch addresses.
+    tr_out_2[it]->Branch("evt",&evt_2,"evt/I");
+    tr_out_2[it]->Branch("b",&b_2,"b/F");
+    tr_out_2[it]->Branch("hf",&hf_2,"hf/F");
+    tr_out_2[it]->Branch("bin",&bin_2,"bin/I");
+    tr_out_2[it]->Branch("vx",&vx_2,"vx/F");
+    tr_out_2[it]->Branch("vy",&vy_2,"vy/F");
+    tr_out_2[it]->Branch("vz",&vz_2,"vz/F");
+    tr_out_2[it]->Branch("nref",&nref_2,"nref/I");
+    tr_out_2[it]->Branch("rawpt",rawpt_2,"rawpt[nref]/F");
+    tr_out_2[it]->Branch("jtpt",jtpt_2,"jtpt[nref]/F");
+    tr_out_2[it]->Branch("jteta",jteta_2,"jteta[nref]/F");
+    tr_out_2[it]->Branch("jty",jty_2,"jty[nref]/F");
+    tr_out_2[it]->Branch("jtphi",jtphi_2,"jtphi[nref]/F");
+    tr_out_2[it]->Branch("jtpu",jtpu_2,"jtpu[nref]/F");
+    tr_out_2[it]->Branch("discr_ssvHighEff",discr_ssvHighEff_2,"discr_ssvHighEff[nref]/F");
+    tr_out_2[it]->Branch("discr_ssvHighPur",discr_ssvHighPur_2,"discr_ssvHighPur[nref]/F");
+    tr_out_2[it]->Branch("discr_csvMva",discr_csvMva_2,"discr_csvMva[nref]/F");
+    tr_out_2[it]->Branch("discr_csvSimple",discr_csvSimple_2,"discr_csvSimple[nref]/F");
+    tr_out_2[it]->Branch("discr_muByIp3",discr_muByIp3_2,"discr_muByIp3[nref]/F");
+    tr_out_2[it]->Branch("discr_muByPt",discr_muByPt_2,"discr_muByPt[nref]/F");
+    tr_out_2[it]->Branch("discr_prob",discr_prob_2,"discr_prob[nref]/F");
+    tr_out_2[it]->Branch("discr_probb",discr_probb_2,"discr_probb[nref]/F");
+    tr_out_2[it]->Branch("discr_tcHighEff",discr_tcHighEff_2,"discr_tcHighEff[nref]/F");
+    tr_out_2[it]->Branch("discr_tcHighPur",discr_tcHighPur_2,"discr_tcHighPur[nref]/F");
+    tr_out_2[it]->Branch("nsvtx",nsvtx_2,"nsvtx[nref]/I");
+    tr_out_2[it]->Branch("svtxntrk",svtxntrk_2,"svtxntrk[nref]/I");
+    tr_out_2[it]->Branch("svtxdl",svtxdl_2,"svtxdl[nref]/F");
+    tr_out_2[it]->Branch("svtxdls",svtxdls_2,"svtxdls[nref]/F");
+    tr_out_2[it]->Branch("svtxm",svtxm_2,"svtxm[nref]/F");
+    tr_out_2[it]->Branch("svtxpt",svtxpt_2,"svtxpt[nref]/F");
+    tr_out_2[it]->Branch("nIPtrk",nIPtrk_2,"nIPtrk[nref]/I");
+    tr_out_2[it]->Branch("nselIPtrk",nselIPtrk_2,"nselIPtrk[nref]/I");
+    tr_out_2[it]->Branch("nIP",&nIP_2,"nIP/I");
+    tr_out_2[it]->Branch("ipJetIndex",ipJetIndex_2,"ipJetIndex[nIP]/I");
+    tr_out_2[it]->Branch("ipPt",ipPt_2,"ipPt[nIP]/F");
+    tr_out_2[it]->Branch("ipProb0",ipProb0_2,"ipProb0[nIP]/F");
+    tr_out_2[it]->Branch("ipProb1",ipProb1_2,"ipProb1[nIP]/F");
+    tr_out_2[it]->Branch("ip2d",ip2d_2,"ip2d[nIP]/F");
+    tr_out_2[it]->Branch("ip2dSig",ip2dSig_2,"ip2dSig[nIP]/F");
+    tr_out_2[it]->Branch("ip3d",ip3d_2,"ip3d[nIP]/F");
+    tr_out_2[it]->Branch("ip3dSig",ip3dSig_2,"ip3dSig[nIP]/F");
+    tr_out_2[it]->Branch("ipDist2Jet",ipDist2Jet_2,"ipDist2Jet[nIP]/F");
+    tr_out_2[it]->Branch("ipDist2JetSig",ipDist2JetSig_2,"ipDist2JetSig[nIP]/F");
+    tr_out_2[it]->Branch("ipClosest2Jet",ipClosest2Jet_2,"ipClosest2Jet[nIP]/F");  
+    tr_out_2[it]->Branch("mue",mue_2,"mue[nref]/F");
+    tr_out_2[it]->Branch("mupt",mupt_2,"mupt[nref]/F");
+    tr_out_2[it]->Branch("mueta",mueta_2,"mueta[nref]/F");
+    tr_out_2[it]->Branch("muphi",muphi_2,"muphi[nref]/F");
+    tr_out_2[it]->Branch("mudr",mudr_2,"mudr[nref]/F");
+    tr_out_2[it]->Branch("muptrel",muptrel_2,"muptre[nref]/F");
+    tr_out_2[it]->Branch("muchg",muchg_2,"muchg[nref]/I");
+    tr_out_2[it]->Branch("pthat",&pthat_2,"pthat/F");
+    tr_out_2[it]->Branch("beamId1",&beamId1_2,"beamId1/I");
+    tr_out_2[it]->Branch("beamId2",&beamId1_2,"beamId2/I");
+    tr_out_2[it]->Branch("refpt",refpt_2,"refpt[nref]/F");
+    tr_out_2[it]->Branch("refeta",refeta_2,"refeta[nref]/F");
+    tr_out_2[it]->Branch("refy",refy_2,"refy[nref]/F");
+    tr_out_2[it]->Branch("refphi",refphi_2,"refphi[nref]/F");
+    tr_out_2[it]->Branch("refdphijt",refdphijt_2,"refdphijt[nref]/F");
+    tr_out_2[it]->Branch("refdrjt",refdrjt_2,"refdrjt[nref]/F");
+    tr_out_2[it]->Branch("refparton_pt",refparton_pt_2,"refparton_pt[nref]/F");
+    tr_out_2[it]->Branch("refparton_flavor",refparton_flavor_2,"refparton_flavor[nref]/I");
+    tr_out_2[it]->Branch("refparton_flavorForB",refparton_flavorForB_2,"refparton_flavorForB[nref]/I");
+    /*
+    tr_out_2[it]->Branch("ngen",&ngen_2,"ngen/I");
+    tr_out_2[it]->Branch("genmatchindex",genmatchindex_2,"genmatchindex[nref]/I");
+    tr_out_2[it]->Branch("genpt",genpt_2,"genpt[nref]/F");
+    tr_out_2[it]->Branch("geneta",geneta_2,"geneta[nref]/F");
+    tr_out_2[it]->Branch("geny",geny_2,"geny[nref]/F");
+    tr_out_2[it]->Branch("genphi",genphi_2,"genphi[nref]/F");
+    tr_out_2[it]->Branch("gendphijt",gendphijt_2,"gendphijt[nref]/F");
+    tr_out_2[it]->Branch("gendrjt",gendrjt_2,"gendrjt[nref]/F");
+    */
+    tr_out_2[it]->Branch("weight",&weight,"weight/D");
 
     //Declaration of leaves types
     Int_t           raw2digi_step;
@@ -311,7 +566,7 @@ void weightPtHatBins(){
     Int_t           spikeSel;
     Int_t           collSell;
     Int_t           hltAna;
-    Int_t           superFilterPath;
+    //Int_t           superFilterPath;
 
     // Set branch addresses.
     tr_in_skim[it]->SetBranchAddress("raw2digi_step",&raw2digi_step);
@@ -326,7 +581,7 @@ void weightPtHatBins(){
     tr_in_skim[it]->SetBranchAddress("spikeSel",&spikeSel);
     tr_in_skim[it]->SetBranchAddress("collSell",&collSell);
     tr_in_skim[it]->SetBranchAddress("hltAna",&hltAna);
-    tr_in_skim[it]->SetBranchAddress("superFilterPath",&superFilterPath);
+    //tr_in_skim[it]->SetBranchAddress("superFilterPath",&superFilterPath);
 
     // Set output branch addresses.
     tr_out_skim[it]->Branch("raw2digi_step",&raw2digi_step,"raw2digi_step/I");
@@ -341,11 +596,12 @@ void weightPtHatBins(){
     tr_out_skim[it]->Branch("spikeSel",&spikeSel,"spikeSel/I");
     tr_out_skim[it]->Branch("collSell",&collSell,"collSell/I");
     tr_out_skim[it]->Branch("hltAna",&hltAna,"hltAna/I");
-    tr_out_skim[it]->Branch("superFilterPath",&superFilterPath,"superFilterPath/I");
+    //tr_out_skim[it]->Branch("superFilterPath",&superFilterPath,"superFilterPath/I");
 
 
     Long64_t nentries = tr_in[it]->GetEntries();
     Long64_t nbytes = 0;
+    Long64_t nbytes_2 = 0;
     Long64_t nbytes_skim = 0;
 
     for (Long64_t i=0; i<nentries;i++) {
@@ -353,6 +609,7 @@ void weightPtHatBins(){
       if(i%100000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl;
 
       nbytes += tr_in[it]->GetEntry(i);
+      nbytes_2 += tr_in_2[it]->GetEntry(i);
       nbytes_skim += tr_in_skim[it]->GetEntry(i);
 
       if (it<N-1){
@@ -360,12 +617,15 @@ void weightPtHatBins(){
       }
 
       tr_out[it]->Fill();
+      tr_out_2[it]->Fill();
       tr_out_skim[it]->Fill();
 
     }
     
     fout[it]->cd("akPu3PFJetAnalyzer");
     tr_out[it]->Write();
+    fout[it]->cd("ak5PFJetAnalyzer");
+    tr_out_2[it]->Write();
     fout[it]->cd("skimanalysis");
     tr_out_skim[it]->Write();
 
