@@ -1,28 +1,28 @@
-#import FWCore.ParameterSet.VarParsing as VarParsing
-#
-#ivars = VarParsing.VarParsing('standard')
-#ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
-#
-#
-##ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-#ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG//d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_102_1_a9Z.root'
-#ivars.output = 'test2.root'
-#ivars.maxEvents = -1
-#ivars.initialEvent = 1
-#
-#ivars.parseArguments()
+import FWCore.ParameterSet.VarParsing as VarParsing
+
+ivars = VarParsing.VarParsing('standard')
+ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
+
+
+#ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
+ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG//d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_102_1_a9Z.root'
+ivars.output = 'test2.root'
+ivars.maxEvents = -1
+ivars.initialEvent = 1
+
+ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = False
+isMC = True
 hiReco = True
 reReco = True
 hasSimInfo = True
-genTag = "generator"
-hltFilter = "HLT_HIJet65_v1"
-trigResults = 'TriggerResults::HLT'
-#gTag = 'STARTHI44_V7::All'
-gTag = 'GR_R_44_V10::All'
+genTag = "hiSignal"
+#hltFilter = "HLT_Jet80_v3"
+hltFilter = ""
+trigResults = 'TriggerResults::RECO'
+gTag = 'STARTHI44_V7::All'
 hiMode = True
 
 # some important triggers:  HLT_Jet40_v1, HLT_HIL2Mu7_v1'
@@ -67,8 +67,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(
-    #ivars.maxEvents
-    -1
+    ivars.maxEvents
+    #-1
     )
 )
 
@@ -85,12 +85,13 @@ process.source = cms.Source("PoolSource",
     #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_8.root',
     #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_10.root',
     #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
+    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPtTrack-PromptSkim-v1/0000/62CDCFAB-9013-E111-9133-842B2B6F85FD.root'
     #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0000/88CA2FB9-5C2A-E111-8296-00A0D1E95364.root' # weird memory crash - 8004
-    '/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0000/425129A6-1121-E111-91AC-782BCB4FBD6F.root' # track list merger - 8012
+    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0000/425129A6-1121-E111-91AC-782BCB4FBD6F.root' # track list merger - 8012
     #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0001/3EBB24B7-682A-E111-97F6-003048F34288.root'
     #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
-    #ivars.files
+    ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             #eventsToProcess = cms.untracked.VEventRange('182838:7396593-182838:7396593'),
@@ -299,14 +300,20 @@ if hiReco:
         )
         
     process.pfRegTrack = process.pfTrack.clone(TkColList = cms.VInputTag("hiGeneralAndRegitTracks"))
-    process.pfRegBlock = process.particleFlowBlock.clone()
-    process.regParticleFlow = process.particleFlowTmp.clone()
+    process.pfRegBlock = process.particleFlowBlock.clone(RecTracks = "pfRegTrack",useIterTracking=True)
+    process.regParticleFlow = process.particleFlowTmp.clone( blocks = "pfRegBlock")
     
+    process.pfRegTrack.TrackQuality = "highPurity"
     
     process.pfRegTrack.GsfTracksInEvents = False
     process.regParticleFlow.usePFElectrons = False
     process.regParticleFlow.muons = "regMuons"
-    
+
+    process.pfRegTrack.GsfTracksInEvents = False
+    process.regParticleFlow.usePFElectrons = False
+    process.pfRegTrack.MuColl = "regMuons"
+    process.pfRegBlock.RecMuons = "regMuons"
+    process.regParticleFlow.muons = "regMuons"
     
     process.hiRegPF =  cms.Sequence(
         process.pfRegTrack
@@ -438,8 +445,8 @@ else:
 
 process.TFileService = cms.Service("TFileService",
                                    fileName=cms.string(
-    'bTagAnalyzers.root'
-    #ivars.output
+    #'bTagAnalyzers.root'
+    ivars.output
     )
                                    )
 
