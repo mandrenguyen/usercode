@@ -27,8 +27,11 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
     else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
 
   } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-    if(isMC)fin=new TFile("/data_CMS/cms/sregnard/hiReco_jetTrig/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
-    else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRaw_offPV_fixTR/merged_bTagAnalyzers.root");
+    if(isMC)fin=new //TFile("/d102/mnguyen/bTaggingOutput/hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetQCD5080120.root");
+TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetBJET5080120.root");
+//TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetQCD5080120.root");
+//TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetCJET5080120.root");
+    else fin=new TFile("/d102/mnguyen/bTaggingOutput/pbpbDataJet80/merged_bTagAnalyzers_hiRegitSVHighPurity.root");
   }
 
   //  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_pythia30.root");
@@ -355,7 +358,7 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
   TH1F *hipClosest2JetC = new TH1F("hipClosest2JetC","hipClosest2JetC",40,0,1);
   TH1F *hipClosest2JetL = new TH1F("hipClosest2JetL","hipClosest2JetL",40,0,1);
 
-  TNtuple *nt = new TNtuple("nt","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm");
+  TNtuple *nt = new TNtuple("nt","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat");
 
   TNtuple *ntMuReq = new TNtuple("ntMuReq","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
 
@@ -381,7 +384,7 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
       for(int ij=0;ij<nref;ij++){
 	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
 
-	  nt->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij]);
+	  nt->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat);
 
 	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
 
