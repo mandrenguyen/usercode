@@ -23,7 +23,7 @@ void fixEmpty(TH1 *h)
    }
 }
 
-RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double maxX = 1,double ptMin = 60, double ptMax = 500)
+RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double maxX = 1,double ptMin = 60, double ptMax = 500, bool floatC = 1)
 {
    // Prepare a canvas
    TCanvas *c = new TCanvas("c","",600,600);
@@ -31,28 +31,38 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    
 
    // MC shape file
-   TFile *inf = new TFile("histos/ppMC.root");
-   TTree *t = (TTree*) inf->Get("nt");
+   TFile *infQCD = new TFile("histos/ppMC_hiReco_jetTrigQCD.root");
+   TTree *tQCD = (TTree*) infQCD->Get("nt");
+   TFile *infB = new TFile("histos/ppMC_hiReco_jetTrigB.root");
+   TTree *tB = (TTree*) infB->Get("nt");
+   TFile *infC = new TFile("histos/ppMC_hiReco_jetTrigC.root");
+   TTree *tC = (TTree*) infC->Get("nt");
 
    // b-jet signal shape
-   TH1D *hB = new TH1D("hB","",50,minX,maxX);
+   TH1D *hB = new TH1D("hB","",20,minX,maxX);
    hB->Sumw2();
-   t->Draw(Form("%s>>hB",var),Form("abs(refparton_flavorForB)==5&&jtpt>%f&&jtpt<%f",ptMin,ptMax));
+   tB->Draw(Form("%s>>hB",var),Form("weight*(abs(refparton_flavorForB)==5&&jtpt>%f&&jtpt<%f&&pthat>80)",ptMin,ptMax));
    fixEmpty(hB);
 
-   TH1D *hC = new TH1D("hC","",50,minX,maxX);
+   TH1D *hC = new TH1D("hC","",20,minX,maxX);
    hC->Sumw2();
-   t->Draw(Form("%s>>hC",var),Form("abs(refparton_flavorForB)==4&&jtpt>%f&&jtpt<%f",ptMin,ptMax));
+   tC->Draw(Form("%s>>hC",var),Form("weight*(abs(refparton_flavorForB)==4&&jtpt>%f&&jtpt<%f&&pthat>80)",ptMin,ptMax));
    fixEmpty(hC);
    
    // b-jet background shape
-   TH1D *hOtherFlavor = new TH1D("hOtherFlavor","",50,minX,maxX);
+   TH1D *hOtherFlavor = new TH1D("hOtherFlavor","",20,minX,maxX);
+   TH1D *hQCDC = new TH1D("hQCDC","",20,minX,maxX);
    hOtherFlavor->Sumw2();
-   t->Draw(Form("%s>>hOtherFlavor",var),Form("abs(refparton_flavorForB)!=5&&jtpt>%f&&jtpt<%f",ptMin,ptMax));
-   fixEmpty(hOtherFlavor);
+   hC->Sumw2();
+   tQCD->Draw(Form("%s>>hOtherFlavor",var),Form("weight*(abs(refparton_flavorForB)!=5&&abs(refparton_flavorForB)!=4&&jtpt>%f&&jtpt<%f&&pthat>80)",ptMin,ptMax));
+   tQCD->Draw(Form("%s>>hQCDC",var),Form("weight*(abs(refparton_flavorForB)==4&&jtpt>%f&&jtpt<%f&&pthat>80)",ptMin,ptMax));   fixEmpty(hOtherFlavor);
    
+   if (!floatC) {
+      hC->Scale(1./hC->Integral(0,100)*hQCDC->Integral(0,100));
+      hOtherFlavor->Add(hC);
+   }
    // data sample   
-   TFile *infData = new TFile("histos/ppMC.root");
+   TFile *infData = new TFile("histos/ppdata_hiReco_jetTrig.root");
    TTree *tData = (TTree*) infData->Get("nt");
    
    // --- Observable ---
@@ -63,7 +73,9 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
  
    // --- Build Histogram PDF ---
    RooDataHist xB("xB","xB",s,hB);
+   RooDataHist xC("xC","xC",s,hC); // not used if doesn't float C
    RooHistPdf signal("signal","signal PDF",s,xB);
+   RooHistPdf signalC("signalC","signalC PDF",s,xC); // not used if doesn't float C
 
    RooDataHist xOtherFlavor("xOtherFlavor","xOtherFlavor",s,hOtherFlavor);
    RooHistPdf background("background","Background PDF",s,xOtherFlavor);
@@ -75,31 +87,39 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    //   RooRealVar nbkg("nbkg","#background events",1e5,0.,1e7) ;
    //   RooAddPdf model("model","g+a",RooArgList(signal,background),RooArgList(nsig,nbkg)) ;
    RooRealVar frac("frac","#background events",0.1,0.,1) ;
-   RooAddPdf model("model","g+a",signal,background,frac) ;
+   RooRealVar fracC("fracC","#background events",0.1,0.,1) ; // not sured if doesn't float C
+   RooAddPdf modelBck("modelBck","g+a",signalC,background,fracC) ;
+   RooAddPdf *model;
+   if (!floatC) {
+     model = new RooAddPdf("model","g+a",signal,background,frac) ;
+   } else {
+     model = new RooAddPdf("model","g+a",signal,modelBck,frac) ;
+   }
 
    // data sample
    //RooDataSet *data = new RooDataSet("data","data",RooArgSet(s),Import(*tData));
    RooDataSet *data = new RooDataSet("data","data",tData,RooArgSet(s,jtpt),Form("jtpt>%f&&jtpt<%f",ptMin,ptMax));
    
    // --- Perform extended ML fit of composite PDF to data ---
-   model.fitTo(*data) ;
- 
+   model->fitTo(*data) ;
    // --- Plot data and composite PDF overlaid ---
    RooPlot* sframe = s.frame() ;
-   TH2D *htemp = new TH2D("htemp","",100,minX,maxX,100,0.1,1e5) ;
+   TH2D *htemp = new TH2D("htemp","",100,minX,maxX,100,1,1e6) ;
    htemp->SetXTitle(Form("%s %.0f < p_{T} < %.0f GeV/c",var,ptMin,ptMax));
    htemp->SetYTitle("Entries");
    htemp->Draw();
    cout <<"Min "<<sframe->GetMinimum()<<endl;
-   data->plotOn(sframe,Binning(50)) ;
+   data->plotOn(sframe,Binning(20)) ;
    sframe->SetTitle("");
-   model.plotOn(sframe,Components(background),LineStyle(kDashed),LineColor(kBlue)) ;   
-   model.plotOn(sframe,Components(signal),LineStyle(kDashed),LineColor(kRed),FillColor(kRed),FillStyle(1)) ;   
-   model.plotOn(sframe) ;
+   model->plotOn(sframe,Components(background),LineStyle(kDashed),LineColor(kBlue)) ;   
+   model->plotOn(sframe,Components(signalC),LineStyle(kDashed),LineColor(kGreen)) ;   
+   model->plotOn(sframe) ;
+   model->plotOn(sframe,Components(signal),LineStyle(kDashed),LineColor(kRed),FillColor(kRed),FillStyle(1)) ;   
 
    cout <<"b jet fraction = "<<frac.getVal()<<endl;
    sframe->Draw("same");
    c->SaveAs(Form("fit/%s-%.0f-%.0f.gif",var,ptMin,ptMax));
+   delete model;
    return frac;
 }
 
@@ -108,8 +128,11 @@ void ptDependence()
    TFile *inf = new TFile("histos/ppMC.root");
    TTree *t = (TTree*) inf->Get("nt");
 
-   const int nBins = 8;
-   double ptBin[nBins+1] = {60,70,80,90,100,120,140,160,200};
+//   const int nBins = 4;
+//   double ptBin[nBins+1] = {100,120,140,160,200};
+   const int nBins = 1;
+   double ptBin[nBins+1] = {100,400};
+   
    TH1D *hProb = new TH1D("hProb","",nBins,ptBin);
    TH1D *hCSV = new TH1D("hCSV","",nBins,ptBin);
    TH1D *hSVTXM = new TH1D("hSVTXM","",nBins,ptBin);
@@ -141,7 +164,7 @@ void ptDependence()
    hSVTXM->SetLineColor(4);
    hSVTXM->SetMarkerColor(4);
    hSVTXM->SetMarkerStyle(24);
-   hSVTXM->Draw("same");
+//   hSVTXM->Draw("same");
    t->Draw("abs(refparton_flavorForB)==5:jtpt","","prof same");
    
    TLegend *leg = new TLegend(0.2,0.7,0.5,0.9);
@@ -150,6 +173,6 @@ void ptDependence()
    leg->SetFillColor(0);
    leg->AddEntry(hProb,"Jet Probability","pl");
    leg->AddEntry(hCSV,"CSV","pl");
-   leg->AddEntry(hSVTXM,"SV mass","pl");
+//   leg->AddEntry(hSVTXM,"SV mass","pl");
    leg->Draw();
 }
