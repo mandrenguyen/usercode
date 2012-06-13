@@ -3,11 +3,14 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TNtuple.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h" 
 
-void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=0)
+void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=0, int updateJEC=1)
 {
 
-  Float_t minJetPt=60;
+  Float_t minJetPt=0;
   if (isMuTrig) minJetPt=30;
   Float_t maxJetEta=2;
   Float_t minMuPt=5;
@@ -27,11 +30,8 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
     else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
 
   } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-    if(isMC)fin=new //TFile("/d102/mnguyen/bTaggingOutput/hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetQCD5080120.root");
-TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetBJET5080120.root");
-//TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetQCD5080120.root");
-//TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetCJET5080120.root");
-    else fin=new TFile("/d102/mnguyen/bTaggingOutput/pbpbDataJet80/merged_bTagAnalyzers_hiRegitSVHighPurity.root");
+    if(isMC)fin=new TFile("/data_CMS/cms/sregnard/hiReco_jetTrig/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
+    else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
   }
 
   //  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_pythia30.root");
@@ -358,11 +358,40 @@ TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetBJET5080120.root");
   TH1F *hipClosest2JetC = new TH1F("hipClosest2JetC","hipClosest2JetC",40,0,1);
   TH1F *hipClosest2JetL = new TH1F("hipClosest2JetL","hipClosest2JetL",40,0,1);
 
-  TNtuple *nt = new TNtuple("nt","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat");
+  TNtuple *nt;
+  if(isMC) nt= new TNtuple("nt","","jtpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat");
+  else nt= new TNtuple("nt","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat");
 
-  TNtuple *ntMuReq = new TNtuple("ntMuReq","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
+  TNtuple *ntMuReq;
+  if(isMC) ntMuReq = new TNtuple("ntMuReq","","jtpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
+  else ntMuReq = new TNtuple("ntMuReq","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
 
   
+   cout<<" grab the JEC's "<<endl;
+   // grab the JEC's
+   
+   JetCorrectorParameters* parHI442x_l2, * parHI442x_l3;
+   vector<JetCorrectorParameters> vpar_HI442x;   
+   FactorizedJetCorrector *_JEC_HI442x;
+   
+   if(updateJEC){   
+     
+     cout<<" updating the JECs "<<endl;
+     
+     string L2Name = "JEC/JEC_dijet_L2Relative_AK3PF.txt";
+     string L3Name = "JEC/JEC_dijet_L3Absolute_AK3PF.txt";
+     
+     parHI442x_l2 = new JetCorrectorParameters(L2Name.c_str());
+     parHI442x_l3 = new JetCorrectorParameters(L3Name.c_str());
+          
+     vpar_HI442x.push_back(*parHI442x_l2);
+     vpar_HI442x.push_back(*parHI442x_l3);
+     _JEC_HI442x = new FactorizedJetCorrector(vpar_HI442x);
+   }     
+   
+
+
+
   Long64_t nentries = t->GetEntries();
 
   for (Long64_t i=0; i<nentries;i++) {
@@ -377,6 +406,16 @@ TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetBJET5080120.root");
       if(beamId1==2112 || beamId2==2112)  continue;
     }
 
+    if(updateJEC){
+      
+      for(int ij=0; ij<nref; ij++){	  
+	_JEC_HI442x->setJetEta(jteta[ij]);
+	_JEC_HI442x->setJetPt(rawpt[ij]);
+	jtpt[ij] = rawpt[ij]*_JEC_HI442x->getCorrection(); 
+      }	
+    }
+
+
     float w=1.;
     if(isMC&&useWeight) w=weight;
 
@@ -384,11 +423,13 @@ TFile("hydjet/merged_weighted_bJetAnalyzers_L2L3gt60_hydjetBJET5080120.root");
       for(int ij=0;ij<nref;ij++){
 	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
 
-	  nt->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat);
+	  if(isMC)nt->Fill(jtpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat);
+	  else nt->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat);
 
 	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
 
-	    ntMuReq->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	    if(isMC)ntMuReq->Fill(jtpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	    else ntMuReq->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
 	  }
 	}
       }
