@@ -5,7 +5,7 @@ ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testin
 
 
 #ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG//d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_102_1_a9Z.root'
+ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECO_set2/e5d7378087e57a0f8e6e97059876cc46/RECO_9_1_OGL.root'
 ivars.output = 'test2.root'
 ivars.maxEvents = -1
 ivars.initialEvent = 1
@@ -17,7 +17,7 @@ import FWCore.ParameterSet.Config as cms
 isMC = True
 hiReco = True
 reReco = True
-hasSimInfo = True
+hasSimInfo = False
 genTag = "hiSignal"
 #hltFilter = "HLT_Jet80_v3"
 hltFilter = ""
@@ -258,14 +258,47 @@ if hiReco:
     else: svJetSel = 'pt > 10. && eta > -2. && eta < 2'
 
     print "Seeding around jets with, ",svJetSel
-    process.ptEtaFilteredJets = cms.EDFilter("CandViewSelector",
-                                               src = cms.InputTag("akPu3PFJets"),
-                                               cut = cms.string(svJetSel)
-                                               )
 
+    from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
+    # L2 (relative eta-conformity) Correction Services
+    process.akPu3PFL2Relative = cms.ESSource(
+        'LXXXCorrectionService',
+        level     = cms.string('L2Relative'),
+        algorithm = cms.string('AK3PF'),
+        #era    = cms.string('HI_PFTowers_hiGoodTightTracks_D6T_413'),
+        era    = cms.string('JEC_dijet'),
+        section   = cms.string('')
+        )
+    # L3 (absolute) Correction Services
+    process.akPu3PFL3Absolute = cms.ESSource(
+        'LXXXCorrectionService',
+        level     = cms.string('L3Absolute'),
+        algorithm = cms.string('AK3PF'),
+        #era    = cms.string('HI_PFTowers_hiGoodTightTracks_D6T_413'),
+        era    = cms.string('JEC_dijet'),
+        section   = cms.string('')
+        )
+    # L2L3 CORRECTION SERVICES
+    process.akPu3PFL2L3 = cms.ESSource(
+        'JetCorrectionServiceChain',
+        correctors = cms.vstring('akPu3PFL2Relative','akPu3PFL3Absolute')
+        )
+    
+    process.akPu3PFJetsL2L3   = cms.EDProducer('BasicJetCorrectionProducer',
+                                               src         = cms.InputTag('akPu3PFJets'),
+                                               correctors  = cms.vstring('akPu3PFL2L3')
+                                               )
+    
+    
+    
+    process.ptEtaFilteredJets = cms.EDFilter("CandViewSelector",
+                                             src = cms.InputTag("akPu3PFJetsL2L3"),
+                                             cut = cms.string(svJetSel)
+                                             )
+    
     process.akPu3PFSelectedJets = cms.EDFilter("LargestPtCandViewSelector",
                                                src = cms.InputTag("ptEtaFilteredJets"),
-                                               maxNumber = cms.uint32(7)
+                                               maxNumber = cms.uint32(5)
                                                )
         
     process.load("RecoHI.HiTracking.hiRegitTracking_cff")
@@ -276,7 +309,15 @@ if hiReco:
     process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
-    
+
+    if hiMode == False:  # open up region for pp
+        hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
+        hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
+        hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
+        hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
+        hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 10.
+        hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 10.
+
     process.load("RecoHI.HiTracking.MergeRegit_cff")
     
     process.regGlobalMuons = process.globalMuons.clone(
@@ -342,6 +383,7 @@ if hiReco:
     process.offlinePrimaryVertices.TrackLabel = "hiSecondaryVertexSelectedTracks"
 
     process.regionalTracking = cms.Path(
+        process.akPu3PFJetsL2L3 *
         process.ptEtaFilteredJets *
         process.akPu3PFSelectedJets *
         process.hiRegitTracking *
@@ -368,15 +410,18 @@ process.jec = cms.ESSource("PoolDBESSource",
 	timetype = cms.string('runnumber'),
 	toGet = cms.VPSet(
 		cms.PSet(record = cms.string("JetCorrectionsRecord"),
-                         tag = cms.string("JetCorrectorParametersCollection_HI_Calo_hiGoodTightTracks_D6T_413_IC5Calo"),
+                         #tag = cms.string("JetCorrectorParametersCollection_HI_Calo_hiGoodTightTracks_D6T_413_IC5Calo"),
+                         tag = cms.string('JetCorrectorParametersCollection_HI_Calo_hiGoodTightTracks_D6T_413_IC5Calo'),
                          label = cms.untracked.string("IC5Calo")),
                 
 		cms.PSet(record = cms.string("JetCorrectionsRecord"),
-                         tag    = cms.string('JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_413_AK3PF'),
+                         #tag    = cms.string('JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_D6T_413_AK3PF'),
+                         tag    = cms.string('JetCorrectorParametersCollection_HI_PFTowers_hiGoodTightTracks_PythiaZ2_442p5_AK3PF'),
                          label = cms.untracked.string("AK3PF")),
                 
                 ),
-                           connect = cms.string("sqlite_file:JEC_HI_PFTower_413patch2_2011_v3.db"),
+                           #connect = cms.string("sqlite_file:JEC_HI_PFTower_413patch2_2011_v3.db"),
+                           connect = cms.string("sqlite_file:JEC_HI2760_CMSSW501_2012.db"),
                            )
 process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 
