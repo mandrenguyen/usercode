@@ -3,49 +3,56 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TNtuple.h"
+#include "TROOT.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h" 
 
-void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=0, int updateJEC=1)
+void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=1)
 {
 
-  Float_t minJetPt=0;
+  // isMC=0 --> Real data, ==1 --> QCD, ==2 --> cJet, ==3 --> bJet
+  Float_t minJetPt=80;
   if (isMuTrig) minJetPt=30;
   Float_t maxJetEta=2;
   Float_t minMuPt=5;
 
   TFile *fin;
 
-  if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
-    if(isMC)fin=new TFile("/data_CMS/cms/sregnard/ppReco_muTrig/merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR_weighted.root");
-    else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
-   
-  } else if ( isRecopp&&!isMuTrig) { // pp reco, jet triggered
-    if(isMC)fin=new TFile("/data_CMS/cms/sregnard/ppReco_jetTrig/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_weighted.root");
-    else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
-   
-  } else if (!isRecopp&& isMuTrig) { // hi reco, muon triggered
-    if(isMC)fin=new TFile("/data_CMS/cms/sregnard/hiReco_muTrig/merged_bTagAnalyzers_hiRecoFromRawV3_offPV_HLTMu3v2_fixTR_weighted.root");
-    else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
-
-  } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-    if(isMC)fin=new TFile("/data_CMS/cms/sregnard/hiReco_jetTrig/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
-    else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
+  if(ppPbPb){
+    if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity/merged_bTagAnalyzers.root"); 
+    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_qcd.root");
+    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_bJet.root"); 
+    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_cJet.root");
   }
-
-  //  if(isMC)fin=new TFile("../sample/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_pythia30.root");
-  //  else fin=new TFile("../sample/merged_bTagAnalyzers_ppDataJet40_ppRecoFromRaw_fixTR.root");
+  else{
+    if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
+      if(isMC)fin=new TFile("/data_CMS/cms/sregnard/ppReco_muTrig/merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR_weighted.root");
+      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
+      
+    } else if ( isRecopp&&!isMuTrig) { // pp reco, jet triggered
+      if(isMC)fin=new TFile("/data_CMS/cms/sregnard/ppReco_jetTrig/merged_bJetAnalyzers_ppRecoFromRaw_fixTR_weighted.root");
+      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
+      
+    } else if (!isRecopp&& isMuTrig) { // hi reco, muon triggered
+      if(isMC)fin=new TFile("/data_CMS/cms/sregnard/hiReco_muTrig/merged_bTagAnalyzers_hiRecoFromRawV3_offPV_HLTMu3v2_fixTR_weighted.root");
+      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
+      
+    } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
+      if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
+      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/pthat30/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR.root");
+      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRaw_offPV_fixTR/merged_bTagAnalyzers.root");
+    }
+  }
 
   TTree *t = (TTree*) fin->Get("akPu3PFJetAnalyzer/t");
   //TTree *t = (TTree*) fin->Get("ak5PFJetAnalyzer/t"); //for ppReco_jetTrig
   TTree *tSkim = (TTree*) fin->Get("skimanalysis/HltTree");
-
+  
   //Declaration of leaves types                  
   Int_t           evt;
-  //Float_t         b;
-  //Float_t         hf;
-  //Int_t           bin;
+  Int_t           bin;
+  Float_t           vz;
   Int_t           nref;
   Float_t         rawpt[1000];
   Float_t         jtpt[1000];
@@ -72,17 +79,17 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
   Int_t           nIPtrk[1000];
   Int_t           nselIPtrk[1000];
   Int_t   nIP;
-  Int_t   ipJetIndex[1000];
-  Float_t ipPt[1000];
-  Float_t ipProb0[1000];
-  Float_t ipProb1[1000];
-  Float_t ip2d[1000];
-  Float_t ip2dSig[1000];
-  Float_t ip3d[1000];
-  Float_t ip3dSig[1000];
-  Float_t ipDist2Jet[1000];
-  Float_t ipDist2JetSig[1000];
-  Float_t ipClosest2Jet[1000];
+  Int_t   ipJetIndex[10000];
+  Float_t ipPt[10000];
+  Float_t ipProb0[10000];
+  Float_t ipProb1[10000];
+  Float_t ip2d[10000];
+  Float_t ip2dSig[10000];
+  Float_t ip3d[10000];
+  Float_t ip3dSig[10000];
+  Float_t ipDist2Jet[10000];
+  Float_t ipDist2JetSig[10000];
+  Float_t ipClosest2Jet[10000];
   Float_t         mue[1000];
   Float_t         mupt[1000];
   Float_t         mueta[1000];
@@ -112,17 +119,19 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
   Float_t         gendphijt[1000];
   Float_t         gendrjt[1000];
   */
-  Double_t         weight;
+  Double_t         weight, xSecWeight, centWeight, vzWeight;
   
+  int nHLTBit;
+  bool hltBit[12];
+
   Int_t pvSel;
   Int_t hbheNoiseSel;
   Int_t spikeSel;
   Int_t collSell;
-    
+  
   t->SetBranchAddress("evt",&evt);
-  //t->SetBranchAddress("b",&b);
-  //t->SetBranchAddress("hf",&hf);   
-  //t->SetBranchAddress("bin",&bin);           
+  if(ppPbPb)t->SetBranchAddress("bin",&bin);           
+  t->SetBranchAddress("vz",&vz);           
   t->SetBranchAddress("nref",&nref);
   t->SetBranchAddress("rawpt",rawpt);
   t->SetBranchAddress("jtpt",jtpt);
@@ -146,6 +155,7 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
   t->SetBranchAddress("svtxdls",svtxdls);
   t->SetBranchAddress("svtxm",svtxm);
   t->SetBranchAddress("svtxpt",svtxpt);
+ 
   t->SetBranchAddress("nIPtrk",nIPtrk);
   t->SetBranchAddress("nselIPtrk",nselIPtrk); 
   t->SetBranchAddress("nIP",&nIP);
@@ -162,6 +172,8 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
     t->SetBranchAddress("ipDist2JetSig",ipDist2JetSig);
     t->SetBranchAddress("ipClosest2Jet",ipClosest2Jet);
   }
+
+  /*
   t->SetBranchAddress("mue",mue);
   t->SetBranchAddress("mupt",mupt);
   t->SetBranchAddress("mueta",mueta);
@@ -169,6 +181,7 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
   t->SetBranchAddress("mudr",mudr);
   t->SetBranchAddress("muptrel",muptrel);
   t->SetBranchAddress("muchg",muchg);
+  */
   if(isMC){
     t->SetBranchAddress("pthat",&pthat);
     t->SetBranchAddress("beamId1",&beamId1);
@@ -193,7 +206,14 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
     t->SetBranchAddress("gendrjt",gendrjt);
     */
   }
-  if(isMC&&useWeight)t->SetBranchAddress("weight",&weight);
+  if(isMC&&useWeight){
+    t->SetBranchAddress("weight",&weight);
+    t->SetBranchAddress("xSecWeight",&xSecWeight);
+    if(ppPbPb)t->SetBranchAddress("centWeight",&centWeight);
+    t->SetBranchAddress("vzWeight",&vzWeight);
+  }
+  t->SetBranchAddress("nHLTBit",&nHLTBit);
+  t->SetBranchAddress("hltBit",hltBit);
 
   tSkim->SetBranchAddress("pvSel",&pvSel);
   tSkim->SetBranchAddress("hbheNoiseSel",&hbheNoiseSel);
@@ -202,169 +222,224 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
 
 
   TFile *fout;
-
-  if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
-    if(isMC)fout=new TFile("histos/ppMC_ppReco_muTrig.root","recreate");
-    else fout=new TFile("histos/ppdata_ppReco_muTrig.root","recreate");
-  } else if ( isRecopp&&!isMuTrig) { // pp reco, jet triggered
-    if(isMC)fout=new TFile("histos/ppMC_ppReco_jetTrig.root","recreate");
-    else fout=new TFile("histos/ppdata_ppReco_jetTrig.root","recreate");
-  } else if (!isRecopp&& isMuTrig) { // hi reco, muon triggered
-    if(isMC)fout=new TFile("histos/ppMC_hiReco_muTrig.root","recreate");
-    else fout=new TFile("histos/ppdata_hiReco_muTrig.root","recreate");
-  } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-    if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig.root","recreate");
-    else fout=new TFile("histos/ppdata_hiReco_jetTrig.root","recreate");
+  if(ppPbPb){
+    if(isMC==0) fout = new TFile("histos/PbPbdata.root","recreate");
+    else if(isMC==1) fout = new TFile("histos/PbPbQCDMC.root","recreate");
+    else if(isMC==2) fout = new TFile("histos/PbPbBMC.root","recreate");
+    else if(isMC==3) fout = new TFile("histos/PbPbCMC.root","recreate");
+  }
+  else{
+    if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
+      if(isMC)fout=new TFile("histos/ppMC_ppReco_muTrig.root","recreate");
+      else fout=new TFile("histos/ppdata_ppReco_muTrig.root","recreate");
+    } else if ( isRecopp&&!isMuTrig) { // pp reco, jet triggered
+      if(isMC)fout=new TFile("histos/ppMC_ppReco_jetTrig.root","recreate");
+      else fout=new TFile("histos/ppdata_ppReco_jetTrig.root","recreate");
+    } else if (!isRecopp&& isMuTrig) { // hi reco, muon triggered
+      if(isMC)fout=new TFile("histos/ppMC_hiReco_muTrig.root","recreate");
+      else fout=new TFile("histos/ppdata_hiReco_muTrig.root","recreate");
+    } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
+      if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig.root","recreate");
+      else fout=new TFile("histos/ppdata_hiReco_jetTrig.root","recreate");
+    }
   }
 
-  TH1F *hjtpt = new TH1F("hjtpt","hjtpt",50,0,250);
-  TH1F *hjtptB = new TH1F("hjtptB","hjtptB",50,0,250);
-  TH1F *hjtptC = new TH1F("hjtptC","hjtptC",50,0,250);
-  TH1F *hjtptL = new TH1F("hjtptL","hjtptL",50,0,250);
-  TH1F *hjtptU = new TH1F("hjtptU","hjtptU",50,0,250);
+  TH1D *hbin = new TH1D("hbin","hbin",40,-0.5,39.5);
+  TH1D *hbinw = new TH1D("hbinw","hbinw",40,-0.5,39.5);
+  hbin->Sumw2(); hbinw->Sumw2(); 
 
-  TH1F *hdiscr_csvSimple = new TH1F("hdiscr_csvSimple","hdiscr_csvSimple",40,0,1);
-  TH1F *hdiscr_csvSimpleB = new TH1F("hdiscr_csvSimpleB","hdiscr_csvSimpleB",40,0,1);
-  TH1F *hdiscr_csvSimpleC = new TH1F("hdiscr_csvSimpleC","hdiscr_csvSimpleC",40,0,1);
-  TH1F *hdiscr_csvSimpleL = new TH1F("hdiscr_csvSimpleL","hdiscr_csvSimpleL",40,0,1);
-  
-  TH1F *hdiscr_prob = new TH1F("hdiscr_prob","hdiscr_prob",40,0,3);
-  TH1F *hdiscr_probB = new TH1F("hdiscr_probB","hdiscr_probB",40,0,3);
-  TH1F *hdiscr_probC = new TH1F("hdiscr_probC","hdiscr_probC",40,0,3);
-  TH1F *hdiscr_probL = new TH1F("hdiscr_probL","hdiscr_probL",40,0,3);
-  
-  TH1F *hdiscr_ssvHighEff = new TH1F("hdiscr_ssvHighEff","hdiscr_ssvHighEff",50,1,6);
-  TH1F *hdiscr_ssvHighEffB = new TH1F("hdiscr_ssvHighEffB","hdiscr_ssvHighEffB",50,1,6);
-  TH1F *hdiscr_ssvHighEffC = new TH1F("hdiscr_ssvHighEffC","hdiscr_ssvHighEffC",50,1,6);
-  TH1F *hdiscr_ssvHighEffL = new TH1F("hdiscr_ssvHighEffL","hdiscr_ssvHighEffL",50,1,6);
-  
-  TH1F *hdiscr_ssvHighPur = new TH1F("hdiscr_ssvHighPur","hdiscr_ssvHighPur",50,1,6);
-  TH1F *hdiscr_ssvHighPurB = new TH1F("hdiscr_ssvHighPurB","hdiscr_ssvHighPurB",50,1,6);
-  TH1F *hdiscr_ssvHighPurC = new TH1F("hdiscr_ssvHighPurC","hdiscr_ssvHighPurC",50,1,6);
-  TH1F *hdiscr_ssvHighPurL = new TH1F("hdiscr_ssvHighPurL","hdiscr_ssvHighPurL",50,1,6);
-  
-  TH1F *hnsvtx = new TH1F("hnsvtx","hnsvtx",6,-0.5,5.5);
-  TH1F *hnsvtxB = new TH1F("hnsvtxB","hnsvtxB",6,-0.5,5.5);
-  TH1F *hnsvtxC = new TH1F("hnsvtxC","hnsvtxC",6,-0.5,5.5);
-  TH1F *hnsvtxL = new TH1F("hnsvtxL","hnsvtxL",6,-0.5,5.5);
-  
-  TH1F *hsvtxntrk = new TH1F("hsvtxntrk","hsvtxntrk",12,-0.5,11.5);
-  TH1F *hsvtxntrkB = new TH1F("hsvtxntrkB","hsvtxntrkB",12,-0.5,11.5);
-  TH1F *hsvtxntrkC = new TH1F("hsvtxntrkC","hsvtxntrkC",12,-0.5,11.5);
-  TH1F *hsvtxntrkL = new TH1F("hsvtxntrkL","hsvtxntrkL",12,-0.5,11.5);
+  TH1D *hvz = new TH1D("hvz","hvz",120,-15.,15.);
+  TH1D *hvzw = new TH1D("hvzw","hvzw",120,-15.,15.);
+  hvz->Sumw2(); hvzw->Sumw2(); 
 
-  TH1F *hsvtxdl = new TH1F("hsvtxdl","hsvtxdl",20,0,10);
-  TH1F *hsvtxdlB = new TH1F("hsvtxdlB","hsvtxdlB",20,0,10);
-  TH1F *hsvtxdlC = new TH1F("hsvtxdlC","hsvtxdlC",20,0,10);
-  TH1F *hsvtxdlL = new TH1F("hsvtxdlL","hsvtxdlL",20,0,10);
+  TH1D *hjtpt = new TH1D("hjtpt","hjtpt",68,80,330);
+  TH1D *hjtptB = new TH1D("hjtptB","hjtptB",68,80,330);
+  TH1D *hjtptC = new TH1D("hjtptC","hjtptC",68,80,330);
+  TH1D *hjtptL = new TH1D("hjtptL","hjtptL",68,80,330);
+  TH1D *hjtptU = new TH1D("hjtptU","hjtptU",68,80,330);
+  hjtpt->Sumw2(); hjtptB->Sumw2(); hjtptC->Sumw2(); hjtptL->Sumw2(); hjtptU->Sumw2();
 
-  TH1F *hsvtxdls = new TH1F("hsvtxdls","hsvtxdls",40,0,80);
-  TH1F *hsvtxdlsB = new TH1F("hsvtxdlsB","hsvtxdlsB",40,0,80);
-  TH1F *hsvtxdlsC = new TH1F("hsvtxdlsC","hsvtxdlsC",40,0,80);
-  TH1F *hsvtxdlsL = new TH1F("hsvtxdlsL","hsvtxdlsL",40,0,80);
+  TH1D *hjteta = new TH1D("hjteta","hjteta",40,-2,2);
+  TH1D *hjtetaB = new TH1D("hjtetaB","hjtetaB",40,-2,2);
+  TH1D *hjtetaC = new TH1D("hjtetaC","hjtetaC",40,-2,2);
+  TH1D *hjtetaL = new TH1D("hjtetaL","hjtetaL",40,-2,2);
+  hjteta->Sumw2(); hjtetaB->Sumw2(); hjtetaC->Sumw2(); hjtetaL->Sumw2(); 
+
+  TH1D *hjtphi = new TH1D("hjtphi","hjtphi",40,-1.*acos(-1.),acos(-1.));
+  TH1D *hjtphiB = new TH1D("hjtphiB","hjtphiB",40,-1.*acos(-1.),acos(-1.));
+  TH1D *hjtphiC = new TH1D("hjtphiC","hjtphiC",40,-1.*acos(-1.),acos(-1.));
+  TH1D *hjtphiL = new TH1D("hjtphiL","hjtphiL",40,-1.*acos(-1.),acos(-1.));
+  hjtphi->Sumw2(); hjtphiB->Sumw2(); hjtphiC->Sumw2(); hjtphiL->Sumw2(); 
+
+  TH1D *hdiscr_csvSimple = new TH1D("hdiscr_csvSimple","hdiscr_csvSimple",25,0,1);
+  TH1D *hdiscr_csvSimpleB = new TH1D("hdiscr_csvSimpleB","hdiscr_csvSimpleB",25,0,1);
+  TH1D *hdiscr_csvSimpleC = new TH1D("hdiscr_csvSimpleC","hdiscr_csvSimpleC",25,0,1);
+  TH1D *hdiscr_csvSimpleL = new TH1D("hdiscr_csvSimpleL","hdiscr_csvSimpleL",25,0,1);
+  hdiscr_csvSimple->Sumw2(); hdiscr_csvSimpleB->Sumw2(); hdiscr_csvSimpleC->Sumw2(); hdiscr_csvSimpleL->Sumw2();
   
-  TH1F *hsvtxm = new TH1F("hsvtxm","hsvtxm",32,0,8);
-  TH1F *hsvtxmB = new TH1F("hsvtxmB","hsvtxmB",32,0,8);
-  TH1F *hsvtxmC = new TH1F("hsvtxmC","hsvtxmC",32,0,8);
-  TH1F *hsvtxmL = new TH1F("hsvtxmL","hsvtxmL",32,0,8);
+  TH1D *hdiscr_prob = new TH1D("hdiscr_prob","hdiscr_prob",25,0,2.5);
+  TH1D *hdiscr_probB = new TH1D("hdiscr_probB","hdiscr_probB",25,0,2.5);
+  TH1D *hdiscr_probC = new TH1D("hdiscr_probC","hdiscr_probC",25,0,2.5);
+  TH1D *hdiscr_probL = new TH1D("hdiscr_probL","hdiscr_probL",25,0,2.5);
+  hdiscr_prob->Sumw2(); hdiscr_probB->Sumw2(); hdiscr_probC->Sumw2(); hdiscr_probL->Sumw2();
   
-  TH1F *hsvtxmSV3 = new TH1F("hsvtxmSV3","hsvtxmSV3",32,0,8);
-  TH1F *hsvtxmSV3B = new TH1F("hsvtxmSV3B","hsvtxmSV3B",32,0,8);
-  TH1F *hsvtxmSV3C = new TH1F("hsvtxmSV3C","hsvtxmSV3C",32,0,8);
-  TH1F *hsvtxmSV3L = new TH1F("hsvtxmSV3L","hsvtxmSV3L",32,0,8);
+  TH1D *hdiscr_ssvHighEff = new TH1D("hdiscr_ssvHighEff","hdiscr_ssvHighEff",25,1,6);
+  TH1D *hdiscr_ssvHighEffB = new TH1D("hdiscr_ssvHighEffB","hdiscr_ssvHighEffB",25,1,6);
+  TH1D *hdiscr_ssvHighEffC = new TH1D("hdiscr_ssvHighEffC","hdiscr_ssvHighEffC",25,1,6);
+  TH1D *hdiscr_ssvHighEffL = new TH1D("hdiscr_ssvHighEffL","hdiscr_ssvHighEffL",25,1,6);
+  hdiscr_ssvHighEff->Sumw2(); hdiscr_ssvHighEffB->Sumw2(); hdiscr_ssvHighEffC->Sumw2(); hdiscr_ssvHighEffL->Sumw2();
   
-  TH1F *hsvtxpt = new TH1F("hsvtxpt","hsvtxpt",20,0,100);
-  TH1F *hsvtxptB = new TH1F("hsvtxptB","hsvtxptB",20,0,100);
-  TH1F *hsvtxptC = new TH1F("hsvtxptC","hsvtxptC",20,0,100);
-  TH1F *hsvtxptL = new TH1F("hsvtxptL","hsvtxptL",20,0,100);
+  TH1D *hdiscr_ssvHighPur = new TH1D("hdiscr_ssvHighPur","hdiscr_ssvHighPur",25,1,6);
+  TH1D *hdiscr_ssvHighPurB = new TH1D("hdiscr_ssvHighPurB","hdiscr_ssvHighPurB",25,1,6);
+  TH1D *hdiscr_ssvHighPurC = new TH1D("hdiscr_ssvHighPurC","hdiscr_ssvHighPurC",25,1,6);
+  TH1D *hdiscr_ssvHighPurL = new TH1D("hdiscr_ssvHighPurL","hdiscr_ssvHighPurL",25,1,6);
+  hdiscr_ssvHighPur->Sumw2(); hdiscr_ssvHighPurB->Sumw2(); hdiscr_ssvHighPurC->Sumw2(); hdiscr_ssvHighPurL->Sumw2();
   
-  TH1F *hsvtxptSV3 = new TH1F("hsvtxptSV3","hsvtxptSV3",20,0,100);
-  TH1F *hsvtxptSV3B = new TH1F("hsvtxptSV3B","hsvtxptSV3B",20,0,100);
-  TH1F *hsvtxptSV3C = new TH1F("hsvtxptSV3C","hsvtxptSV3C",20,0,100);
-  TH1F *hsvtxptSV3L = new TH1F("hsvtxptSV3L","hsvtxptSV3L",20,0,100);
+  TH1D *hnsvtx = new TH1D("hnsvtx","hnsvtx",6,-0.5,5.5);
+  TH1D *hnsvtxB = new TH1D("hnsvtxB","hnsvtxB",6,-0.5,5.5);
+  TH1D *hnsvtxC = new TH1D("hnsvtxC","hnsvtxC",6,-0.5,5.5);
+  TH1D *hnsvtxL = new TH1D("hnsvtxL","hnsvtxL",6,-0.5,5.5);
+  hnsvtx->Sumw2(); hnsvtxB->Sumw2(); hnsvtxC->Sumw2(); hnsvtxL->Sumw2();
   
-  TH1F *hnIPtrk = new TH1F("hnIPtrk","hnIPtrk",40,0,40);
-  TH1F *hnIPtrkB = new TH1F("hnIPtrkB","hnIPtrkB",40,0,40);
-  TH1F *hnIPtrkC = new TH1F("hnIPtrkC","hnIPtrkC",40,0,40);
-  TH1F *hnIPtrkL = new TH1F("hnIPtrkL","hnIPtrkL",40,0,40);
+  TH1D *hsvtxntrk = new TH1D("hsvtxntrk","hsvtxntrk",12,-0.5,11.5);
+  TH1D *hsvtxntrkB = new TH1D("hsvtxntrkB","hsvtxntrkB",12,-0.5,11.5);
+  TH1D *hsvtxntrkC = new TH1D("hsvtxntrkC","hsvtxntrkC",12,-0.5,11.5);
+  TH1D *hsvtxntrkL = new TH1D("hsvtxntrkL","hsvtxntrkL",12,-0.5,11.5);
+  hsvtxntrk->Sumw2(); hsvtxntrkB->Sumw2(); hsvtxntrkC->Sumw2(); hsvtxntrkL->Sumw2();
+
+  TH1D *hsvtxdl = new TH1D("hsvtxdl","hsvtxdl",20,0,10);
+  TH1D *hsvtxdlB = new TH1D("hsvtxdlB","hsvtxdlB",20,0,10);
+  TH1D *hsvtxdlC = new TH1D("hsvtxdlC","hsvtxdlC",20,0,10);
+  TH1D *hsvtxdlL = new TH1D("hsvtxdlL","hsvtxdlL",20,0,10);
+  hsvtxdl->Sumw2(); hsvtxdlB->Sumw2(); hsvtxdlC->Sumw2(); hsvtxdlL->Sumw2();
+
+  TH1D *hsvtxdls = new TH1D("hsvtxdls","hsvtxdls",40,0,80);
+  TH1D *hsvtxdlsB = new TH1D("hsvtxdlsB","hsvtxdlsB",40,0,80);
+  TH1D *hsvtxdlsC = new TH1D("hsvtxdlsC","hsvtxdlsC",40,0,80);
+  TH1D *hsvtxdlsL = new TH1D("hsvtxdlsL","hsvtxdlsL",40,0,80);
+  hsvtxdls->Sumw2(); hsvtxdlsB->Sumw2(); hsvtxdlsC->Sumw2(); hsvtxdlsL->Sumw2();
   
-  TH1F *hnselIPtrk = new TH1F("hnselIPtrk","hnselIPtrk",40,0,40);
-  TH1F *hnselIPtrkB = new TH1F("hnselIPtrkB","hnselIPtrkB",40,0,40);
-  TH1F *hnselIPtrkC = new TH1F("hnselIPtrkC","hnselIPtrkC",40,0,40);
-  TH1F *hnselIPtrkL = new TH1F("hnselIPtrkL","hnselIPtrkL",40,0,40);
+  TH1D *hsvtxm = new TH1D("hsvtxm","hsvtxm",32,0,8);
+  TH1D *hsvtxmB = new TH1D("hsvtxmB","hsvtxmB",32,0,8);
+  TH1D *hsvtxmC = new TH1D("hsvtxmC","hsvtxmC",32,0,8);
+  TH1D *hsvtxmL = new TH1D("hsvtxmL","hsvtxmL",32,0,8);
+  hsvtxm->Sumw2(); hsvtxmB->Sumw2(); hsvtxmC->Sumw2(); hsvtxmL->Sumw2(); 
   
-  TH1F *hmuptrel = new TH1F("hmuptrel","hmuptrel",40,0,4);
-  TH1F *hmuptrelB = new TH1F("hmuptrelB","hmuptrelB",40,0,4);
-  TH1F *hmuptrelC = new TH1F("hmuptrelC","hmuptrelC",40,0,4);
-  TH1F *hmuptrelL = new TH1F("hmuptrelL","hmuptrelL",40,0,4);
+  TH1D *hsvtxmSV3 = new TH1D("hsvtxmSV3","hsvtxmSV3",32,0,8);
+  TH1D *hsvtxmSV3B = new TH1D("hsvtxmSV3B","hsvtxmSV3B",32,0,8);
+  TH1D *hsvtxmSV3C = new TH1D("hsvtxmSV3C","hsvtxmSV3C",32,0,8);
+  TH1D *hsvtxmSV3L = new TH1D("hsvtxmSV3L","hsvtxmSV3L",32,0,8);
+  hsvtxmSV3->Sumw2(); hsvtxmSV3B->Sumw2(); hsvtxmSV3C->Sumw2(); hsvtxmSV3L->Sumw2(); 
   
-  TH1F *hmuptrelSV2 = new TH1F("hmuptrelSV2","hmuptrelSV2",40,0,4);
-  TH1F *hmuptrelSV2B = new TH1F("hmuptrelSV2B","hmuptrelSV2B",40,0,4);
-  TH1F *hmuptrelSV2C = new TH1F("hmuptrelSV2C","hmuptrelSV2C",40,0,4);
-  TH1F *hmuptrelSV2L = new TH1F("hmuptrelSV2L","hmuptrelSV2L",40,0,4);
+  TH1D *hsvtxpt = new TH1D("hsvtxpt","hsvtxpt",20,0,100);
+  TH1D *hsvtxptB = new TH1D("hsvtxptB","hsvtxptB",20,0,100);
+  TH1D *hsvtxptC = new TH1D("hsvtxptC","hsvtxptC",20,0,100);
+  TH1D *hsvtxptL = new TH1D("hsvtxptL","hsvtxptL",20,0,100);
+  hsvtxpt->Sumw2(); hsvtxptB->Sumw2(); hsvtxptC->Sumw2(); hsvtxptL->Sumw2(); 
   
-  TH1F *hmuptrelSV3 = new TH1F("hmuptrelSV3","hmuptrelSV3",40,0,4);
-  TH1F *hmuptrelSV3B = new TH1F("hmuptrelSV3B","hmuptrelSV3B",40,0,4);
-  TH1F *hmuptrelSV3C = new TH1F("hmuptrelSV3C","hmuptrelSV3C",40,0,4);
-  TH1F *hmuptrelSV3L = new TH1F("hmuptrelSV3L","hmuptrelSV3L",40,0,4);
+  TH1D *hsvtxptSV3 = new TH1D("hsvtxptSV3","hsvtxptSV3",20,0,100);
+  TH1D *hsvtxptSV3B = new TH1D("hsvtxptSV3B","hsvtxptSV3B",20,0,100);
+  TH1D *hsvtxptSV3C = new TH1D("hsvtxptSV3C","hsvtxptSV3C",20,0,100);
+  TH1D *hsvtxptSV3L = new TH1D("hsvtxptSV3L","hsvtxptSV3L",20,0,100);
+  hsvtxptSV3->Sumw2(); hsvtxptSV3B->Sumw2(); hsvtxptSV3C->Sumw2(); hsvtxptSV3L->Sumw2(); 
   
-  TH1F *hipPt = new TH1F("hipPt","hipPt",40,0,40);
-  TH1F *hipPtB = new TH1F("hipPtB","hipPtB",40,0,40);
-  TH1F *hipPtC = new TH1F("hipPtC","hipPtC",40,0,40);
-  TH1F *hipPtL = new TH1F("hipPtL","hipPtL",40,0,40);
+  TH1D *hnIPtrk = new TH1D("hnIPtrk","hnIPtrk",100,0,100);
+  TH1D *hnIPtrkB = new TH1D("hnIPtrkB","hnIPtrkB",100,0,100);
+  TH1D *hnIPtrkC = new TH1D("hnIPtrkC","hnIPtrkC",100,0,100);
+  TH1D *hnIPtrkL = new TH1D("hnIPtrkL","hnIPtrkL",100,0,100);
+  hnIPtrk->Sumw2(); hnIPtrkB->Sumw2(); hnIPtrkC->Sumw2(); hnIPtrkL->Sumw2(); 
   
-  TH1F *hipProb0 = new TH1F("hipProb0","hipProb0",40,-1,1);
-  TH1F *hipProb0B = new TH1F("hipProb0B","hipProb0B",40,-1,1);
-  TH1F *hipProb0C = new TH1F("hipProb0C","hipProb0C",40,-1,1);
-  TH1F *hipProb0L = new TH1F("hipProb0L","hipProb0L",40,-1,1);
+  TH1D *hnselIPtrk = new TH1D("hnselIPtrk","hnselIPtrk",100,0,100);
+  TH1D *hnselIPtrkB = new TH1D("hnselIPtrkB","hnselIPtrkB",100,0,100);
+  TH1D *hnselIPtrkC = new TH1D("hnselIPtrkC","hnselIPtrkC",100,0,100);
+  TH1D *hnselIPtrkL = new TH1D("hnselIPtrkL","hnselIPtrkL",100,0,100);
+  hnselIPtrk->Sumw2(); hnselIPtrkB->Sumw2(); hnselIPtrkC->Sumw2(); hnselIPtrkL->Sumw2(); 
   
-  TH1F *hipProb1 = new TH1F("hipProb1","hipProb1",40,-1,1);
-  TH1F *hipProb1B = new TH1F("hipProb1B","hipProb1B",40,-1,1);
-  TH1F *hipProb1C = new TH1F("hipProb1C","hipProb1C",40,-1,1);
-  TH1F *hipProb1L = new TH1F("hipProb1L","hipProb1L",40,-1,1);
+  TH1D *hmuptrel = new TH1D("hmuptrel","hmuptrel",40,0,4);
+  TH1D *hmuptrelB = new TH1D("hmuptrelB","hmuptrelB",40,0,4);
+  TH1D *hmuptrelC = new TH1D("hmuptrelC","hmuptrelC",40,0,4);
+  TH1D *hmuptrelL = new TH1D("hmuptrelL","hmuptrelL",40,0,4);
+  hmuptrel->Sumw2(); hmuptrelB->Sumw2(); hmuptrelC->Sumw2(); hmuptrelL->Sumw2(); 
   
-  TH1F *hip2d = new TH1F("hip2d","hip2d",40,-0.2,0.2);
-  TH1F *hip2dB = new TH1F("hip2dB","hip2dB",40,-0.2,0.2);
-  TH1F *hip2dC = new TH1F("hip2dC","hip2dC",40,-0.2,0.2);
-  TH1F *hip2dL = new TH1F("hip2dL","hip2dL",40,-0.2,0.2);
+  TH1D *hmuptrelSV2 = new TH1D("hmuptrelSV2","hmuptrelSV2",40,0,4);
+  TH1D *hmuptrelSV2B = new TH1D("hmuptrelSV2B","hmuptrelSV2B",40,0,4);
+  TH1D *hmuptrelSV2C = new TH1D("hmuptrelSV2C","hmuptrelSV2C",40,0,4);
+  TH1D *hmuptrelSV2L = new TH1D("hmuptrelSV2L","hmuptrelSV2L",40,0,4);
+  hmuptrelSV2->Sumw2(); hmuptrelSV2B->Sumw2(); hmuptrelSV2C->Sumw2(); hmuptrelSV2L->Sumw2(); 
   
-  TH1F *hip2dSig = new TH1F("hip2dSig","hip2dSig",40,-100,100);
-  TH1F *hip2dSigB = new TH1F("hip2dSigB","hip2dSigB",40,-100,100);
-  TH1F *hip2dSigC = new TH1F("hip2dSigC","hip2dSigC",40,-100,100);
-  TH1F *hip2dSigL = new TH1F("hip2dSigL","hip2dSigL",40,-100,100);
+  TH1D *hmuptrelSV3 = new TH1D("hmuptrelSV3","hmuptrelSV3",40,0,4);
+  TH1D *hmuptrelSV3B = new TH1D("hmuptrelSV3B","hmuptrelSV3B",40,0,4);
+  TH1D *hmuptrelSV3C = new TH1D("hmuptrelSV3C","hmuptrelSV3C",40,0,4);
+  TH1D *hmuptrelSV3L = new TH1D("hmuptrelSV3L","hmuptrelSV3L",40,0,4);
+  hmuptrelSV3->Sumw2(); hmuptrelSV3B->Sumw2(); hmuptrelSV3C->Sumw2(); hmuptrelSV3L->Sumw2(); 
   
-  TH1F *hip3d = new TH1F("hip3d","hip3d",40,-0.2,0.2);
-  TH1F *hip3dB = new TH1F("hip3dB","hip3dB",40,-0.2,0.2);
-  TH1F *hip3dC = new TH1F("hip3dC","hip3dC",40,-0.2,0.2);
-  TH1F *hip3dL = new TH1F("hip3dL","hip3dL",40,-0.2,0.2);
+  TH1D *hipPt = new TH1D("hipPt","hipPt",40,0,40);
+  TH1D *hipPtB = new TH1D("hipPtB","hipPtB",40,0,40);
+  TH1D *hipPtC = new TH1D("hipPtC","hipPtC",40,0,40);
+  TH1D *hipPtL = new TH1D("hipPtL","hipPtL",40,0,40);
+  hipPt->Sumw2(); hipPtB->Sumw2(); hipPtC->Sumw2(); hipPtL->Sumw2(); 
   
-  TH1F *hip3dSig = new TH1F("hip3dSig","hip3dSig",40,-100,100);
-  TH1F *hip3dSigB = new TH1F("hip3dSigB","hip3dSigB",40,-100,100);
-  TH1F *hip3dSigC = new TH1F("hip3dSigC","hip3dSigC",40,-100,100);
-  TH1F *hip3dSigL = new TH1F("hip3dSigL","hip3dSigL",40,-100,100);
+  TH1D *hipProb0 = new TH1D("hipProb0","hipProb0",40,-1,1);
+  TH1D *hipProb0B = new TH1D("hipProb0B","hipProb0B",40,-1,1);
+  TH1D *hipProb0C = new TH1D("hipProb0C","hipProb0C",40,-1,1);
+  TH1D *hipProb0L = new TH1D("hipProb0L","hipProb0L",40,-1,1);
+  hipProb0->Sumw2(); hipProb0B->Sumw2(); hipProb0C->Sumw2(); hipProb0L->Sumw2(); 
   
-  TH1F *hipDist2Jet = new TH1F("hipDist2Jet","hipDist2Jet",40,-0.1,0);
-  TH1F *hipDist2JetB = new TH1F("hipDist2JetB","hipDist2JetB",40,-0.1,0);
-  TH1F *hipDist2JetC = new TH1F("hipDist2JetC","hipDist2JetC",40,-0.1,0);
-  TH1F *hipDist2JetL = new TH1F("hipDist2JetL","hipDist2JetL",40,-0.1,0);
+  TH1D *hipProb1 = new TH1D("hipProb1","hipProb1",40,-1,1);
+  TH1D *hipProb1B = new TH1D("hipProb1B","hipProb1B",40,-1,1);
+  TH1D *hipProb1C = new TH1D("hipProb1C","hipProb1C",40,-1,1);
+  TH1D *hipProb1L = new TH1D("hipProb1L","hipProb1L",40,-1,1);
+  hipProb1->Sumw2(); hipProb1B->Sumw2(); hipProb1C->Sumw2(); hipProb1L->Sumw2(); 
   
-  TH1F *hipDist2JetSig = new TH1F("hipDist2JetSig","hipDist2JetSig",40,-0.1,0.1);
-  TH1F *hipDist2JetSigB = new TH1F("hipDist2JetSigB","hipDist2JetSigB",40,-0.1,0.1);
-  TH1F *hipDist2JetSigC = new TH1F("hipDist2JetSigC","hipDist2JetSigC",40,-0.1,0.1);
-  TH1F *hipDist2JetSigL = new TH1F("hipDist2JetSigL","hipDist2JetSigL",40,-0.1,0.1);
+  TH1D *hip2d = new TH1D("hip2d","hip2d",40,-0.2,0.2);
+  TH1D *hip2dB = new TH1D("hip2dB","hip2dB",40,-0.2,0.2);
+  TH1D *hip2dC = new TH1D("hip2dC","hip2dC",40,-0.2,0.2);
+  TH1D *hip2dL = new TH1D("hip2dL","hip2dL",40,-0.2,0.2);
+  hip2d->Sumw2(); hip2dB->Sumw2(); hip2dC->Sumw2(); hip2dL->Sumw2(); 
   
-  TH1F *hipClosest2Jet = new TH1F("hipClosest2Jet","hipClosest2Jet",40,0,1);
-  TH1F *hipClosest2JetB = new TH1F("hipClosest2JetB","hipClosest2JetB",40,0,1);
-  TH1F *hipClosest2JetC = new TH1F("hipClosest2JetC","hipClosest2JetC",40,0,1);
-  TH1F *hipClosest2JetL = new TH1F("hipClosest2JetL","hipClosest2JetL",40,0,1);
+  TH1D *hip2dSig = new TH1D("hip2dSig","hip2dSig",40,-100,100);
+  TH1D *hip2dSigB = new TH1D("hip2dSigB","hip2dSigB",40,-100,100);
+  TH1D *hip2dSigC = new TH1D("hip2dSigC","hip2dSigC",40,-100,100);
+  TH1D *hip2dSigL = new TH1D("hip2dSigL","hip2dSigL",40,-100,100);
+  hip2dSig->Sumw2(); hip2dSigB->Sumw2(); hip2dSigC->Sumw2(); hip2dSigL->Sumw2(); 
+  
+  TH1D *hip3d = new TH1D("hip3d","hip3d",40,-0.2,0.2);
+  TH1D *hip3dB = new TH1D("hip3dB","hip3dB",40,-0.2,0.2);
+  TH1D *hip3dC = new TH1D("hip3dC","hip3dC",40,-0.2,0.2);
+  TH1D *hip3dL = new TH1D("hip3dL","hip3dL",40,-0.2,0.2);
+  hip3d->Sumw2(); hip3dB->Sumw2(); hip3dC->Sumw2(); hip3dL->Sumw2(); 
+  
+  TH1D *hip3dSig = new TH1D("hip3dSig","hip3dSig",40,-100,100);
+  TH1D *hip3dSigB = new TH1D("hip3dSigB","hip3dSigB",40,-100,100);
+  TH1D *hip3dSigC = new TH1D("hip3dSigC","hip3dSigC",40,-100,100);
+  TH1D *hip3dSigL = new TH1D("hip3dSigL","hip3dSigL",40,-100,100);
+  hip3dSig->Sumw2(); hip3dSigB->Sumw2(); hip3dSigC->Sumw2(); hip3dSigL->Sumw2(); 
+  
+  TH1D *hipDist2Jet = new TH1D("hipDist2Jet","hipDist2Jet",40,-0.1,0);
+  TH1D *hipDist2JetB = new TH1D("hipDist2JetB","hipDist2JetB",40,-0.1,0);
+  TH1D *hipDist2JetC = new TH1D("hipDist2JetC","hipDist2JetC",40,-0.1,0);
+  TH1D *hipDist2JetL = new TH1D("hipDist2JetL","hipDist2JetL",40,-0.1,0);
+  hipDist2Jet->Sumw2(); hipDist2JetB->Sumw2(); hipDist2JetC->Sumw2(); hipDist2JetL->Sumw2(); 
+  
+  TH1D *hipDist2JetSig = new TH1D("hipDist2JetSig","hipDist2JetSig",40,-0.1,0.1);
+  TH1D *hipDist2JetSigB = new TH1D("hipDist2JetSigB","hipDist2JetSigB",40,-0.1,0.1);
+  TH1D *hipDist2JetSigC = new TH1D("hipDist2JetSigC","hipDist2JetSigC",40,-0.1,0.1);
+  TH1D *hipDist2JetSigL = new TH1D("hipDist2JetSigL","hipDist2JetSigL",40,-0.1,0.1);
+  hipDist2JetSig->Sumw2(); hipDist2JetSigB->Sumw2(); hipDist2JetSigC->Sumw2(); hipDist2JetSigL->Sumw2(); 
+  
+  TH1D *hipClosest2Jet = new TH1D("hipClosest2Jet","hipClosest2Jet",40,0,1);
+  TH1D *hipClosest2JetB = new TH1D("hipClosest2JetB","hipClosest2JetB",40,0,1);
+  TH1D *hipClosest2JetC = new TH1D("hipClosest2JetC","hipClosest2JetC",40,0,1);
+  TH1D *hipClosest2JetL = new TH1D("hipClosest2JetL","hipClosest2JetL",40,0,1);
+  hipClosest2Jet->Sumw2(); hipClosest2JetB->Sumw2(); hipClosest2JetC->Sumw2(); hipClosest2JetL->Sumw2(); 
 
   TNtuple *nt;
-  if(isMC) nt= new TNtuple("nt","","jtpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat");
-  else nt= new TNtuple("nt","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat");
+  if(isMC) nt= new TNtuple("nt","","jtpt:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:nselIPtrk");
+  else nt= new TNtuple("nt","","jtpt:rawpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:nselIPtrk");
 
   TNtuple *ntMuReq;
-  if(isMC) ntMuReq = new TNtuple("ntMuReq","","jtpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
-  else ntMuReq = new TNtuple("ntMuReq","","jtpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
+  if(isMC) ntMuReq = new TNtuple("ntMuReq","","jtpt:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
+  else ntMuReq = new TNtuple("ntMuReq","","jtpt:rawpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
 
   
    cout<<" grab the JEC's "<<endl;
@@ -399,13 +474,24 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
     if (i%100000==0) cout<<" i = "<<i<<" out of "<<nentries<<" ("<<(int)(100*(float)i/(float)nentries)<<"%)"<<endl; 
 
     tSkim->GetEntry(i);
-    if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
-
-    t->GetEntry(i);
     if(isMC){
-      if(beamId1==2112 || beamId2==2112)  continue;
+      if(!pvSel||!spikeSel) continue; //hbheNoise doesn't work in mixed events
+    }
+    else{
+      if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
     }
 
+    t->GetEntry(i);
+    if(isMC&&!ppPbPb){
+      if(beamId1==2112 || beamId2==2112)  continue;
+    }
+    // hard coded Jet80
+    if(ppPbPb){
+      if(!hltBit[10]) continue;
+    }
+
+    if(fabs(vz)>15.) continue;
+    
     if(updateJEC){
       
       for(int ij=0; ij<nref; ij++){	  
@@ -416,26 +502,29 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
     }
 
 
-    float w=1.;
+    double w=1.;
     if(isMC&&useWeight) w=weight;
+
 
     if(doNtuples){
       for(int ij=0;ij<nref;ij++){
 	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
 
-	  if(isMC)nt->Fill(jtpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat);
-	  else nt->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat);
+	  if(isMC)nt->Fill(jtpt[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,nselIPtrk[ij]);
+	  else nt->Fill(jtpt[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,nselIPtrk[ij]);
 
 	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
 
-	    if(isMC)ntMuReq->Fill(jtpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
-	    else ntMuReq->Fill(jtpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	    if(isMC)ntMuReq->Fill(jtpt[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	    else ntMuReq->Fill(jtpt[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
 	  }
 	}
       }
     }
 
     if(doJets){
+
+      int useEvent=0;
 
       for(int ij=0;ij<nref;ij++){
 	
@@ -445,13 +534,27 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
 	    //muon requirement
 	    if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))>0.5 || mupt[ij]<minMuPt) continue;
 	  }
-	 
+	  
+	  useEvent=1;
+
 	  hjtpt->Fill(jtpt[ij],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    
 	    else if(abs(refparton_flavorForB[ij])==4)hjtptC->Fill(jtpt[ij],w);    
 	    else if(abs(refparton_flavorForB[ij])<99)hjtptL->Fill(jtpt[ij],w);    
 	    else hjtptU->Fill(jtpt[ij],w);    
+	  }
+	  hjteta->Fill(jteta[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hjtetaB->Fill(jteta[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hjtetaC->Fill(jteta[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hjtetaL->Fill(jteta[ij],w);    
+	  }
+	  hjtphi->Fill(jtphi[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hjtphiB->Fill(jtphi[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hjtphiC->Fill(jtphi[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])<99)hjtphiL->Fill(jtphi[ij],w);    
 	  }
 	  //*
 	  hdiscr_csvSimple->Fill(discr_csvSimple[ij],w);    
@@ -554,8 +657,10 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
 	    else if(abs(refparton_flavorForB[ij])==4)hnIPtrkC->Fill(nIPtrk[ij],w);    
 	    else if(abs(refparton_flavorForB[ij])<99)hnIPtrkL->Fill(nIPtrk[ij],w);    
 	  }
-	  
+
+
 	  hnselIPtrk->Fill(nselIPtrk[ij],w);    
+
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hnselIPtrkB->Fill(nselIPtrk[ij],w);    
 	    else if(abs(refparton_flavorForB[ij])==4)hnselIPtrkC->Fill(nselIPtrk[ij],w);
@@ -590,36 +695,50 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
 	    }
 	    
 	  }
-
 	  //*/
 	}
 
       }
+      if(useEvent){
+	if(isMC){
+	  hbinw->Fill(bin,w);
+	  hbin->Fill(bin,xSecWeight*vzWeight);
+	}
+	else hbin->Fill(bin);
 
+	if(isMC){
+	  hvzw->Fill(vz,w);
+	  if(ppPbPb)hvz->Fill(vz,xSecWeight*centWeight);
+	  else hvz->Fill(vz,xSecWeight);
+	}
+	else hvz->Fill(vz);
+      }
     }
-    //*
+    
     if(doTracks){
-      
+
       for(int it=0;it<nIP;it++){
 	
 	int ijet = ipJetIndex[it];
 	
 	if(jtpt[ijet]>minJetPt && fabs(jteta[ijet])<maxJetEta){
-	  
+
+
 	  hipPt->Fill(ipPt[it],w);    
+
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ijet])==5)hipPtB->Fill(ipPt[it],w);
 	    else if(abs(refparton_flavorForB[ijet])==4)hipPtC->Fill(ipPt[it],w); 
 	    else if(abs(refparton_flavorForB[ijet])<99)hipPtL->Fill(ipPt[it],w); 
 	  }
-	  
+
 	  hipProb0->Fill(ipProb0[it],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ijet])==5)hipProb0B->Fill(ipProb0[it],w);
 	    else if(abs(refparton_flavorForB[ijet])==4)hipProb0C->Fill(ipProb0[it],w);
 	    else if(abs(refparton_flavorForB[ijet])<99)hipProb0L->Fill(ipProb0[it],w);
 	  }
-	  
+
 	  hipProb1->Fill(ipProb1[it],w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ijet])==5)hipProb1B->Fill(ipProb1[it],w);
@@ -679,13 +798,21 @@ void analyzeTrees(int isRecopp=0, int isMuTrig=0, int isMC=1, int useWeight=1, i
 	}
 	
       }
-    
+      
     }
-    //*/
+    
+  
   }
+  hbin->Write(); hbinw->Write(); hvz->Write(); hvzw->Write();
 
   hjtpt->Write();
   if(isMC) hjtptB->Write(); hjtptC->Write(); hjtptL->Write(); hjtptU->Write();
+
+  hjteta->Write();
+  if(isMC) hjtetaB->Write(); hjtetaC->Write(); hjtetaL->Write(); 
+
+  hjtphi->Write();
+  if(isMC) hjtphiB->Write(); hjtphiC->Write(); hjtphiL->Write(); 
 
   hdiscr_csvSimple->Write();
   if(isMC) hdiscr_csvSimpleB->Write(); hdiscr_csvSimpleC->Write(); hdiscr_csvSimpleL->Write(); 
