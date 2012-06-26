@@ -4,50 +4,71 @@
 #include "TTree.h"
 #include "TString.h"
 #include "TF1.h"
+#include "TH1.h"
+#include "TMath.h"
 
 void weightPtHatBins(int LCB=0){
     
   gROOT->Reset();
   
-  Int_t start=2;
-  Int_t N=5;
+  Int_t start=1;
+  Int_t N=6;
 
-  TFile *fin[7], *fout[7];
-  TTree *tr_in[7], *tr_out[7];
-  TTree *tr_in_skim[7], *tr_out_skim[7];
+  TFile *fin[6], *fout[6];
+  TTree *tr_in[6], *tr_out[6];
+  TTree *tr_in_skim[6], *tr_out_skim[6];
 
-  Int_t bounds[7] = {15,30,50,80,120,170,200};
+  Int_t bounds[6] = {15,30,50,80,120,200};
 
-  Double_t xSections[7]={(0)};
+  Double_t xSections[6]={(0)};
   if(LCB==2){
-    xSections[2] = 1.181e-03;
-    xSections[3] = 1.104e-04;
+    xSections[2] = 7.5614e-04;
+    xSections[3] = 7.117e-05;
+    xSections[4] = 1.118e-05;
+  }
+  if(LCB==1){
+    xSections[2] = 1.170e-03;
+    xSections[3] = 1.723e-04;
+    xSections[4] = 2.172e-05;
   }
   if(LCB==0){
     xSections[1] = 1.079e-02;
     xSections[2] = 1.021e-03;
     xSections[3] = 9.913e-05;          
     xSections[4] = 1.128e-05;
-    xSections[5] = 1.470e-06;
-    xSections[6] = 5.310e-07;
+    //xSections[5] = 1.470e-06;  //pt,hat 170 --> wrong !?
+    xSections[5] = 5.310e-07;
 
   }
 
   TF1 *fCent = new TF1("fCent","pol7",0,40);
   fCent->SetParameters(14781.9,-1641.19,127.245,-8.87318,0.41423,-0.011089,0.000154744,-8.76427e-07);
 
-  //char name[100];
-  
-  char filename[500] = "merged_bjetAnalyzers_hiRecoV3_offPV";
+  TFile *fData = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbdata.root");
+  TH1F *hDataVz = (TH1F *)fData->Get("hvz");
+  hDataVz->Rebin(4);
+  hDataVz->Scale(1./hDataVz->Integral());
+
+  TFile *fMC = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbQCDMC.root");
+  TH1F *hMCCent =  (TH1F*)fMC->Get("hbin");
+  TH1F *hMCVz = (TH1F *)fMC->Get("hvz");
+  hMCVz->Rebin(4);
+  hMCVz->Scale(1./hMCVz->Integral());
+
+  char filename[500] = "merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix";
+
+  Double_t weight, xSecWeight, centWeight, vzWeight;
   
   for (Int_t it=start; it<N; it++) {
-  
+      
     cout<<" file # "<<it<<endl;
     TString inputPath = "/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/";
     TString outputPath = "/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/";
 
     if(LCB==0)inputPath.Append(Form("qcd%d/%s.root",bounds[it],filename));
+    else if(LCB==1)inputPath.Append(Form("cJet%d/%s.root",bounds[it],filename));
     else if(LCB==2)inputPath.Append(Form("bJet%d/%s.root",bounds[it],filename));
+    
     cout<<"   reading from "<<inputPath<<endl; 
     fin[it] = new TFile(inputPath);
 
@@ -66,9 +87,14 @@ void weightPtHatBins(int LCB=0){
     tr_out[it] = new TTree("t","Jet Analyzer");
     tr_out_skim[it] = new TTree("HltTree","HltTree");
 
-    Double_t fentries = (Double_t)tr_in[it]->GetEntries();
-    Double_t xSecWeight = xSections[it]/(fentries);
-    cout<<"  x-sec weight ("<< bounds[it] <<") : "<< xSecWeight <<endl;
+    char cutname[100];
+    if (it<N-1) sprintf(cutname,"pthat>%d&&pthat<%d",bounds[it],bounds[it+1]);
+    else sprintf(cutname,"pthat>%d",bounds[it]);
+
+    cout<<cutname<<endl;
+    Double_t fentries = (Double_t)tr_in[it]->GetEntries(cutname);
+    xSecWeight = xSections[it]/(fentries);
+    cout<<"  x-sec weight ("<< bounds[it] <<") : "<< xSecWeight <<" entries: "<<fentries<<endl;
 
 
     //Declaration of leaves types
@@ -103,17 +129,17 @@ void weightPtHatBins(int LCB=0){
     Int_t           nIPtrk[300];
     Int_t           nselIPtrk[300];
     Int_t   nIP;
-    Int_t   ipJetIndex[400];
-    Float_t ipPt[400];
-    Float_t ipProb0[400];
-    Float_t ipProb1[400];
-    Float_t ip2d[400];
-    Float_t ip2dSig[400];
-    Float_t ip3d[400];
-    Float_t ip3dSig[400];
-    Float_t ipDist2Jet[400];
-    Float_t ipDist2JetSig[400];
-    Float_t ipClosest2Jet[400];
+    Int_t   ipJetIndex[10000];
+    Float_t ipPt[10000];
+    Float_t ipProb0[10000];
+    Float_t ipProb1[10000];
+    Float_t ip2d[10000];
+    Float_t ip2dSig[10000];
+    Float_t ip3d[10000];
+    Float_t ip3dSig[10000];
+    Float_t ipDist2Jet[10000];
+    Float_t ipDist2JetSig[10000];
+    Float_t ipClosest2Jet[10000];
     Float_t         mue[300];
     Float_t         mupt[300];
     Float_t         mueta[300];
@@ -143,7 +169,10 @@ void weightPtHatBins(int LCB=0){
     Float_t         gendphijt[100];
     Float_t         gendrjt[100];
     */
-    Double_t weight;
+
+    int nHLTBit;
+    bool hltBit[12];
+
 
     // Set branch addresses.
     tr_in[it]->SetBranchAddress("evt",&evt);
@@ -190,13 +219,13 @@ void weightPtHatBins(int LCB=0){
     tr_in[it]->SetBranchAddress("ipDist2Jet",ipDist2Jet);
     tr_in[it]->SetBranchAddress("ipDist2JetSig",ipDist2JetSig);
     tr_in[it]->SetBranchAddress("ipClosest2Jet",ipClosest2Jet);
-    tr_in[it]->SetBranchAddress("mue",mue);
-    tr_in[it]->SetBranchAddress("mupt",mupt);
-    tr_in[it]->SetBranchAddress("mueta",mueta);
-    tr_in[it]->SetBranchAddress("muphi",muphi);
-    tr_in[it]->SetBranchAddress("mudr",mudr);
-    tr_in[it]->SetBranchAddress("muptrel",muptrel);
-    tr_in[it]->SetBranchAddress("muchg",muchg);
+    //tr_in[it]->SetBranchAddress("mue",mue);
+    //tr_in[it]->SetBranchAddress("mupt",mupt);
+    //tr_in[it]->SetBranchAddress("mueta",mueta);
+    //tr_in[it]->SetBranchAddress("muphi",muphi);
+    //tr_in[it]->SetBranchAddress("mudr",mudr);
+    //tr_in[it]->SetBranchAddress("muptrel",muptrel);
+    //tr_in[it]->SetBranchAddress("muchg",muchg);
     tr_in[it]->SetBranchAddress("pthat",&pthat);
     tr_in[it]->SetBranchAddress("beamId1",&beamId1);
     tr_in[it]->SetBranchAddress("beamId2",&beamId2);
@@ -209,6 +238,9 @@ void weightPtHatBins(int LCB=0){
     tr_in[it]->SetBranchAddress("refparton_pt",refparton_pt);
     tr_in[it]->SetBranchAddress("refparton_flavor",refparton_flavor);
     tr_in[it]->SetBranchAddress("refparton_flavorForB",refparton_flavorForB);
+    tr_in[it]->SetBranchAddress("nHLTBit",&nHLTBit);
+    tr_in[it]->SetBranchAddress("hltBit",hltBit);
+
     /*
     tr_in[it]->SetBranchAddress("ngen",&ngen);
     tr_in[it]->SetBranchAddress("genmatchindex",genmatchindex);
@@ -265,13 +297,13 @@ void weightPtHatBins(int LCB=0){
     tr_out[it]->Branch("ipDist2Jet",ipDist2Jet,"ipDist2Jet[nIP]/F");
     tr_out[it]->Branch("ipDist2JetSig",ipDist2JetSig,"ipDist2JetSig[nIP]/F");
     tr_out[it]->Branch("ipClosest2Jet",ipClosest2Jet,"ipClosest2Jet[nIP]/F");  
-    tr_out[it]->Branch("mue",mue,"mue[nref]/F");
-    tr_out[it]->Branch("mupt",mupt,"mupt[nref]/F");
-    tr_out[it]->Branch("mueta",mueta,"mueta[nref]/F");
-    tr_out[it]->Branch("muphi",muphi,"muphi[nref]/F");
-    tr_out[it]->Branch("mudr",mudr,"mudr[nref]/F");
-    tr_out[it]->Branch("muptrel",muptrel,"muptre[nref]/F");
-    tr_out[it]->Branch("muchg",muchg,"muchg[nref]/I");
+    //tr_out[it]->Branch("mue",mue,"mue[nref]/F");
+    //tr_out[it]->Branch("mupt",mupt,"mupt[nref]/F");
+    //tr_out[it]->Branch("mueta",mueta,"mueta[nref]/F");
+    //tr_out[it]->Branch("muphi",muphi,"muphi[nref]/F");
+    //tr_out[it]->Branch("mudr",mudr,"mudr[nref]/F");
+    //tr_out[it]->Branch("muptrel",muptrel,"muptre[nref]/F");
+    //tr_out[it]->Branch("muchg",muchg,"muchg[nref]/I");
     tr_out[it]->Branch("pthat",&pthat,"pthat/F");
     tr_out[it]->Branch("beamId1",&beamId1,"beamId1/I");
     tr_out[it]->Branch("beamId2",&beamId1,"beamId2/I");
@@ -295,6 +327,12 @@ void weightPtHatBins(int LCB=0){
     tr_out[it]->Branch("gendrjt",gendrjt,"gendrjt[nref]/F");
     */
     tr_out[it]->Branch("weight",&weight,"weight/D");
+    tr_out[it]->Branch("xSecWeight",&xSecWeight,"xSecWeight/D");
+    tr_out[it]->Branch("centWeight",&centWeight,"centWeight/D");
+    tr_out[it]->Branch("vzWeight",&vzWeight,"vzWeight/D");
+
+    tr_out[it]->Branch("nHLTBit",&nHLTBit,"nHLTBit/I");
+    tr_out[it]->Branch("hltBit",hltBit,"hltBit[nHLTBit]/O");
 
 
     //Declaration of leaves types
@@ -331,10 +369,15 @@ void weightPtHatBins(int LCB=0){
       nbytes += tr_in[it]->GetEntry(i);
       nbytes_skim += tr_in_skim[it]->GetEntry(i);
 
-      float centWeight = fCent->Eval(bin);
+      centWeight = fCent->Integral(bin,bin+1)/hMCCent->GetBinContent(bin+1);
       if(centWeight<0) centWeight=0.;
-      weight=xSecWeight*centWeight;
-      
+
+      int vzbin = (int) TMath::Ceil(vz+15.);
+      if(vzbin>0&&vzbin<=30)vzWeight = hDataVz->GetBinContent(vzbin)/hMCVz->GetBinContent(vzbin);
+      else vzWeight=0.;
+
+      weight=xSecWeight*centWeight*vzWeight;
+
 
       if (it<N-1){
 	if (pthat>bounds[it+1]) continue;
