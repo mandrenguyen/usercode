@@ -20,7 +20,9 @@ void weightPtHatBins(int LCB=0){
 
   Int_t bounds[6] = {15,30,50,80,120,200};
 
+
   Double_t xSections[6]={(0)};
+  /*
   if(LCB==2){
     xSections[2] = 7.5614e-04;
     xSections[3] = 7.117e-05;
@@ -32,14 +34,28 @@ void weightPtHatBins(int LCB=0){
     xSections[4] = 2.172e-05;
   }
   if(LCB==0){
-    xSections[1] = 1.079e-02;
-    xSections[2] = 1.021e-03;
-    xSections[3] = 9.913e-05;          
-    xSections[4] = 1.128e-05;
-    //xSections[5] = 1.470e-06;  //pt,hat 170 --> wrong !?
-    xSections[5] = 5.310e-07;
+  */
+  xSections[1] = 1.079e-02; //30
+  xSections[2] = 1.021e-03; //50
+  xSections[3] = 9.913e-05; //80         
+  xSections[4] = 1.128e-05; //120
+  //xSections[5] = 1.470e-06;  //pt,hat 170 --> wrong !?
+  xSections[5] = 5.310e-07;
+  
+  // multiply by the fraction of events on the interval
+  //30-50
+  xSections[1] *= 89849./99173.;
+  //50-80
+  xSections[2] *= 138481./153301.;
+  //80-120
+  xSections[3] *= 126859./143194.;
+  //120-200
+  xSections[4] *= 34457./36104.;
+  
+  //}
 
-  }
+
+  
 
   TF1 *fCent = new TF1("fCent","pol7",0,40);
   fCent->SetParameters(14781.9,-1641.19,127.245,-8.87318,0.41423,-0.011089,0.000154744,-8.76427e-07);
@@ -77,7 +93,7 @@ void weightPtHatBins(int LCB=0){
     fin[it]->cd("/skimanalysis");
     tr_in_skim[it] = (TTree*)gDirectory->Get("HltTree");
 
-    outputPath.Append(Form("%s_weighted_%d.root",filename,bounds[it]));
+    outputPath.Append(Form("%s_weighted_WithUpperCut_%d.root",filename,bounds[it]));
     fout[it] = new TFile(outputPath,"RECREATE");
     cout<<"   writing into "<<outputPath<<endl; 
 
@@ -90,7 +106,7 @@ void weightPtHatBins(int LCB=0){
     char cutname[100];
     if (it<N-1) sprintf(cutname,"pthat>%d&&pthat<%d",bounds[it],bounds[it+1]);
     else sprintf(cutname,"pthat>%d",bounds[it]);
-
+    //sprintf(cutname,"pthat>%d",bounds[it]);
     cout<<cutname<<endl;
     Double_t fentries = (Double_t)tr_in[it]->GetEntries(cutname);
     xSecWeight = xSections[it]/(fentries);
@@ -370,6 +386,7 @@ void weightPtHatBins(int LCB=0){
       nbytes_skim += tr_in_skim[it]->GetEntry(i);
 
       centWeight = fCent->Integral(bin,bin+1)/hMCCent->GetBinContent(bin+1);
+      //centWeight = fCent->Integral(bin,bin+1);
       if(centWeight<0) centWeight=0.;
 
       int vzbin = (int) TMath::Ceil(vz+15.);
