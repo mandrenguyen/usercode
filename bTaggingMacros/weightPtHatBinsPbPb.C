@@ -11,52 +11,34 @@ void weightPtHatBins(int LCB=0){
     
   gROOT->Reset();
   
-  Int_t start=1;
-  Int_t N=6;
+  Int_t start=4;
+  Int_t N=7;
 
-  TFile *fin[6], *fout[6];
-  TTree *tr_in[6], *tr_out[6];
-  TTree *tr_in_skim[6], *tr_out_skim[6];
+  TFile *fin[7], *fout[7];
+  TTree *tr_in[7], *tr_out[7];
+  TTree *tr_in_skim[7], *tr_out_skim[7];
 
-  Int_t bounds[6] = {15,30,50,80,120,200};
+  Int_t bounds[7] = {15,30,50,80,120,170,200};
 
 
-  Double_t xSections[6]={(0)};
-  /*
-  if(LCB==2){
-    xSections[2] = 7.5614e-04;
-    xSections[3] = 7.117e-05;
-    xSections[4] = 1.118e-05;
-  }
-  if(LCB==1){
-    xSections[2] = 1.170e-03;
-    xSections[3] = 1.723e-04;
-    xSections[4] = 2.172e-05;
-  }
-  if(LCB==0){
-  */
+  Double_t xSections[7]={(0)};
+
   xSections[1] = 1.079e-02; //30
   xSections[2] = 1.021e-03; //50
   xSections[3] = 9.913e-05; //80         
   xSections[4] = 1.128e-05; //120
-  //xSections[5] = 1.470e-06;  //pt,hat 170 --> wrong !?
-  xSections[5] = 5.310e-07;
+  xSections[5] = 1.470e-06; //170
+  xSections[6] = 5.310e-07; //200
   
   // multiply by the fraction of events on the interval
-  //30-50
-  xSections[1] *= 89849./99173.;
-  //50-80
-  xSections[2] *= 138481./153301.;
-  //80-120
-  xSections[3] *= 126859./143194.;
-  //120-200
-  xSections[4] *= 34457./36104.;
-  
-  //}
+  xSections[1] *= 89849./99173.;   //30-50
+  xSections[2] *= 138481./153301.;   //50-80
+  xSections[3] *= 126859./143194.;   //80-120
+  //xSections[4] *= 34457./36104.;   //120-200
+  xSections[4] *= 31479./36104.;    //120-170
+  xSections[5] *= 31707./49715.;    //170-200
 
-
-  
-
+  // fit to centrality distribution
   TF1 *fCent = new TF1("fCent","pol7",0,40);
   fCent->SetParameters(14781.9,-1641.19,127.245,-8.87318,0.41423,-0.011089,0.000154744,-8.76427e-07);
 
