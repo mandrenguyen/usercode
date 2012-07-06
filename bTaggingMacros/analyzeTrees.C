@@ -8,11 +8,12 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h" 
 
-void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=1)
+void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=1)
 {
 
   // isMC=0 --> Real data, ==1 --> QCD, ==2 --> cJet, ==3 --> bJet
   Float_t minJetPt=80;
+  //if(!ppPbPb) minJetPt=65;
   if (isMuTrig) minJetPt=30;
   Float_t maxJetEta=2;
   Float_t minMuPt=5;
@@ -21,9 +22,9 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
 
   if(ppPbPb){
     if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity/merged_bTagAnalyzers.root"); 
-    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_qcd.root");
-    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_bJet.root"); 
-    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_cJet.root");
+    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_qcd.root");
+    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_bJet.root"); 
+    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_cJet.root");
   }
   else{
     if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
@@ -39,9 +40,12 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
       else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
       
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-      if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
+      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
+      if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_highPurity_weighted_WithUpperCut.root");
       //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/pthat30/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR.root");
-      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRaw_offPV_fixTR/merged_bTagAnalyzers.root");
+      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRaw_offPV_fixTR/merged_bTagAnalyzers.root");
+      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_highPurity/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_highPurity.root");
+      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_highPurity/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_highPurity.root");
     }
   }
 
@@ -130,7 +134,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   Int_t collSell;
   
   t->SetBranchAddress("evt",&evt);
-  if(ppPbPb)t->SetBranchAddress("bin",&bin);           
+  t->SetBranchAddress("bin",&bin);           
   t->SetBranchAddress("vz",&vz);           
   t->SetBranchAddress("nref",&nref);
   t->SetBranchAddress("rawpt",rawpt);
@@ -223,10 +227,13 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
 
   TFile *fout;
   if(ppPbPb){
+
     if(isMC==0) fout = new TFile("histos/PbPbdata.root","recreate");
     else if(isMC==1) fout = new TFile("histos/PbPbQCDMC.root","recreate");
     else if(isMC==2) fout = new TFile("histos/PbPbBMC.root","recreate");
     else if(isMC==3) fout = new TFile("histos/PbPbCMC.root","recreate");
+
+
   }
   else{
     if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
@@ -239,8 +246,8 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
       if(isMC)fout=new TFile("histos/ppMC_hiReco_muTrig.root","recreate");
       else fout=new TFile("histos/ppdata_hiReco_muTrig.root","recreate");
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-      if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig.root","recreate");
-      else fout=new TFile("histos/ppdata_hiReco_jetTrig.root","recreate");
+      if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root","recreate");
+      else fout=new TFile("histos/ppdata_hiReco_jetTrig_highPurity.root","recreate");
     }
   }
 
@@ -258,6 +265,12 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   TH1D *hjtptL = new TH1D("hjtptL","hjtptL",68,80,330);
   TH1D *hjtptU = new TH1D("hjtptU","hjtptU",68,80,330);
   hjtpt->Sumw2(); hjtptB->Sumw2(); hjtptC->Sumw2(); hjtptL->Sumw2(); hjtptU->Sumw2();
+
+  TH1D *hrawpt = new TH1D("hrawpt","hrawpt",68,80,330);
+  TH1D *hrawptB = new TH1D("hrawptB","hrawptB",68,80,330);
+  TH1D *hrawptC = new TH1D("hrawptC","hrawptC",68,80,330);
+  TH1D *hrawptL = new TH1D("hrawptL","hrawptL",68,80,330);
+  hrawpt->Sumw2(); hrawptB->Sumw2(); hrawptC->Sumw2(); hrawptL->Sumw2();
 
   TH1D *hjteta = new TH1D("hjteta","hjteta",40,-2,2);
   TH1D *hjtetaB = new TH1D("hjtetaB","hjtetaB",40,-2,2);
@@ -391,30 +404,102 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   TH1D *hipProb1L = new TH1D("hipProb1L","hipProb1L",40,-1,1);
   hipProb1->Sumw2(); hipProb1B->Sumw2(); hipProb1C->Sumw2(); hipProb1L->Sumw2(); 
   
-  TH1D *hip2d = new TH1D("hip2d","hip2d",40,-0.2,0.2);
-  TH1D *hip2dB = new TH1D("hip2dB","hip2dB",40,-0.2,0.2);
-  TH1D *hip2dC = new TH1D("hip2dC","hip2dC",40,-0.2,0.2);
-  TH1D *hip2dL = new TH1D("hip2dL","hip2dL",40,-0.2,0.2);
+  TH1D *hip2d = new TH1D("hip2d","hip2d",40,-0.1,0.1);
+  TH1D *hip2dB = new TH1D("hip2dB","hip2dB",40,-0.1,0.1);
+  TH1D *hip2dC = new TH1D("hip2dC","hip2dC",40,-0.1,0.1);
+  TH1D *hip2dL = new TH1D("hip2dL","hip2dL",40,-0.1,0.1);
   hip2d->Sumw2(); hip2dB->Sumw2(); hip2dC->Sumw2(); hip2dL->Sumw2(); 
   
-  TH1D *hip2dSig = new TH1D("hip2dSig","hip2dSig",40,-100,100);
-  TH1D *hip2dSigB = new TH1D("hip2dSigB","hip2dSigB",40,-100,100);
-  TH1D *hip2dSigC = new TH1D("hip2dSigC","hip2dSigC",40,-100,100);
-  TH1D *hip2dSigL = new TH1D("hip2dSigL","hip2dSigL",40,-100,100);
+  TH1D *hip2dSig = new TH1D("hip2dSig","hip2dSig",65,-32.5,32.5);
+  TH1D *hip2dSigB = new TH1D("hip2dSigB","hip2dSigB",65,-32.5,32.5);
+  TH1D *hip2dSigC = new TH1D("hip2dSigC","hip2dSigC",65,-32.5,32.5);
+  TH1D *hip2dSigL = new TH1D("hip2dSigL","hip2dSigL",65,-32.5,32.5);
   hip2dSig->Sumw2(); hip2dSigB->Sumw2(); hip2dSigC->Sumw2(); hip2dSigL->Sumw2(); 
+
+  TH1D *hip2d1 = new TH1D("hip2d1","hip2d1",40,-0.1,0.1);
+  TH1D *hip2d1B = new TH1D("hip2d1B","hip2d1B",40,-0.1,0.1);
+  TH1D *hip2d1C = new TH1D("hip2d1C","hip2d1C",40,-0.1,0.1);
+  TH1D *hip2d1L = new TH1D("hip2d1L","hip2d1L",40,-0.1,0.1);
+  hip2d1->Sumw2(); hip2d1B->Sumw2(); hip2d1C->Sumw2(); hip2d1L->Sumw2(); 
+
+  TH1D *hip2dSig1 = new TH1D("hip2dSig1","hip2dSig1",65,-32.5,32.5);
+  TH1D *hip2dSig1B = new TH1D("hip2dSig1B","hip2dSig1B",65,-32.5,32.5);
+  TH1D *hip2dSig1C = new TH1D("hip2dSig1C","hip2dSig1C",65,-32.5,32.5);
+  TH1D *hip2dSig1L = new TH1D("hip2dSig1L","hip2dSig1L",65,-32.5,32.5);
+  hip2dSig1->Sumw2(); hip2dSig1B->Sumw2(); hip2dSig1C->Sumw2(); hip2dSig1L->Sumw2(); 
+
+  TH1D *hip2d2 = new TH1D("hip2d2","hip2d2",40,-0.1,0.1);
+  TH1D *hip2d2B = new TH1D("hip2d2B","hip2d2B",40,-0.1,0.1);
+  TH1D *hip2d2C = new TH1D("hip2d2C","hip2d2C",40,-0.1,0.1);
+  TH1D *hip2d2L = new TH1D("hip2d2L","hip2d2L",40,-0.1,0.1);
+  hip2d2->Sumw2(); hip2d2B->Sumw2(); hip2d2C->Sumw2(); hip2d2L->Sumw2(); 
+
+  TH1D *hip2dSig2 = new TH1D("hip2dSig2","hip2dSig2",65,-32.5,32.5);
+  TH1D *hip2dSig2B = new TH1D("hip2dSig2B","hip2dSig2B",65,-32.5,32.5);
+  TH1D *hip2dSig2C = new TH1D("hip2dSig2C","hip2dSig2C",65,-32.5,32.5);
+  TH1D *hip2dSig2L = new TH1D("hip2dSig2L","hip2dSig2L",65,-32.5,32.5);
+  hip2dSig2->Sumw2(); hip2dSig2B->Sumw2(); hip2dSig2C->Sumw2(); hip2dSig2L->Sumw2(); 
+
+  TH1D *hip2d3 = new TH1D("hip2d3","hip2d3",40,-0.1,0.1);
+  TH1D *hip2d3B = new TH1D("hip2d3B","hip2d3B",40,-0.1,0.1);
+  TH1D *hip2d3C = new TH1D("hip2d3C","hip2d3C",40,-0.1,0.1);
+  TH1D *hip2d3L = new TH1D("hip2d3L","hip2d3L",40,-0.1,0.1);
+  hip2d3->Sumw2(); hip2d3B->Sumw2(); hip2d3C->Sumw2(); hip2d3L->Sumw2(); 
+
+  TH1D *hip2dSig3 = new TH1D("hip2dSig3","hip2dSig3",65,-32.5,32.5);
+  TH1D *hip2dSig3B = new TH1D("hip2dSig3B","hip2dSig3B",65,-32.5,32.5);
+  TH1D *hip2dSig3C = new TH1D("hip2dSig3C","hip2dSig3C",65,-32.5,32.5);
+  TH1D *hip2dSig3L = new TH1D("hip2dSig3L","hip2dSig3L",65,-32.5,32.5);
+  hip2dSig3->Sumw2(); hip2dSig3B->Sumw2(); hip2dSig3C->Sumw2(); hip2dSig3L->Sumw2(); 
   
-  TH1D *hip3d = new TH1D("hip3d","hip3d",40,-0.2,0.2);
-  TH1D *hip3dB = new TH1D("hip3dB","hip3dB",40,-0.2,0.2);
-  TH1D *hip3dC = new TH1D("hip3dC","hip3dC",40,-0.2,0.2);
-  TH1D *hip3dL = new TH1D("hip3dL","hip3dL",40,-0.2,0.2);
+  TH1D *hip3d = new TH1D("hip3d","hip3d",40,-0.1,0.1);
+  TH1D *hip3dB = new TH1D("hip3dB","hip3dB",40,-0.1,0.1);
+  TH1D *hip3dC = new TH1D("hip3dC","hip3dC",40,-0.1,0.1);
+  TH1D *hip3dL = new TH1D("hip3dL","hip3dL",40,-0.1,0.1);
   hip3d->Sumw2(); hip3dB->Sumw2(); hip3dC->Sumw2(); hip3dL->Sumw2(); 
   
-  TH1D *hip3dSig = new TH1D("hip3dSig","hip3dSig",40,-100,100);
-  TH1D *hip3dSigB = new TH1D("hip3dSigB","hip3dSigB",40,-100,100);
-  TH1D *hip3dSigC = new TH1D("hip3dSigC","hip3dSigC",40,-100,100);
-  TH1D *hip3dSigL = new TH1D("hip3dSigL","hip3dSigL",40,-100,100);
+  TH1D *hip3dSig = new TH1D("hip3dSig","hip3dSig",65,-32.5,32.5);
+  TH1D *hip3dSigB = new TH1D("hip3dSigB","hip3dSigB",65,-32.5,32.5);
+  TH1D *hip3dSigC = new TH1D("hip3dSigC","hip3dSigC",65,-32.5,32.5);
+  TH1D *hip3dSigL = new TH1D("hip3dSigL","hip3dSigL",65,-32.5,32.5);
   hip3dSig->Sumw2(); hip3dSigB->Sumw2(); hip3dSigC->Sumw2(); hip3dSigL->Sumw2(); 
   
+  TH1D *hip3d1 = new TH1D("hip3d1","hip3d1",40,-0.1,0.1);
+  TH1D *hip3d1B = new TH1D("hip3d1B","hip3d1B",40,-0.1,0.1);
+  TH1D *hip3d1C = new TH1D("hip3d1C","hip3d1C",40,-0.1,0.1);
+  TH1D *hip3d1L = new TH1D("hip3d1L","hip3d1L",40,-0.1,0.1);
+  hip3d1->Sumw2(); hip3d1B->Sumw2(); hip3d1C->Sumw2(); hip3d1L->Sumw2(); 
+
+  TH1D *hip3dSig1 = new TH1D("hip3dSig1","hip3dSig1",65,-32.5,32.5);
+  TH1D *hip3dSig1B = new TH1D("hip3dSig1B","hip3dSig1B",65,-32.5,32.5);
+  TH1D *hip3dSig1C = new TH1D("hip3dSig1C","hip3dSig1C",65,-32.5,32.5);
+  TH1D *hip3dSig1L = new TH1D("hip3dSig1L","hip3dSig1L",65,-32.5,32.5);
+  hip3dSig1->Sumw2(); hip3dSig1B->Sumw2(); hip3dSig1C->Sumw2(); hip3dSig1L->Sumw2(); 
+
+  TH1D *hip3d2 = new TH1D("hip3d2","hip3d2",40,-0.1,0.1);
+  TH1D *hip3d2B = new TH1D("hip3d2B","hip3d2B",40,-0.1,0.1);
+  TH1D *hip3d2C = new TH1D("hip3d2C","hip3d2C",40,-0.1,0.1);
+  TH1D *hip3d2L = new TH1D("hip3d2L","hip3d2L",40,-0.1,0.1);
+  hip3d2->Sumw2(); hip3d2B->Sumw2(); hip3d2C->Sumw2(); hip3d2L->Sumw2(); 
+
+  TH1D *hip3dSig2 = new TH1D("hip3dSig2","hip3dSig2",65,-32.5,32.5);
+  TH1D *hip3dSig2B = new TH1D("hip3dSig2B","hip3dSig2B",65,-32.5,32.5);
+  TH1D *hip3dSig2C = new TH1D("hip3dSig2C","hip3dSig2C",65,-32.5,32.5);
+  TH1D *hip3dSig2L = new TH1D("hip3dSig2L","hip3dSig2L",65,-32.5,32.5);
+  hip3dSig2->Sumw2(); hip3dSig2B->Sumw2(); hip3dSig2C->Sumw2(); hip3dSig2L->Sumw2(); 
+
+  TH1D *hip3d3 = new TH1D("hip3d3","hip3d3",40,-0.1,0.1);
+  TH1D *hip3d3B = new TH1D("hip3d3B","hip3d3B",40,-0.1,0.1);
+  TH1D *hip3d3C = new TH1D("hip3d3C","hip3d3C",40,-0.1,0.1);
+  TH1D *hip3d3L = new TH1D("hip3d3L","hip3d3L",40,-0.1,0.1);
+  hip3d3->Sumw2(); hip3d3B->Sumw2(); hip3d3C->Sumw2(); hip3d3L->Sumw2(); 
+
+  TH1D *hip3dSig3 = new TH1D("hip3dSig3","hip3dSig3",65,-32.5,32.5);
+  TH1D *hip3dSig3B = new TH1D("hip3dSig3B","hip3dSig3B",65,-32.5,32.5);
+  TH1D *hip3dSig3C = new TH1D("hip3dSig3C","hip3dSig3C",65,-32.5,32.5);
+  TH1D *hip3dSig3L = new TH1D("hip3dSig3L","hip3dSig3L",65,-32.5,32.5);
+  hip3dSig3->Sumw2(); hip3dSig3B->Sumw2(); hip3dSig3C->Sumw2(); hip3dSig3L->Sumw2(); 
+
   TH1D *hipDist2Jet = new TH1D("hipDist2Jet","hipDist2Jet",40,-0.1,0);
   TH1D *hipDist2JetB = new TH1D("hipDist2JetB","hipDist2JetB",40,-0.1,0);
   TH1D *hipDist2JetC = new TH1D("hipDist2JetC","hipDist2JetC",40,-0.1,0);
@@ -434,12 +519,12 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   hipClosest2Jet->Sumw2(); hipClosest2JetB->Sumw2(); hipClosest2JetC->Sumw2(); hipClosest2JetL->Sumw2(); 
 
   TNtuple *nt;
-  if(isMC) nt= new TNtuple("nt","","jtpt:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:nselIPtrk");
-  else nt= new TNtuple("nt","","jtpt:rawpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:nselIPtrk");
+  if(isMC) nt= new TNtuple("nt","","jtpt:jteta:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:bin");
+  else nt= new TNtuple("nt","","jtpt:jteta:rawpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:bin");
 
   TNtuple *ntMuReq;
-  if(isMC) ntMuReq = new TNtuple("ntMuReq","","jtpt:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
-  else ntMuReq = new TNtuple("ntMuReq","","jtpt:rawpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
+  if(isMC) ntMuReq = new TNtuple("ntMuReq","","jtpt:jteta:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
+  else ntMuReq = new TNtuple("ntMuReq","","jtpt:jteta:rawpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
 
   
    cout<<" grab the JEC's "<<endl;
@@ -475,10 +560,13 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
 
     tSkim->GetEntry(i);
     if(isMC){
+      // temporarily remove cuts from MC
       if(!pvSel||!spikeSel) continue; //hbheNoise doesn't work in mixed events
     }
     else{
-      if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
+      //if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
+      // turn off spike and on coll Sel
+      if(!pvSel||!hbheNoiseSel||!collSell) continue;
     }
 
     t->GetEntry(i);
@@ -489,7 +577,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
     if(ppPbPb){
       if(!hltBit[10]) continue;
     }
-
+    //if(isMC&&ppPbPb){
+    if(isMC){
+      if(pthat<50) continue;
+    }
     if(fabs(vz)>15.) continue;
     
     if(updateJEC){
@@ -505,308 +596,449 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
     double w=1.;
     if(isMC&&useWeight) w=weight;
 
-
-    if(doNtuples){
-      for(int ij=0;ij<nref;ij++){
-	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
-
-	  if(isMC)nt->Fill(jtpt[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,nselIPtrk[ij]);
-	  else nt->Fill(jtpt[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,nselIPtrk[ij]);
-
-	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
-
-	    if(isMC)ntMuReq->Fill(jtpt[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
-	    else ntMuReq->Fill(jtpt[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
-	  }
-	}
-      }
-    }
-
-    if(doJets){
-
-      int useEvent=0;
-
-      for(int ij=0;ij<nref;ij++){
-	
-	if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
-	  
-	  if (isMuTrig) {
-	    //muon requirement
-	    if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))>0.5 || mupt[ij]<minMuPt) continue;
-	  }
-	  
-	  useEvent=1;
-
-	  hjtpt->Fill(jtpt[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hjtptC->Fill(jtpt[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hjtptL->Fill(jtpt[ij],w);    
-	    else hjtptU->Fill(jtpt[ij],w);    
-	  }
-	  hjteta->Fill(jteta[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hjtetaB->Fill(jteta[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hjtetaC->Fill(jteta[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hjtetaL->Fill(jteta[ij],w);    
-	  }
-	  hjtphi->Fill(jtphi[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hjtphiB->Fill(jtphi[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hjtphiC->Fill(jtphi[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hjtphiL->Fill(jtphi[ij],w);    
-	  }
-	  //*
-	  hdiscr_csvSimple->Fill(discr_csvSimple[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hdiscr_csvSimpleB->Fill(discr_csvSimple[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_csvSimpleC->Fill(discr_csvSimple[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_csvSimpleL->Fill(discr_csvSimple[ij],w);    
-	  }
-	  
-	  hdiscr_prob->Fill(discr_probb[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_probb[ij],w); 
-	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_probb[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_probb[ij],w);    
-	  }
-	  
-	  hdiscr_ssvHighEff->Fill(discr_ssvHighEff[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighEffB->Fill(discr_ssvHighEff[ij],w); 
-	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_ssvHighEffC->Fill(discr_ssvHighEff[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_ssvHighEffL->Fill(discr_ssvHighEff[ij],w);    
-	  }
-	  
-	  hdiscr_ssvHighPur->Fill(discr_ssvHighPur[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighPurB->Fill(discr_ssvHighPur[ij],w); 
-	    else if(abs(refparton_flavorForB[ij])==4)hdiscr_ssvHighPurC->Fill(discr_ssvHighPur[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hdiscr_ssvHighPurL->Fill(discr_ssvHighPur[ij],w);    
-	  }
-	  //*
-	  hnsvtx->Fill(nsvtx[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hnsvtxB->Fill(nsvtx[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hnsvtxC->Fill(nsvtx[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hnsvtxL->Fill(nsvtx[ij],w); 
-	  }
-	  
-	  if(nsvtx[ij]>0){
-	    
-	    hsvtxntrk->Fill(svtxntrk[ij],w);    
-	    if(isMC){
-	      if(abs(refparton_flavorForB[ij])==5)hsvtxntrkB->Fill(svtxntrk[ij],w);    
-	      else if(abs(refparton_flavorForB[ij])==4)hsvtxntrkC->Fill(svtxntrk[ij],w);
-	      else if(abs(refparton_flavorForB[ij])<99)hsvtxntrkL->Fill(svtxntrk[ij],w);
-	    }
-	    
-	    // require at least 1 tracks as in btagging @ 7 TeV note
-	    if(svtxntrk[ij]>1){	  
-	      
-	      hsvtxdl->Fill(svtxdl[ij],w);    
-	      if(isMC){
-		if(abs(refparton_flavorForB[ij])==5)hsvtxdlB->Fill(svtxdl[ij],w);    
-		else if(abs(refparton_flavorForB[ij])==4)hsvtxdlC->Fill(svtxdl[ij],w);
-		else if(abs(refparton_flavorForB[ij])<99)hsvtxdlL->Fill(svtxdl[ij],w);
-	      }
-	      
-	      hsvtxdls->Fill(svtxdls[ij],w);    
-	      if(isMC){
-		if(abs(refparton_flavorForB[ij])==5)hsvtxdlsB->Fill(svtxdls[ij],w);    
-		else if(abs(refparton_flavorForB[ij])==4)hsvtxdlsC->Fill(svtxdls[ij],w); 
-		else if(abs(refparton_flavorForB[ij])<99)hsvtxdlsL->Fill(svtxdls[ij],w); 
-	      }
-	      
-	      hsvtxm->Fill(svtxm[ij],w);    
-	      if(isMC){
-		if(abs(refparton_flavorForB[ij])==5)hsvtxmB->Fill(svtxm[ij],w);    
-		else if(abs(refparton_flavorForB[ij])==4)hsvtxmC->Fill(svtxm[ij],w);
-		else if(abs(refparton_flavorForB[ij])<99)hsvtxmL->Fill(svtxm[ij],w); 
-	      }
-
-	      hsvtxpt->Fill(svtxpt[ij],w);    
-	      if(isMC){
-		if(abs(refparton_flavorForB[ij])==5)hsvtxptB->Fill(svtxpt[ij],w);    
-		else if(abs(refparton_flavorForB[ij])==4)hsvtxptC->Fill(svtxpt[ij],w);
-		else if(abs(refparton_flavorForB[ij])<99)hsvtxptL->Fill(svtxpt[ij],w);
-	      }
-	      
-	      if(svtxntrk[ij]>=3) {
-
-		hsvtxmSV3->Fill(svtxm[ij],w);    
-		if(isMC){
-		  if(abs(refparton_flavorForB[ij])==5)hsvtxmSV3B->Fill(svtxm[ij],w);    
-		  else if(abs(refparton_flavorForB[ij])==4)hsvtxmSV3C->Fill(svtxm[ij],w);
-		  else if(abs(refparton_flavorForB[ij])<99)hsvtxmSV3L->Fill(svtxm[ij],w); 
-		}
-
-		hsvtxptSV3->Fill(svtxpt[ij],w);    
-		if(isMC){
-		  if(abs(refparton_flavorForB[ij])==5)hsvtxptSV3B->Fill(svtxpt[ij],w);    
-		  else if(abs(refparton_flavorForB[ij])==4)hsvtxptSV3C->Fill(svtxpt[ij],w);
-		  else if(abs(refparton_flavorForB[ij])<99)hsvtxptSV3L->Fill(svtxpt[ij],w);
-		}
-	      }
-	    }
-	  }
-	  
-	  hnIPtrk->Fill(nIPtrk[ij],w);    
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hnIPtrkB->Fill(nIPtrk[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hnIPtrkC->Fill(nIPtrk[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])<99)hnIPtrkL->Fill(nIPtrk[ij],w);    
-	  }
-
-
-	  hnselIPtrk->Fill(nselIPtrk[ij],w);    
-
-	  if(isMC){
-	    if(abs(refparton_flavorForB[ij])==5)hnselIPtrkB->Fill(nselIPtrk[ij],w);    
-	    else if(abs(refparton_flavorForB[ij])==4)hnselIPtrkC->Fill(nselIPtrk[ij],w);
-	    else if(abs(refparton_flavorForB[ij])<99)hnselIPtrkL->Fill(nselIPtrk[ij],w);
-	  }
-
-	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
-
-	    hmuptrel->Fill(muptrel[ij],w);    
-	    if(isMC){
-	      if(abs(refparton_flavorForB[ij])==5)hmuptrelB->Fill(muptrel[ij],w);
-	      else if(abs(refparton_flavorForB[ij])==4)hmuptrelC->Fill(muptrel[ij],w);
-	      else if(abs(refparton_flavorForB[ij])<99)hmuptrelL->Fill(muptrel[ij],w);
-	    }
-
-	    if(svtxntrk[ij]>=2) {  
-	      hmuptrelSV2->Fill(muptrel[ij],w);    
-	      if(isMC){
-		if(abs(refparton_flavorForB[ij])==5)hmuptrelSV2B->Fill(muptrel[ij],w);
-		else if(abs(refparton_flavorForB[ij])==4)hmuptrelSV2C->Fill(muptrel[ij],w);
-		else if(abs(refparton_flavorForB[ij])<99)hmuptrelSV2L->Fill(muptrel[ij],w);
-	      }
-	    }
-
-	    if(svtxntrk[ij]>=3) {  
-	      hmuptrelSV3->Fill(muptrel[ij],w);    
-	      if(isMC){
-		if(abs(refparton_flavorForB[ij])==5)hmuptrelSV3B->Fill(muptrel[ij],w);
-		else if(abs(refparton_flavorForB[ij])==4)hmuptrelSV3C->Fill(muptrel[ij],w);
-		else if(abs(refparton_flavorForB[ij])<99)hmuptrelSV3L->Fill(muptrel[ij],w);
-	      }
-	    }
-	    
-	  }
-	  //*/
-	}
-
-      }
-      if(useEvent){
-	if(isMC){
-	  hbinw->Fill(bin,w);
-	  hbin->Fill(bin,xSecWeight*vzWeight);
-	}
-	else hbin->Fill(bin);
-
-	if(isMC){
-	  hvzw->Fill(vz,w);
-	  if(ppPbPb)hvz->Fill(vz,xSecWeight*centWeight);
-	  else hvz->Fill(vz,xSecWeight);
-	}
-	else hvz->Fill(vz);
-      }
-    }
     
-    if(doTracks){
+    
+    int useEvent=0;
+    
+    int trackPosition =0;
 
-      for(int it=0;it<nIP;it++){
+    for(int ij=0;ij<nref;ij++){
+
+      trackPosition+=nselIPtrk[ij];
+
+      if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
 	
-	int ijet = ipJetIndex[it];
+
+	if(doNtuples){
+
+	  if(ppPbPb){
+	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
+	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
+	  }
+	  else{
+	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
+	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
+	  }
+	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
+	    
+	    if(isMC)ntMuReq->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	    else ntMuReq->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	  }
+	}
+
 	
-	if(jtpt[ijet]>minJetPt && fabs(jteta[ijet])<maxJetEta){
+	if(!doJets) continue;
+	
+	if (isMuTrig) {
+	  //muon requirement
+	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))>0.5 || mupt[ij]<minMuPt) continue;
+	}
+	
+	useEvent=1;
+	
+	hjtpt->Fill(jtpt[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hjtptB->Fill(jtpt[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hjtptC->Fill(jtpt[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hjtptL->Fill(jtpt[ij],w);    
+	  else hjtptU->Fill(jtpt[ij],w);    
+	}
+	hrawpt->Fill(rawpt[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hrawptB->Fill(rawpt[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hrawptC->Fill(rawpt[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hrawptL->Fill(rawpt[ij],w);    
+	}
+	hjteta->Fill(jteta[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hjtetaB->Fill(jteta[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hjtetaC->Fill(jteta[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hjtetaL->Fill(jteta[ij],w);    
+	}
+	hjtphi->Fill(jtphi[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hjtphiB->Fill(jtphi[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hjtphiC->Fill(jtphi[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hjtphiL->Fill(jtphi[ij],w);    
+	}
+	//*
+	hdiscr_csvSimple->Fill(discr_csvSimple[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hdiscr_csvSimpleB->Fill(discr_csvSimple[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_csvSimpleC->Fill(discr_csvSimple[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_csvSimpleL->Fill(discr_csvSimple[ij],w);    
+	}
+	
+	hdiscr_prob->Fill(discr_probb[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_probb[ij],w); 
+	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_probb[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_probb[ij],w);    
+	}
+	
+	hdiscr_ssvHighEff->Fill(discr_ssvHighEff[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighEffB->Fill(discr_ssvHighEff[ij],w); 
+	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_ssvHighEffC->Fill(discr_ssvHighEff[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_ssvHighEffL->Fill(discr_ssvHighEff[ij],w);    
+	}
+	
+	hdiscr_ssvHighPur->Fill(discr_ssvHighPur[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighPurB->Fill(discr_ssvHighPur[ij],w); 
+	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_ssvHighPurC->Fill(discr_ssvHighPur[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_ssvHighPurL->Fill(discr_ssvHighPur[ij],w);    
+	}
+	//*
+	hnsvtx->Fill(nsvtx[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hnsvtxB->Fill(nsvtx[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hnsvtxC->Fill(nsvtx[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hnsvtxL->Fill(nsvtx[ij],w); 
+	}
+	
+	if(nsvtx[ij]>0){
+	  
+	  hsvtxntrk->Fill(svtxntrk[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hsvtxntrkB->Fill(svtxntrk[ij],w);    
+	    else if(abs(refparton_flavorForB[ij])==4)hsvtxntrkC->Fill(svtxntrk[ij],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hsvtxntrkL->Fill(svtxntrk[ij],w);
+	  }
+	  
+	  // require at least 1 tracks as in btagging @ 7 TeV note
+	  if(svtxntrk[ij]>1){	  
+	    
+	    hsvtxdl->Fill(svtxdl[ij],w);    
+	    if(isMC){
+	      if(abs(refparton_flavorForB[ij])==5)hsvtxdlB->Fill(svtxdl[ij],w);    
+	      else if(abs(refparton_flavorForB[ij])==4)hsvtxdlC->Fill(svtxdl[ij],w);
+	      else if(abs(refparton_flavorForB[ij])<99)hsvtxdlL->Fill(svtxdl[ij],w);
+	    }
+	    
+	    hsvtxdls->Fill(svtxdls[ij],w);    
+	    if(isMC){
+	      if(abs(refparton_flavorForB[ij])==5)hsvtxdlsB->Fill(svtxdls[ij],w);    
+	      else if(abs(refparton_flavorForB[ij])==4)hsvtxdlsC->Fill(svtxdls[ij],w); 
+	      else if(abs(refparton_flavorForB[ij])<99)hsvtxdlsL->Fill(svtxdls[ij],w); 
+	    }
+	    
+	    hsvtxm->Fill(svtxm[ij],w);    
+	    if(isMC){
+	      if(abs(refparton_flavorForB[ij])==5)hsvtxmB->Fill(svtxm[ij],w);    
+	      else if(abs(refparton_flavorForB[ij])==4)hsvtxmC->Fill(svtxm[ij],w);
+	      else if(abs(refparton_flavorForB[ij])<99)hsvtxmL->Fill(svtxm[ij],w); 
+	    }
+	    
+	    hsvtxpt->Fill(svtxpt[ij],w);    
+	    if(isMC){
+	      if(abs(refparton_flavorForB[ij])==5)hsvtxptB->Fill(svtxpt[ij],w);    
+	      else if(abs(refparton_flavorForB[ij])==4)hsvtxptC->Fill(svtxpt[ij],w);
+	      else if(abs(refparton_flavorForB[ij])<99)hsvtxptL->Fill(svtxpt[ij],w);
+	    }
+	    
+	    if(svtxntrk[ij]>=3) {
+	      
+	      hsvtxmSV3->Fill(svtxm[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hsvtxmSV3B->Fill(svtxm[ij],w);    
+		else if(abs(refparton_flavorForB[ij])==4)hsvtxmSV3C->Fill(svtxm[ij],w);
+		else if(abs(refparton_flavorForB[ij])<99)hsvtxmSV3L->Fill(svtxm[ij],w); 
+	      }
+	      
+	      hsvtxptSV3->Fill(svtxpt[ij],w);    
+	      if(isMC){
+		if(abs(refparton_flavorForB[ij])==5)hsvtxptSV3B->Fill(svtxpt[ij],w);    
+		else if(abs(refparton_flavorForB[ij])==4)hsvtxptSV3C->Fill(svtxpt[ij],w);
+		else if(abs(refparton_flavorForB[ij])<99)hsvtxptSV3L->Fill(svtxpt[ij],w);
+	      }
+	    }
+	  }
+	}
+	  
+	hnIPtrk->Fill(nIPtrk[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hnIPtrkB->Fill(nIPtrk[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hnIPtrkC->Fill(nIPtrk[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hnIPtrkL->Fill(nIPtrk[ij],w);    
+	}
+	
+	
+	hnselIPtrk->Fill(nselIPtrk[ij],w);    
+	
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hnselIPtrkB->Fill(nselIPtrk[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])==4)hnselIPtrkC->Fill(nselIPtrk[ij],w);
+	  else if(abs(refparton_flavorForB[ij])<99)hnselIPtrkL->Fill(nselIPtrk[ij],w);
+	}
+	
+	if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
+	  
+	  hmuptrel->Fill(muptrel[ij],w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hmuptrelB->Fill(muptrel[ij],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hmuptrelC->Fill(muptrel[ij],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hmuptrelL->Fill(muptrel[ij],w);
+	  }
+	  
+	  if(svtxntrk[ij]>=2) {  
+	    hmuptrelSV2->Fill(muptrel[ij],w);    
+	    if(isMC){
+	      if(abs(refparton_flavorForB[ij])==5)hmuptrelSV2B->Fill(muptrel[ij],w);
+	      else if(abs(refparton_flavorForB[ij])==4)hmuptrelSV2C->Fill(muptrel[ij],w);
+	      else if(abs(refparton_flavorForB[ij])<99)hmuptrelSV2L->Fill(muptrel[ij],w);
+	    }
+	  }
+	  
+	  if(svtxntrk[ij]>=3) {  
+	    hmuptrelSV3->Fill(muptrel[ij],w);    
+	    if(isMC){
+	      if(abs(refparton_flavorForB[ij])==5)hmuptrelSV3B->Fill(muptrel[ij],w);
+	      else if(abs(refparton_flavorForB[ij])==4)hmuptrelSV3C->Fill(muptrel[ij],w);
+	      else if(abs(refparton_flavorForB[ij])<99)hmuptrelSV3L->Fill(muptrel[ij],w);
+	    }
+	  }
+	  
+	}
+	//*/
+
+	float ip2d1MostSig=-999.;
+	float ip3d1MostSig=-999.;
+	float ip2dSig1MostSig=-999.;
+	float ip3dSig1MostSig=-999.;
+
+	float ip2d2MostSig=-999.;
+	float ip3d2MostSig=-999.;
+	float ip2dSig2MostSig=-999.;
+	float ip3dSig2MostSig=-999.;
+
+	float ip2d3MostSig=-999.;
+	float ip3d3MostSig=-999.;
+	float ip2dSig3MostSig=-999.;
+	float ip3dSig3MostSig=-999.;
+
+	for(int it=trackPosition-nselIPtrk[ij];it<trackPosition;it++){
+	  
+	  if(fabs(ipDist2Jet[it])>0.07) continue;
+	  if(ipClosest2Jet[it] > 5.0) continue;
+	  
+	  if(ip2dSig[it]>ip2dSig1MostSig){	    
+	    ip2d3MostSig=ip2d2MostSig;
+	    ip2dSig3MostSig=ip2dSig2MostSig;
+	    ip2d2MostSig=ip2d1MostSig;
+	    ip2dSig2MostSig=ip2dSig1MostSig;
+	    ip2d1MostSig=ip2d[it];
+	    ip2dSig1MostSig=ip2dSig[it];
+	  }
+	  else if(ip2dSig[it]>ip2dSig2MostSig){	    
+	    ip2d3MostSig=ip2d2MostSig;
+	    ip2dSig3MostSig=ip2dSig2MostSig;
+	    ip2d2MostSig=ip2d[it];
+	    ip2dSig2MostSig=ip2dSig[it];
+	  }
+	  else if(ip2dSig[it]>ip2dSig3MostSig){	    
+	    ip2d3MostSig=ip2d[it];
+	    ip2dSig3MostSig=ip2dSig[it];
+	  }
+
+	  
+	  if(ip3dSig[it]>ip3dSig1MostSig){	    
+	    ip3d3MostSig=ip3d2MostSig;
+	    ip3dSig3MostSig=ip3dSig2MostSig;
+	    ip3d2MostSig=ip3d1MostSig;
+	    ip3dSig2MostSig=ip3dSig1MostSig;
+	    ip3d1MostSig=ip3d[it];
+	    ip3dSig1MostSig=ip3dSig[it];
+	  }
+	  else if(ip3dSig[it]>ip3dSig2MostSig){	    
+	    ip3d3MostSig=ip3d2MostSig;
+	    ip3dSig3MostSig=ip3dSig2MostSig;
+	    ip3d2MostSig=ip3d[it];
+	    ip3dSig2MostSig=ip3dSig[it];
+	  }
+	  else if(ip3dSig[it]>ip3dSig3MostSig){	    
+	    ip3d3MostSig=ip3d[it];
+	    ip3dSig3MostSig=ip3dSig[it];
+	  }
+
 
 
 	  hipPt->Fill(ipPt[it],w);    
 
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hipPtB->Fill(ipPt[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hipPtC->Fill(ipPt[it],w); 
-	    else if(abs(refparton_flavorForB[ijet])<99)hipPtL->Fill(ipPt[it],w); 
+	    if(abs(refparton_flavorForB[ij])==5)hipPtB->Fill(ipPt[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hipPtC->Fill(ipPt[it],w); 
+	    else if(abs(refparton_flavorForB[ij])<99)hipPtL->Fill(ipPt[it],w); 
 	  }
-
+	  
 	  hipProb0->Fill(ipProb0[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hipProb0B->Fill(ipProb0[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hipProb0C->Fill(ipProb0[it],w);
-	    else if(abs(refparton_flavorForB[ijet])<99)hipProb0L->Fill(ipProb0[it],w);
+	    if(abs(refparton_flavorForB[ij])==5)hipProb0B->Fill(ipProb0[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hipProb0C->Fill(ipProb0[it],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hipProb0L->Fill(ipProb0[it],w);
 	  }
-
+	  
 	  hipProb1->Fill(ipProb1[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hipProb1B->Fill(ipProb1[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hipProb1C->Fill(ipProb1[it],w);
-	    else if(abs(refparton_flavorForB[ijet])<99)hipProb1L->Fill(ipProb1[it],w);
+	    if(abs(refparton_flavorForB[ij])==5)hipProb1B->Fill(ipProb1[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hipProb1C->Fill(ipProb1[it],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hipProb1L->Fill(ipProb1[it],w);
 	  }
-
+	  
 	  hip2d->Fill(ip2d[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hip2dB->Fill(ip2d[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hip2dC->Fill(ip2d[it],w); 
-	    else if(abs(refparton_flavorForB[ijet])<99)hip2dL->Fill(ip2d[it],w); 
+	    if(abs(refparton_flavorForB[ij])==5)hip2dB->Fill(ip2d[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2dC->Fill(ip2d[it],w); 
+	    else if(abs(refparton_flavorForB[ij])<99)hip2dL->Fill(ip2d[it],w); 
 	  }
-
+	  
 	  hip2dSig->Fill(ip2dSig[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hip2dSigB->Fill(ip2dSig[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hip2dSigC->Fill(ip2dSig[it],w);
-	    else if(abs(refparton_flavorForB[ijet])<99)hip2dSigL->Fill(ip2dSig[it],w);
+	    if(abs(refparton_flavorForB[ij])==5)hip2dSigB->Fill(ip2dSig[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2dSigC->Fill(ip2dSig[it],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip2dSigL->Fill(ip2dSig[it],w);
 	  }
-
+	  
 	  hip3d->Fill(ip3d[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hip3dB->Fill(ip3d[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hip3dC->Fill(ip3d[it],w); 
-	    else if(abs(refparton_flavorForB[ijet])<99)hip3dL->Fill(ip3d[it],w); 
+	    if(abs(refparton_flavorForB[ij])==5)hip3dB->Fill(ip3d[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3dC->Fill(ip3d[it],w); 
+	    else if(abs(refparton_flavorForB[ij])<99)hip3dL->Fill(ip3d[it],w); 
 	  }
-
+	  
 	  hip3dSig->Fill(ip3dSig[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hip3dSigB->Fill(ip3dSig[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hip3dSigC->Fill(ip3dSig[it],w);
-	    else if(abs(refparton_flavorForB[ijet])<99)hip3dSigL->Fill(ip3dSig[it],w);
+	    if(abs(refparton_flavorForB[ij])==5)hip3dSigB->Fill(ip3dSig[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3dSigC->Fill(ip3dSig[it],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip3dSigL->Fill(ip3dSig[it],w);
 	  }
-
+	  
 	  hipDist2Jet->Fill(ipDist2Jet[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hipDist2JetB->Fill(ipDist2Jet[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetC->Fill(ipDist2Jet[it],w);
-	    else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetL->Fill(ipDist2Jet[it],w);
+	    if(abs(refparton_flavorForB[ij])==5)hipDist2JetB->Fill(ipDist2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hipDist2JetC->Fill(ipDist2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hipDist2JetL->Fill(ipDist2Jet[it],w);
 	  }
-
+	  
 	  hipDist2JetSig->Fill(ipDist2JetSig[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hipDist2JetSigB->Fill(ipDist2JetSig[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hipDist2JetSigC->Fill(ipDist2JetSig[it],w);
-	    else if(abs(refparton_flavorForB[ijet])<99)hipDist2JetSigL->Fill(ipDist2JetSig[it],w);
+	    if(abs(refparton_flavorForB[ij])==5)hipDist2JetSigB->Fill(ipDist2JetSig[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hipDist2JetSigC->Fill(ipDist2JetSig[it],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hipDist2JetSigL->Fill(ipDist2JetSig[it],w);
 	  }
-
+	  
 	  hipClosest2Jet->Fill(ipClosest2Jet[it],w);    
 	  if(isMC){
-	    if(abs(refparton_flavorForB[ijet])==5)hipClosest2JetB->Fill(ipClosest2Jet[it],w);
-	    else if(abs(refparton_flavorForB[ijet])==4)hipClosest2JetC->Fill(ipClosest2Jet[it],w);
-	    else if(abs(refparton_flavorForB[ijet])<99)hipClosest2JetL->Fill(ipClosest2Jet[it],w);
+	    if(abs(refparton_flavorForB[ij])==5)hipClosest2JetB->Fill(ipClosest2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ij])==4)hipClosest2JetC->Fill(ipClosest2Jet[it],w);
+	    else if(abs(refparton_flavorForB[ij])<99)hipClosest2JetL->Fill(ipClosest2Jet[it],w);
+	  }
+	  	  
+	}
+
+	if(jtpt[ij]<90){
+	  hip2d1->Fill(ip2d1MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip2d1B->Fill(ip2d1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2d1C->Fill(ip2d1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip2d1L->Fill(ip2d1MostSig,w);
+	  }
+	  hip2dSig1->Fill(ip2dSig1MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip2dSig1B->Fill(ip2dSig1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2dSig1C->Fill(ip2dSig1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip2dSig1L->Fill(ip2dSig1MostSig,w);
+	  }
+	  hip3d1->Fill(ip3d1MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip3d1B->Fill(ip3d1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3d1C->Fill(ip3d1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip3d1L->Fill(ip3d1MostSig,w);
+	  }
+	  hip3dSig1->Fill(ip3dSig1MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip3dSig1B->Fill(ip3dSig1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3dSig1C->Fill(ip3dSig1MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip3dSig1L->Fill(ip3dSig1MostSig,w);
 	  }
 
+	  hip2d2->Fill(ip2d2MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip2d2B->Fill(ip2d2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2d2C->Fill(ip2d2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip2d2L->Fill(ip2d2MostSig,w);
+	  }
+	  hip2dSig2->Fill(ip2dSig2MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip2dSig2B->Fill(ip2dSig2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2dSig2C->Fill(ip2dSig2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip2dSig2L->Fill(ip2dSig2MostSig,w);
+	  }
+	  hip3d2->Fill(ip3d2MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip3d2B->Fill(ip3d2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3d2C->Fill(ip3d2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip3d2L->Fill(ip3d2MostSig,w);
+	  }
+	  hip3dSig2->Fill(ip3dSig2MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip3dSig2B->Fill(ip3dSig2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3dSig2C->Fill(ip3dSig2MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip3dSig2L->Fill(ip3dSig2MostSig,w);
+	  }
+
+	  hip2d3->Fill(ip2d3MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip2d3B->Fill(ip2d3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2d3C->Fill(ip2d3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip2d3L->Fill(ip2d3MostSig,w);
+	  }
+	  hip2dSig3->Fill(ip2dSig3MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip2dSig3B->Fill(ip2dSig3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip2dSig3C->Fill(ip2dSig3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip2dSig3L->Fill(ip2dSig3MostSig,w);
+	  }
+	  hip3d3->Fill(ip3d3MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip3d3B->Fill(ip3d3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3d3C->Fill(ip3d3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip3d3L->Fill(ip3d3MostSig,w);
+	  }
+	  hip3dSig3->Fill(ip3dSig3MostSig,w);    
+	  if(isMC){
+	    if(abs(refparton_flavorForB[ij])==5)hip3dSig3B->Fill(ip3dSig3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])==4)hip3dSig3C->Fill(ip3dSig3MostSig,w);
+	    else if(abs(refparton_flavorForB[ij])<99)hip3dSig3L->Fill(ip3dSig3MostSig,w);
+	  }	
 	}
-	
       }
+    }
+    if(useEvent){
+      if(isMC){
+	hbinw->Fill(bin,w);
+	hbin->Fill(bin,xSecWeight*vzWeight);
+      }
+      else hbin->Fill(bin);
       
+      if(isMC){
+	hvzw->Fill(vz,w);
+	if(ppPbPb)hvz->Fill(vz,xSecWeight*centWeight);
+	else hvz->Fill(vz,xSecWeight);
+      }
+      else hvz->Fill(vz);
     }
     
-  
+    
+    
   }
   hbin->Write(); hbinw->Write(); hvz->Write(); hvzw->Write();
 
   hjtpt->Write();
   if(isMC) hjtptB->Write(); hjtptC->Write(); hjtptL->Write(); hjtptU->Write();
+
+  hrawpt->Write();
+  if(isMC) hrawptB->Write(); hrawptC->Write(); hrawptL->Write(); 
 
   hjteta->Write();
   if(isMC) hjtetaB->Write(); hjtetaC->Write(); hjtetaL->Write(); 
@@ -880,11 +1112,49 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   hip2dSig->Write();
   if(isMC) hip2dSigB->Write(); hip2dSigC->Write(); hip2dSigL->Write();
 
+  hip2d1->Write();
+  if(isMC) hip2d1B->Write(); hip2d1C->Write(); hip2d1L->Write();
+
+  hip2dSig1->Write();
+  if(isMC) hip2dSig1B->Write(); hip2dSig1C->Write(); hip2dSig1L->Write();
+
+  hip2d2->Write();
+  if(isMC) hip2d2B->Write(); hip2d2C->Write(); hip2d2L->Write();
+
+  hip2dSig2->Write();
+  if(isMC) hip2dSig2B->Write(); hip2dSig2C->Write(); hip2dSig2L->Write();
+
+  hip2d3->Write();
+  if(isMC) hip2d3B->Write(); hip2d3C->Write(); hip2d3L->Write();
+
+  hip2dSig3->Write();
+  if(isMC) hip2dSig3B->Write(); hip2dSig3C->Write(); hip2dSig3L->Write();
+
+
   hip3d->Write();
   if(isMC) hip3dB->Write(); hip3dC->Write(); hip3dL->Write();
 
   hip3dSig->Write();
   if(isMC) hip3dSigB->Write(); hip3dSigC->Write(); hip3dSigL->Write();
+
+  hip3d1->Write();
+  if(isMC) hip3d1B->Write(); hip3d1C->Write(); hip3d1L->Write();
+
+  hip3dSig1->Write();
+  if(isMC) hip3dSig1B->Write(); hip3dSig1C->Write(); hip3dSig1L->Write();
+
+  hip3d2->Write();
+  if(isMC) hip3d2B->Write(); hip3d2C->Write(); hip3d2L->Write();
+
+  hip3dSig2->Write();
+  if(isMC) hip3dSig2B->Write(); hip3dSig2C->Write(); hip3dSig2L->Write();
+
+  hip3d3->Write();
+  if(isMC) hip3d3B->Write(); hip3d3C->Write(); hip3d3L->Write();
+
+  hip3dSig3->Write();
+  if(isMC) hip3dSig3B->Write(); hip3dSig3C->Write(); hip3dSig3L->Write();
+
 
   hipDist2Jet->Write();
   if(isMC) hipDist2JetB->Write(); hipDist2JetC->Write(); hipDist2JetL->Write();
