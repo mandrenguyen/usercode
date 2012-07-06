@@ -55,9 +55,7 @@ struct Enumerations {
 
 
 
-void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=1, char *taggerName="ssvHighEff", int cbinlo=0, int cbinhi=40, float etalo=0., float etahi=2.) {
-
-
+void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=1, char *taggerName="ssvHighEff", int cbinlo=0, int cbinhi=4, float etalo=0., float etahi=2.) {
 
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
@@ -65,7 +63,7 @@ void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double w
   gStyle->SetLabelSize(14,"xyz");
   gStyle->SetTitleFont(43,"xyz");
   gStyle->SetTitleSize(16,"xyz");
-  //gStyle->SetTitleOffset(3.5,"x"); 
+  gStyle->SetTitleOffset(1.5,"xy"); 
   gROOT->ForceStyle(1);
   
   int doLTJP=1;
@@ -105,13 +103,17 @@ void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double w
   }
 
   TCanvas *c1=new TCanvas("c1","c1",1200,600);
-  c1->Divide(ncol,nrow,0,0);
+  //c1->Divide(ncol,nrow,0,0);
+  c1->Divide(ncol,nrow);
   TCanvas *c2=new TCanvas("c2","c2",1200,600);
-  c2->Divide(ncol,nrow,0,0);
+  //c2->Divide(ncol,nrow,0,0);
+  c2->Divide(ncol,nrow);
   TCanvas *c3=new TCanvas("c3","c3",1200,600);
-  c3->Divide(ncol,nrow,0,0);
+  //c3->Divide(ncol,nrow,0,0);
+  c3->Divide(ncol,nrow);
   TCanvas *c4=new TCanvas("c4","c4",1200,600);
-  c4->Divide(ncol,nrow,0,0);
+  //c4->Divide(ncol,nrow,0,0);
+  c4->Divide(ncol,nrow);
 
   TCanvas *cCount = new TCanvas("cCount","cCount",600,600);
 
@@ -119,27 +121,27 @@ void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double w
 
     cout<<"Processing jet pT bin ["<<ptBin[n]<<","<<ptBin[n+1]<<"] ..."<<endl;
     cCount->cd();
-    numbers = count(ppPbPb,ptBin[n],ptBin[n+1],tagger,workingPoint,cbinlo,cbinhi,etalo,etahi);
+    numbers = count(ptBin[n],ptBin[n+1],tagger,workingPoint,cbinlo,cbinhi,etalo,etahi);
     c1->cd(n+1);
     c1->GetPad(n+1)->SetLogy();
-    RooRealVar fitSvtxmTag = bfractionFit(ppPbPb,fixCL,"svtxm",0,6,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint));
-    //RooRealVar fitSvtxmTag = bfractionFit(ppPbPb,fixCL,"svtxm",0,6,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,10,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint));
-    //RooRealVar fitJpDirect = bfractionFit(ppPbPb,fixCL,"discr_prob",0,3,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,-2,10,"inclusive sample",5e4);
+    RooRealVar fitSvtxmTag = bfractionFit(fixCL,"svtxm",0,6,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),9e3);
+    //RooRealVar fitSvtxmTag = bfractionFit(fixCL,"svtxm",0,6,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,10,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint));
+    //RooRealVar fitJpDirect = bfractionFit(fixCL,"discr_prob",0,3,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,-2,10,"inclusive sample",5e4);
     c2->cd(n+1);
     c2->GetPad(n+1)->SetLogy();
-    RooRealVar fitJpDirect = bfractionFit(ppPbPb,fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,"discr_prob",0.,3.,"inclusive sample",4e5);
+    RooRealVar fitJpDirect = bfractionFit(fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,"discr_prob",0.,3.,"inclusive sample",4e5);
 
     if (doLTJP) {
       c3->cd(n+1);
       c3->GetPad(n+1)->SetLogy();
-      RooRealVar fitJpBeforetag = bfractionFit(ppPbPb,fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,"discr_prob",0,3.,"jets with JP info",4e5);
+      RooRealVar fitJpBeforetag = bfractionFit(fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,"discr_prob",0,3.,"jets with JP info",4e5);
       c4->cd(n+1);
       c4->GetPad(n+1)->SetLogy();
-      RooRealVar fitJpTag = bfractionFit(ppPbPb,fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),4e5);
+      RooRealVar fitJpTag = bfractionFit(fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),4e5);
     } 
     if (doLTCSV) {
-      RooRealVar fitCsvBeforetag = bfractionFit(ppPbPb,fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,-2,10,"jets with CSV info",4e5);
-      RooRealVar fitCsvTag = bfractionFit(ppPbPb,fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,10,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),4e5);
+      RooRealVar fitCsvBeforetag = bfractionFit(fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,-2,10,"jets with CSV info",4e5);
+      RooRealVar fitCsvTag = bfractionFit(fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,10,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),4e5);
     } 
 
     taggedFracData = numbers.nTaggedJetsData / (numbers.nTaggedJetsData+numbers.nUntaggedJetsData);
@@ -246,9 +248,10 @@ void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double w
   
   TLegend *legPur = new TLegend(0.4,0.15,0.85,0.3,Form("Purity of b-tagged sample (%s at %.1f)",taggerName,workingPoint));
   legPur->SetBorderSize(0);
-  legPur->SetFillColor(kGray);
-  legPur->AddEntry(hBPurityMC,"MC","pl");
-  legPur->AddEntry(hBPurityData,"Data (fit of svtxm)","pl");
+  //legPur->SetFillColor(kGray);
+  legPur->SetFillStyle(0);
+  legPur->AddEntry(hBPurityMC,"MC Input","pl");
+  legPur->AddEntry(hBPurityData,"Data","pl");
   TCanvas *cBPurity = new TCanvas("cBPurity","b purity",600,600);
   hBPurityMC->SetAxisRange(0,1,"Y");
   hBPurityMC->SetTitleOffset(1.3,"Y");
@@ -265,8 +268,9 @@ void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double w
 
   TLegend *legEff = new TLegend(0.4,0.65,0.85,0.8,Form("Efficiency for tagging b-jets (%s at %.1f)",taggerName,workingPoint));
   legEff->SetBorderSize(0);
-  legEff->SetFillColor(kGray);
-  legEff->AddEntry(hBEfficiencyMC,"MC","pl");
+  //legEff->SetFillColor(kGray);
+  legEff->SetFillStyle(0);
+  legEff->AddEntry(hBEfficiencyMC,"MC Efficiency","pl");
   if (doLTJP) legEff->AddEntry(hBEfficiencyDataLTJP,"LT method (JP)","pl");
   if (doLTCSV) legEff->AddEntry(hBEfficiencyDataLTCSV,"LT method (CSV)","pl");
   TCanvas *cBEfficiency = new TCanvas("cBEfficiency","B-Tagging efficiency",600,600);
@@ -294,12 +298,13 @@ void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double w
 
   TLegend *legFrac = new TLegend(0.25,0.15,0.85,0.3);
   legFrac->SetBorderSize(0);
-  legFrac->SetFillColor(kGray);
-  legFrac->AddEntry(hBFractionMC,"MC","pl");
-  legFrac->AddEntry(hBFractionJPdirect,"direct fit of JP","pl");
-  legFrac->AddEntry(hBFractionData,Form("%s at %.1f + pur. from svtxm + eff. from MC",taggerName,workingPoint),"pl");
-  if (doLTJP) legFrac->AddEntry(hBFractionDataLTJP,Form("%s at %.1f + pur. from svtxm + eff. from LT (JP)",taggerName,workingPoint),"pl");
-  if (doLTCSV) legFrac->AddEntry(hBFractionDataLTCSV,Form("%s at %.1f + pur. from svtxm + eff. from LT (CSV)",taggerName,workingPoint),"pl");
+  //legFrac->SetFillColor(kGray);
+  legFrac->SetFillStyle(0);
+  legFrac->AddEntry(hBFractionMC,"MC Input","pl");
+  legFrac->AddEntry(hBFractionData,Form("%s at %.1f + pur. from SV mass + eff. from MC",taggerName,workingPoint),"pl");
+  if (doLTJP) legFrac->AddEntry(hBFractionDataLTJP,Form("%s at %.1f + pur. from SV mass + eff. from LT (JP)",taggerName,workingPoint),"pl");
+  if (doLTCSV) legFrac->AddEntry(hBFractionDataLTCSV,Form("%s at %.1f + pur. from SV mass + eff. from LT (CSV)",taggerName,workingPoint),"pl");
+  legFrac->AddEntry(hBFractionJPdirect,"Direct fit to JP","pl");
   TCanvas *cBFraction = new TCanvas("cBFraction","B-jet fraction",600,600);
   hBFractionMC->SetAxisRange(0,0.03,"Y");
   hBFractionMC->SetTitleOffset(1.8,"Y");
@@ -331,7 +336,7 @@ void bfractionVsJetPtPbPb(int ppPbPb=0,char *tagger="discr_ssvHighEff", double w
   //cBFraction->SaveAs("bfraction.gif");
 
 
-  TFile *fout = new TFile(Form("output/bFractionMerged_ppPbPb%d_%sat%.1fFixCL%d_bin_%d_%d_eta_%d_%d.root",ppPbPb,taggerName,workingPoint,fixCL,cbinlo,cbinhi,(int)etalo,(int)etahi),"recreate");
+  TFile *fout = new TFile(Form("output/bFractionMerged_%sat%.1fFixCL%d_bin_%d_%d_eta_%d_%d.root",taggerName,workingPoint,fixCL,cbinlo,cbinhi,(int)etalo,(int)etahi),"recreate");
   hBFractionMC->Write();
   hBFractionData->Write();
   if (doLTJP) hBFractionDataLTJP->Write();
@@ -377,7 +382,7 @@ void fixEmpty(TH1 *h){
    }
 }
 
-RooRealVar bfractionFit(int ppPbPb=0,bool fixCL=1, char *var="discr_prob", double minXvar=0, double maxXvar=3, double ptMin=100, double ptMax=500, int cbinlo, int cbinhi, float etalo, float etahi,
+RooRealVar bfractionFit(bool fixCL=1, char *var="discr_prob", double minXvar=0, double maxXvar=3, double ptMin=100, double ptMax=500, int cbinlo, int cbinhi, float etalo, float etahi,
 // by default, no b-tagging :
 char *discr="discr_prob", double minXdiscr=-999, double maxXdiscr=999, char *comment="inclusive sample", 
 double maxYaxis=1e3)
@@ -389,20 +394,19 @@ double maxYaxis=1e3)
   // svtxm : from (0) 0 to 7 
   // muptrel : from (0) 0 to 5
 
-  TFile *fQCDMC, *fBMC, *fCMC, *data;
-  
-  if(ppPbPb){
-    fQCDMC = new TFile("histos/PbPbQCDMC.root"); 
-    fBMC = new TFile("histos/PbPbBMC.root"); 
-    fCMC = new TFile("histos/PbPbCMC.root"); 
-    fdata = new TFile("histos/PbPbdata.root");
-  }
-  else{
-    fQCDMC = new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root"); 
-    fBMC = new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root"); 
-    fCMC = new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root"); 
-    fdata = new TFile("histos/ppdata_hiReco_jetTrig_highPurity.root");
-  }
+  //*
+  TFile *fQCDMC = new TFile("histos/PbPbQCDMC.root"); 
+  TFile *fBMC = new TFile("histos/PbPbBMC.root"); 
+  TFile *fCMC = new TFile("histos/PbPbCMC.root"); 
+  TFile *fdata = new TFile("histos/PbPbdata.root");
+  //*/
+
+  /*
+  TFile *fQCDMC = new TFile("histos/ppMC_hiReco_jetTrig.root"); 
+  TFile *fBMC = new TFile("histos/ppMC_hiReco_jetTrig.root"); 
+  TFile *fCMC = new TFile("histos/ppMC_hiReco_jetTrig.root"); 
+  TFile *fdata = new TFile("histos/ppdata_hiReco_jetTrig.root");
+  */
 
   TTree *tQCDMC = (TTree*) fQCDMC->Get("nt");
   TTree *tBMC = (TTree*) fBMC->Get("nt");
@@ -501,7 +505,9 @@ double maxYaxis=1e3)
 
   //RooPlot* sframe = s.frame();
   TH2D *htemp = new TH2D(Form("%s%.0f%.0f",var,ptMin,ptMax),Form("%s%.0f%.0f",var,ptMin,ptMax),100,minXvar,maxXvar,100,0.5,maxYaxis) ;
-  htemp->SetXTitle(Form("%s %.0f < p_{T} < %.0f GeV/c",var,ptMin,ptMax));
+  //htemp->SetXTitle(Form("%s %.0f < p_{T} < %.0f GeV/c",var,ptMin,ptMax));
+  if(var=="svtxm")htemp->SetXTitle("SV mass (GeV/c^{2})");
+  else htemp->SetXTitle("JP Disc.");
   htemp->SetYTitle("Entries");
   /*
   htemp->Draw();
@@ -576,23 +582,19 @@ double maxYaxis=1e3)
 
 
 
-Enumerations count(int ppPbPb,double ptMin, double ptMax, char *discr, double workingPoint, int cbinlo, int cbinhi, float etalo, float etahi) {
+Enumerations count(double ptMin, double ptMax, char *discr, double workingPoint, int cbinlo, int cbinhi, float etalo, float etahi) {
 
-  TFile *fQCDMC, *fBMC, *fCMC, *fdata;
+  //*
+  TFile *fQCDMC = new TFile("histos/PbPbQCDMC.root"); 
+  TFile *fBMC = new TFile("histos/PbPbBMC.root"); 
+  TFile *fCMC = new TFile("histos/PbPbCMC.root"); 
+  TFile *fdata = new TFile("histos/PbPbdata.root");
+  //*/
 
-  if(ppPbPb){
-    fQCDMC = new TFile("histos/PbPbQCDMC.root"); 
-    fBMC = new TFile("histos/PbPbBMC.root"); 
-    fCMC = new TFile("histos/PbPbCMC.root"); 
-    fdata = new TFile("histos/PbPbdata.root");
-  }
-  else{
-    fQCDMC = new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root"); 
-    fBMC = new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root"); 
-    fCMC = new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root"); 
-    fdata = new TFile("histos/ppdata_hiReco_jetTrig_highPurity.root");
-  }
-
+  /*
+  //TFile *fMC = new TFile("histos/ppMC_hiReco_jetTrig.root"); 
+  //TFile *fdata = new TFile("histos/ppdata_hiReco_jetTrig.root");
+  */
 
   TTree *tQCDMC = (TTree*) fQCDMC->Get("nt");
   TTree *tBMC = (TTree*) fBMC->Get("nt");
