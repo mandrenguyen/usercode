@@ -55,7 +55,7 @@ struct Enumerations {
 
 
 
-void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=1, char *taggerName="ssvHighEff", int cbinlo=0, int cbinhi=4, float etalo=0., float etahi=2.) {
+void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=1, char *taggerName="ssvHighEff", int cbinlo=0, int cbinhi=40, float etalo=0., float etahi=2.) {
 
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
