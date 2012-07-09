@@ -736,7 +736,7 @@ double maxYaxis=1e3)
   if(comment!="b-tagged sample (SSVHE > 2)") drawText(comment,0.18,0.80);
   if(comment=="b-tagged sample (SSVHE > 2)"){
     drawText("b-tagged sample",0.18,0.80);
-    drawText("(SSVHE at 2)",0.18,0.75);
+    drawText("(SSVHE > 2)",0.18,0.75);
   }
   
   if(ptMin==80) ptMinLabel = Form("0%2.0f",ptMin);
