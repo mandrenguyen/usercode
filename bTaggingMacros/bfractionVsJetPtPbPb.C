@@ -52,10 +52,20 @@ struct Enumerations {
   Double_t nUntaggedJetsDataError;
 
 };
+int counter(0);
+TCanvas* can1[20];
+TH1D* hData[20];
+TH1D* hMCC[20];
+TH1D* hMCB[20];
+TH1D* hMCL[20];
+TH1D* hMCLC[20];
+TH1D* MCTotal[20];
+THStack* hs[20];
+THStack* fakehs[20];
+void drawText(const char *text, float xp, float yp);
 
-
-
-void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=1, char *taggerName="ssvHighEff", int cbinlo=0, int cbinhi=40, float etalo=0., float etahi=2.) {
+///XXXX
+void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=0, char *taggerName="SSVHE", int cbinlo=0, int cbinhi=40, float etalo=0., float etahi=2.) {
 
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
@@ -123,10 +133,8 @@ void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2.,
     cCount->cd();
     numbers = count(ptBin[n],ptBin[n+1],tagger,workingPoint,cbinlo,cbinhi,etalo,etahi);
     c1->cd(n+1);
-    c1->GetPad(n+1)->SetLogy();
-    RooRealVar fitSvtxmTag = bfractionFit(fixCL,"svtxm",0,6,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),9e3);
-    //RooRealVar fitSvtxmTag = bfractionFit(fixCL,"svtxm",0,6,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,10,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint));
-    //RooRealVar fitJpDirect = bfractionFit(fixCL,"discr_prob",0,3,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,-2,10,"inclusive sample",5e4);
+    RooRealVar fitSvtxmTag = bfractionFit(fixCL,"svtxm",0,6,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,"b-tagged sample (SSVHE > 2)",9e3);
+
     c2->cd(n+1);
     c2->GetPad(n+1)->SetLogy();
     RooRealVar fitJpDirect = bfractionFit(fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,"discr_prob",0.,3.,"inclusive sample",4e5);
@@ -137,7 +145,7 @@ void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2.,
       RooRealVar fitJpBeforetag = bfractionFit(fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,"discr_prob",0,3.,"jets with JP info",4e5);
       c4->cd(n+1);
       c4->GetPad(n+1)->SetLogy();
-      RooRealVar fitJpTag = bfractionFit(fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),4e5);
+      RooRealVar fitJpTag = bfractionFit(fixCL,"discr_prob",0.0,3.,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,6,"b-tagged sample (SSVHE > 2)",4e5);
     } 
     if (doLTCSV) {
       RooRealVar fitCsvBeforetag = bfractionFit(fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,-2,10,"jets with CSV info",4e5);
@@ -185,7 +193,7 @@ void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2.,
     //*  --- b fraction --- 
 
     bFracMC = numbers.nBjetsMC / numbers.nJetsMC;
-    //bFracMC = numbers.nTaggedJetsMC * bPurMC / (bEffMC * numbers.nJetsMC); // for check : same as previous
+    bFracMC = numbers.nTaggedJetsMC * bPurMC / (bEffMC * numbers.nJetsMC); // for check : same as previous
     bFracMCError = fracError(numbers.nBjetsMC,numbers.nNonBjetsMC,numbers.nBjetsMCError,numbers.nNonBjetsMCError); 
     hBFractionMC->SetBinContent(n+1,bFracMC); 
     hBFractionMC->SetBinError(n+1,bFracMCError); 
@@ -193,14 +201,14 @@ void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2.,
 
     bFracData = taggedFracData * bPurData / bEffMC; // efficiency from MC
     bFracDataError = prodError(taggedFracData,bPurData,taggedFracDataError,bPurDataError) / bEffMC; // stat.error from purity and tagged-fraction (assumed independent)
-    //bFracDataError = bFracData * bPurDataError / bPurData; // stat.error only from purity
+    bFracDataError = bFracData * bPurDataError / bPurData; // stat.error only from purity
     hBFractionData->SetBinContent(n+1,bFracData);    
     hBFractionData->SetBinError(n+1,bFracDataError);
 
     if (doLTJP) {
       bFracDataLTJP = taggedFracData * bPurData / bEffDataLTJP ; // efficiency from LTJP method
       bFracDataLTJPError = prodError(taggedFracData,bPurData,taggedFracDataError,bPurDataError) / bEffDataLTJP; // stat.error from purity and tagged-fraction (assumed independent)
-      //bFracDataLTJPError = bFracDataLTJP * bPurDataError / bPurData; // stat.error only from purity
+      bFracDataLTJPError = bFracDataLTJP * bPurDataError / bPurData; // stat.error only from purity
       hBFractionDataLTJP->SetBinContent(n+1,bFracDataLTJP);    
       hBFractionDataLTJP->SetBinError(n+1,bFracDataLTJPError);
     } 
@@ -208,7 +216,7 @@ void bfractionVsJetPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2.,
     if (doLTCSV) {
       bFracDataLTCSV = taggedFracData * bPurData / bEffDataLTCSV; // efficiency from LTCSV method
       bFracDataLTCSVError = prodError(taggedFracData,bPurData,taggedFracDataError,bPurDataError) / bEffDataLTCSV; // stat.error from purity and tagged-fraction (assumed independent)
-      //bFracDataLTCSVError = bFracDataLTCSV * bPurDataError / bPurData; // stat.error only from purity
+      bFracDataLTCSVError = bFracDataLTCSV * bPurDataError / bPurData; // stat.error only from purity
       hBFractionDataLTCSV->SetBinContent(n+1,bFracDataLTCSV);    
       hBFractionDataLTCSV->SetBinError(n+1,bFracDataLTCSVError);
     } 
@@ -382,11 +390,21 @@ void fixEmpty(TH1 *h){
    }
 }
 
-RooRealVar bfractionFit(bool fixCL=1, char *var="discr_prob", double minXvar=0, double maxXvar=3, double ptMin=100, double ptMax=500, int cbinlo, int cbinhi, float etalo, float etahi,
+RooRealVar bfractionFit(bool fixCL=0, char *var="discr_prob", double minXvar=0, double maxXvar=3, double ptMin=100, double ptMax=500, int cbinlo, int cbinhi, float etalo, float etahi,
 // by default, no b-tagging :
 char *discr="discr_prob", double minXdiscr=-999, double maxXdiscr=999, char *comment="inclusive sample", 
 double maxYaxis=1e3)
 {
+
+  gStyle->SetOptStat(0);
+  gStyle->SetOptTitle(0);
+  gStyle->SetLabelFont(43,"xyz");
+  gStyle->SetLabelSize(20,"xyz");
+  gStyle->SetTitleFont(43,"xyz");
+  gStyle->SetTitleSize(26,"xyz");
+  gStyle->SetTitleOffset(1.0,"x"); 
+  gROOT->ForceStyle(1);
+
   // discr_prob : from (0) 0 to 3, operating point : 0.6 (1%), 0.7 
   // discr_ssvHighEff : from (-1) 1 to 6, operating point : 2 ?
   // discr_ssvHighPur : from (-1) 1 to 6, operating point : 2 ?  
@@ -485,8 +503,6 @@ double maxYaxis=1e3)
   else RooAddPdf model("model","",RooArgList(bottom,charm,light),RooArgList(Bfraction,Cfraction));  
 
   // --- Data sample ---
-  //RooDataSet *data = new RooDataSet("data","data",tdata,RooArgSet(s,jtpt,discriminator),Form("jtpt>=%f&&jtpt<%f&&%s>=%f&&%s<%f",ptMin,ptMax,discr,minXdiscr,discr,maxXdiscr));
-  //RooDataSet *data = new RooDataSet("data","data",tdata,RooArgSet(s,jtpt,discriminator),Form("jtpt>=%f&&jtpt<%f&&%s>=%f&&%s<%f&&bin>=%d&&bin<%d&&fabs(jteta)>%f&&fabs(jteta)<%f",ptMin,ptMax,discr,minXdiscr,discr,maxXdiscr,cbinlo,cbinhi,etalo,etahi));
   RooDataSet *data = new RooDataSet("data","data",tdata,RooArgSet(s,jtpt,jteta,bin,discriminator),Form("jtpt>=%f&&jtpt<%f&&%s>=%f&&%s<%f&&abs(jteta)>%f&&abs(jteta)<%f&&bin>=%d&&bin<%d",ptMin,ptMax,discr,minXdiscr,discr,maxXdiscr,etalo,etahi,cbinlo,cbinhi));
 
     
@@ -509,22 +525,7 @@ double maxYaxis=1e3)
   if(var=="svtxm")htemp->SetXTitle("SV mass (GeV/c^{2})");
   else htemp->SetXTitle("JP Disc.");
   htemp->SetYTitle("Entries");
-  /*
-  htemp->Draw();
-  data->plotOn(sframe,Binning(25));
-  if(fixCL) {
-    model.plotOn(sframe,Components(charmlight),LineStyle(kDashed),LineColor(30),LineWidth(2));
-  } else {
-    model.plotOn(sframe,Components(light),LineStyle(kDashed),LineColor(kBlue),LineWidth(2));
-    model.plotOn(sframe,Components(charm),LineStyle(kDashed),LineColor(kGreen),LineWidth(2));
-    model.plotOn(sframe,Components(RooArgSet(charm,light)),LineStyle(kDashed),LineColor(30),LineWidth(2));
-  }
-  model.plotOn(sframe,Components(bottom),LineStyle(kDashed),LineColor(kRed),LineWidth(2),FillColor(kRed),FillStyle(1));   
-  model.plotOn(sframe,LineWidth(2),LineColor(13));
-  data->plotOn(sframe,Binning(25));
-  model.paramOn(sframe,Layout(0.4,0.9,0.9),Format("NEU",FixedPrecision(3)));
-  sframe->Draw("same");
-  */
+
 
   // --- Perform extended ML fit of composite PDF to data ---
   RooFitResult *fitresult = model.fitTo(*data,Save(),PrintLevel(-1));
@@ -552,35 +553,244 @@ double maxYaxis=1e3)
 
   model.paramOn(sframe,Layout(0.4,0.9,0.9),Format("NEU",FixedPrecision(3)));
   sframe->Draw("same");
-  TLegend *leg = new TLegend(0.61,fixCL?0.60:0.50,0.98,fixCL?0.78:0.75);
-  leg->SetBorderSize(0);
-  leg->SetFillStyle(0);
-  leg->AddEntry("h_data","PbPb data","p");
-  leg->AddEntry(Form("model_Norm[%s]_Comp[bottom]",var),"b","l");
-  if(fixCL) {
-    leg->AddEntry(Form("model_Norm[%s]_Comp[charmlight]",var),"c + udsg","l");
-  } else {
-    leg->AddEntry(Form("model_Norm[%s]_Comp[charm]",var),"c","l");
-    leg->AddEntry(Form("model_Norm[%s]_Comp[light]",var),"udsg","l");
-    leg->AddEntry(Form("model_Norm[%s]_Comp[charm,light]",var),"c + udsg","l");    
+//   TLegend *leg = new TLegend(0.61,fixCL?0.60:0.50,0.98,fixCL?0.78:0.75);
+//   leg->SetBorderSize(0);
+//   leg->SetFillStyle(0);
+//   leg->AddEntry("h_data","PbPb data","p");
+//   leg->AddEntry(Form("model_Norm[%s]_Comp[bottom]",var),"b","l");
+//   if(fixCL) {
+//     leg->AddEntry(Form("model_Norm[%s]_Comp[charmlight]",var),"c + udsg","l");
+//   } else {
+//     leg->AddEntry(Form("model_Norm[%s]_Comp[charm]",var),"c","l");
+//     leg->AddEntry(Form("model_Norm[%s]_Comp[light]",var),"udsg","l");
+//     leg->AddEntry(Form("model_Norm[%s]_Comp[charm,light]",var),"c + udsg","l");    
+//   }
+//   leg->AddEntry(Form("model_Norm[%s]",var),"b + c + udsg","l");
+//   leg->Draw("same");
+
+  //////////////////////////////////////////////////////////
+  //Plot Stacked histos
+  //////////////////////////////////////////////////////////
+  int nXbins = 12;
+  bool doLog = true;
+  hMCB[counter] = new TH1D(Form("hMCB_%d",counter),Form("hMCB_%d",counter),nXbins,minXvar,maxXvar);
+  hMCC[counter] = new TH1D(Form("hMCC_%d",counter),Form("hMCC_%d",counter),nXbins,minXvar,maxXvar);
+  hMCL[counter] = new TH1D(Form("hMCL_%d",counter),Form("hMCL_%d",counter),nXbins,minXvar,maxXvar);
+  hMCLC[counter] = new TH1D(Form("hMCLC_%d",counter),Form("hMCLC_%d",counter),nXbins,minXvar,maxXvar);
+  hData[counter] = new TH1D(Form("hData_%d",counter),Form("hData_%d",counter),nXbins,minXvar,maxXvar);
+  hData[counter]->Sumw2();
+  hMCL[counter]->Sumw2();  hMCB[counter]->Sumw2();  hMCC[counter]->Sumw2(); hMCLC[counter]->Sumw2();
+  tBMC->Draw(Form("%s>>hMCB_%d",var,counter),Form("weight*(abs(refparton_flavorForB)==5&&jtpt>=%f&&jtpt<%f&&%s>=%f&&%s<%f)",ptMin,ptMax,discr,minXdiscr,discr,maxXdiscr),"goff");
+  tCMC->Draw(Form("%s>>hMCC_%d",var,counter),Form("weight*(abs(refparton_flavorForB)==4&&jtpt>=%f&&jtpt<%f&&%s>=%f&&%s<%f)",ptMin,ptMax,discr,minXdiscr,discr,maxXdiscr),"goff");
+  tQCDMC->Draw(Form("%s>>hMCL_%d",var,counter),Form("weight*(abs(refparton_flavorForB)!=5&&abs(refparton_flavorForB)!=4&&abs(refparton_flavorForB)<99&&jtpt>=%f&&jtpt<%f&&%s>=%f&&%s<%f)",ptMin,ptMax,discr,minXdiscr,discr,maxXdiscr),"goff");
+  tdata->Draw(Form("%s>>hData_%d",var,counter),Form("jtpt>=%f&&jtpt<%f&&%s>=%f&&%s<%f",ptMin,ptMax,discr,minXdiscr,discr,maxXdiscr),"goff");
+  hMCLC[counter]->Add( hMCL[counter]);
+  hMCLC[counter]->Add( hMCC[counter]);
+  fixEmpty(hMCB[counter]); fixEmpty(hMCC[counter]); fixEmpty(hMCL[counter]); fixEmpty(hMCLC[counter]); fixEmpty(hData[counter]);
+  
+  
+  can1[counter] = new TCanvas(Form("can1_%d",counter),Form("can1_%d",counter),700,600);
+  hs[counter] = new THStack(Form("hs_%d",counter),"le stack of MC histos");
+  fakehs[counter] = new THStack(Form("fakehs_%d",counter),"le fake stack of MC histos");
+
+  can1[counter]->cd();
+  if (doLog) can1[counter]->cd()->SetLogy();
+
+
+  if (doLog){
+    hData[counter]->SetMaximum(hData[counter]->GetMaximum()*1000);
+    hData[counter]->SetMinimum(0.5);
   }
-  leg->AddEntry(Form("model_Norm[%s]",var),"b + c + udsg","l");
-  leg->Draw("same");
+  if (!doLog){
+    hData[counter]->SetMaximum(hData[counter]->GetMaximum()*1.5);
+    hData[counter]->SetMinimum(0.0);
+  }
+  const char* yTitle;
+  const char* xTitle;
+  if (var=="svtxm")  xTitle = Form("Secondary Vertex Mass [GeV/c^{2}]");
+  if (var=="discr_prob") xTitle = Form("Jet Probability");
+  //if (var=="svtxm") yTitle = (Form("Number of Jets / %3.2f GeV",(maxXvar-minXvar)/nXbins));
+  //if (var=="discr_prob") yTitle = (Form("Numbers of Jets / %3.2f",(maxXvar-minXvar)/nXbins));
+  if (var=="svtxm") yTitle = ("Number of Jets");
+  if (var=="discr_prob") yTitle = ("Number of Jets");
+  hData[counter]->GetXaxis()->CenterTitle();
+  hData[counter]->GetYaxis()->CenterTitle();
+  hData[counter]->GetYaxis()->SetTitle(yTitle);
+  hData[counter]->GetXaxis()->SetTitle(xTitle);
+  hData[counter]->Draw();
+  double Bnorm, Cnorm, Lnorm, LCnorm;
+  Double_t Bfrac =Bfraction.getVal();
+  Double_t Cfrac =Cfraction.getVal();
+  
+  //Normalize Histograms
+  //if(!fixCL) Lnorm = (hData[counter]->Integral(1,nXbins)/hMCL[counter]->Integral(1,nXbins))*(1/(Cfrac+Bfrac+1));
+  //if(!fixCL) Cnorm = (hData[counter]->Integral(1,nXbins)/hMCC[counter]->Integral(1,nXbins))*(Cfrac/(Cfrac+Bfrac+1));
+  //if(!fixCL) Bnorm = (hData[counter]->Integral(1,nXbins)/hMCB[counter]->Integral(1,nXbins))*(Bfrac/(Cfrac+Bfrac+1));
+  //if(fixCL) LCnorm = (hData[counter]->Integral(1,nXbins)/hMCLC[counter]->Integral(1,nXbins))*(1/(Bfrac+1));
+  //if(fixCL)  Bnorm = (hData[counter]->Integral(1,nXbins)/hMCB[counter]->Integral(1,nXbins))*(Bfrac/(Bfrac+1));
+  if(!fixCL) Lnorm = (hData[counter]->Integral(1,nXbins)/hMCL[counter]->Integral(1,nXbins))*(1.-Cfrac-Bfrac);
+  if(!fixCL) Cnorm = (hData[counter]->Integral(1,nXbins)/hMCC[counter]->Integral(1,nXbins))*(Cfrac);
+  if(!fixCL) Bnorm = (hData[counter]->Integral(1,nXbins)/hMCB[counter]->Integral(1,nXbins))*(Bfrac);
+  if(fixCL) LCnorm = (hData[counter]->Integral(1,nXbins)/hMCLC[counter]->Integral(1,nXbins))*(1.-Bfrac);
+  if(fixCL)  Bnorm = (hData[counter]->Integral(1,nXbins)/hMCB[counter]->Integral(1,nXbins))*(Bfrac);
+  
+  hMCB[counter]->SetFillColor(kRed+2);
+  //hMCB[counter]->SetLineWidth(4);
+  hMCL[counter]->SetFillColor(kBlue+1);
+  hMCC[counter]->SetFillColor(kGreen+2);
+  hMCLC[counter]->SetFillColor(kBlue+2);
+  hMCB[counter]->SetMarkerSize(0);
+  hMCC[counter]->SetMarkerSize(0);
+  hMCL[counter]->SetMarkerSize(0);
+  hMCLC[counter]->SetMarkerSize(0);
+  hMCB[counter]->Scale(Bnorm);
+  hMCC[counter]->Scale(Cnorm);
+  hMCL[counter]->Scale(Lnorm);
+  hMCLC[counter]->Scale(LCnorm);
+  if (!fixCL){
+    hs[counter]->Add(hMCB[counter]);
+    hs[counter]->Add(hMCC[counter]);
+    hs[counter]->Add(hMCL[counter]);
+  }
+  if (fixCL){
+    hs[counter]->Add(hMCB[counter]);
+    hs[counter]->Add(hMCLC[counter]);
+  }
 
+  //hs[counter]->Draw("same hE2");
+  hs[counter]->Draw("same h e");
+  hData[counter]->Draw("same");
+  can1[counter]->GetFrame()->SetLineWidth(4);
+  can1[counter]->RedrawAxis();
+  //checkBins(hMCB[counter]); checkBins(hMCC[counter]); checkBins(hMCL[counter]); checkBins(hData[counter]);
 
+  //To obtain the ovaerll sum histogram of the MC counts
+  MCTotal[counter] = new TH1D(Form("MCTotal_%d",counter),Form("MCTotal_%d",counter),nXbins,minXvar,maxXvar);
+  MCTotal[counter]->Sumw2();
+  if (!fixCL){
+    MCTotal[counter]->Add(hMCB[counter]);
+    MCTotal[counter]->Add(hMCC[counter]);
+    MCTotal[counter]->Add(hMCL[counter]);
+  }
+  if (fixCL){
+    MCTotal[counter]->Add(hMCB[counter]);
+    MCTotal[counter]->Add(hMCLC[counter]);
+  }
+  MCTotal[counter]->SetLineWidth(3.0);
+  MCTotal[counter]->SetMarkerSize(0);
+  MCTotal[counter]->SetMarkerColor(kGray+2);
+  //MCTotal[counter]->SetLineColor(kAzure-3);    
+  MCTotal[counter]->SetLineColor(kBlue-9);    
+  //MCTotal[counter]->SetLineColor(kGray+2);
+  MCTotal[counter]->Draw("same e");
+  hData[counter]->Draw("same");
+  //http://root.cern.ch/root/htmldoc/TH1.html#TH1:Chi2Test
+  Double_t chi2 = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2 P NORM");
+  Double_t chi2NDF = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2NDF P NORM");
+  //This is a fake THstack to also plot the constribution from the charm, 
+  //even though it is supposed to be merged with the Light constribution 
+  if(fixCL){
+    //fakehs[counter]->Add(hMCB[counter]);
+    //hMCC[counter]->Scale();
+    
+  }
+
+  //Redraw some partial histograms to show error bars in between
+  if(fixCL){
+    //hMCB[counter]->SetLineColor(kBlack);
+    //hMCB[counter]->SetLineColor(kRed);
+    hMCB[counter]->SetMarkerSize(0);
+    hMCB[counter]->Draw("same e");
+  }
+  /*  // Jorge, I don't know what you're doing here, but there's a bug.  The error bars are drawn in the wrong place
+  if(!fixCL){  
+   hMCB[counter]->SetLineColor(kBlack);
+   hMCB[counter]->SetMarkerSize(0);
+   hMCB[counter]->Draw("same e");
+   hMCB[counter]->Add(hMCC[counter]);
+   //hMCB[counter]->SetLineColor(kRed);
+   //hMCB[counter]->SetLineColor(kBlack);
+   hMCB[counter]->SetMarkerSize(0);
+   hMCB[counter]->Draw("same e");
+  }
+  */
+  TLegend *hleg = new TLegend(0.5,fixCL?0.70:0.67,0.90,fixCL?0.92:0.92);
+  hleg->SetBorderSize(0);
+  hleg->SetFillStyle(0);
+  hleg->AddEntry(hData[counter],"PbPb data","lp");
+  hleg->AddEntry(hMCB[counter],"b","f");
+  if(!fixCL){
+    hleg->AddEntry(hMCC[counter],"c","f");
+    hleg->AddEntry(hMCL[counter],"udsg","f");
+  }
+  if(fixCL){
+    hleg->AddEntry(hMCLC[counter],"c + usdg","f");
+  }
+  hleg->Draw("same");
+  if(!fixCL)drawText(Form("%2.0f < p_{T} < %2.0f GeV/c",ptMin,ptMax),0.50,0.62);
+  if(fixCL)drawText(Form("%2.0f < p_{T} < %2.0f GeV/c",ptMin,ptMax),0.50,0.66);
+  drawText(Form("#chi^{2}/NDF = %3.1f / %d",chi2NDF,nXbins-1),0.53,0.55);
+  drawText("CMS Preliminary",0.15,0.965);
+  drawText("#sqrt{s_{NN}} = 2.76 TeV",0.60,0.965);
+  drawText("|#eta| < 2.0",0.18,0.88);
+  if(comment!="b-tagged sample (SSVHE > 2)") drawText(comment,0.18,0.80);
+  if(comment=="b-tagged sample (SSVHE > 2)"){
+    drawText("b-tagged sample",0.18,0.80);
+    drawText("(SSVHE at 2)",0.18,0.75);
+  }
+  
+  if(ptMin==80) ptMinLabel = Form("0%2.0f",ptMin);
+  else ptMinLabel = Form("%3.0f",ptMin);
+  
+  bool printEach=false;
+  // --- Print results ---
+  //cout <<"b jet fraction in MC = "<<bInitFrac<<endl;
+  cout<<"ZZZZZ TEXTcounter: "<<counter<<"   Comment: "<<comment<<endl;
+  if(!fixCL) cout<<"ZZZZZ Scale factors: B= "<<Bnorm<<" C= "<<Cnorm<<" Light= "<<Lnorm<<endl;
+  if(fixCL)  cout<<"ZZZZZ Scale factors: B= "<<Bnorm<<" LC= "<<LCnorm<<endl;
+  cout<<"ZZZZZ Chi2: "<<chi2<<" Chi2/NDF: "<<chi2NDF<<endl;
+  cout<<"ZZZZZ var: "<<var<<"  discr: "<<discr<<"    min(discr): "<<minXvar<<"    max(discr): "<<maxXvar<<endl;
+  cout<<"ZZZZZ in pT [ "<<ptMin<<" , "<<ptMax<<" ]"<<endl;
+  cout<<"ZZZZZ b jet fraction in data = "<<Bfraction.getVal()<<endl;
+  if(!fixCL) cout <<"ZZZZZ c jet fraction = "<<Cfraction.getVal()<<endl;
+  if(!fixCL){
+    if (!printEach){
+      if (counter<15) can1[counter]->Print("bTagStackedHistos_nofixCL.pdf(","pdf");
+      if (counter==15) can1[counter]->Print("bTagStackedHistos_nofixCL.pdf)","pdf");
+    }
+    if (printEach) can1[counter]->Print(Form("PDFS/bStack_%sPt%s_%3.0f_nofixCL.pdf",var,ptMinLabel,ptMax),"pdf");
+  }
+  if(fixCL){
+    if (!printEach){
+      if (counter<15) can1[counter]->Print("bTagStackedHistos_fixCL.pdf(","pdf");
+      if (counter==15) can1[counter]->Print("bTagStackedHistos_fixCL.pdf)","pdf");
+    }
+    if (printEach) can1[counter]->Print(Form("PDFS/bStack_%sPt%s_%3.0f_fixCL.pdf",var,ptMinLabel,ptMax),"pdf");
+  }
+  counter++;
+  
   // --- Print results ---
   //cout <<"b jet fraction in MC = "<<bInitFrac<<endl;
   cout <<"b jet fraction in data = "<<Bfraction.getVal()<<endl;
   if(!fixCL) cout <<"c jet fraction = "<<Cfraction.getVal()<<endl;
-
+  
   // --- Save canvas ---
   TString path = Form("gifs/%s_jtpt%.0fto%.0f_%s%.2fto%.2f_%s.gif",var,ptMin,ptMax,discr,minXdiscr,maxXdiscr,fixCL?"CLfixed":"CLfree");
   //cROOFIT->SaveAs(path);
-
+  
   return Bfraction;
 }
 
-
+void drawText(const char *text, float xp, float yp){
+  TLatex *tex = new TLatex(xp,yp,text);
+  tex->SetTextFont(63);
+  tex->SetTextSize(25);
+  //tex->SetTextSize(0.05);
+  tex->SetTextColor(kBlack);
+  tex->SetLineWidth(1);
+  tex->SetNDC();
+  tex->Draw();
+}
 
 Enumerations count(double ptMin, double ptMax, char *discr, double workingPoint, int cbinlo, int cbinhi, float etalo, float etahi) {
 
