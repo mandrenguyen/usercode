@@ -846,7 +846,7 @@ RooRealVar *bfractionFit(parameters p, char *var, char *discr, double minXdiscr,
 
   // ========== Toy check on MC template ==========
   if (toyMC) {
-     TH1F *hToyResult = new TH1F("hToyResult","",200,0,1);
+     TH1F *hToyResult = new TH1F("hToyResult","",200,0,Bfraction->getVal()*2);
      char *pathToy = Form("toyMC/jtpt%.0fto%.0f_%s%.2fto%.2f_%s",ptMin,ptMax,discr,minXdiscr,maxXdiscr,fixCL?"CLfixed":"CLfree");
      TCanvas *cToy = new TCanvas("cToy",pathToy,600,600);
      int nExp = 100;
@@ -878,8 +878,8 @@ RooRealVar *bfractionFit(parameters p, char *var, char *discr, double minXdiscr,
 	delete hCLToy;
      }	
      hToyResult->Draw();
-     cToy->SaveAs(Form("toyMC/jtpt%.0fto%.0f_%s%.2fto%.2f_%s.gif",ptMin,ptMax,discr,minXdiscr,maxXdiscr,fixCL?"CLfixed":"CLfree"));
-     cToy->SaveAs(Form("toyMC/jtpt%.0fto%.0f_%s%.2fto%.2f_%s.C",ptMin,ptMax,discr,minXdiscr,maxXdiscr,fixCL?"CLfixed":"CLfree"));
+     cToy->SaveAs(Form("toyMC/jtpt_cent_%.0f-%.0f_%.0fto%.0f_%s%.2fto%.2f_%s.gif",cbinlo*2.5,cbinhi*2.5,ptMin,ptMax,discr,minXdiscr,maxXdiscr,fixCL?"CLfixed":"CLfree"));
+     cToy->SaveAs(Form("toyMC/jtpt_cent_%.0f-%.0f_%.0fto%.0f_%s%.2fto%.2f_%s.C",cbinlo*2.5,cbinhi*2.5,ptMin,ptMax,discr,minXdiscr,maxXdiscr,fixCL?"CLfixed":"CLfree"));
      delete hToyResult;
      delete cToy;
   }  

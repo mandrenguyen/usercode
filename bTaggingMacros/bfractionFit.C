@@ -23,7 +23,7 @@ void fixEmpty(TH1 *h)
    }
 }
 
-RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double maxX = 1,double ptMin = 60, double ptMax = 500, bool floatC = 1)
+RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double maxX = 1,double ptMin = 60, double ptMax = 500, bool floatC = 0)
 {
    // Prepare a canvas
    TCanvas *c = new TCanvas("c","",600,600);
@@ -60,6 +60,7 @@ RooRealVar bfractionFit(char *var = "discr_csvSimple",double minX = 0,double max
    if (!floatC) {
       hC->Scale(1./hC->Integral(0,100)*hQCDC->Integral(0,100));
       hOtherFlavor->Add(hC);
+      cout <<"fracC = " <<hC->Integral(0,100)/hOtherFlavor->Integral(0,100)<<endl;
    }
    // data sample   
    TFile *infData = new TFile("histos/ppdata_hiReco_jetTrig.root");
@@ -128,10 +129,10 @@ void ptDependence()
    TFile *inf = new TFile("histos/ppMC.root");
    TTree *t = (TTree*) inf->Get("nt");
 
-//   const int nBins = 4;
-//   double ptBin[nBins+1] = {100,120,140,160,200};
-   const int nBins = 1;
-   double ptBin[nBins+1] = {100,400};
+   const int nBins = 4;
+   double ptBin[nBins+1] = {100,120,140,160,200};
+//   const int nBins = 1;
+//   double ptBin[nBins+1] = {100,400};
    
    TH1D *hProb = new TH1D("hProb","",nBins,ptBin);
    TH1D *hCSV = new TH1D("hCSV","",nBins,ptBin);
