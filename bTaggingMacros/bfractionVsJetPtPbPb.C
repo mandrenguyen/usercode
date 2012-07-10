@@ -16,7 +16,6 @@
 #include "TPaveText.h"
 #include "TFrame.h"
 
-#ifndef __CINT__
 #include <RooFit.h>
 #include <RooRealVar.h>
 #include <RooDataHist.h>
@@ -25,7 +24,6 @@
 #include <RooPlot.h>
 #include <RooAddPdf.h>
 #include <RooGlobalFunc.h>
-#endif
 
 using namespace RooFit;
 
@@ -213,24 +211,24 @@ void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2
     c1->cd(n+1);
     p.ptMin = ptBin[n];
     p.ptMax = ptBin[n+1];
-    RooRealVar *fitSvtxmTag = bfractionFit(p,"svtxm",tagger,workingPoint,6,"b-tagged sample (SSVHE > 2)",9e3,0);
+    RooRealVar *fitSvtxmTag = bfractionFit(p,"svtxm",tagger,workingPoint,6,"b-tagged sample (SSVHE > 2)",9e3,1);
 
     c2->cd(n+1);
     c2->GetPad(n+1)->SetLogy();
-    RooRealVar *fitJpDirect = bfractionFit(p,"discr_prob","discr_prob",0.,3.,"inclusive sample",4e5,0);
+    RooRealVar *fitJpDirect = bfractionFit(p,"discr_prob","discr_prob",0.,3.,"inclusive sample",4e5,1);
     RooRealVar *fitJpTag, *fitJpBeforetag;
     RooRealVar *fitCsvTag, *fitCsvBeforetag;
     if (doLTJP) {
       c3->cd(n+1);
       c3->GetPad(n+1)->SetLogy();
-      fitJpBeforetag = bfractionFit(p,"discr_prob","discr_prob",0,3.,"jets with JP info",4e5,0);
+      fitJpBeforetag = bfractionFit(p,"discr_prob","discr_prob",0,3.,"jets with JP info",4e5,1);
       c4->cd(n+1);
       c4->GetPad(n+1)->SetLogy();
-      fitJpTag = bfractionFit(p,"discr_prob",tagger,workingPoint,6,"b-tagged sample (SSVHE > 2)",4e5,0);
+      fitJpTag = bfractionFit(p,"discr_prob",tagger,workingPoint,6,"b-tagged sample (SSVHE > 2)",4e5,1);
     } 
     if (doLTCSV) {
-      fitCsvBeforetag = bfractionFit(p,"discr_csvSimple",tagger,-2,10,"jets with CSV info",4e5,0);
-      fitCsvTag = bfractionFit(p,"discr_csvSimple",tagger,workingPoint,10,Form("b-tagged sample (%s > %.1f)",taggerName,workingPoint),4e5,0);
+      fitCsvBeforetag = bfractionFit(p,"discr_csvSimple",tagger,-2,10,"jets with CSV info",4e5,1);
+      fitCsvTag = bfractionFit(p,"discr_csvSimple",tagger,workingPoint,10,Form("b-tagged sample (%s > %.1f)",taggerName,workingPoint),4e5,1);
     } 
 
     taggedFracData = numbers.nTaggedJetsData / (numbers.nTaggedJetsData+numbers.nUntaggedJetsData);
@@ -848,10 +846,10 @@ RooRealVar *bfractionFit(parameters p, char *var, char *discr, double minXdiscr,
 
   // ========== Toy check on MC template ==========
   if (toyMC) {
-     TH1F *hToyResult = new TH1F("hToyResult","",100,0,1);
+     TH1F *hToyResult = new TH1F("hToyResult","",200,0,1);
      char *pathToy = Form("toyMC/jtpt%.0fto%.0f_%s%.2fto%.2f_%s",ptMin,ptMax,discr,minXdiscr,maxXdiscr,fixCL?"CLfixed":"CLfree");
      TCanvas *cToy = new TCanvas("cToy",pathToy,600,600);
-     int nExp = 10;
+     int nExp = 100;
      for (int iExp=0;iExp<nExp;iExp++) {
         TH1D* hBToy  = fluctuateHist(hB);
         TH1D* hCToy  = fluctuateHist(hC);
