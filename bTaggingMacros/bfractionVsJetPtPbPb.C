@@ -65,15 +65,27 @@ THStack* fakehs[20];
 void drawText(const char *text, float xp, float yp);
 
 ///XXXX
-void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=0, char *taggerName="SSVHE", int cbinlo=0, int cbinhi=40, float etalo=0., float etahi=2.) {
+void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2., int fixCL=1, char *taggerName="SSVHE", int cbinlo=0, int cbinhi=40, float etalo=0., float etahi=2.) {
 
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
+
+  gStyle->SetLabelFont(43,"xyz");
+  gStyle->SetLabelSize(20,"xyz");
+  gStyle->SetTitleFont(43,"xyz");
+  gStyle->SetTitleSize(26,"xyz");
+  gStyle->SetTitleOffset(1.0,"x"); 
+  gStyle->SetNdivisions(510,"xy"); 
+
+  gROOT->ForceStyle(1);
+
+  /*
   gStyle->SetLabelFont(43,"xyz");
   gStyle->SetLabelSize(14,"xyz");
   gStyle->SetTitleFont(43,"xyz");
   gStyle->SetTitleSize(16,"xyz");
   gStyle->SetTitleOffset(1.5,"xy"); 
+  */
   gROOT->ForceStyle(1);
   
   int doLTJP=1;
@@ -88,18 +100,18 @@ void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2
   Double_t bPurMCError, bPurDataError, bEffMCError, bEffDataLTJPError, bEffDataLTCSVError, taggedFracDataError, bFracMCError, bFracDataError, bFracDataLTJPError, bFracDataLTCSVError, bFracJPdirectError;
   Enumerations numbers;
   
-  TH1D *hBPurityData = new TH1D("hBPurityData","hBPurityData;Jet p_{T} (GeV/c);B-Tagging purity",nBins,ptBin);
-  TH1D *hBPurityMC = new TH1D("hBPurityMC","hBPurityMC;Jet p_{T} (GeV/c);B-Tagging purity",nBins,ptBin);
+  TH1D *hBPurityData = new TH1D("hBPurityData","hBPurityData;Jet p_{T} (GeV/c);b-Tagging purity",nBins,ptBin);
+  TH1D *hBPurityMC = new TH1D("hBPurityMC","hBPurityMC;Jet p_{T} (GeV/c);b-Tagging purity",nBins,ptBin);
   
-  TH1D *hBEfficiencyMC = new TH1D("hBEfficiencyMC","hBEfficiencyMC;Jet p_{T} (GeV/c);B-Tagging efficiency",nBins,ptBin);
-  TH1D *hBEfficiencyDataLTJP = new TH1D("hBEfficiencyDataLTJP","hBEfficiencyDataLTJP;Jet p_{T} (GeV/c);B-Tagging efficiency",nBins,ptBin);
-  TH1D *hBEfficiencyDataLTCSV = new TH1D("hBEfficiencyDataLTCSV","hBEfficiencyDataLTCSV;Jet p_{T} (GeV/c);B-Tagging efficiency",nBins,ptBin);
+  TH1D *hBEfficiencyMC = new TH1D("hBEfficiencyMC","hBEfficiencyMC;Jet p_{T} (GeV/c);b-Tagging efficiency",nBins,ptBin);
+  TH1D *hBEfficiencyDataLTJP = new TH1D("hBEfficiencyDataLTJP","hBEfficiencyDataLTJP;Jet p_{T} (GeV/c);b-Tagging efficiency",nBins,ptBin);
+  TH1D *hBEfficiencyDataLTCSV = new TH1D("hBEfficiencyDataLTCSV","hBEfficiencyDataLTCSV;Jet p_{T} (GeV/c);b-Tagging efficiency",nBins,ptBin);
   
-  TH1D *hBFractionMC = new TH1D("hBFractionMC","hBFractionMC;Jet p_{T} (GeV/c);B-jet fraction",nBins,ptBin);
-  TH1D *hBFractionData = new TH1D("hBFractionData","hBFractionData;Jet p_{T} (GeV/c);B-jet fraction",nBins,ptBin);
-  TH1D *hBFractionDataLTJP = new TH1D("hBFractionDataLTJP","hBFractionDataLTJP;Jet p_{T} (GeV/c);B-jet fraction",nBins,ptBin);
-  TH1D *hBFractionDataLTCSV = new TH1D("hBFractionDataLTCSV","hBFractionDataLTCSV;Jet p_{T} (GeV/c);B-jet fraction",nBins,ptBin);
-  TH1D *hBFractionJPdirect = new TH1D("hBFractionJPdirect","hBFractionJPdirect;Jet p_{T} (GeV/c);B-jet fraction",nBins,ptBin);
+  TH1D *hBFractionMC = new TH1D("hBFractionMC","hBFractionMC;Jet p_{T} (GeV/c);b-jet fraction",nBins,ptBin);
+  TH1D *hBFractionData = new TH1D("hBFractionData","hBFractionData;Jet p_{T} (GeV/c);b-jet fraction",nBins,ptBin);
+  TH1D *hBFractionDataLTJP = new TH1D("hBFractionDataLTJP","hBFractionDataLTJP;Jet p_{T} (GeV/c);b-jet fraction",nBins,ptBin);
+  TH1D *hBFractionDataLTCSV = new TH1D("hBFractionDataLTCSV","hBFractionDataLTCSV;Jet p_{T} (GeV/c);b-jet fraction",nBins,ptBin);
+  TH1D *hBFractionJPdirect = new TH1D("hBFractionJPdirect","hBFractionJPdirect;Jet p_{T} (GeV/c);b-jet fraction",nBins,ptBin);
   
   int ncol=1;
   int nrow=1;
@@ -149,7 +161,7 @@ void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2
     } 
     if (doLTCSV) {
       RooRealVar fitCsvBeforetag = bfractionFit(fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,-2,10,"jets with CSV info",4e5);
-      RooRealVar fitCsvTag = bfractionFit(fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,10,Form("b-tagged sample (%s at %.1f)",taggerName,workingPoint),4e5);
+      RooRealVar fitCsvTag = bfractionFit(fixCL,"discr_csvSimple",0,1,ptBin[n],ptBin[n+1],cbinlo,cbinhi,etalo,etahi,tagger,workingPoint,10,Form("b-tagged sample (%s > %.1f)",taggerName,workingPoint),4e5);
     } 
 
     taggedFracData = numbers.nTaggedJetsData / (numbers.nTaggedJetsData+numbers.nUntaggedJetsData);
@@ -254,12 +266,12 @@ void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2
     //*/
   }
   
-  TLegend *legPur = new TLegend(0.4,0.15,0.85,0.3,Form("Purity of b-tagged sample (%s at %.1f)",taggerName,workingPoint));
+  TLegend *legPur = new TLegend(0.25,0.7,0.9,0.9,Form("Purity of b-tagged sample (%s > %.1f)",taggerName,workingPoint));
   legPur->SetBorderSize(0);
   //legPur->SetFillColor(kGray);
   legPur->SetFillStyle(0);
-  legPur->AddEntry(hBPurityMC,"MC Input","pl");
-  legPur->AddEntry(hBPurityData,"Data","pl");
+  legPur->AddEntry(hBPurityMC,"MC Input","p");
+  legPur->AddEntry(hBPurityData,"Data","p");
   TCanvas *cBPurity = new TCanvas("cBPurity","b purity",600,600);
   hBPurityMC->SetAxisRange(0,1,"Y");
   hBPurityMC->SetTitleOffset(1.3,"Y");
@@ -274,14 +286,14 @@ void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2
   legPur->Draw();
   //cBPurity->SaveAs("purity.gif");
 
-  TLegend *legEff = new TLegend(0.4,0.65,0.85,0.8,Form("Efficiency for tagging b-jets (%s at %.1f)",taggerName,workingPoint));
+  TLegend *legEff = new TLegend(0.25,0.7,0.9,0.9,Form("Efficiency for tagging b-jets (%s > %.1f)",taggerName,workingPoint));
   legEff->SetBorderSize(0);
   //legEff->SetFillColor(kGray);
   legEff->SetFillStyle(0);
-  legEff->AddEntry(hBEfficiencyMC,"MC Efficiency","pl");
-  if (doLTJP) legEff->AddEntry(hBEfficiencyDataLTJP,"LT method (JP)","pl");
-  if (doLTCSV) legEff->AddEntry(hBEfficiencyDataLTCSV,"LT method (CSV)","pl");
-  TCanvas *cBEfficiency = new TCanvas("cBEfficiency","B-Tagging efficiency",600,600);
+  legEff->AddEntry(hBEfficiencyMC,"Simulation","p");
+  if (doLTJP) legEff->AddEntry(hBEfficiencyDataLTJP,"Reference Tagger","p");
+  if (doLTCSV) legEff->AddEntry(hBEfficiencyDataLTCSV,"LT method (CSV)","p");
+  TCanvas *cBEfficiency = new TCanvas("cBEfficiency","b-Tagging efficiency",600,600);
   hBEfficiencyMC->SetAxisRange(0,1,"Y");
   hBEfficiencyMC->SetTitleOffset(1.3,"Y");
   hBEfficiencyMC->SetLineColor(2);
@@ -289,8 +301,8 @@ void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2
   hBEfficiencyMC->SetMarkerStyle(21);
   hBEfficiencyMC->Draw();
   if (doLTJP) {
-    hBEfficiencyDataLTJP->SetLineColor(8);
-    hBEfficiencyDataLTJP->SetMarkerColor(8);
+    hBEfficiencyDataLTJP->SetLineColor(kGreen);
+    hBEfficiencyDataLTJP->SetMarkerColor(kGreen);
     hBEfficiencyDataLTJP->SetMarkerStyle(20);
     hBEfficiencyDataLTJP->Draw("same");
   }
@@ -309,11 +321,11 @@ void bfractionVsJetPtPbPb(char *tagger="discr_ssvHighEff", double workingPoint=2
   //legFrac->SetFillColor(kGray);
   legFrac->SetFillStyle(0);
   legFrac->AddEntry(hBFractionMC,"MC Input","pl");
-  legFrac->AddEntry(hBFractionData,Form("%s at %.1f + pur. from SV mass + eff. from MC",taggerName,workingPoint),"pl");
-  if (doLTJP) legFrac->AddEntry(hBFractionDataLTJP,Form("%s at %.1f + pur. from SV mass + eff. from LT (JP)",taggerName,workingPoint),"pl");
-  if (doLTCSV) legFrac->AddEntry(hBFractionDataLTCSV,Form("%s at %.1f + pur. from SV mass + eff. from LT (CSV)",taggerName,workingPoint),"pl");
+  legFrac->AddEntry(hBFractionData,Form("%s > %.1f + pur. from SV mass + eff. from MC",taggerName,workingPoint),"pl");
+  if (doLTJP) legFrac->AddEntry(hBFractionDataLTJP,Form("%s > %.1f + pur. from SV mass + eff. from LT (JP)",taggerName,workingPoint),"pl");
+  if (doLTCSV) legFrac->AddEntry(hBFractionDataLTCSV,Form("%s > %.1f + pur. from SV mass + eff. from LT (CSV)",taggerName,workingPoint),"pl");
   legFrac->AddEntry(hBFractionJPdirect,"Direct fit to JP","pl");
-  TCanvas *cBFraction = new TCanvas("cBFraction","B-jet fraction",600,600);
+  TCanvas *cBFraction = new TCanvas("cBFraction","b-jet fraction",600,600);
   hBFractionMC->SetAxisRange(0,0.03,"Y");
   hBFractionMC->SetTitleOffset(1.8,"Y");
   hBFractionMC->SetLineColor(2);
@@ -396,14 +408,6 @@ char *discr="discr_prob", double minXdiscr=-999, double maxXdiscr=999, char *com
 double maxYaxis=1e3)
 {
 
-  gStyle->SetOptStat(0);
-  gStyle->SetOptTitle(0);
-  gStyle->SetLabelFont(43,"xyz");
-  gStyle->SetLabelSize(20,"xyz");
-  gStyle->SetTitleFont(43,"xyz");
-  gStyle->SetTitleSize(26,"xyz");
-  gStyle->SetTitleOffset(1.0,"x"); 
-  gROOT->ForceStyle(1);
 
   // discr_prob : from (0) 0 to 3, operating point : 0.6 (1%), 0.7 
   // discr_ssvHighEff : from (-1) 1 to 6, operating point : 2 ?
@@ -598,7 +602,7 @@ double maxYaxis=1e3)
 
 
   if (doLog){
-    hData[counter]->SetMaximum(hData[counter]->GetMaximum()*1000);
+    hData[counter]->SetMaximum(hData[counter]->GetMaximum()*50);
     hData[counter]->SetMinimum(0.5);
   }
   if (!doLog){
@@ -685,8 +689,10 @@ double maxYaxis=1e3)
   MCTotal[counter]->Draw("same e");
   hData[counter]->Draw("same");
   //http://root.cern.ch/root/htmldoc/TH1.html#TH1:Chi2Test
-  Double_t chi2 = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2 P NORM");
-  Double_t chi2NDF = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2NDF P NORM");
+  //Double_t chi2 = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2 P NORM");
+  //Double_t chi2NDF = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2/NDF P NORM");
+  Double_t chi2 = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2 P");
+  Double_t chi2NDF = hData[counter]->Chi2Test(MCTotal[counter],"UW CHI2/NDF P");
   //This is a fake THstack to also plot the constribution from the charm, 
   //even though it is supposed to be merged with the Light constribution 
   if(fixCL){
@@ -729,7 +735,8 @@ double maxYaxis=1e3)
   hleg->Draw("same");
   if(!fixCL)drawText(Form("%2.0f < p_{T} < %2.0f GeV/c",ptMin,ptMax),0.50,0.62);
   if(fixCL)drawText(Form("%2.0f < p_{T} < %2.0f GeV/c",ptMin,ptMax),0.50,0.66);
-  drawText(Form("#chi^{2}/NDF = %3.1f / %d",chi2NDF,nXbins-1),0.53,0.55);
+  //drawText(Form("#chi^{2}/NDF = %3.1f / %d",chi2NDF,nXbins-1),0.53,0.55);
+  drawText(Form("#chi^{2}/NDF = %3.1f / %d",chi2,(int)(chi2/chi2NDF)),0.51,0.55);
   drawText("CMS Preliminary",0.15,0.965);
   drawText("#sqrt{s_{NN}} = 2.76 TeV",0.60,0.965);
   drawText("|#eta| < 2.0",0.18,0.88);
