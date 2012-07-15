@@ -4,9 +4,10 @@ ivars = VarParsing.VarParsing('standard')
 ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
 
-#ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECO_set2/e5d7378087e57a0f8e6e97059876cc46/RECO_9_1_OGL.root'
-ivars.output = 'test2.root'
+#ivars.files='file:/mnt/hadoop/cms/store/user/yenjie/MC_Production/Pythia80_HydjetDrum_mix01/RECO/set2_random10000_HydjetDrum_452.root'
+#ivars.files='file:/mnt/hadoop/cms/store/data/Nov2011ppRereco-276TeV-HI/AllPhysics2760/RECO/SD_JetHI-Nov2011HI/0000/0424065B-E10C-E111-A5E2-782BCB38D552.root'
+ivars.files='file:/mnt/hadoop/cms/store/user/icali/Pythia/Z2/ppDijet50/recosignal_v2/set1_random10000_HydjetDrum_1.root'
+ivars.output = 'test.root'
 ivars.maxEvents = -1
 ivars.initialEvent = 1
 
@@ -19,17 +20,21 @@ hiReco = True
 reReco = True
 hasSimInfo = False
 genTag = "hiSignal"
-#hltFilter = "HLT_Jet80_v3"
+#hltFilter = "HLT_Jet40_v1"
 hltFilter = ""
-trigResults = 'TriggerResults::RECO'
+trigResults = 'TriggerResults::RECOSIGNAL'
 gTag = 'STARTHI44_V7::All'
-hiMode = True
+#gTag = 'GR_R_44_V10::All'
+hiMode = False
+redoPFJets = True
 
 # some important triggers:  HLT_Jet40_v1, HLT_HIL2Mu7_v1'
 
 if hiReco:
     svTracks = "hiSecondaryVertexSelectedTracks"
     pvProducer = "offlinePrimaryVertices"
+    #print "hacked to look at hiGeneralTracks"
+    #svTracks = "hiGeneralTracks"
     #pvProducer = "hiSelectedVertex"
 else:
     svTracks = "generalTracks"
@@ -64,6 +69,8 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.load('Configuration.StandardSequences.SimL1Emulator_cff')
+
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(
@@ -76,21 +83,6 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_0.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_1.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_2.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_3.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_4.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_6.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_8.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_10.root',
-    #'file:/data_CMS/cms/mnguyen/QCD_Pt_80_TuneZ2_2760GeV_pythia6/RAW_11.root',
-    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
-    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPtTrack-PromptSkim-v1/0000/62CDCFAB-9013-E111-9133-842B2B6F85FD.root'
-    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0000/88CA2FB9-5C2A-E111-8296-00A0D1E95364.root' # weird memory crash - 8004
-    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0000/425129A6-1121-E111-91AC-782BCB4FBD6F.root' # track list merger - 8012
-    #'/store/data/HIRun2011/HIHighPt/RECO/hiHighPt-PromptSkim-v1/0001/3EBB24B7-682A-E111-97F6-003048F34288.root'
-    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_9_1_GNC.root'
     ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -139,7 +131,7 @@ process.hiCentrality.produceBasicClusters = cms.bool(False)
 process.hiCentrality.produceHFhits = cms.bool(True)
 process.hiCentrality.produceTracks = cms.bool(False)
 
-'''
+
 if isMC==False:
     
     import PhysicsTools.PythonAnalysis.LumiList as LumiList
@@ -147,11 +139,12 @@ if isMC==False:
     myLumis = LumiList.LumiList(filename = 'json.txt').getCMSSWString().split(',')
     process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
     process.source.lumisToProcess.extend(myLumis)
-'''
+
+
 
 if reReco == False:
     process.raw2digi_step = cms.Path(process.RawToDigi)
-    process.L1Reco_step = cms.Path(process.L1Reco)
+process.L1Reco_step = cms.Path(process.L1Reco)
 
 if hiReco:
     if reReco == False:
@@ -245,7 +238,8 @@ if isMC:
     process.HiGenParticleAna = cms.EDAnalyzer("HiGenAnalyzer")
     process.HiGenParticleAna.src= cms.untracked.InputTag(genTag)    
     process.hiGenParticles.srcVector = cms.vstring(genTag)
-
+    print "excluding neutrinos"
+    process.hiGenParticlesForJets.ignoreParticleIDs += cms.vuint32( 12,14,16)
     process.higen_step          = cms.Path(     
         process.hiGenParticles * process.hiGenParticlesForJets * process.genPartons * process.hiPartons * process.hiRecoGenJets #* process.HiGenParticleAna
         )
@@ -311,12 +305,12 @@ if hiReco:
     process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
 
     if hiMode == False:  # open up region for pp
-        hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
-        hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
-        hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
-        hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
-        hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 10.
-        hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 10.
+        process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
+        process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
+        process.hiRegitPixelPairStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
+        process.hiRegitDetachedTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 15.
+        process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 10.
+        process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 10.
 
     process.load("RecoHI.HiTracking.MergeRegit_cff")
     
@@ -367,9 +361,11 @@ if hiReco:
         srcTracks = 'hiGeneralAndRegitTracks',
         srcPFCands = 'regParticleFlow'
         )
-    
-    if hiMode: svTrackSel = 'quality("highPurity") && pt > 1'
-    else: svTrackSel = 'quality("loose") && pt > 1'
+
+    svTrackSel = 'quality("highPurity") && pt > 1'
+    print "Cutting on highPurity tracks"
+    #if hiMode: svTrackSel = 'quality("highPurity") && pt > 1'
+    #else: svTrackSel = 'quality("loose") && pt > 1'
 
     process.hiSecondaryVertexSelectedTracks = cms.EDFilter("TrackSelector",
                                                            src = cms.InputTag("hiGeneralAndRegitCaloMatchedTracks"),
@@ -381,6 +377,7 @@ if hiReco:
     # Need to re-reco PV with the same track collection as used for the SVs
     process.load("RecoVertex.PrimaryVertexProducer.OfflinePrimaryVertices_cfi")
     process.offlinePrimaryVertices.TrackLabel = "hiSecondaryVertexSelectedTracks"
+
 
     process.regionalTracking = cms.Path(
         process.akPu3PFJetsL2L3 *
@@ -395,7 +392,11 @@ if hiReco:
         process.offlinePrimaryVertices
         )
     
-    
+    if redoPFJets:
+        print "Redoing PF jets with regit PF "
+        process.pfTowersFromRegit = process.particleTowerProducer.clone(src="regParticleFlow")
+        process.akPu3regPFJets = process.akPu3PFJets.clone(src="pfTowersFromRegit")
+        process.regionalTracking *= process.pfTowersFromRegit*process.akPu3regPFJets
 
 # here comes pat
 process.load('CmsHi.JetAnalysis.PatAna_cff')
@@ -428,6 +429,9 @@ process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 process.akPu3PFcorr.payload = cms.string('AK3PF')
 
 process.akPu3PFJetTracksAssociatorAtVertex.tracks = cms.InputTag(svTracks)
+print "Restricting cone size to 0.3 "
+process.akPu3PFJetTracksAssociatorAtVertex.coneSize=0.3
+process.akPu3PFSecondaryVertexTagInfos.vertexCuts.maxDeltaRToJetAxis=0.3
 process.akPu3PFImpactParameterTagInfos.primaryVertex = pvProducer
 
 # selection already done for SV
@@ -476,12 +480,24 @@ process.akPu5PFpatJets.tagInfoSources = cms.VInputTag(
     cms.InputTag("akPu5PFSoftMuonTagInfos"),
     )
 
+if redoPFJets:
+    print "resetting pat sequence to run regit jets"
+    process.akPu3PFpatJets.jetSource = cms.InputTag("akPu3regPFJets")
+    process.akPu3PFcorr.src= cms.InputTag("akPu3regPFJets")
+    process.akPu3PFmatch.src= cms.InputTag("akPu3regPFJets")
+    process.akPu3PFparton.src= cms.InputTag("akPu3regPFJets")
+    process.akPu3PFPatJetPartonAssociation.jets    = cms.InputTag("akPu3regPFJets")
+    process.akPu3PFJetTracksAssociatorAtVertex.jets   = cms.InputTag("akPu3regPFJets")
+    process.akPu3PFSoftMuonTagInfos.jets = cms.InputTag("akPu3regPFJets")
+
 if hiMode:
     if isMC: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging)
     else: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging_data)    
 else:
     if isMC: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging * process.akPu5PFpatSequence_withBtagging)
     else: process.pat_step          = cms.Path(process.akPu3PFpatSequence_withBtagging_data * process.akPu5PFpatSequence_withBtagging_data)
+
+
 
 #######################
 #   Analyzers
@@ -633,7 +649,7 @@ process.muonTree.vertices = pvProducer
 process.ana_step          = cms.Path(         
     process.hiCentrality *
     process.akPu3PFJetAnalyzer *
-    #process.trackAnalyzers*
+    process.trackAnalyzers*
     process.muonTree
     )
 
@@ -650,13 +666,14 @@ process.spikeSel = cms.Path(process.hiEcalRecHitSpikeFilter)
 process.collSell = cms.Path(process.collisionEventSelection)
 #process.hcalTimingSel = cms.Path(process.hcalTimingFilter)
 
-# include some event selection bits
+
 process.load('CmsHi.HiHLTAlgos.hltanalysis_cff')
-process.hltanalysis.hltresults = cms.InputTag("TriggerResults")
 process.hltAna = cms.Path(process.hltanalysis)
 process.pAna = cms.EndPath(process.skimanalysis)
-process.skimanalysis.hltresults = cms.InputTag("TriggerResults")
 
+
+process.hltanalysis.hltresults = cms.InputTag("TriggerResults")
+process.skimanalysis.hltresults = cms.InputTag("TriggerResults")
 
 # Secondary vertex sim matching, only tested on RAW data
 '''
@@ -717,4 +734,4 @@ if hltFilter:
     process.skimanalysis.superFilters = cms.vstring("superFilterPath")
     for path in process.paths:
         getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
-        
+
