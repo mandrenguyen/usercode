@@ -2,14 +2,16 @@
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TH1.h"
+#include "TMath.h"
 
-void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
+void weightPtHatBins(int isRecopp=0, int isMuTrig=0){
     
   gROOT->Reset();
   
   Int_t start=0;
-  if (!isMuTrig) start=1;
-  Int_t N=4;
+  if (!isMuTrig) start=6;
+  Int_t N=7;
 
   TFile *fin[7], *fout[7];
   TTree *tr_in[7], *tr_out[7];
@@ -25,16 +27,17 @@ void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
     9425./210000.
   };
 
+  Double_t xSections[7]={(0)};
   if (isMuTrig) {
-    Double_t xSections[7] = {
-      2.03e-01 * eff[0],
-      1.079e-02 * eff[1],
-      1.021e-03 * eff[2],
-      9.913e-05 * eff[3],
-      1.128e-05,
-      1.470e-06, 
-      5.310e-07
-    };
+
+    xSections[0] = 2.03e-01 * eff[0];
+    xSections[1] = 1.079e-02 * eff[1];
+    xSections[2] = 1.021e-03 * eff[2];
+    xSections[3] = 9.913e-05 * eff[3];
+    xSections[4] = 1.128e-05;
+    xSections[5] = 1.470e-06; 
+    xSections[6] = 5.310e-07;
+    
     /*
     Double_t xSections[7] = {
       2.03e-01 * (eff[0]*2.03e-01 - eff[1]*1.079e-02) / (2.03e-01 - 1.079e-02),
@@ -46,17 +49,27 @@ void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
       5.310e-07
     };
     */
-  } else {
-    Double_t xSections[7] = {
-      2.03e-01,
-      1.079e-02,
-      1.021e-03,
-      9.913e-05,
-      1.128e-05,
-      1.470e-06, 
-      5.310e-07
-    };
+  } 
+  else {
+    xSections[0] = 2.03e-01;
+    xSections[1] = 1.079e-02;
+    xSections[2] = 1.021e-03;
+    xSections[3] = 9.913e-05;
+    xSections[4] = 1.128e-05;
+    xSections[5] = 1.470e-06; 
+    xSections[6] = 5.310e-07;
   }
+
+  TFile *fData = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck.root");
+  TH1F *hDataVz = (TH1F *)fData->Get("hvz");
+  hDataVz->Rebin(4);
+  hDataVz->Scale(1./hDataVz->Integral());
+
+  TFile *fMC = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck.root");
+  TH1F *hMCVz = (TH1F *)fMC->Get("hvzw");
+  hMCVz->Rebin(4);
+  hMCVz->Scale(1./hMCVz->Integral());
+
 
   //char name[100];
   
@@ -68,15 +81,18 @@ void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
   } else if (!isRecopp&& isMuTrig) {
     filename = "merged_bTagAnalyzers_hiRecoFromRawV3_offPV_HLTMu3v2_fixTR";
   } else if (!isRecopp&&!isMuTrig) {
-    filename = "merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR";
+    //filename = "merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR";
+    filename = "merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_v2";
   }
   TString inputPath = "default";
   TString outputPath = "default";
 
+  Double_t weight, xSecWeight, vzWeight;
+
   for (Int_t it=start; it<N; it++) {
     
-    inputPath = "/data_CMS/cms/mnguyen/bTaggingOutput/pythia/";
-    outputPath = "/data_CMS/cms/sregnard/";
+    inputPath = "/data_CMS/cms/mnguyen/bTaggingOutput/unquenchedPyquen/";
+    outputPath = "/data_CMS/cms/mnguyen/bTaggingOutput/unquenchedPyquen/";
 
     inputPath.Append(Form("pthat%d/%s.root",bounds[it],filename));
     fin[it] = new TFile(inputPath);
@@ -102,8 +118,8 @@ void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
     tr_out_skim[it] = new TTree("HltTree","HltTree");
 
     Double_t fentries = (Double_t)tr_in[it]->GetEntries();
-    Double_t weight = xSections[it]/(fentries);
-    cout<<"  weight ("<< bounds[it] <<") : "<< weight <<endl;
+    xSecWeight = xSections[it]/(fentries);
+    cout<<"  x-sec weight ("<< bounds[it] <<") : "<< xSecWeight <<endl;
 
     //Declaration of leaves types
     Int_t           evt;
@@ -328,6 +344,8 @@ void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
     tr_out[it]->Branch("gendrjt",gendrjt,"gendrjt[nref]/F");
     */
     tr_out[it]->Branch("weight",&weight,"weight/D");
+    tr_out[it]->Branch("xSecWeight",&xSecWeight,"xSecWeight/D");
+    tr_out[it]->Branch("vzWeight",&vzWeight,"vzWeight/D");
 
     //Declaration of leaves types
     Int_t           evt_2;
@@ -552,6 +570,8 @@ void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
     tr_out_2[it]->Branch("gendrjt",gendrjt_2,"gendrjt[nref]/F");
     */
     tr_out_2[it]->Branch("weight",&weight,"weight/D");
+    tr_out_2[it]->Branch("xSecWeight",&xSecWeight,"xSecWeight/D");
+    tr_out_2[it]->Branch("vzWeight",&vzWeight,"vzWeight/D");
 
     //Declaration of leaves types
     Int_t           raw2digi_step;
@@ -611,6 +631,13 @@ void weightPtHatBins(int isRecopp=1, int isMuTrig=1){
       nbytes += tr_in[it]->GetEntry(i);
       nbytes_2 += tr_in_2[it]->GetEntry(i);
       nbytes_skim += tr_in_skim[it]->GetEntry(i);
+
+
+      int vzbin = (int) TMath::Ceil(vz+15.);
+      if(vzbin>0&&vzbin<=30)vzWeight = hDataVz->GetBinContent(vzbin)/hMCVz->GetBinContent(vzbin);
+      else vzWeight=0.;
+
+      weight=xSecWeight*vzWeight;
 
       if (it<N-1){
 	if (pthat>bounds[it+1]) continue;
