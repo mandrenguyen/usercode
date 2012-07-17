@@ -8,7 +8,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h" 
 
-void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=1)
+void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=1, int cbin=-1)
 {
 
   // isMC=0 --> Real data, ==1 --> QCD, ==2 --> cJet, ==3 --> bJet
@@ -18,6 +18,12 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   Float_t maxJetEta=2;
   Float_t minMuPt=5;
 
+  // cbin = -1 --> 0-100%
+  // cbin = 0 --> 0-20%
+  // cbin = 1 --> 20-50%
+  // cbin =2 --> 50-100%
+  if(!ppPbPb) cbin=-1;
+  
   TFile *fin;
 
   if(ppPbPb){
@@ -41,11 +47,13 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
       
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
       //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
-      if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_highPurity_weighted_WithUpperCut.root");
+      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_highPurity_weighted_WithUpperCut.root");
+      if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/unquenchedPyquen/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_v2_weighted.root");
+      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_coneSize3_hiModeCheck_weighted_WithUpperCut.root");
       //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/pthat30/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR.root");
       //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRaw_offPV_fixTR/merged_bTagAnalyzers.root");
-      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_highPurity/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_highPurity.root");
       //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_highPurity/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_highPurity.root");
+      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck.root");
     }
   }
 
@@ -228,26 +236,35 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TFile *fout;
   if(ppPbPb){
 
-    if(isMC==0) fout = new TFile("histos/PbPbdata.root","recreate");
-    else if(isMC==1) fout = new TFile("histos/PbPbQCDMC.root","recreate");
-    else if(isMC==2) fout = new TFile("histos/PbPbBMC.root","recreate");
-    else if(isMC==3) fout = new TFile("histos/PbPbCMC.root","recreate");
-
+    if(cbin==-1){
+      if(isMC==0) fout = new TFile("histos/PbPbdata_noIPupperCut.root","recreate");
+      else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_noIPupperCut.root","recreate");
+      else if(isMC==2) fout = new TFile("histos/PbPbBMC_noIPupperCut.root","recreate");
+      else if(isMC==3) fout = new TFile("histos/PbPbCMC_noIPupperCut.root","recreate");
+    }
+    else{
+      if(isMC==0) fout = new TFile(Form("histos/PbPbdata_%d_noIPupperCut.root",cbin),"recreate");
+      else if(isMC==1) fout = new TFile(Form("histos/PbPbQCDMC_%d_noIPupperCut.root",cbin),"recreate");
+      else if(isMC==2) fout = new TFile(Form("histos/PbPbBMC_%d_noIPupperCut.root",cbin),"recreate");
+      else if(isMC==3) fout = new TFile(Form("histos/PbPbCMC_%d_noIPupperCut.root",cbin),"recreate");
+    }
 
   }
   else{
     if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
-      if(isMC)fout=new TFile("histos/ppMC_ppReco_muTrig.root","recreate");
-      else fout=new TFile("histos/ppdata_ppReco_muTrig.root","recreate");
+      if(isMC)fout=new TFile("histos/ppMC_ppReco_muTrig_noIPupperCut.root","recreate");
+      else fout=new TFile("histos/ppdata_ppReco_muTrig_noIPupperCut.root","recreate");
     } else if ( isRecopp&&!isMuTrig) { // pp reco, jet triggered
-      if(isMC)fout=new TFile("histos/ppMC_ppReco_jetTrig.root","recreate");
-      else fout=new TFile("histos/ppdata_ppReco_jetTrig.root","recreate");
+      if(isMC)fout=new TFile("histos/ppMC_ppReco_jetTrig_noIPupperCut.root","recreate");
+      else fout=new TFile("histos/ppdata_ppReco_jetTrig_noIPupperCut.root","recreate");
     } else if (!isRecopp&& isMuTrig) { // hi reco, muon triggered
-      if(isMC)fout=new TFile("histos/ppMC_hiReco_muTrig.root","recreate");
-      else fout=new TFile("histos/ppdata_hiReco_muTrig.root","recreate");
+      if(isMC)fout=new TFile("histos/ppMC_hiReco_muTrig_noIPupperCut.root","recreate");
+      else fout=new TFile("histos/ppdata_hiReco_muTrig_noIPupperCut.root","recreate");
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-      if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_highPurity.root","recreate");
-      else fout=new TFile("histos/ppdata_hiReco_jetTrig_highPurity.root","recreate");
+      //if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck.root","recreate");
+      if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck_unquenchedPyquen_jet65.root","recreate");
+      //else fout=new TFile("histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck.root","recreate");
+      else fout=new TFile("histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck_jet65.root","recreate");
     }
   }
 
@@ -307,6 +324,18 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hdiscr_ssvHighPurC = new TH1D("hdiscr_ssvHighPurC","hdiscr_ssvHighPurC",25,1,6);
   TH1D *hdiscr_ssvHighPurL = new TH1D("hdiscr_ssvHighPurL","hdiscr_ssvHighPurL",25,1,6);
   hdiscr_ssvHighPur->Sumw2(); hdiscr_ssvHighPurB->Sumw2(); hdiscr_ssvHighPurC->Sumw2(); hdiscr_ssvHighPurL->Sumw2();
+
+  TH1D *hdiscr_tcHighEff = new TH1D("hdiscr_tcHighEff","hdiscr_tcHighEff",25,1,6);
+  TH1D *hdiscr_tcHighEffB = new TH1D("hdiscr_tcHighEffB","hdiscr_tcHighEffB",25,1,6);
+  TH1D *hdiscr_tcHighEffC = new TH1D("hdiscr_tcHighEffC","hdiscr_tcHighEffC",25,1,6);
+  TH1D *hdiscr_tcHighEffL = new TH1D("hdiscr_tcHighEffL","hdiscr_tcHighEffL",25,1,6);
+  hdiscr_tcHighEff->Sumw2(); hdiscr_tcHighEffB->Sumw2(); hdiscr_tcHighEffC->Sumw2(); hdiscr_tcHighEffL->Sumw2();
+  
+  TH1D *hdiscr_tcHighPur = new TH1D("hdiscr_tcHighPur","hdiscr_tcHighPur",25,1,6);
+  TH1D *hdiscr_tcHighPurB = new TH1D("hdiscr_tcHighPurB","hdiscr_tcHighPurB",25,1,6);
+  TH1D *hdiscr_tcHighPurC = new TH1D("hdiscr_tcHighPurC","hdiscr_tcHighPurC",25,1,6);
+  TH1D *hdiscr_tcHighPurL = new TH1D("hdiscr_tcHighPurL","hdiscr_tcHighPurL",25,1,6);
+  hdiscr_tcHighPur->Sumw2(); hdiscr_tcHighPurB->Sumw2(); hdiscr_tcHighPurC->Sumw2(); hdiscr_tcHighPurL->Sumw2();
   
   TH1D *hnsvtx = new TH1D("hnsvtx","hnsvtx",6,-0.5,5.5);
   TH1D *hnsvtxB = new TH1D("hnsvtxB","hnsvtxB",6,-0.5,5.5);
@@ -410,10 +439,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip2dL = new TH1D("hip2dL","hip2dL",40,-0.1,0.1);
   hip2d->Sumw2(); hip2dB->Sumw2(); hip2dC->Sumw2(); hip2dL->Sumw2(); 
   
-  TH1D *hip2dSig = new TH1D("hip2dSig","hip2dSig",65,-32.5,32.5);
-  TH1D *hip2dSigB = new TH1D("hip2dSigB","hip2dSigB",65,-32.5,32.5);
-  TH1D *hip2dSigC = new TH1D("hip2dSigC","hip2dSigC",65,-32.5,32.5);
-  TH1D *hip2dSigL = new TH1D("hip2dSigL","hip2dSigL",65,-32.5,32.5);
+  TH1D *hip2dSig = new TH1D("hip2dSig","hip2dSig",70,-35,35);
+  TH1D *hip2dSigB = new TH1D("hip2dSigB","hip2dSigB",70,-35,35);
+  TH1D *hip2dSigC = new TH1D("hip2dSigC","hip2dSigC",70,-35,35);
+  TH1D *hip2dSigL = new TH1D("hip2dSigL","hip2dSigL",70,-35,35);
   hip2dSig->Sumw2(); hip2dSigB->Sumw2(); hip2dSigC->Sumw2(); hip2dSigL->Sumw2(); 
 
   TH1D *hip2d1 = new TH1D("hip2d1","hip2d1",40,-0.1,0.1);
@@ -422,10 +451,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip2d1L = new TH1D("hip2d1L","hip2d1L",40,-0.1,0.1);
   hip2d1->Sumw2(); hip2d1B->Sumw2(); hip2d1C->Sumw2(); hip2d1L->Sumw2(); 
 
-  TH1D *hip2dSig1 = new TH1D("hip2dSig1","hip2dSig1",65,-32.5,32.5);
-  TH1D *hip2dSig1B = new TH1D("hip2dSig1B","hip2dSig1B",65,-32.5,32.5);
-  TH1D *hip2dSig1C = new TH1D("hip2dSig1C","hip2dSig1C",65,-32.5,32.5);
-  TH1D *hip2dSig1L = new TH1D("hip2dSig1L","hip2dSig1L",65,-32.5,32.5);
+  TH1D *hip2dSig1 = new TH1D("hip2dSig1","hip2dSig1",70,-35,35);
+  TH1D *hip2dSig1B = new TH1D("hip2dSig1B","hip2dSig1B",70,-35,35);
+  TH1D *hip2dSig1C = new TH1D("hip2dSig1C","hip2dSig1C",70,-35,35);
+  TH1D *hip2dSig1L = new TH1D("hip2dSig1L","hip2dSig1L",70,-35,35);
   hip2dSig1->Sumw2(); hip2dSig1B->Sumw2(); hip2dSig1C->Sumw2(); hip2dSig1L->Sumw2(); 
 
   TH1D *hip2d2 = new TH1D("hip2d2","hip2d2",40,-0.1,0.1);
@@ -434,10 +463,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip2d2L = new TH1D("hip2d2L","hip2d2L",40,-0.1,0.1);
   hip2d2->Sumw2(); hip2d2B->Sumw2(); hip2d2C->Sumw2(); hip2d2L->Sumw2(); 
 
-  TH1D *hip2dSig2 = new TH1D("hip2dSig2","hip2dSig2",65,-32.5,32.5);
-  TH1D *hip2dSig2B = new TH1D("hip2dSig2B","hip2dSig2B",65,-32.5,32.5);
-  TH1D *hip2dSig2C = new TH1D("hip2dSig2C","hip2dSig2C",65,-32.5,32.5);
-  TH1D *hip2dSig2L = new TH1D("hip2dSig2L","hip2dSig2L",65,-32.5,32.5);
+  TH1D *hip2dSig2 = new TH1D("hip2dSig2","hip2dSig2",70,-35,35);
+  TH1D *hip2dSig2B = new TH1D("hip2dSig2B","hip2dSig2B",70,-35,35);
+  TH1D *hip2dSig2C = new TH1D("hip2dSig2C","hip2dSig2C",70,-35,35);
+  TH1D *hip2dSig2L = new TH1D("hip2dSig2L","hip2dSig2L",70,-35,35);
   hip2dSig2->Sumw2(); hip2dSig2B->Sumw2(); hip2dSig2C->Sumw2(); hip2dSig2L->Sumw2(); 
 
   TH1D *hip2d3 = new TH1D("hip2d3","hip2d3",40,-0.1,0.1);
@@ -446,10 +475,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip2d3L = new TH1D("hip2d3L","hip2d3L",40,-0.1,0.1);
   hip2d3->Sumw2(); hip2d3B->Sumw2(); hip2d3C->Sumw2(); hip2d3L->Sumw2(); 
 
-  TH1D *hip2dSig3 = new TH1D("hip2dSig3","hip2dSig3",65,-32.5,32.5);
-  TH1D *hip2dSig3B = new TH1D("hip2dSig3B","hip2dSig3B",65,-32.5,32.5);
-  TH1D *hip2dSig3C = new TH1D("hip2dSig3C","hip2dSig3C",65,-32.5,32.5);
-  TH1D *hip2dSig3L = new TH1D("hip2dSig3L","hip2dSig3L",65,-32.5,32.5);
+  TH1D *hip2dSig3 = new TH1D("hip2dSig3","hip2dSig3",70,-35,35);
+  TH1D *hip2dSig3B = new TH1D("hip2dSig3B","hip2dSig3B",70,-35,35);
+  TH1D *hip2dSig3C = new TH1D("hip2dSig3C","hip2dSig3C",70,-35,35);
+  TH1D *hip2dSig3L = new TH1D("hip2dSig3L","hip2dSig3L",70,-35,35);
   hip2dSig3->Sumw2(); hip2dSig3B->Sumw2(); hip2dSig3C->Sumw2(); hip2dSig3L->Sumw2(); 
   
   TH1D *hip3d = new TH1D("hip3d","hip3d",40,-0.1,0.1);
@@ -458,10 +487,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip3dL = new TH1D("hip3dL","hip3dL",40,-0.1,0.1);
   hip3d->Sumw2(); hip3dB->Sumw2(); hip3dC->Sumw2(); hip3dL->Sumw2(); 
   
-  TH1D *hip3dSig = new TH1D("hip3dSig","hip3dSig",65,-32.5,32.5);
-  TH1D *hip3dSigB = new TH1D("hip3dSigB","hip3dSigB",65,-32.5,32.5);
-  TH1D *hip3dSigC = new TH1D("hip3dSigC","hip3dSigC",65,-32.5,32.5);
-  TH1D *hip3dSigL = new TH1D("hip3dSigL","hip3dSigL",65,-32.5,32.5);
+  TH1D *hip3dSig = new TH1D("hip3dSig","hip3dSig",70,-35,35);
+  TH1D *hip3dSigB = new TH1D("hip3dSigB","hip3dSigB",70,-35,35);
+  TH1D *hip3dSigC = new TH1D("hip3dSigC","hip3dSigC",70,-35,35);
+  TH1D *hip3dSigL = new TH1D("hip3dSigL","hip3dSigL",70,-35,35);
   hip3dSig->Sumw2(); hip3dSigB->Sumw2(); hip3dSigC->Sumw2(); hip3dSigL->Sumw2(); 
   
   TH1D *hip3d1 = new TH1D("hip3d1","hip3d1",40,-0.1,0.1);
@@ -470,10 +499,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip3d1L = new TH1D("hip3d1L","hip3d1L",40,-0.1,0.1);
   hip3d1->Sumw2(); hip3d1B->Sumw2(); hip3d1C->Sumw2(); hip3d1L->Sumw2(); 
 
-  TH1D *hip3dSig1 = new TH1D("hip3dSig1","hip3dSig1",65,-32.5,32.5);
-  TH1D *hip3dSig1B = new TH1D("hip3dSig1B","hip3dSig1B",65,-32.5,32.5);
-  TH1D *hip3dSig1C = new TH1D("hip3dSig1C","hip3dSig1C",65,-32.5,32.5);
-  TH1D *hip3dSig1L = new TH1D("hip3dSig1L","hip3dSig1L",65,-32.5,32.5);
+  TH1D *hip3dSig1 = new TH1D("hip3dSig1","hip3dSig1",70,-35,35);
+  TH1D *hip3dSig1B = new TH1D("hip3dSig1B","hip3dSig1B",70,-35,35);
+  TH1D *hip3dSig1C = new TH1D("hip3dSig1C","hip3dSig1C",70,-35,35);
+  TH1D *hip3dSig1L = new TH1D("hip3dSig1L","hip3dSig1L",70,-35,35);
   hip3dSig1->Sumw2(); hip3dSig1B->Sumw2(); hip3dSig1C->Sumw2(); hip3dSig1L->Sumw2(); 
 
   TH1D *hip3d2 = new TH1D("hip3d2","hip3d2",40,-0.1,0.1);
@@ -482,10 +511,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip3d2L = new TH1D("hip3d2L","hip3d2L",40,-0.1,0.1);
   hip3d2->Sumw2(); hip3d2B->Sumw2(); hip3d2C->Sumw2(); hip3d2L->Sumw2(); 
 
-  TH1D *hip3dSig2 = new TH1D("hip3dSig2","hip3dSig2",65,-32.5,32.5);
-  TH1D *hip3dSig2B = new TH1D("hip3dSig2B","hip3dSig2B",65,-32.5,32.5);
-  TH1D *hip3dSig2C = new TH1D("hip3dSig2C","hip3dSig2C",65,-32.5,32.5);
-  TH1D *hip3dSig2L = new TH1D("hip3dSig2L","hip3dSig2L",65,-32.5,32.5);
+  TH1D *hip3dSig2 = new TH1D("hip3dSig2","hip3dSig2",70,-35,35);
+  TH1D *hip3dSig2B = new TH1D("hip3dSig2B","hip3dSig2B",70,-35,35);
+  TH1D *hip3dSig2C = new TH1D("hip3dSig2C","hip3dSig2C",70,-35,35);
+  TH1D *hip3dSig2L = new TH1D("hip3dSig2L","hip3dSig2L",70,-35,35);
   hip3dSig2->Sumw2(); hip3dSig2B->Sumw2(); hip3dSig2C->Sumw2(); hip3dSig2L->Sumw2(); 
 
   TH1D *hip3d3 = new TH1D("hip3d3","hip3d3",40,-0.1,0.1);
@@ -494,10 +523,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
   TH1D *hip3d3L = new TH1D("hip3d3L","hip3d3L",40,-0.1,0.1);
   hip3d3->Sumw2(); hip3d3B->Sumw2(); hip3d3C->Sumw2(); hip3d3L->Sumw2(); 
 
-  TH1D *hip3dSig3 = new TH1D("hip3dSig3","hip3dSig3",65,-32.5,32.5);
-  TH1D *hip3dSig3B = new TH1D("hip3dSig3B","hip3dSig3B",65,-32.5,32.5);
-  TH1D *hip3dSig3C = new TH1D("hip3dSig3C","hip3dSig3C",65,-32.5,32.5);
-  TH1D *hip3dSig3L = new TH1D("hip3dSig3L","hip3dSig3L",65,-32.5,32.5);
+  TH1D *hip3dSig3 = new TH1D("hip3dSig3","hip3dSig3",70,-35,35);
+  TH1D *hip3dSig3B = new TH1D("hip3dSig3B","hip3dSig3B",70,-35,35);
+  TH1D *hip3dSig3C = new TH1D("hip3dSig3C","hip3dSig3C",70,-35,35);
+  TH1D *hip3dSig3L = new TH1D("hip3dSig3L","hip3dSig3L",70,-35,35);
   hip3dSig3->Sumw2(); hip3dSig3B->Sumw2(); hip3dSig3C->Sumw2(); hip3dSig3L->Sumw2(); 
 
   TH1D *hipDist2Jet = new TH1D("hipDist2Jet","hipDist2Jet",40,-0.1,0);
@@ -570,6 +599,26 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
     }
 
     t->GetEntry(i);
+
+    if(ppPbPb){
+      if(cbin==-1){
+	// do nothing
+      }
+      else if(cbin==0){
+	if(bin>=8) continue;
+      }
+      else if(cbin==1) {
+	if(bin<8||bin>=20) continue;
+      }
+      else if(cbin==2){
+	if(bin<20) continue;
+      }
+      else {
+	cout<<" bin not defined "<<endl;
+	return;
+      }
+    }
+
     if(isMC&&!ppPbPb){
       if(beamId1==2112 || beamId2==2112)  continue;
     }
@@ -578,7 +627,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
       if(!hltBit[10]) continue;
     }
     //if(isMC&&ppPbPb){
-    if(isMC){
+    if(isMC&&minJetPt>65){
       if(pthat<50) continue;
     }
     if(fabs(vz)>15.) continue;
@@ -675,7 +724,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
 	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_probb[ij],w);    
 	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_probb[ij],w);    
 	}
-	
+
 	hdiscr_ssvHighEff->Fill(discr_ssvHighEff[ij],w);    
 	if(isMC){
 	  if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighEffB->Fill(discr_ssvHighEff[ij],w); 
@@ -688,6 +737,20 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
 	  if(abs(refparton_flavorForB[ij])==5)hdiscr_ssvHighPurB->Fill(discr_ssvHighPur[ij],w); 
 	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_ssvHighPurC->Fill(discr_ssvHighPur[ij],w);    
 	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_ssvHighPurL->Fill(discr_ssvHighPur[ij],w);    
+	}
+
+	hdiscr_tcHighEff->Fill(discr_tcHighEff[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hdiscr_tcHighEffB->Fill(discr_tcHighEff[ij],w); 
+	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_tcHighEffC->Fill(discr_tcHighEff[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_tcHighEffL->Fill(discr_tcHighEff[ij],w);    
+	}
+	
+	hdiscr_tcHighPur->Fill(discr_tcHighPur[ij],w);    
+	if(isMC){
+	  if(abs(refparton_flavorForB[ij])==5)hdiscr_tcHighPurB->Fill(discr_tcHighPur[ij],w); 
+	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_tcHighPurC->Fill(discr_tcHighPur[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_tcHighPurL->Fill(discr_tcHighPur[ij],w);    
 	}
 	//*
 	hnsvtx->Fill(nsvtx[ij],w);    
@@ -801,7 +864,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
 	  
 	}
 	//*/
-
+     
 	float ip2d1MostSig=-999.;
 	float ip3d1MostSig=-999.;
 	float ip2dSig1MostSig=-999.;
@@ -936,7 +999,8 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
 	  	  
 	}
 
-	if(jtpt[ij]<90){
+	//if(jtpt[ij]<90){
+	if(jtpt[ij]<200){
 	  hip2d1->Fill(ip2d1MostSig,w);    
 	  if(isMC){
 	    if(abs(refparton_flavorForB[ij])==5)hip2d1B->Fill(ip2d1MostSig,w);
@@ -1057,6 +1121,12 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=0, int 
 
   hdiscr_ssvHighPur->Write();
   if(isMC) hdiscr_ssvHighPurB->Write(); hdiscr_ssvHighPurC->Write(); hdiscr_ssvHighPurL->Write(); 
+
+  hdiscr_tcHighEff->Write();
+  if(isMC) hdiscr_tcHighEffB->Write(); hdiscr_tcHighEffC->Write(); hdiscr_tcHighEffL->Write(); 
+
+  hdiscr_tcHighPur->Write();
+  if(isMC) hdiscr_tcHighPurB->Write(); hdiscr_tcHighPurC->Write(); hdiscr_tcHighPurL->Write(); 
 
   hnsvtx->Write();
   if(isMC) hnsvtxB->Write(); hnsvtxC->Write(); hnsvtxL->Write();
