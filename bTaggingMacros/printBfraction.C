@@ -1,4 +1,4 @@
-void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, char *taggerName="ssvHighEff") {
+void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, char *taggerName="ssvHighEff", int doCent=0) {
 
   gROOT->ForceStyle(1);
 
@@ -16,11 +16,27 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
   gStyle->SetTitleOffset(1.5,"xy");
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetPadBottomMargin(0.12);
+  gStyle->SetNdivisions(408,"y");
 
 
-  TFile *fin1 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL1_bin_0_40_eta_0_2.root");
-  TFile *fin2 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL0_bin_0_40_eta_0_2.root");
-  
+  TFile *fin1, *fin2;
+  if(doCent){
+    //fin1 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL1_centDep.root");
+    //fin2 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL0_centDep.root");
+    fin1 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL1_centDep_80_100.root");
+    fin2 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL0_centDep_80_100.root");
+  }
+  else{
+    //fin1 = new TFile("output/bFractionMerged_Smear2Sigma_SSVHEat2.0FixCL1_bin_0_40_eta_0_2.root");
+    //fin2 = new TFile("output/bFractionMerged_Smear2Sigma_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");
+    //fin1 = new TFile("output/bFractionMerged_regPFJets_SSVHEat2.0FixCL1_bin_0_40_eta_0_2.root");
+    //fin2 = new TFile("output/bFractionMerged_regPFJets_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");
+    fin1 = new TFile("output/bFractionMerged_SSVHEat2.0FixCL1_bin_0_40_eta_0_2.root");
+    fin2 = new TFile("output/bFractionMerged_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");
+    //fin1 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL1_bin_0_40_eta_0_2.root");
+    //fin2 = new TFile("output/bFractionMerged_ssvHighEffat2.0FixCL0_bin_0_40_eta_0_2.root");
+  }
+
   TH1F *hBFractionMC = (TH1F*) fin1->Get("hBFractionMC");
 
   TH1F *hBFractionData = (TH1F*) fin1->Get("hBFractionData");
@@ -46,13 +62,26 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
   //*/
 
   //*  --- correction due to Jet Energy Scale (by hand) ---
-  correct2(hBFractionMC);
-  correct2(hBFractionData);
-  correct2(hBFractionDataFixC);
-  correct2(hBFractionDataLTJP);
-  correct2(hBFractionDataLTJPFixC);
-  correct2(hBFractionJPdirect);
-  correct2(hBFractionJPdirectFixC);
+  if(doCent){
+    correctByCent(hBFractionMC);
+    correctByCent(hBFractionData);
+    correctByCent(hBFractionDataFixC);
+    correctByCent(hBFractionDataLTJP);
+    correctByCent(hBFractionDataLTJPFixC);
+    correctByCent(hBFractionJPdirect);
+    correctByCent(hBFractionJPdirectFixC);
+  }
+  else{
+    //*
+    correct2(hBFractionMC);
+    correct2(hBFractionData);
+    correct2(hBFractionDataFixC);
+    correct2(hBFractionDataLTJP);
+    correct2(hBFractionDataLTJPFixC);
+    correct2(hBFractionJPdirect);
+    correct2(hBFractionJPdirectFixC);
+    //*/
+  }
   //*/
 
   //  --- plots with variation of charm ---
@@ -63,14 +92,19 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
   hBFractionMC->SetLineWidth(2);
   hBFractionMC->SetMarkerColor(2);
   //hBFractionMC->SetMarkerStyle(4);
-  hBFractionMC->SetAxisRange(80,200,"X");
+  if(!doCent)hBFractionMC->SetAxisRange(80,200,"X");
   hBFractionMC->SetAxisRange(0,0.05,"Y");
   hBFractionMC->SetTitleOffset(1,"X");  
   hBFractionMC->GetYaxis()->SetTitle("b-jet fraction");;
   //hBFractionMC->Draw("e1"); 
   
-  hBFractionMC->GetYaxis()->SetNdivisions(505);
-  hBFractionMC->Draw("hist"); 
+  //hBFractionMC->GetYaxis()->SetNdivisions(505);
+  
+  TH1F *hBFractionMC_dummy= (TH1F*)hBFractionMC->Clone("hBFractionMC_dummy");
+  hBFractionMC_dummy->SetLineWidth(0);
+  hBFractionMC_dummy->SetMarkerSize(0);
+  hBFractionMC_dummy->Draw(); 
+  //  hBFractionMC->Draw("hist"); 
 
   hBFractionData->SetMarkerStyle(8);
   hBFractionData->Draw("e1,same");  
@@ -95,14 +129,15 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
   //hBFractionJPdirectFixC->Draw("e1same");
 
   
-  TLegend *legFrac1 = new TLegend(0.15,0.13,0.87,0.3);
+  TLegend *legFrac1 = new TLegend(0.05,0.13,0.87,0.3);
+
   legFrac1->SetBorderSize(0);
   legFrac1->SetFillStyle(0);
-  legFrac1->AddEntry(hBFractionDataLTJP,Form("SSVHE, LT method",taggerName,workingPoint),"p");
-  legFrac1->AddEntry(hBFractionDataLTJPFixC,Form("SSVHE, LT method, Floating Charm Norm.",taggerName,workingPoint),"p");
-  legFrac1->AddEntry(hBFractionData,Form("SSVHE, MC eff.",taggerName,workingPoint),"p");
-  legFrac1->AddEntry(hBFractionJPdirect,"Jet Probability","p");
-  legFrac1->AddEntry(hBFractionMC,"MC Input","l");
+  legFrac1->AddEntry(hBFractionDataLTJP,Form("SSVHE, LT method",taggerName,workingPoint),"pl");
+  legFrac1->AddEntry(hBFractionDataLTJPFixC,Form("SSVHE, LT method, Floating Charm Norm.",taggerName,workingPoint),"pl");
+  legFrac1->AddEntry(hBFractionData,Form("SSVHE, MC eff.",taggerName,workingPoint),"pl");
+  legFrac1->AddEntry(hBFractionJPdirect,"Jet Probability","pl");
+  //legFrac1->AddEntry(hBFractionMC,"MC Input (reconstructed)","l");
 
   legFrac1->Draw();
 
@@ -115,24 +150,29 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
 
   TH1F *hBFractionMC2 = hBFractionMC->Clone();
   hBFractionMC2->SetMaximum(0.06);
-  hBFractionMC2->GetXaxis()->SetRangeUser(80,200);
-  hBFractionMC2->Draw();
+  if(!doCent)hBFractionMC2->GetXaxis()->SetRangeUser(80,200);
+  hBFractionMC2->Draw("hist");
 
-  TLatex *prel = new TLatex(83,0.0615,"CMS preliminary");
+  TLatex *prel;
+  if(doCent)prel= new TLatex(10,0.0615,"CMS preliminary");
+  else prel= new TLatex(85,0.0615,"CMS preliminary");
   prel->Draw();
 
   TLatex *roots = new TLatex(147,0.0615,"#sqrt{s_{NN}} = 2.76 TeV");
   roots->Draw();
 
-  //TLatex *csel = new TLatex(90,0.0025,"Centrality 0-100%");
-  TLatex *csel = new TLatex(90,0.05,"Centrality 0-100%");
-  csel->Draw();
-
+  if(!doCent){
+    TLatex *csel = new TLatex(90,0.05,"Centrality 0-100%");
+    csel->Draw();
+  }
   //TLatex *ptlabel = new TLatex(90,0.0075,"Jet p_{T} > 80 GeV/c");
-  TLatex *ptlabel = new TLatex(90,0.055,"Jet p_{T} > 80 GeV/c");
-  ptlabel->Draw();
+  TLatex *ptlabel = new TLatex(20,0.005,"80 < Jet p_{T} < 100 GeV/c");
+  if(doCent)ptlabel->Draw();
 
 
+  float mcStatErr[4] = {0.03,0.06,0.07,0.15};
+
+  
   TGraphErrors *gSyst = new TGraphErrors(5);
   Double_t errCLratio, errMethod, totalSystErr;
 
@@ -143,9 +183,17 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
     errCLratio = abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionDataLTJPFixC->GetBinContent(i));
     //errMethod = abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionData->GetBinContent(i));
     errMethod = max(abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionData->GetBinContent(i)),abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionJPdirect->GetBinContent(i)));
-    totalSystErr = norm(errCLratio,errMethod);
+    double errJES = 0.14*hBFractionDataLTJP->GetBinContent(i);
+
+    totalSystErr = norm(errCLratio,errMethod,errJES);
 
     gSyst->SetPointError(i,hBFractionDataLTJP->GetBinWidth(i)/2,totalSystErr);
+
+    // add in MC template uncertainties
+    float origStatErr = hBFractionDataLTJP->GetBinError(i);
+    float extraStatErr = mcStatErr[i-1]*hBFractionDataLTJP->GetBinContent(i);
+    float totalStatErr = sqrt(origStatErr*origStatErr + extraStatErr*extraStatErr);
+    hBFractionDataLTJP->SetBinError(i,totalStatErr);
 
   }
 
@@ -160,11 +208,18 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
   hBFractionDataLTJP2->Draw("e1same");
 
   //hBFractionMC2->Draw("e1same");
-  hBFractionMC2->Draw("hist,same");
+  hBFractionMC2->Draw("hist,e,same");
   
 
   //TLegend *legFrac2 = new TLegend(0.2,0.67,0.8,0.85);
   TLegend *legFrac2 = new TLegend(0.2,0.15,0.8,0.34);
+  if(doCent){
+    legFrac2->SetX1(0.365);
+    legFrac2->SetY1(0.657);
+    legFrac2->SetX2(0.965);
+    legFrac2->SetY2(0.848);
+  }
+
   legFrac2->SetHeader("#int L dt = 150 #mub^{-1}");
   legFrac2->SetBorderSize(0);
   legFrac2->SetFillStyle(0);
@@ -191,6 +246,7 @@ void printBfraction(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, ch
 Double_t abs (Double_t a) {return (a>0)?a:-a;}
 Double_t max (Double_t a, Double_t b) {return (a>b)?a:b;}
 Double_t norm (Double_t a, Double_t b) {return sqrt(a*a+b*b);}
+Double_t norm (Double_t a, Double_t b, Double_t c) {return sqrt(a*a+b*b+c*c);}
 
 
 
@@ -245,6 +301,7 @@ void correct2(TH1* h) {
   h->SetBinError(5,1.68418*h->GetBinError(5));
   */
 
+  /*
   h->SetBinContent(1,1.83493*h->GetBinContent(1));
   h->SetBinContent(2,1.78004*h->GetBinContent(2));
   h->SetBinContent(3,1.73233*h->GetBinContent(3));
@@ -254,8 +311,31 @@ void correct2(TH1* h) {
   h->SetBinError(2,1.78004*h->GetBinError(2));
   h->SetBinError(3,1.73233*h->GetBinError(3));
   h->SetBinError(4,1.67081*h->GetBinError(4));
+  */
+
+  h->SetBinContent(1,2.01493*h->GetBinContent(1));
+  h->SetBinContent(2,1.94923*h->GetBinContent(2));
+  h->SetBinContent(3,1.89018*h->GetBinContent(3));
+  h->SetBinContent(4,1.81609*h->GetBinContent(4));
+
+  h->SetBinError(1,2.01493*h->GetBinError(1));
+  h->SetBinError(2,1.94923*h->GetBinError(2));
+  h->SetBinError(3,1.89018*h->GetBinError(3));
+  h->SetBinError(4,1.81609*h->GetBinError(4));
 
 
 
+}
+
+
+void correctByCent(TH1* h) {
+
+  h->SetBinContent(1,2.03721*h->GetBinContent(1));
+  h->SetBinContent(2,1.99421*h->GetBinContent(2));
+  h->SetBinContent(3,1.94481*h->GetBinContent(3));
+
+  h->SetBinError(1,2.03721*h->GetBinError(1));
+  h->SetBinError(2,1.99421*h->GetBinError(2));
+  h->SetBinError(3,1.94481*h->GetBinError(3));
 
 }
