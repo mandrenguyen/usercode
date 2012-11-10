@@ -4,10 +4,9 @@ ivars = VarParsing.VarParsing('standard')
 ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
 
-#ivars.files='file:/mnt/hadoop/cms/store/user/yenjie/MC_Production/Pythia80_HydjetDrum_mix01/RECO/set2_random10000_HydjetDrum_452.root'
-#ivars.files='file:/mnt/hadoop/cms/store/data/Nov2011ppRereco-276TeV-HI/AllPhysics2760/RECO/SD_JetHI-Nov2011HI/0000/0424065B-E10C-E111-A5E2-782BCB38D552.root'
-ivars.files='file:/mnt/hadoop/cms/store/user/icali/Pythia/Z2/ppDijet50/recosignal_v2/set1_random10000_HydjetDrum_1.root'
-ivars.output = 'test.root'
+#ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
+ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECO_set2/e5d7378087e57a0f8e6e97059876cc46/RECO_9_1_OGL.root'
+ivars.output = 'test2.root'
 ivars.maxEvents = -1
 ivars.initialEvent = 1
 
@@ -15,23 +14,24 @@ ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = True
+isMC = False
 hiReco = True
 reReco = True
-hasSimInfo = False
+hasSimInfo = True
 genTag = "hiSignal"
 #hltFilter = "HLT_Jet40_v1"
-hltFilter = ""
-trigResults = 'TriggerResults::RECOSIGNAL'
-gTag = 'STARTHI44_V7::All'
-#gTag = 'GR_R_44_V10::All'
-hiMode = False
-redoPFJets = True
+hltFilter = "HLT_HIL2Mu*_v*"
+trigResults = 'TriggerResults::HLT'
+#gTag = 'STARTHI44_V7::All'
+gTag = 'GR_R_44_V10::All'
+hiMode = True
+redoPFJets = False
 
 # some important triggers:  HLT_Jet40_v1, HLT_HIL2Mu7_v1'
 
 if hiReco:
     svTracks = "hiSecondaryVertexSelectedTracks"
+    #svTracks = "hiGeneralTracks"
     pvProducer = "offlinePrimaryVertices"
     #print "hacked to look at hiGeneralTracks"
     #svTracks = "hiGeneralTracks"
@@ -74,8 +74,8 @@ process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(
-    ivars.maxEvents
-    #-1
+    #ivars.maxEvents
+    -1
     )
 )
 
@@ -83,6 +83,8 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
+    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
+    #'/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG/d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_9_1_BoU.root'
     ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -132,13 +134,13 @@ process.hiCentrality.produceHFhits = cms.bool(True)
 process.hiCentrality.produceTracks = cms.bool(False)
 
 
-if isMC==False:
-    
-    import PhysicsTools.PythonAnalysis.LumiList as LumiList
-    import FWCore.ParameterSet.Types as CfgTypes
-    myLumis = LumiList.LumiList(filename = 'json.txt').getCMSSWString().split(',')
-    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
-    process.source.lumisToProcess.extend(myLumis)
+#if isMC==False:
+#    
+#    import PhysicsTools.PythonAnalysis.LumiList as LumiList
+#    import FWCore.ParameterSet.Types as CfgTypes
+#    myLumis = LumiList.LumiList(filename = 'json.txt').getCMSSWString().split(',')
+#    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+#    process.source.lumisToProcess.extend(myLumis)
 
 
 
@@ -238,8 +240,8 @@ if isMC:
     process.HiGenParticleAna = cms.EDAnalyzer("HiGenAnalyzer")
     process.HiGenParticleAna.src= cms.untracked.InputTag(genTag)    
     process.hiGenParticles.srcVector = cms.vstring(genTag)
-    print "excluding neutrinos"
-    process.hiGenParticlesForJets.ignoreParticleIDs += cms.vuint32( 12,14,16)
+    #print "excluding neutrinos"
+    #process.hiGenParticlesForJets.ignoreParticleIDs += cms.vuint32( 12,14,16)
     process.higen_step          = cms.Path(     
         process.hiGenParticles * process.hiGenParticlesForJets * process.genPartons * process.hiPartons * process.hiRecoGenJets #* process.HiGenParticleAna
         )
@@ -248,7 +250,7 @@ if isMC:
 
 
 if hiReco:
-    if hiMode: svJetSel = 'pt > 60. && eta > -2. && eta < 2'
+    if hiMode: svJetSel = 'pt > 30. && eta > -2. && eta < 2'
     else: svJetSel = 'pt > 10. && eta > -2. && eta < 2'
 
     print "Seeding around jets with, ",svJetSel
@@ -292,7 +294,7 @@ if hiReco:
     
     process.akPu3PFSelectedJets = cms.EDFilter("LargestPtCandViewSelector",
                                                src = cms.InputTag("ptEtaFilteredJets"),
-                                               maxNumber = cms.uint32(5)
+                                               maxNumber = cms.uint32(3)
                                                )
         
     process.load("RecoHI.HiTracking.hiRegitTracking_cff")
@@ -525,7 +527,7 @@ process.akPu3PFJetAnalyzer.trackTag = svTracks
 if hiMode: process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(True)
 else: process.akPu3PFJetAnalyzer.useCentrality = cms.untracked.bool(False)
 
-if hiMode: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasBSC_OR_v1','HLT_HIMinBiasHF_v1','HLT_HIMinBiasHf_OR_v1','HLT_HIMinBiasHfOrBSC_v1','HLT_HIL2Mu3_v2','HLT_HIL2Mu3_NHitQ_v2','HLT_HIL2Mu7_v2','HLT_HIL2Mu15_v2','HLT_HIJet55_v1','HLT_HIJet65_v1','HLT_HIJet80_v1','HLT_HIJet95_v1')
+if hiMode: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasBSC_OR_v1','HLT_HIMinBiasHF_v1','HLT_HIMinBiasHf_OR_v1','HLT_HIMinBiasHfOrBSC_v1','HLT_HIL2Mu3_v1','HLT_HIL2Mu3_NHitQ_v1','HLT_HIL2Mu7_v1','HLT_HIL2Mu15_v1','HLT_HIJet55_v1','HLT_HIJet65_v1','HLT_HIJet80_v1','HLT_HIJet95_v1')
 elif isMC: process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_Jet15U_v3','HLT_Jet30U_v3','HLT_Jet50U_v3','HLT_Jet70U_v3','HLT_L2Mu7_v1','HLT_Mu0_v2','HLT_Mu3_v2','HLT_Mu5','HLT_Mu7','HLT_Mu9','HLT_L1_BptxXOR_BscMinBiasOR')
 else:  process.akPu3PFJetAnalyzer.hltTrgNames = cms.untracked.vstring('HLT_HIMinBiasHfOrBSC_Core','HLT_Jet20_v1','HLT_Jet40_v1','HLT_Jet60_v1','HLT_L1SingleMuOpen_v1','HLT_Mu0_v3','HLT_Mu3_v3','HLT_Mu5_v3','HLT_L1BscMinBiasORBptxPlusANDMinus_v1')
 
@@ -649,7 +651,7 @@ process.muonTree.vertices = pvProducer
 process.ana_step          = cms.Path(         
     process.hiCentrality *
     process.akPu3PFJetAnalyzer *
-    process.trackAnalyzers*
+    #process.trackAnalyzers*
     process.muonTree
     )
 
@@ -666,6 +668,22 @@ process.spikeSel = cms.Path(process.hiEcalRecHitSpikeFilter)
 process.collSell = cms.Path(process.collisionEventSelection)
 #process.hcalTimingSel = cms.Path(process.hcalTimingFilter)
 
+process.load("JetMETCorrections.Configuration.DefaultJEC_cff")
+process.icPu5CaloJetsL2L3 = process.ak5CaloJetsL2L3.clone(src = 'iterativeConePu5CaloJets', correctors = ['ak5CaloL2L3'])
+
+process.btagMuonInJet = cms.EDFilter("BTagSkimLeptonJet",
+                                     CaloJet = cms.InputTag("icPu5CaloJetsL2L3"),
+                                     MinimumCaloJetPt = cms.double(20.0),
+                                     MinimumPtRel = cms.double(0.0),
+                                     LeptonType = cms.string('muon'),
+                                     Lepton = cms.InputTag("muons"),
+                                     MinimumNLeptonJet = cms.int32(1),
+                                     MaximumDeltaR = cms.double(0.4),
+                                     MaximumLeptonEta = cms.double(2.5),
+                                     MinimumLeptonPt = cms.double(5),
+                                     MaximumCaloJetEta = cms.double(2.2)
+                                     )
+process.btagSkimPath       = cms.Path( process.icPu5CaloJetsL2L3 * process.btagMuonInJet)
 
 process.load('CmsHi.HiHLTAlgos.hltanalysis_cff')
 process.hltAna = cms.Path(process.hltanalysis)
@@ -735,3 +753,5 @@ if hltFilter:
     for path in process.paths:
         getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
 
+process.hltAna.remove(process.hltJetHI)
+process.superFilterPath.remove(process.hltJetHI)
