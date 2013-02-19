@@ -7,7 +7,7 @@
 #include "TH1.h"
 #include "TMath.h"
 
-void weightPtHatBinsBC(int LCB=2){
+void weightPtHatBinsBC(int LCB=2, int useGSP=1, int muTrig=1){
     
   gROOT->Reset();
   
@@ -17,41 +17,34 @@ void weightPtHatBinsBC(int LCB=2){
   TFile *fin[7], *fout[7];
   TTree *tr_in[7], *tr_out[7];
   TTree *tr_in_skim[7], *tr_out_skim[7];
+  TTree *tr_in_count[7];
 
   Int_t bounds[7] = {15,40,50,65,80,120,200};
 
   Double_t xSections[7]={(0)};
   
-  xSections[1] = 1.079e-02; //30-50  --> 40-50 below
-  xSections[2] = 1.021e-03; // 50-80 -->  50-65 below 
-  xSections[3] = 1.021e-03; // 50-80 --> 65-80 below
+  xSections[1] = 1.079e-02 * 1.93146278756580497e-01;  // 30-50, 19.3% is the ratio of pthat 40 to 30 ; //30-50
+  xSections[2] = 1.021e-03 * 110902./138481.; // 50-80 -->  50-65
+  xSections[3] = 1.021e-03 * 27579./138481.; // 50-80 --> 65-80 below
   xSections[4] = 9.913e-05; // 80-120         
   xSections[5] = 1.128e-05; //120-200
   //xSections[6] = 1.470e-06; //pt,hat 170
   xSections[6] = 5.310e-07; // 200
 
+  //if(!muTrig){
   // truncated bins
   //30-50
-  xSections[1] *= 89849./99173. *1.93146278756580497e-01;  // 19.3% is the ratio of pthat 40 to 30 
+  xSections[1] *= 89849./99173.;
   //50-80
-  xSections[2] *= 138481./153301. * 110902./138481.;  // 50-65
-  xSections[3] *= 138481./153301. * 27579./138481.;   // 65-80
+  xSections[2] *= 138481./153301.;  // 50-65
+  xSections[3] *= 138481./153301.;   // 65-80
   //80-120
   xSections[4] *= 126859./143194.;
   //120-200
   xSections[5] *= 34457./36104.;
+  //}
 
-  /*
-  // Corrections for finite pT,hat binning
-  Double_t ptHatTruncCorr[7]={(0)};
 
-  ptHatTruncCorr[1]=17354./26678.;
-  ptHatTruncCorr[2]=110902./153301.;
-  ptHatTruncCorr[3]=27579./42399.;
-  ptHatTruncCorr[4]=126859./143194.;
-  ptHatTruncCorr[5]=34457./36104.;
-  ptHatTruncCorr[6]=1.;
-  */
 
 
   double bPerEventQCD[7]={0.,642./17354.,4906./107431.,1467./26729.,7391./123105.,2466./34457.,2713./39754.};
@@ -63,18 +56,24 @@ void weightPtHatBinsBC(int LCB=2){
   TF1 *fCent = new TF1("fCent","pol7",0,40);
   fCent->SetParameters(14781.9,-1641.19,127.245,-8.87318,0.41423,-0.011089,0.000154744,-8.76427e-07);
 
-  TFile *fData = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbdata.root");
+  //TFile *fData = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbdata.root");
+  TFile *fData = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbdata_regPFforJets.root");
+
   TH1F *hDataVz = (TH1F *)fData->Get("hvz");
   hDataVz->Rebin(4);
   hDataVz->Scale(1./hDataVz->Integral());
 
-  TFile *fMC = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbQCDMC.root");
+  //TFile *fMC = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbQCDMC.root");
+  TFile *fMC = new TFile("/grid_mnt/vol__vol1__u/llr/cms/mnguyen/bTagging442p5/CMSSW_4_4_2_patch5/src/bTaggingMacros/histos/PbPbQCDMC_regPFforJets.root");
   TH1F *hMCCent =  (TH1F*)fMC->Get("hbin");
   TH1F *hMCVz = (TH1F *)fMC->Get("hvz");
   hMCVz->Rebin(4);
   hMCVz->Scale(1./hMCVz->Integral());
 
-  char filename[500] = "merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix";
+  //char filename[500] = "merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix";
+  //char filename[500] = "merged_bjetAnalyzers_hiRecoV3_offPV_regPFforJets";
+  //char filename[500] = "merged_bjetAnalyzers_hiRecoV3_offPV_addGSP";
+  char filename[500] = "merged_bjetAnalyzers_hiRecoV3_offPV_L2MuX_pt30by3_v2";
 
   Double_t weight, xSecWeight, centWeight, vzWeight;
   
@@ -94,7 +93,10 @@ void weightPtHatBinsBC(int LCB=2){
     tr_in[it] = (TTree*)gDirectory->Get("t");
     fin[it]->cd("/skimanalysis");
     tr_in_skim[it] = (TTree*)gDirectory->Get("HltTree");
-    outputPath.Append(Form("%s_weighted_WithUpperCut_%d.root",filename,bounds[it]));
+    fin[it]->cd("/hltanalysis");
+    tr_in_count[it] = (TTree*)gDirectory->Get("HltTree");
+
+    outputPath.Append(Form("%s_weighted_%d.root",filename,bounds[it]));
     //outputPath.Append(Form("%s_weighted_%d.root",filename,bounds[it]));
     fout[it] = new TFile(outputPath,"RECREATE");
     cout<<"   writing into "<<outputPath<<endl; 
@@ -110,7 +112,27 @@ void weightPtHatBinsBC(int LCB=2){
     else sprintf(cutname,"pthat>%d",bounds[it]);
 
     cout<<cutname<<endl;
-    Double_t fentries = (Double_t)tr_in[it]->GetEntries(cutname);
+    Double_t fentries =0.;
+    if(muTrig) {
+      fentries= (Double_t)tr_in_count[it]->GetEntries();
+      // Entries counted differently for the muTrig, need to put the truncation by hand
+      if(LCB==2){
+	if(it==1) fentries *= 7739./17649.;
+	if(it==2) fentries *= 21271./27764.;
+	if(it==3) fentries *= 1.;
+	if(it==4) fentries *= 22532./24478.;
+	if(it==5) fentries *= 8952./9510.;
+      }
+      if(LCB==1){
+	if(it==1) fentries *= 1.;
+	if(it==2) fentries *= 8955./11652.;
+	if(it==3) fentries *= 1.;
+	if(it==4) fentries *= 31788./33596.;
+	if(it==5) fentries *= 7286./7753.;
+      }
+    }
+    else fentries= (Double_t)tr_in[it]->GetEntries(cutname);
+
     xSecWeight = xSections[it]/(fentries);
 
     if(LCB==1 && cPerEventC[it]>0) xSecWeight*=cPerEventQCD[it]/cPerEventC[it];
@@ -180,6 +202,7 @@ void weightPtHatBinsBC(int LCB=2){
     Float_t         refparton_pt[300];
     Int_t           refparton_flavor[300];
     Int_t           refparton_flavorForB[300];
+    Bool_t           refparton_isGSP[300];
     /*
     Int_t           ngen;
     Int_t           genmatchindex[100];
@@ -240,13 +263,13 @@ void weightPtHatBinsBC(int LCB=2){
     tr_in[it]->SetBranchAddress("ipDist2Jet",ipDist2Jet);
     tr_in[it]->SetBranchAddress("ipDist2JetSig",ipDist2JetSig);
     tr_in[it]->SetBranchAddress("ipClosest2Jet",ipClosest2Jet);
-    //tr_in[it]->SetBranchAddress("mue",mue);
-    //tr_in[it]->SetBranchAddress("mupt",mupt);
-    //tr_in[it]->SetBranchAddress("mueta",mueta);
-    //tr_in[it]->SetBranchAddress("muphi",muphi);
-    //tr_in[it]->SetBranchAddress("mudr",mudr);
-    //tr_in[it]->SetBranchAddress("muptrel",muptrel);
-    //tr_in[it]->SetBranchAddress("muchg",muchg);
+    tr_in[it]->SetBranchAddress("mue",mue);
+    tr_in[it]->SetBranchAddress("mupt",mupt);
+    tr_in[it]->SetBranchAddress("mueta",mueta);
+    tr_in[it]->SetBranchAddress("muphi",muphi);
+    tr_in[it]->SetBranchAddress("mudr",mudr);
+    tr_in[it]->SetBranchAddress("muptrel",muptrel);
+    tr_in[it]->SetBranchAddress("muchg",muchg);
     tr_in[it]->SetBranchAddress("pthat",&pthat);
     tr_in[it]->SetBranchAddress("beamId1",&beamId1);
     tr_in[it]->SetBranchAddress("beamId2",&beamId2);
@@ -259,6 +282,7 @@ void weightPtHatBinsBC(int LCB=2){
     tr_in[it]->SetBranchAddress("refparton_pt",refparton_pt);
     tr_in[it]->SetBranchAddress("refparton_flavor",refparton_flavor);
     tr_in[it]->SetBranchAddress("refparton_flavorForB",refparton_flavorForB);
+    if(useGSP)tr_in[it]->SetBranchAddress("refparton_isGSP",refparton_isGSP);
     tr_in[it]->SetBranchAddress("nHLTBit",&nHLTBit);
     tr_in[it]->SetBranchAddress("hltBit",hltBit);
 
@@ -318,13 +342,13 @@ void weightPtHatBinsBC(int LCB=2){
     tr_out[it]->Branch("ipDist2Jet",ipDist2Jet,"ipDist2Jet[nIP]/F");
     tr_out[it]->Branch("ipDist2JetSig",ipDist2JetSig,"ipDist2JetSig[nIP]/F");
     tr_out[it]->Branch("ipClosest2Jet",ipClosest2Jet,"ipClosest2Jet[nIP]/F");  
-    //tr_out[it]->Branch("mue",mue,"mue[nref]/F");
-    //tr_out[it]->Branch("mupt",mupt,"mupt[nref]/F");
-    //tr_out[it]->Branch("mueta",mueta,"mueta[nref]/F");
-    //tr_out[it]->Branch("muphi",muphi,"muphi[nref]/F");
-    //tr_out[it]->Branch("mudr",mudr,"mudr[nref]/F");
-    //tr_out[it]->Branch("muptrel",muptrel,"muptre[nref]/F");
-    //tr_out[it]->Branch("muchg",muchg,"muchg[nref]/I");
+    tr_out[it]->Branch("mue",mue,"mue[nref]/F");
+    tr_out[it]->Branch("mupt",mupt,"mupt[nref]/F");
+    tr_out[it]->Branch("mueta",mueta,"mueta[nref]/F");
+    tr_out[it]->Branch("muphi",muphi,"muphi[nref]/F");
+    tr_out[it]->Branch("mudr",mudr,"mudr[nref]/F");
+    tr_out[it]->Branch("muptrel",muptrel,"muptre[nref]/F");
+    tr_out[it]->Branch("muchg",muchg,"muchg[nref]/I");
     tr_out[it]->Branch("pthat",&pthat,"pthat/F");
     tr_out[it]->Branch("beamId1",&beamId1,"beamId1/I");
     tr_out[it]->Branch("beamId2",&beamId1,"beamId2/I");
@@ -337,6 +361,7 @@ void weightPtHatBinsBC(int LCB=2){
     tr_out[it]->Branch("refparton_pt",refparton_pt,"refparton_pt[nref]/F");
     tr_out[it]->Branch("refparton_flavor",refparton_flavor,"refparton_flavor[nref]/I");
     tr_out[it]->Branch("refparton_flavorForB",refparton_flavorForB,"refparton_flavorForB[nref]/I");
+    if(useGSP)tr_out[it]->Branch("refparton_isGSP",refparton_isGSP,"refparton_isGSP[nref]/O");
     /*
     tr_out[it]->Branch("ngen",&ngen,"ngen/I");
     tr_out[it]->Branch("genmatchindex",genmatchindex,"genmatchindex[nref]/I");
