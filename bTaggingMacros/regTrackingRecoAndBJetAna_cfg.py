@@ -1,29 +1,32 @@
-import FWCore.ParameterSet.VarParsing as VarParsing
+#import FWCore.ParameterSet.VarParsing as VarParsing
 
-ivars = VarParsing.VarParsing('standard')
-ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
+#ivars = VarParsing.VarParsing('standard')
+#ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
 
 
 #ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-ivars.files='/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECO_set2/e5d7378087e57a0f8e6e97059876cc46/RECO_9_1_OGL.root'
-ivars.output = 'test2.root'
-ivars.maxEvents = -1
-ivars.initialEvent = 1
+#ivars.files='/store/user/mnguyen/HidjetQuenchedMinBias/bjet30Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_set1/512a18052edc3cb578f63cce838241b9/bjet30Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_1714_1_010.root'
+#ivars.output = 'test2.root'
+#ivars.maxEvents = -1
+#ivars.initialEvent = 1
 
-ivars.parseArguments()
+#ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-isMC = False
+isMC = True
 hiReco = True
-reReco = True
-hasSimInfo = True
+reReco = False
+hasSimInfo = False
 genTag = "hiSignal"
 #hltFilter = "HLT_Jet40_v1"
-hltFilter = "HLT_HIL2Mu*_v*"
-trigResults = 'TriggerResults::HLT'
+#hltFilter = "HLT_HIL2Mu*_v*"
+hltFilter = ""
+#trigResults = 'TriggerResults::RECO'
+trigResults = 'TriggerResults::HISIGNAL'
 #gTag = 'STARTHI44_V7::All'
-gTag = 'GR_R_44_V10::All'
+gTag = 'STARTHI44_V12::All'
+#gTag = 'GR_R_44_V10::All'
 hiMode = True
 redoPFJets = False
 
@@ -45,6 +48,7 @@ print "Reco'ing SV's w/ ", svTracks, ", PV w/ ", pvProducer
 process = cms.Process('BJET')
 
 #process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck")
+#process.Timing = cms.Service("Timing")
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -84,11 +88,12 @@ process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
     #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-    #'/store/user/mnguyen/Hydjet1p8_Winter2012/bjet50_Z2_EmbeddedInHydjet18_newPFTowers_GEN-SIM-RECODEBUG/d70ee1caf0ca479a9e14bfc6c76ebba2/RECO_9_1_BoU.root'
-    ivars.files
+    '/store/user/mnguyen/HidjetQuenchedMinBias/bjet200Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_set1/78eee09151c33d6c798456e8594eb6cd/bjet200Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_9_1_vTr.root'
+    #ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             #eventsToProcess = cms.untracked.VEventRange('182838:7396593-182838:7396593'),
+                            #skipEvents = cms.untracked.uint32(33)
                             )
 
 process.options = cms.untracked.PSet(
@@ -146,7 +151,7 @@ process.hiCentrality.produceTracks = cms.bool(False)
 
 if reReco == False:
     process.raw2digi_step = cms.Path(process.RawToDigi)
-process.L1Reco_step = cms.Path(process.L1Reco)
+    process.L1Reco_step = cms.Path(process.L1Reco)
 
 if hiReco:
     if reReco == False:
@@ -306,6 +311,7 @@ if hiReco:
     process.hiRegitMixedTripletStepSeedsA.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
     process.hiRegitMixedTripletStepSeedsB.RegionFactoryPSet.RegionPSet.JetSrc = cms.InputTag("akPu3PFSelectedJets")
 
+
     if hiMode == False:  # open up region for pp
         process.hiRegitInitialStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
         process.hiRegitLowPtTripletStepSeeds.RegionFactoryPSet.RegionPSet.originHalfLength = 2.
@@ -436,14 +442,29 @@ process.akPu3PFJetTracksAssociatorAtVertex.coneSize=0.3
 process.akPu3PFSecondaryVertexTagInfos.vertexCuts.maxDeltaRToJetAxis=0.3
 process.akPu3PFImpactParameterTagInfos.primaryVertex = pvProducer
 
+process.load("RecoBTag.ImpactParameter.negativeOnlyJetBProbabilityComputer_cfi")
+process.load("RecoBTag.ImpactParameter.negativeOnlyJetProbabilityComputer_cfi")
+# these do nothing, jet probability is already positive
+#process.load("RecoBTag.ImpactParameter.positiveOnlyJetProbabilityComputer_cfi")
+#process.load("RecoBTag.ImpactParameterLearning.positiveOnlyJetBProbabilityComputer_cfi")  # Not in 44X
+process.load("RecoBTag.ImpactParameter.negativeTrackCounting3D2ndComputer_cfi")
+process.load("RecoBTag.ImpactParameter.negativeTrackCounting3D3rdComputer_cfi")
+process.load("RecoBTag.SecondaryVertex.combinedSecondaryVertexNegativeES_cfi")
+process.load("RecoBTag.SecondaryVertex.combinedSecondaryVertexPositiveES_cfi")
+process.load("RecoBTag.SoftLepton.negativeSoftLeptonByPtES_cfi")
+process.load("RecoBTag.SoftLepton.positiveSoftLeptonByPtES_cfi")
+
 # selection already done for SV
-if hiReco == False: process.akPu3PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'highPurity'
+if hiReco == False:
+    process.akPu3PFSecondaryVertexTagInfos.trackSelection.qualityClass = 'highPurity'
+    process.akPu3PFSecondaryVertexNegativeTagInfos.trackSelection.qualityClass = 'highPurity'
 
 process.akPu3PFpatJets.addAssociatedTracks = True
 process.akPu3PFpatJets.addTagInfos = True
 process.akPu3PFpatJets.addBTagInfo         = True
 process.akPu3PFpatJets.addDiscriminators   = True
 process.akPu3PFpatJets.getJetMCFlavour     = True
+
 
 process.akPu3PFpatJets.tagInfoSources = cms.VInputTag(
     cms.InputTag("akPu3PFImpactParameterTagInfos"),
@@ -508,8 +529,8 @@ else:
 
 process.TFileService = cms.Service("TFileService",
                                    fileName=cms.string(
-    #'bTagAnalyzers.root'
-    ivars.output
+    'bTagAnalyzers.root'
+    #ivars.output
     )
                                    )
 
@@ -657,6 +678,14 @@ process.ana_step          = cms.Path(
 
 if hiMode==False: process.ana_step *= process.ak5PFJetAnalyzer
 
+#IP calibration
+process.load("RecoBTag.ImpactParameterLearning.ImpactParameterCalibration_cfi")
+process.ipCalib.Jets                     = cms.InputTag('akPu3PFSelectedJets')
+process.ipCalib.jetTagsColl              = cms.string("akPu3PFJetProbabilityBJetTags")
+process.ipCalib.tagInfoSrc               = cms.InputTag("akPu3PFImpactParameterTagInfos")
+process.ipCalib.jetPModuleName           = cms.string('akPu3PFJetProbabilityBJetTags')
+
+process.akPu3PFjetsIPcalib = cms.Path(process.ipCalib)
 
 # trigger requirment, gets added in front of all patch w/ the superFilter
 process.load('CmsHi.JetAnalysis.EventSelection_cff')
@@ -753,5 +782,5 @@ if hltFilter:
     for path in process.paths:
         getattr(process,path)._seq = process.superFilterSequence*getattr(process,path)._seq
 
-process.hltAna.remove(process.hltJetHI)
-process.superFilterPath.remove(process.hltJetHI)
+    process.hltAna.remove(process.hltJetHI)
+    process.superFilterPath.remove(process.hltJetHI)
