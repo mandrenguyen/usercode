@@ -1,31 +1,29 @@
-#import FWCore.ParameterSet.VarParsing as VarParsing
+import FWCore.ParameterSet.VarParsing as VarParsing
 
-#ivars = VarParsing.VarParsing('standard')
-#ivars.register('initialEvent',mult=ivars.multiplicity.singleton,info="for testing")
+ivars = VarParsing.VarParsing('standard')
+ivars.register('jobIndex',mult=ivars.multiplicity.singleton,info="for testing")
 
+ivars.jobIndex=99
+ivars.files='file:/mnt/hadoop/cms/store/user/yenjie/MC_Production/Pythia80_HydjetDrum_mix01/RECO/set2_random10000_HydjetDrum_452.root'
+ivars.output = 'test.root'
 
-#ivars.files='/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-#ivars.files='/store/user/mnguyen/HidjetQuenchedMinBias/bjet30Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_set1/512a18052edc3cb578f63cce838241b9/bjet30Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_1714_1_010.root'
-#ivars.output = 'test2.root'
-#ivars.maxEvents = -1
-#ivars.initialEvent = 1
+ivars.maxEvents = -1
 
-#ivars.parseArguments()
+ivars.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
 isMC = True
 hiReco = True
-reReco = False
+reReco = True
 hasSimInfo = False
 genTag = "hiSignal"
 #hltFilter = "HLT_Jet40_v1"
 #hltFilter = "HLT_HIL2Mu*_v*"
-hltFilter = ""
-#trigResults = 'TriggerResults::RECO'
-trigResults = 'TriggerResults::HISIGNAL'
-#gTag = 'STARTHI44_V7::All'
-gTag = 'STARTHI44_V12::All'
+hltFilter = "HLT_HIJet80_v*"
+trigResults = 'TriggerResults::RECO'
+#trigResults = 'TriggerResults::HISIGNAL'
+gTag = 'STARTHI44_V7::All'
 #gTag = 'GR_R_44_V10::All'
 hiMode = True
 redoPFJets = False
@@ -78,8 +76,8 @@ process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(
-    #ivars.maxEvents
-    -1
+    ivars.maxEvents
+    #-1
     )
 )
 
@@ -87,9 +85,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             #secondaryFileNames = cms.untracked.vstring(),
                             fileNames = cms.untracked.vstring(
-    #'/store/user/mnguyen/bjet80_FCROnly_Z2_GEN-SIM-RAW/bjet80_FCROnly_Z2_GEN-SIM-RAW/aa4acc31aed2ed270550386a3a3a6f5b/RAW_113_1_wAR.root'
-    '/store/user/mnguyen/HidjetQuenchedMinBias/bjet200Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_set1/78eee09151c33d6c798456e8594eb6cd/bjet200Z2_EmbeddedInHydjet18_GEN-SIM-RAWSIM_9_1_vTr.root'
-    #ivars.files
+    ivars.files
     ),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             #eventsToProcess = cms.untracked.VEventRange('182838:7396593-182838:7396593'),
@@ -104,8 +100,30 @@ process.options = cms.untracked.PSet(
 
 # Other statements
 process.GlobalTag.globaltag = gTag
-
 print "global Tag = ", process.GlobalTag.globaltag
+
+print "customizing JP calib "
+
+
+process.jpCalib = cms.ESSource("PoolDBESSource",
+                               DBParameters = cms.PSet(messageLevel = cms.untracked.int32(0)),
+                               timetype = cms.string('runnumber'),
+                               toGet = cms.VPSet(
+    cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
+             tag = cms.string('probBTagPDF2D_tag_mc'),
+             #label = cms.untracked.string("IC5Calo")
+             ),
+    
+    cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
+             tag    = cms.string('probBTagPDF3D_tag_mc'),
+             #label = cms.untracked.string("AK3PF")
+             ),
+    
+    ),
+                               connect = cms.string("sqlite_file:jpCalib_HIMC44X_2011_v1.db"),
+                               )
+process.es_prefer_jpCalib = cms.ESPrefer('PoolDBESSource','jpCalib')
+
 
 ######################
 # Hi specific reco
@@ -225,6 +243,9 @@ if hiMode:
 else:
     process.akPu3PFJets.doPUOffsetCorr = False
     process.ak5PFJets.doPUOffsetCorr = False
+
+#process.akPu3PFJets.jetPtMin =1.
+#process.ak5PFJets.jetPtMin =1.
 
 process.load('RecoHI.HiJetAlgos.ParticleTowerProducer_cff')
 
@@ -348,10 +369,6 @@ if hiReco:
     
     process.pfRegTrack.TrackQuality = "highPurity"
     
-    process.pfRegTrack.GsfTracksInEvents = False
-    process.regParticleFlow.usePFElectrons = False
-    process.regParticleFlow.muons = "regMuons"
-
     process.pfRegTrack.GsfTracksInEvents = False
     process.regParticleFlow.usePFElectrons = False
     process.pfRegTrack.MuColl = "regMuons"
@@ -529,8 +546,8 @@ else:
 
 process.TFileService = cms.Service("TFileService",
                                    fileName=cms.string(
-    'bTagAnalyzers.root'
-    #ivars.output
+    #'bTagAnalyzers.root'
+    ivars.output
     )
                                    )
 
@@ -684,8 +701,9 @@ process.ipCalib.Jets                     = cms.InputTag('akPu3PFSelectedJets')
 process.ipCalib.jetTagsColl              = cms.string("akPu3PFJetProbabilityBJetTags")
 process.ipCalib.tagInfoSrc               = cms.InputTag("akPu3PFImpactParameterTagInfos")
 process.ipCalib.jetPModuleName           = cms.string('akPu3PFJetProbabilityBJetTags')
+process.ipCalib.jobIndex = ivars.jobIndex
 
-process.akPu3PFjetsIPcalib = cms.Path(process.ipCalib)
+#process.akPu3PFjetsIPcalib = cms.Path(process.ipCalib)
 
 # trigger requirment, gets added in front of all patch w/ the superFilter
 process.load('CmsHi.JetAnalysis.EventSelection_cff')
