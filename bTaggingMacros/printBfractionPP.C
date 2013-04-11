@@ -1,5 +1,29 @@
+#include <iostream.h>
+#include <math.h>
+#include "TROOT.h"
+#include "TStyle.h"
+#include "TH1.h"
+#include "TF1.h"
+#include "TFile.h"
+#include "TCanvas.h"
+#include "TLegend.h"
+#include "TLatex.h"
+#include "TGraphErrors.h"
+#include "TGraphAsymmErrors.h"
+
+
+
+Double_t abs (Double_t a);
+Double_t max (Double_t a, Double_t b);
+Double_t norm (Double_t a, Double_t b);
+Double_t norm (Double_t a, Double_t b, Double_t c);
+Double_t norm (Double_t a, Double_t b, Double_t c, Double_t d, Double_t e);
+
+void correct2(TH1* h);
+void setMeanPt(TGraphAsymmErrors *g, TH1F *h, int isData);
+
 //void printBfraction(char *tagger="discr_ssvHighPur", Double_t workingPoint=2, char *taggerName="SSVHP") {
-void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, char *taggerName="SSVHE") {
+void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, char *taggerName="SSVHE", int saveOutput=0) {
 
 
   gROOT->ForceStyle(1);
@@ -7,13 +31,20 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
 
-  //gStyle->SetErrorX(0);
-  gStyle->SetLabelSize(0.05,"xy");
-  gStyle->SetTitleSize(0.05,"xy");
-  gStyle->SetTitleOffset(1.5,"xy");
+  gStyle->SetTextFont(43);
+  gStyle->SetLabelFont(43,"XYZ");
+  gStyle->SetTitleFont(43,"XYZ");
+
+  // hack
+  gStyle->SetLabelSize(28,"xy");
+  gStyle->SetTitleSize(28,"xy");
+  gStyle->SetTitleOffset(1.1,"x");
+  gStyle->SetTitleOffset(1.5,"y");
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetPadBottomMargin(0.12);
+  gStyle->SetPadTopMargin(0.07);
   gStyle->SetNdivisions(408,"y");
+  gROOT->ForceStyle(1);
 
   TFile *fin = new TFile(Form("./bFractionpp290512/histos/bFraction_%sat%.1f.root",taggerName,workingPoint));
   //TFile *fin = new TFile(Form("./histos/bFraction_regPFforJets_%sat%.1f.root",taggerName,workingPoint));
@@ -34,7 +65,6 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
   TH1F *hBFractionJPdirectMoreC = (TH1F*) fin->Get(Form("hBFractionJPdirect_%sat%.1f_CLshift%.0f",taggerName,workingPoint,20.));
   TH1F *hBFractionJPdirectLessC = (TH1F*) fin->Get(Form("hBFractionJPdirect_%sat%.1f_CLshift%.0f",taggerName,workingPoint,-20.));
 
-
   /*  --- correction due to Jet Energy Scale (calcul) ---
   correct(hBFractionMC);
   correct(hBFractionData);
@@ -48,7 +78,7 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
   correct(hBFractionJPdirectLessC);
   //*/
 
-  //*  --- correction due to Jet Energy Scale (by hand) ---
+  ///*  --- correction due to Jet Energy Scale (by hand) ---
   correct2(hBFractionMC);
   correct2(hBFractionData);
   correct2(hBFractionDataMoreC);
@@ -66,7 +96,7 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
 
-  TCanvas *cBFraction1 = new TCanvas("cBFraction1","b-jet fraction",600,600);
+  TCanvas *cBFraction1 = new TCanvas("cBFraction1","b-jet fraction",700,600);
   hBFractionMC->SetLineColor(2);
   hBFractionMC->SetLineWidth(2);
   hBFractionMC->SetMarkerColor(2);
@@ -80,7 +110,7 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
   hBFractionMC_dummy->SetMarkerColor(0);
   hBFractionMC_dummy->SetLineColor(0);
   hBFractionMC_dummy->Draw(); 
-  //  hBFractionMC->Draw("hist"); 
+  hBFractionMC->Draw("hist,same"); 
 
   //  hBFractionMC->Draw("e1"); 
 
@@ -123,35 +153,40 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
   TLegend *legFrac1 = new TLegend(0.15,0.65,0.87,0.95);
   legFrac1->SetBorderSize(0);
   legFrac1->SetFillStyle(0);
+  legFrac1->SetTextSize(23);
   legFrac1->SetHeader("pp, #sqrt{s} = 2.76 TeV");
   legFrac1->AddEntry(hBFractionDataLTJP,"SSVHE, LT method","pl");
   legFrac1->AddEntry(hBFractionDataLTJPMoreC,"SSVHE, LT method, Charm * 1.2","pl");
   legFrac1->AddEntry(hBFractionDataLTJPLessC,"SSVHE, LT method, Charm * 0.8","pl");
   legFrac1->AddEntry(hBFractionData,"SSVHE, MC eff.","pl");
   legFrac1->AddEntry(hBFractionJPdirect,"Jet Probability","pl");
-  legFrac1->Draw();
+  //legFrac1->Draw();
 
 
   //  --- plots of LT method with syst. uncertainty ---
 
-  TCanvas *cBFraction2 = new TCanvas("cBFraction2","b-jet fraction",600,600);
+  TCanvas *cBFraction2 = new TCanvas("cBFraction2","b-jet fraction",700,600);
 
   //*
-  TH1F *hBFractionMC2 = hBFractionMC->Clone("hBFractionMC2");
+  TH1F *hBFractionMC2 = (TH1F *)hBFractionMC->Clone("hBFractionMC2");
   hBFractionMC2->GetXaxis()->SetRangeUser(80,200);
   hBFractionMC2->SetMarkerSize(0);
   hBFractionMC2->SetMaximum(0.06);
   hBFractionMC2->SetMinimum(0.0);
+  hBFractionMC2->GetXaxis()->CenterTitle();
+  hBFractionMC2->GetYaxis()->CenterTitle();
   hBFractionMC2->Draw("hist");
 
   TGraphAsymmErrors *gBFractionMC2 = new TGraphAsymmErrors(hBFractionMC);
   setMeanPt(gBFractionMC2,hBFractionMC,0);
   gBFractionMC2->GetXaxis()->SetRangeUser(80,200);
   
-  TLatex *prel = new TLatex(83,0.0615,"CMS preliminary");
+  TLatex *prel = new TLatex(81,0.0615,"CMS Preliminary");
+  prel->SetTextSize(23);
   prel->Draw();
 
-  TLatex *roots = new TLatex(147,0.0615,"#sqrt{s} = 2.76 TeV");
+  TLatex *roots = new TLatex(167,0.0615,"#sqrt{s} = 2.76 TeV");
+  roots->SetTextSize(23);
   roots->Draw();
 
   //TLatex *ptlabel = new TLatex(90,0.0075,"Jet p_{T} > 80 GeV/c");
@@ -160,7 +195,7 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
 
   //*/
   /*
-  TH1F *hBFractionMCRefLevel2 = hBFractionMCRefLevel->Clone();
+  TH1F *hBFractionMCRefLevel2 = (TH1F *)hBFractionMCRefLevel->Clone();
   hBFractionMCRefLevel2->SetAxisRange(0,0.05,"Y");
   hBFractionMCRefLevel2->SetTitleOffset(1,"Y");
   hBFractionMCRefLevel2->SetLineColor(2);
@@ -169,35 +204,98 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
   hBFractionMCRefLevel2->Draw();
   //*/
 
-  //TGraphAsymmErrors *gSyst = new TGraphAsymmErrors(3);
+
   TGraphErrors *gSyst = new TGraphErrors(3);
+  TGraphErrors *gSystCL = new TGraphErrors(3);
+  TGraphErrors *gSystMeth = new TGraphErrors(3);
+  TGraphErrors *gSystJES = new TGraphErrors(3);
+  TGraphErrors *gSystTemp = new TGraphErrors(3);
+  TGraphErrors *gSystWP = new TGraphErrors(3);
+
+  gSyst->SetName("gSyst");
+  gSystCL->SetName("gSystCL");
+  gSystMeth->SetName("gSystMeth");
+  gSystJES->SetName("gSystJES");
+  gSystTemp->SetName("gSystTemp");
+  gSystWP->SetName("gSystWP");
+
+
   Double_t errCLratio, errMethod, totalSystErr;
 
-  float binCentData[3]={87.88,108.2,140.6};
-  float binBound[4]={80.,100.,120.,200.};
+  //float binCentData[3]={87.88,108.2,140.6};
+  //float binBound[4]={80.,100.,120.,200.};
+
+  // hard code purity systematics
+  //https://dl.dropbox.com/u/48183843/relativeShift_HIN12003.pdf
+  double errDataMCtemplate[3]= {0.36, 0.11, 0.06};
+  double errWorkingPoint[3]={0.18, 0.18, 0.22};
+
 
   for(Int_t i=1;i<=hBFractionDataLTJP->GetNbinsX();i++) {
 
-    gSyst->SetPoint(i-1,hBFractionDataLTJP->GetBinCenter(i),hBFractionDataLTJP->GetBinContent(i));
-    //gSyst->SetPoint(i-1,binCentData[i-1],hBFractionDataLTJP->GetBinContent(i));
+    float xVal = hBFractionDataLTJP->GetBinCenter(i);
 
+    gSyst->SetPoint(i-1,xVal,hBFractionDataLTJP->GetBinContent(i));
+    gSystCL->SetPoint(i-1,xVal,hBFractionDataLTJP->GetBinContent(i));
+    gSystMeth->SetPoint(i-1,xVal,hBFractionDataLTJP->GetBinContent(i));
+    gSystJES->SetPoint(i-1,xVal,hBFractionDataLTJP->GetBinContent(i));
+    gSystTemp->SetPoint(i-1,xVal,hBFractionDataLTJP->GetBinContent(i));
+    gSystWP->SetPoint(i-1,xVal,hBFractionDataLTJP->GetBinContent(i));
+
+
+//     errCLratio = max(abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionDataLTJPMoreC->GetBinContent(i)),abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionDataLTJPLessC->GetBinContent(i)));
+//     errMethod = max(abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionData->GetBinContent(i)),abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionJPdirect->GetBinContent(i)));
+
+//     double errJES = 0.07*hBFractionDataLTJP->GetBinContent(i);
+//     float val = hBFractionDataLTJP->GetBinContent(i);
+
+//     totalSystErr = norm(errCLratio,errMethod,errJES);
+
+//     gSyst->SetPointError(i-1,hBFractionDataLTJP->GetBinWidth(i)/2,totalSystErr);
+//     gSystCL->SetPointError(i-1,hBFractionDataLTJP->GetBinWidth(i)/2,errCLratio);
+//     gSystMeth->SetPointError(i-1,hBFractionDataLTJP->GetBinWidth(i)/2,errMethod);
+//     gSystJES->SetPointError(i-1,hBFractionDataLTJP->GetBinWidth(i)/2,errJES);
+
+    cout<<" central value "<<hBFractionDataLTJP->GetBinContent(i)<<endl;
     errCLratio = max(abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionDataLTJPMoreC->GetBinContent(i)),abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionDataLTJPLessC->GetBinContent(i)));
-    errMethod = max(abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionData->GetBinContent(i)),abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionJPdirect->GetBinContent(i)));
+    errMethod  = abs(hBFractionDataLTJP->GetBinContent(i)-hBFractionData->GetBinContent(i));
     double errJES = 0.07*hBFractionDataLTJP->GetBinContent(i);
-    totalSystErr = norm(errCLratio,errMethod,errJES);
+    float val     = hBFractionDataLTJP->GetBinContent(i);
+    totalSystErr = norm(errCLratio,errMethod,errJES,val*errDataMCtemplate[i-1],val*errWorkingPoint[i-1]);
 
-    gSyst->SetPointError(i-1,hBFractionDataLTJP->GetBinWidth(i)/2,totalSystErr);
+    float xErr = hBFractionDataLTJP->GetBinWidth(i)/2;
+    gSyst->SetPointError(i-1,xErr,totalSystErr);
+    gSystCL->SetPointError(i-1,xErr,errCLratio);
+    gSystMeth->SetPointError(i-1,xErr,errMethod);
+    gSystJES->SetPointError(i-1,xErr,errJES);
+    gSystTemp->SetPointError(i-1,xErr,val*errDataMCtemplate[i-1]);
+    gSystWP->SetPointError(i-1,xErr,val*errWorkingPoint[i-1]);
+
+    cout<<" rel METH "<<errMethod/val<<endl;
+    cout<<" rel CL "<<errCLratio/val<<endl;
+    cout<<" rel JES "<<errJES/val<<endl;
+    cout<<" rel sys error "<<totalSystErr/val<<endl;
+    cout<<" absolute sys error "<<totalSystErr<<endl;
+
+    // add in MC template uncertainties
+    float origStatErr = hBFractionDataLTJP->GetBinError(i);
+    int statBin=i-1;
+
+
     //gSyst->SetPointError(i-1,abs(binCentData[i-1]-binBound[i-1]),abs(binCentData[i-1]-binBound[i]),totalSystErr,totalSystErr);
 
   }
 
+
   gSyst->SetFillColor(5);
   gSyst->Draw("2");
 
+  gBFractionMC2->SetMarkerSize(0);
   gBFractionMC2->Draw("Z,p,same");
   hBFractionMC2->Draw("hist,same");
 
   TGraphAsymmErrors *gBFractionDataLTJP2 = new TGraphAsymmErrors(hBFractionDataLTJP);
+
   setMeanPt(gBFractionDataLTJP2,hBFractionDataLTJP,1);
   gBFractionDataLTJP2->SetLineColor(1);
   gBFractionDataLTJP2->SetMarkerColor(1);
@@ -207,20 +305,34 @@ void printBfractionPP(char *tagger="discr_ssvHighEff", Double_t workingPoint=2, 
 
   //hBFractionMCRefLevel2->Draw("e1same");
   
-
   TLegend *legFrac2 = new TLegend(0.3,0.15,0.8,0.34);
   legFrac2->SetHeader("#int L dt = 231 nb^{-1}");
   legFrac2->SetBorderSize(0);
   legFrac2->SetFillStyle(0);
+  legFrac2->SetTextSize(23);
   legFrac2->AddEntry(gBFractionDataLTJP2,"pp Data","p");
-  legFrac2->AddEntry(hBFractionMC2,"PYTHIA","l");
+  legFrac2->AddEntry(hBFractionMC2,"Pythia","l");
   legFrac2->AddEntry(gSyst,"Exp. uncertainty","f");
-  legFrac2->Draw();
+  //legFrac2->Draw();
 
 
 
   cBFraction2->RedrawAxis();
-
+  if(saveOutput){
+    cBFraction2->Print("bFractionPPVsPt.pdf","pdf");
+    cBFraction2->Print("bFractionPPVsPt.gif","gif");
+    
+    TFile *fout = new TFile("pp_bFraction.root","recreate");
+    gBFractionDataLTJP2->Write();
+    gSyst->Write();
+    gSystCL->Write();
+    gSystMeth->Write();
+    gSystJES->Write();
+    gSystTemp->Write();
+    gSystWP->Write();
+    gBFractionMC2->Write();
+    fout->Close();
+  }
 }
 
 
@@ -228,7 +340,7 @@ Double_t abs (Double_t a) {return (a>0)?a:-a;}
 Double_t max (Double_t a, Double_t b) {return (a>b)?a:b;}
 Double_t norm (Double_t a, Double_t b) {return sqrt(a*a+b*b);}
 Double_t norm (Double_t a, Double_t b, Double_t c) {return sqrt(a*a+b*b+c*c);}
-
+Double_t norm (Double_t a, Double_t b, Double_t c, Double_t d, Double_t e) {return sqrt(a*a+b*b+c*c+d*d+e*e);}
 
 
 
@@ -298,7 +410,7 @@ void correct2(TH1* h) {
 
 }
 
-void setMeanPt(TGraphAsymmErrors *g, TH1F *h, int isData=1){
+void setMeanPt(TGraphAsymmErrors *g, TH1F *h, int isData){
 
   float meanPtData[3]={87.88,108.2,140.6};
   float meanPtMC[3]={87.83,108.2,140.1};
