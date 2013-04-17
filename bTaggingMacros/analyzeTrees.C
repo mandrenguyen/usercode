@@ -8,7 +8,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h" 
 
-void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=1, int cbin=-1)
+void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=0, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=0, int cbin=-1,int useGSP=0)
 {
 
   // isMC=0 --> Real data, ==1 --> QCD, ==2 --> cJet, ==3 --> bJet
@@ -27,10 +27,24 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
   TFile *fin;
 
   if(ppPbPb){
+    /* // current AN version
     if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity/merged_bTagAnalyzers.root"); 
     else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_qcd.root");
     else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_bJet.root"); 
     else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_cJet.root");
+    */
+
+    /*
+    if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity_regPFforJets/merged_bTagAnalyzers.root"); 
+    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_regPFforJets_weighted_qcd.root");
+    //else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_regPFforJets_weighted_bJet.root"); 
+    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_addGSP_weighted.root");
+    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_regPFforJets_weighted_cJet.root");
+    */
+    if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity_pt30by3_restrictMixTripletA_jpHICalibRepass/merged_bTagAnalyzers_all.root");
+    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_qcd.root");
+    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_bJet.root"); 
+    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_cJet.root");
   }
   else{
     if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
@@ -48,12 +62,16 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
       //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
       //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_highPurity_weighted_WithUpperCut.root");
-      if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/unquenchedPyquen/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_v2_weighted.root");
+      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/unquenchedPyquen/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_v2_weighted.root");
       //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_coneSize3_hiModeCheck_weighted_WithUpperCut.root");
       //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/pthat30/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR.root");
       //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRaw_offPV_fixTR/merged_bTagAnalyzers.root");
       //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_highPurity/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_highPurity.root");
-      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck.root");
+      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck.root");
+      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_regPFforJets_weighted.root");
+      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_regPFforJets/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_regPFforJets.root");
+      if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_addGSP_weighted.root");
+      else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_regPFforJets/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_regPFforJets.root");
     }
   }
 
@@ -61,8 +79,16 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
   //TTree *t = (TTree*) fin->Get("ak5PFJetAnalyzer/t"); //for ppReco_jetTrig
   TTree *tSkim = (TTree*) fin->Get("skimanalysis/HltTree");
   
+  TTree *tmu = (TTree*) fin->Get("muonTree/HLTMuTree");
+  
+  int dupRuns[6] = {181912,181913,181938,181950,181985,182124};
+  
+  vector<int> usedEvents[6];
+  int nDup=0;
+
   //Declaration of leaves types                  
   Int_t           evt;
+  Int_t           run;
   Int_t           bin;
   Float_t           vz;
   Int_t           nref;
@@ -121,8 +147,9 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
   Float_t         refparton_pt[1000];
   Int_t           refparton_flavor[1000];
   Int_t           refparton_flavorForB[1000];
+  Bool_t           refparton_isGSP[1000];
   /*
-  Int_t           ngen;
+    Int_t           ngen;
   Int_t           genmatchindex[1000];
   Float_t         genpt[1000];
   Float_t         geneta[1000];
@@ -142,6 +169,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
   Int_t collSell;
   
   t->SetBranchAddress("evt",&evt);
+  tmu->SetBranchAddress("Run",&run);
   t->SetBranchAddress("bin",&bin);           
   t->SetBranchAddress("vz",&vz);           
   t->SetBranchAddress("nref",&nref);
@@ -207,6 +235,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
     t->SetBranchAddress("refparton_pt",refparton_pt);
     t->SetBranchAddress("refparton_flavor",refparton_flavor);
     t->SetBranchAddress("refparton_flavorForB",refparton_flavorForB);
+    if(useGSP)t->SetBranchAddress("refparton_isGSP",refparton_isGSP);
     /*
     t->SetBranchAddress("ngen",&ngen);
     t->SetBranchAddress("genmatchindex",genmatchindex);
@@ -237,16 +266,37 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
   if(ppPbPb){
 
     if(cbin==-1){
+      /*
       if(isMC==0) fout = new TFile("histos/PbPbdata_noIPupperCut.root","recreate");
       else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_noIPupperCut.root","recreate");
       else if(isMC==2) fout = new TFile("histos/PbPbBMC_noIPupperCut.root","recreate");
       else if(isMC==3) fout = new TFile("histos/PbPbCMC_noIPupperCut.root","recreate");
+      */
+      /*
+      if(isMC==0) fout = new TFile("histos/PbPbdata_regPFforJets.root","recreate");
+      else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_regPFforJets.root","recreate");
+      //else if(isMC==2) fout = new TFile("histos/PbPbBMC_regPFforJets.root","recreate");
+      //else if(isMC==2) fout = new TFile("histos/PbPbBMC_addGSP.root","recreate");
+      else if(isMC==2) fout = new TFile("histos/PbPbBMC_addGSP_up.root","recreate");
+      else if(isMC==3) fout = new TFile("histos/PbPbCMC_regPFforJets.root","recreate");
+      */
+      if(isMC==0) fout = new TFile("histos/PbPbdata_pt30by3_jpHICalibRepass_withDup.root","recreate");
+      else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_pt30by3_ipHICalibCentWeight.root","recreate");
+      else if(isMC==2) fout = new TFile("histos/PbPbBMC_pt30by3_ipHICalibCentWeight.root","recreate");
+      else if(isMC==3) fout = new TFile("histos/PbPbCMC_pt30by3_ipHICalibCentWeight.root","recreate");
     }
     else{
+      /*
       if(isMC==0) fout = new TFile(Form("histos/PbPbdata_%d_noIPupperCut.root",cbin),"recreate");
       else if(isMC==1) fout = new TFile(Form("histos/PbPbQCDMC_%d_noIPupperCut.root",cbin),"recreate");
       else if(isMC==2) fout = new TFile(Form("histos/PbPbBMC_%d_noIPupperCut.root",cbin),"recreate");
       else if(isMC==3) fout = new TFile(Form("histos/PbPbCMC_%d_noIPupperCut.root",cbin),"recreate");
+      */
+      if(isMC==0) fout = new TFile(Form("histos/PbPbdata_%d_pt30by3_jpHICalibRepass.root",cbin),"recreate");
+      else if(isMC==1) fout = new TFile(Form("histos/PbPbQCDMC_%d_pt30by3_ipHICalibCentWeight.root",cbin),"recreate");
+      else if(isMC==2) fout = new TFile(Form("histos/PbPbBMC_%d_pt30by3_ipHICalibCentWeight.root",cbin),"recreate");
+      else if(isMC==3) fout = new TFile(Form("histos/PbPbCMC_%d_pt30by3_ipHICalibCentWeight.root",cbin),"recreate");
+
     }
 
   }
@@ -262,9 +312,12 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
       else fout=new TFile("histos/ppdata_hiReco_muTrig_noIPupperCut.root","recreate");
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
       //if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck.root","recreate");
-      if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck_unquenchedPyquen_jet65.root","recreate");
+      //if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck_unquenchedPyquen_jet65.root","recreate");
       //else fout=new TFile("histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck.root","recreate");
-      else fout=new TFile("histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck_jet65.root","recreate");
+      //else fout=new TFile("histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck_jet65.root","recreate");
+      //if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_regPFforJets.root","recreate");
+      if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_addGSP_up.root","recreate");
+      else fout=new TFile("histos/ppdata_hiReco_jetTrig_regPFforJets.root","recreate");
     }
   }
 
@@ -565,8 +618,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
    
    if(updateJEC){   
      
-     cout<<" updating the JECs "<<endl;
-     
+     //cout<<" updating the JECs, USING REGPF "<<endl;
+
+     //string L2Name = "JEC/JEC_regPF_L2Relative_AK3PF.txt";
+     //string L3Name = "JEC/JEC_regPF_L3Absolute_AK3PF.txt";
      string L2Name = "JEC/JEC_dijet_L2Relative_AK3PF.txt";
      string L3Name = "JEC/JEC_dijet_L3Absolute_AK3PF.txt";
      
@@ -582,6 +637,8 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
 
 
   Long64_t nentries = t->GetEntries();
+
+  int gspCounter=0;
 
   for (Long64_t i=0; i<nentries;i++) {
 
@@ -631,7 +688,33 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
       if(pthat<50) continue;
     }
     if(fabs(vz)>15.) continue;
+
+    if(!isMC&&ppPbPb){
+      tmu->GetEntry(i);
+      
+      bool foundEvt = false;
+      for(int irun=0;irun<6;irun++){       
+	if(run==dupRuns[irun]) {
+	  // binary search does not give the right behavior for some reason
+	  //if(binary_search(usedEvents[irun].begin(), usedEvents[irun].end(), evt)) {
+	  // use the slower find instead
+	  std::vector<int>::iterator it;
+	  // iterator to vector element:
+	  it = find (usedEvents[irun].begin(), usedEvents[irun].end(), evt);
+	  if(it!=usedEvents[irun].end()){
+	    
+	    nDup++;
+	    foundEvt = true;
+	    //cout<< " duplicate event, run: "<<run<<" evt: "<<evt<<endl;
+	    break;
+	}
+	  usedEvents[irun].push_back(evt);
+	}
+      }
     
+      if(foundEvt) continue;
+    }
+
     if(updateJEC){
       
       for(int ij=0; ij<nref; ij++){	  
@@ -655,6 +738,19 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=0, int isMuTrig=0, int isMC=1, int 
 
       trackPosition+=nselIPtrk[ij];
 
+      if(useGSP==2){
+	if(refparton_isGSP[ij]==1){
+	  gspCounter++;
+	  if(gspCounter%2==0) continue;
+	}	
+      }
+      if(useGSP==3){
+	if(refparton_isGSP[ij]==0){
+	  gspCounter++;
+	  if(gspCounter%2==0) continue;
+	}	
+      }
+      
       if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
 	
 
