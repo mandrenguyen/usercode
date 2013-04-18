@@ -8,7 +8,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h" 
 
-void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=0, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=0, int cbin=-1,int useGSP=0)
+void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=0, int cbin=-1,int useGSP=0)
 {
 
   // isMC=0 --> Real data, ==1 --> QCD, ==2 --> cJet, ==3 --> bJet
@@ -169,7 +169,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=0, int 
   Int_t collSell;
   
   t->SetBranchAddress("evt",&evt);
-  tmu->SetBranchAddress("Run",&run);
+  if(isMC==0)tmu->SetBranchAddress("Run",&run);
   t->SetBranchAddress("bin",&bin);           
   t->SetBranchAddress("vz",&vz);           
   t->SetBranchAddress("nref",&nref);
@@ -757,17 +757,17 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=0, int 
 	if(doNtuples){
 
 	  if(ppPbPb){
-	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
-	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
+	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
+	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
 	  }
 	  else{
-	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
-	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
+	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
+	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
 	  }
 	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
 	    
-	    if(isMC)ntMuReq->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
-	    else ntMuReq->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_probb[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	    if(isMC)ntMuReq->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
+	    else ntMuReq->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],muptrel[ij]); 
 	  }
 	}
 
@@ -814,11 +814,11 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=0, int 
 	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_csvSimpleL->Fill(discr_csvSimple[ij],w);    
 	}
 	
-	hdiscr_prob->Fill(discr_probb[ij],w);    
+	hdiscr_prob->Fill(discr_prob[ij],w);    
 	if(isMC){
-	  if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_probb[ij],w); 
-	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_probb[ij],w);    
-	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_probb[ij],w);    
+	  if(abs(refparton_flavorForB[ij])==5)hdiscr_probB->Fill(discr_prob[ij],w); 
+	  else if(abs(refparton_flavorForB[ij])==4)hdiscr_probC->Fill(discr_prob[ij],w);    
+	  else if(abs(refparton_flavorForB[ij])<99)hdiscr_probL->Fill(discr_prob[ij],w);    
 	}
 
 	hdiscr_ssvHighEff->Fill(discr_ssvHighEff[ij],w);    
