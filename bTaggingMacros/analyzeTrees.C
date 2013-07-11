@@ -1,52 +1,46 @@
 #include <iostream>
+#include <vector>
+#include <math.h> 
 #include "TH1.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TNtupleD.h"
 #include "TNtuple.h"
 #include "TROOT.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h" 
 
-void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=0, int cbin=-1,int useGSP=0)
-{
+using namespace std;
 
-  // isMC=0 --> Real data, ==1 --> QCD, ==2 --> cJet, ==3 --> bJet
-  Float_t minJetPt=80;
-  //if(!ppPbPb) minJetPt=65;
+void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int useWeight=1, int doNtuples=1, int doJets=1, int doTracks=1, int updateJEC=0, int cbin=-1,int useGSP=0, int jetTrig=0)
+{
+  // isMC=0 --> Real data, ==1 --> QCD, ==2 --> bJet, ==3 --> cJet
+  Float_t minJetPt=30.;
+  
   if (isMuTrig) minJetPt=30;
   Float_t maxJetEta=2;
   Float_t minMuPt=5;
-
+  
   // cbin = -1 --> 0-100%
   // cbin = 0 --> 0-20%
   // cbin = 1 --> 20-50%
   // cbin =2 --> 50-100%
   if(!ppPbPb) cbin=-1;
   
-  TFile *fin;
-
+  TFile *fin=NULL;
+  
   if(ppPbPb){
-    /* // current AN version
-    if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity/merged_bTagAnalyzers.root"); 
-    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_qcd.root");
-    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_bJet.root"); 
-    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_centUp_regFix_weighted_WithUpperCut_cJet.root");
-    */
-
-    /*
-    if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity_regPFforJets/merged_bTagAnalyzers.root"); 
-    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_regPFforJets_weighted_qcd.root");
-    //else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_regPFforJets_weighted_bJet.root"); 
-    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_addGSP_weighted.root");
-    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiRecoV3_offPV_regPFforJets_weighted_cJet.root");
-    */
-    if(isMC==0) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity_pt30by3_restrictMixTripletA_jpHICalibRepass/merged_bTagAnalyzers_all.root");
-    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_qcd.root");
-    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_bJet.root"); 
-    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_cJet.root");
+    if(isMC==0){
+      if(jetTrig==1)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet80_hiRegitSVHighPurity_pt30by3_restrictMixTripletA_jpHICalibRepass/merged_bTagAnalyzers_all.root");
+      if(jetTrig==2)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/PbPbData/pbpbDataJet65_hiRegitSVHighPurity_pt30by3_restrictMixTripletA_jpHICalibRepass/merged_bTagAnalyzers_all.root");
+    }
+    else if(isMC==1) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_oldHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_qcd.root");
+    else if(isMC==2) fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_bJetPlusQCD.root"); 
+    else if(isMC==3)fin = new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/hydjetEmbedded/merged_bjetAnalyzers_hiReco_offPV_pt30by3_newHydjet_restrictMixTripletA_ipHICalibCentWeight_weighted_cJetPlusQCD.root");
   }
   else{
+    // Kurt, replace with your files
     if        ( isRecopp&& isMuTrig) { // pp reco, muon triggered
       if(isMC)fin=new TFile("/data_CMS/cms/sregnard/ppReco_muTrig/merged_bTagAnalyzers_ppRecoFromRaw_HLTMu3v2_fixTR_weighted.root");
       else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_ppRecoFromRaw_fixTR/merged_bTagAnalyzers.root");
@@ -60,21 +54,12 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
       else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataMu3_hiRecoFromRawV3_offPV_fixTR/merged_bTagAnalyzers.root");
       
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR_weighted.root");
-      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_highPurity_weighted_WithUpperCut.root");
-      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/unquenchedPyquen/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_v2_weighted.root");
-      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_coneSize3_hiModeCheck_weighted_WithUpperCut.root");
-      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/pthat30/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_fixTR.root");
-      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRaw_offPV_fixTR/merged_bTagAnalyzers.root");
-      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_highPurity/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_highPurity.root");
-      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck.root");
-      //if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_regPFforJets_weighted.root");
-      //else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_regPFforJets/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_regPFforJets.root");
       if(isMC)fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/pythia/merged_bJetAnalyzers_hiRecoFromRawV3_offPV_addGSP_weighted.root");
       else fin=new TFile("/data_CMS/cms/mnguyen/bTaggingOutput/ppData/ppDataJet40_hiRecoFromRecoV3_offPV_coneSize3_hiModeCheck_regPFforJets/merged_bTagAnalyzers_hiRecoFromRecoV3_offPV_regPFforJets.root");
     }
   }
-
+  
+  // Remove PU algo for pp?
   TTree *t = (TTree*) fin->Get("akPu3PFJetAnalyzer/t");
   //TTree *t = (TTree*) fin->Get("ak5PFJetAnalyzer/t"); //for ppReco_jetTrig
   TTree *tSkim = (TTree*) fin->Get("skimanalysis/HltTree");
@@ -83,13 +68,14 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   
   int dupRuns[6] = {181912,181913,181938,181950,181985,182124};
   
-  vector<int> usedEvents[6];
+  std::vector<int> usedEvents[6];
   int nDup=0;
 
   //Declaration of leaves types                  
   Int_t           evt;
   Int_t           run;
   Int_t           bin;
+  Float_t         hf;
   Float_t           vz;
   Int_t           nref;
   Float_t         rawpt[1000];
@@ -128,13 +114,14 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   Float_t ipDist2Jet[10000];
   Float_t ipDist2JetSig[10000];
   Float_t ipClosest2Jet[10000];
-  Float_t         mue[1000];
+  //Float_t         mue[1000];
   Float_t         mupt[1000];
+  Float_t         muptPF[1000];
   Float_t         mueta[1000];
   Float_t         muphi[1000];
-  Float_t         mudr[1000];
+  //Float_t         mudr[1000];
   Float_t         muptrel[1000];
-  Int_t           muchg[1000];
+  //Int_t           muchg[1000];
   Float_t         pthat;
   Int_t           beamId1;
   Int_t           beamId2;
@@ -158,6 +145,16 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   Float_t         gendphijt[1000];
   Float_t         gendrjt[1000];
   */
+
+  float chargedMax[1000];
+  float photonMax[1000];
+  float neutralMax[1000];  
+  float chargedSum[1000];
+  float photonSum[1000];
+  float neutralSum[1000];  
+  float muSum[1000];  
+  float eSum[1000];  
+
   Double_t         weight, xSecWeight, centWeight, vzWeight;
   
   int nHLTBit;
@@ -171,6 +168,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   t->SetBranchAddress("evt",&evt);
   if(isMC==0)tmu->SetBranchAddress("Run",&run);
   t->SetBranchAddress("bin",&bin);           
+  t->SetBranchAddress("hf",&hf);           
   t->SetBranchAddress("vz",&vz);           
   t->SetBranchAddress("nref",&nref);
   t->SetBranchAddress("rawpt",rawpt);
@@ -213,9 +211,11 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
     t->SetBranchAddress("ipClosest2Jet",ipClosest2Jet);
   }
 
+  t->SetBranchAddress("mupt",mupt);
+  t->SetBranchAddress("muptPF",muptPF);
+
   /*
   t->SetBranchAddress("mue",mue);
-  t->SetBranchAddress("mupt",mupt);
   t->SetBranchAddress("mueta",mueta);
   t->SetBranchAddress("muphi",muphi);
   t->SetBranchAddress("mudr",mudr);
@@ -245,8 +245,19 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
     t->SetBranchAddress("genphi",genphi);
     t->SetBranchAddress("gendphijt",gendphijt);
     t->SetBranchAddress("gendrjt",gendrjt);
-    */
+    */    
   }
+
+  t->SetBranchAddress("chargedMax",chargedMax);
+  t->SetBranchAddress("photonMax",photonMax);
+  t->SetBranchAddress("neutralMax",neutralMax);
+  t->SetBranchAddress("chargedSum",chargedSum);
+  t->SetBranchAddress("photonSum",photonSum);
+  t->SetBranchAddress("neutralSum",neutralSum);
+  t->SetBranchAddress("muSum",muSum);
+  t->SetBranchAddress("eSum",eSum);
+
+
   if(isMC&&useWeight){
     t->SetBranchAddress("weight",&weight);
     t->SetBranchAddress("xSecWeight",&xSecWeight);
@@ -262,36 +273,30 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   tSkim->SetBranchAddress("collSell",&collSell);
 
 
-  TFile *fout;
+  TFile *fout=NULL;
   if(ppPbPb){
 
     if(cbin==-1){
-      /*
-      if(isMC==0) fout = new TFile("histos/PbPbdata_noIPupperCut.root","recreate");
-      else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_noIPupperCut.root","recreate");
-      else if(isMC==2) fout = new TFile("histos/PbPbBMC_noIPupperCut.root","recreate");
-      else if(isMC==3) fout = new TFile("histos/PbPbCMC_noIPupperCut.root","recreate");
-      */
-      /*
-      if(isMC==0) fout = new TFile("histos/PbPbdata_regPFforJets.root","recreate");
-      else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_regPFforJets.root","recreate");
-      //else if(isMC==2) fout = new TFile("histos/PbPbBMC_regPFforJets.root","recreate");
-      //else if(isMC==2) fout = new TFile("histos/PbPbBMC_addGSP.root","recreate");
-      else if(isMC==2) fout = new TFile("histos/PbPbBMC_addGSP_up.root","recreate");
-      else if(isMC==3) fout = new TFile("histos/PbPbCMC_regPFforJets.root","recreate");
-      */
-      if(isMC==0) fout = new TFile("histos/PbPbdata_pt30by3_jpHICalibRepass_withDup.root","recreate");
-      else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_pt30by3_ipHICalibCentWeight.root","recreate");
-      else if(isMC==2) fout = new TFile("histos/PbPbBMC_pt30by3_ipHICalibCentWeight.root","recreate");
-      else if(isMC==3) fout = new TFile("histos/PbPbCMC_pt30by3_ipHICalibCentWeight.root","recreate");
+      if(jetTrig==0){
+	if(isMC==0) fout = new TFile("histos/PbPbdata_pt30by3_jpHICalibRepass_withDup_PU.root","recreate");
+	else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_pt30by3_ipHICalibCentWeight_noTrig.root","recreate");
+	else if(isMC==2) fout = new TFile("histos/PbPbBMC_pt30by3_ipHICalibCentWeight_noTrig.root","recreate");
+	else if(isMC==3) fout = new TFile("histos/PbPbCMC_pt30by3_ipHICalibCentWeight_noTrig.root","recreate");
+      }
+      if(jetTrig==1){
+	if(isMC==0) fout = new TFile("histos/PbPbdata_pt30by3_jpHICalibRepass_withDup_PU.root","recreate");
+	else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_pt30by3_ipHICalibCentWeight.root","recreate");
+	else if(isMC==2) fout = new TFile("histos/PbPbBMC_pt30by3_ipHICalibCentWeight.root","recreate");
+	else if(isMC==3) fout = new TFile("histos/PbPbCMC_pt30by3_ipHICalibCentWeight.root","recreate");
+      }
+      if(jetTrig==2){
+	if(isMC==0) fout = new TFile("histos/PbPbdata_pt30by3_jpHICalibRepass_withDup_PU_jet65.root","recreate");
+	else if(isMC==1) fout = new TFile("histos/PbPbQCDMC_pt30by3_ipHICalibCentWeight_jet65.root","recreate");
+	else if(isMC==2) fout = new TFile("histos/PbPbBMC_pt30by3_ipHICalibCentWeight_jet65.root","recreate");
+	else if(isMC==3) fout = new TFile("histos/PbPbCMC_pt30by3_ipHICalibCentWeight_jet65.root","recreate");
+      }
     }
     else{
-      /*
-      if(isMC==0) fout = new TFile(Form("histos/PbPbdata_%d_noIPupperCut.root",cbin),"recreate");
-      else if(isMC==1) fout = new TFile(Form("histos/PbPbQCDMC_%d_noIPupperCut.root",cbin),"recreate");
-      else if(isMC==2) fout = new TFile(Form("histos/PbPbBMC_%d_noIPupperCut.root",cbin),"recreate");
-      else if(isMC==3) fout = new TFile(Form("histos/PbPbCMC_%d_noIPupperCut.root",cbin),"recreate");
-      */
       if(isMC==0) fout = new TFile(Form("histos/PbPbdata_%d_pt30by3_jpHICalibRepass.root",cbin),"recreate");
       else if(isMC==1) fout = new TFile(Form("histos/PbPbQCDMC_%d_pt30by3_ipHICalibCentWeight.root",cbin),"recreate");
       else if(isMC==2) fout = new TFile(Form("histos/PbPbBMC_%d_pt30by3_ipHICalibCentWeight.root",cbin),"recreate");
@@ -311,11 +316,6 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
       if(isMC)fout=new TFile("histos/ppMC_hiReco_muTrig_noIPupperCut.root","recreate");
       else fout=new TFile("histos/ppdata_hiReco_muTrig_noIPupperCut.root","recreate");
     } else if (!isRecopp&&!isMuTrig) { // hi reco, jet triggered
-      //if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck.root","recreate");
-      //if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_coneSize3_hiModeCheck_unquenchedPyquen_jet65.root","recreate");
-      //else fout=new TFile("histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck.root","recreate");
-      //else fout=new TFile("histos/ppdata_hiReco_jetTrig_coneSize3_hiModeCheck_jet65.root","recreate");
-      //if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_regPFforJets.root","recreate");
       if(isMC)fout=new TFile("histos/ppMC_hiReco_jetTrig_addGSP_up.root","recreate");
       else fout=new TFile("histos/ppdata_hiReco_jetTrig_regPFforJets.root","recreate");
     }
@@ -600,9 +600,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
   TH1D *hipClosest2JetL = new TH1D("hipClosest2JetL","hipClosest2JetL",40,0,1);
   hipClosest2Jet->Sumw2(); hipClosest2JetB->Sumw2(); hipClosest2JetC->Sumw2(); hipClosest2JetL->Sumw2(); 
 
-  TNtuple *nt;
-  if(isMC) nt= new TNtuple("nt","","jtpt:jteta:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:bin");
-  else nt= new TNtuple("nt","","jtpt:jteta:rawpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:bin");
+  TNtupleD *nt;
+  
+  if(isMC) nt= new TNtupleD("nt","","jtpt:jteta:rawpt:refpt:refparton_flavorForB:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:pthat:bin:weight:trigIndex");
+  else nt= new TNtupleD("nt","","jtpt:jteta:rawpt:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:bin:weight");
 
   TNtuple *ntMuReq;
   if(isMC) ntMuReq = new TNtuple("ntMuReq","","jtpt:jteta:rawpt:refpt:refparton_flavorForB:weight:discr_prob:discr_ssvHighEff:discr_ssvHighPur:discr_csvSimple:svtxm:muptrel");
@@ -614,7 +615,7 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
    
    JetCorrectorParameters* parHI442x_l2, * parHI442x_l3;
    vector<JetCorrectorParameters> vpar_HI442x;   
-   FactorizedJetCorrector *_JEC_HI442x;
+   FactorizedJetCorrector *_JEC_HI442x=NULL;
    
    if(updateJEC){   
      
@@ -652,7 +653,10 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
     else{
       //if(!pvSel||!hbheNoiseSel||!spikeSel) continue;
       // turn off spike and on coll Sel
-      if(!pvSel||!hbheNoiseSel||!collSell) continue;
+      if(!pvSel||!hbheNoiseSel||!collSell){
+	//cout<<" selection failed, pvSel="<<pvSel<<", hbheNoiseSel="<<hbheNoiseSel<<" , collSell="<<collSell<<endl;
+	continue;
+      }
     }
 
     t->GetEntry(i);
@@ -679,16 +683,44 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
     if(isMC&&!ppPbPb){
       if(beamId1==2112 || beamId2==2112)  continue;
     }
-    // hard coded Jet80
+
     if(ppPbPb){
-      if(!hltBit[10]) continue;
+      if(jetTrig==1&&!hltBit[10]) continue;
+      if(jetTrig==2&&!hltBit[9]) continue;
     }
     //if(isMC&&ppPbPb){
     if(isMC&&minJetPt>65){
       if(pthat<50) continue;
     }
     if(fabs(vz)>15.) continue;
-
+    
+    // pileup rejection
+    if(hf>150000.){
+      cout<<" rejecting pileup, "<<" hf "<<hf<<" bin "<<bin<<endl;
+      for(int ij=0;ij<nref;ij++) if(jtpt[ij]>65.&&fabs(jteta[ij])<2.)cout<<" # associated tracks =  "<<nselIPtrk[ij]<<endl;
+      continue;
+    }
+    bool isNoise=false;
+    for(int ij=0; ij<nref; ij++){	  
+      if(jtpt[ij]>4000&&fabs(jteta[ij])<2) cout<<" mupt "<<mupt[0]<<" muptPF "<<muptPF[0]<<endl;
+      if(jtpt[ij]>minJetPt&&fabs(jteta[ij])<2){
+	if(neutralMax[ij]/(neutralMax[ij]+chargedMax[ij]+photonMax[ij])>0.975){
+	  cout<<" cleaning event with jet of  "<<jtpt[ij]<<", eta "<<jteta[ij]<<" noise = "<<neutralMax[ij]/(neutralMax[ij]+chargedMax[ij]+photonMax[ij])<<endl;
+	  isNoise=true;
+	}
+	if(muptPF[ij]>10&&mupt[ij]/muptPF[ij]<0.75){
+	  cout<<" cleaning event with jet of  "<<jtpt[ij]<<", eta "<<jteta[ij]<<" muptPF = "<<muptPF[ij]<<" mupt "<<mupt[ij]<<endl;
+	  isNoise=true;
+	}
+	if(chargedSum[ij]+photonSum[ij]+neutralSum[ij]+muSum[ij]+eSum[ij]<0.5*rawpt[ij]){
+	  cout<<" cleaning event with jet of  "<<jtpt[ij]<<", eta "<<jteta[ij]<<" sum PF pt = "<<chargedSum[ij]+photonSum[ij]+neutralSum[ij]+muSum[ij]+eSum[ij]<<endl;
+	  isNoise=true;
+	}
+      }
+    }
+    if(isNoise) continue;
+    
+    
     if(!isMC&&ppPbPb){
       tmu->GetEntry(i);
       
@@ -726,18 +758,31 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
 
 
     double w=1.;
-    if(isMC&&useWeight) w=weight;
-
+    if(useWeight){
+      if(isMC)w=weight;
+      else{
+	if(jetTrig==2){
+	  if(hltBit[10]) w=0.;
+	  else w=1./8.93333857823361388e-01;
+	}
+      }
+    }
     
+    double trigIndex=0;
+    if(isMC){
+      if(hltBit[10]) trigIndex=3;
+      else if(hltBit[9]) trigIndex=2;
+      else if(hltBit[8]) trigIndex=1;      
+    }
     
     int useEvent=0;
     
     int trackPosition =0;
-
+    
     for(int ij=0;ij<nref;ij++){
-
+      
       trackPosition+=nselIPtrk[ij];
-
+      
       if(useGSP==2){
 	if(refparton_isGSP[ij]==1){
 	  gspCounter++;
@@ -753,16 +798,15 @@ void analyzeTrees(int isRecopp=0, int ppPbPb=1, int isMuTrig=0, int isMC=3, int 
       
       if(jtpt[ij]>minJetPt && fabs(jteta[ij])<maxJetEta){ 
 	
-
+	
 	if(doNtuples){
-
 	  if(ppPbPb){
-	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
-	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,bin);
+	    if(isMC) nt->Fill((double)jtpt[ij],(double)jteta[ij],(double)rawpt[ij],(double)refpt[ij],(double)refparton_flavorForB[ij],(double)discr_prob[ij],(double)discr_ssvHighEff[ij],(double)discr_ssvHighPur[ij],(double)discr_csvSimple[ij],(double)svtxm[ij],(double)pthat,(double)bin,w,trigIndex);	    
+	    else nt->Fill((double)jtpt[ij],(double)jteta[ij],(double)rawpt[ij],(double)discr_prob[ij],(double)discr_ssvHighEff[ij],(double)discr_ssvHighPur[ij],(double)discr_csvSimple[ij],(double)svtxm[ij],(double)bin,w);
 	  }
 	  else{
-	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
-	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refparton_flavorForB[ij],w,discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39);
+	    if(isMC)nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],refpt[ij],refparton_flavorForB[ij],discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],pthat,39,w,1);
+	    else nt->Fill(jtpt[ij],jteta[ij],rawpt[ij],discr_prob[ij],discr_ssvHighEff[ij],discr_ssvHighPur[ij],discr_csvSimple[ij],svtxm[ij],39,w,1);
 	  }
 	  if (sqrt(acos(cos(jtphi[ij]-muphi[ij]))*acos(cos(jtphi[ij]-muphi[ij]))+(jteta[ij]-mueta[ij])*(jteta[ij]-mueta[ij]))<0.5 && mupt[ij]>minMuPt) { 
 	    
